@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : système et vecteur force — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 1 / 2</span>
+    <h2 class="er-titre">Système et vecteur force</h2>
+    <p class="er-contexte">On choisit d'abord le <b>système</b> étudié ; le reste est le <b>milieu extérieur</b>. Chaque action du milieu extérieur sur le système est modélisée par une <b>force</b>, représentée par un <b>vecteur</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 1 (2de) : système et milieu extérieur ;
+   vecteur force (point d'application, direction, sens, valeur en N,
+   dynamomètre, échelle : BF.flecheEchelle) ; notation F⃗A/B, valeur F,
+   actions réciproques (F⃗A/B = −F⃗B/A).
+   ============================================================ */
+const { hasard, melanger, exemple, fmt, proche } = COURS;
+const { o, V, nomV, DIR_TXT, flecheEchelle } = BF;
+const FAB = (a, b) => V('F', `${a}/${b}`);
+
+/* ---------- 1. Le système et le milieu extérieur ---------- */
+// [situation, objet, réponse ('sys' | 'ext'), explication]
+const MILIEU = [
+  ['Système : {la valise}. La valise est posée sur le sol.', 'le sol', 'ext', 'Le sol ne fait pas partie de la valise : il est dans le milieu extérieur.'],
+  ['Système : {la valise}. La valise est posée sur le sol.', 'la poignée de la valise', 'sys', 'La poignée fait partie de la valise : elle est dans le système.'],
+  ['Système : {le parachutiste et son parachute}.', 'le parachute', 'sys', 'Le parachute fait partie du système choisi.'],
+  ['Système : {le parachutiste et son parachute}.', 'l\'air', 'ext', 'L\'air ne fait pas partie du système : il est dans le milieu extérieur.'],
+  ['Système : {la voiture}. Une voiture roule sur une route.', 'le moteur', 'sys', 'Le moteur fait partie de la voiture : il est dans le système.'],
+  ['Système : {la voiture}. Une voiture roule sur une route.', 'la route', 'ext', 'La route ne fait pas partie de la voiture : elle est dans le milieu extérieur.'],
+  ['Système : {le ballon}. Un joueur frappe un ballon.', 'le pied du joueur', 'ext', 'Le pied ne fait pas partie du ballon : il est dans le milieu extérieur.'],
+  ['Système : {la boule}. Une boule est accrochée à un fil.', 'le fil', 'ext', 'Le fil ne fait pas partie de la boule : il est dans le milieu extérieur.'],
+];
+function etape1(c_) {
+  const carte = c_.carte('1. Le système et le milieu extérieur');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définitions.</b> Le <b>système</b> est le solide (ou l'ensemble de solides) que l'on étudie ; on l'écrit entre accolades : {la boule}. Tout ce qui n'appartient pas au système forme le <b>milieu extérieur</b>.</p>
+        <p>Une <b>action mécanique</b> est une action du milieu extérieur sur le système : elle peut le mettre en mouvement, modifier son mouvement, le déformer ou le maintenir immobile.</p></div>
+    </div>
+    ${exemple(`<p>Un joueur frappe un ballon. Système : {le ballon}. Milieu extérieur : le pied, le sol, l'air, la Terre… Le pied exerce une action mécanique sur le ballon : il le met en mouvement.</p>`)}`);
+  const choisies = melanger(MILIEU.filter(m => m[2] === 'ext')).slice(0, 2).concat(melanger(MILIEU.filter(m => m[2] === 'sys')).slice(0, 1));
+  c_.aToi(carte, melanger(choisies).map((m, k) => ({ titre: `Situation ${k + 1}`, enonce: `<p>${m[0]}</p>`,
+    parties: [{ type: 'choix', q: `${m[1].charAt(0).toUpperCase() + m[1].slice(1)} fait partie :`, options: [o('sys', 'du système'), o('ext', 'du milieu extérieur')], bonne: m[2], melanger: false,
+      indices: { sys: 'Fait-il partie du solide écrit entre accolades ?', ext: 'Il fait partie du solide écrit entre accolades.' }, solution: `<p>${m[3]}</p>` }] })));
+  return carte;
+}
+
+/* ---------- 2. Le vecteur force ---------- */
+const DIRS4 = [0, 90, 180, 270];
+const OPTS_DIR = DIRS4.map(a => o(String(a), DIR_TXT[a]));
+function etape2(c_) {
+  const carte = c_.carte('2. Le vecteur force');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Une force</b> modélise une action mécanique. On la représente par un <b>vecteur</b> (une flèche), qui a quatre caractéristiques :</p>
+        <ul class="er-liste"><li>son <b>point d'application</b> (là où part la flèche) ;</li><li>sa <b>direction</b> (verticale, horizontale, oblique…) ;</li>
+        <li>son <b>sens</b> (vers le haut, vers la droite…) ;</li><li>sa <b>valeur</b> (ou intensité), en <b>newtons</b> (N), mesurée avec un <b>dynamomètre</b>.</li></ul>
+        <p>La longueur de la flèche est proportionnelle à la valeur de la force : on choisit une <b>échelle</b> (par exemple 1 carreau ↔ 2 N).</p></div>
+    </div>
+    ${exemple(`${flecheEchelle({ L: 3, ang: 90, x: 5, y: 5, pt: 'A', k: 'F', aria: 'Force de 3 carreaux, verticale vers le haut, depuis le point A' })}
+      <p>Échelle : 1 carreau ↔ 2 N. Cette force a pour point d'application A, pour direction la verticale, pour sens vers le haut ; sa flèche mesure 3 carreaux, donc sa valeur est F = 3 × 2 = 6 N.</p>`)}`);
+  const ang = hasard(DIRS4), L = hasard([2, 3, 4]), k = hasard([1, 2, 5, 10]);
+  const pos = { 0: [2, 3], 90: [5, 5], 180: [8, 3], 270: [5, 1] }[ang];
+  const F2 = hasard([[12, 3], [20, 5], [8, 2], [30, 10]]);
+  c_.aToi(carte, [
+    { titre: 'Lire une force', enonce: `${flecheEchelle({ L, ang, x: pos[0], y: pos[1], pt: 'A', aria: 'Une force dessinée sur un quadrillage' })}<p>Échelle : 1 carreau ↔ ${k} N.</p>`,
+      parties: [{ type: 'choix', q: 'Quelles sont sa direction et son sens ?', options: OPTS_DIR, bonne: String(ang), melanger: false, colonne: true,
+          indice: 'Regarde dans quel sens pointe la flèche.', solution: `<p>${DIR_TXT[ang].charAt(0).toUpperCase() + DIR_TXT[ang].slice(1)}.</p>` },
+        { type: 'nombre', q: 'Quelle est sa valeur ?', label: 'F =', valeur: L * k, unite: 'N', signe: false, tol: 1e-9,
+          diag: v => (proche(v, L) && k !== 1 ? `La flèche mesure ${L} carreaux : multiplie par l'échelle (1 carreau ↔ ${k} N).` : proche(v, L / k) ? 'On multiplie le nombre de carreaux par la valeur d\'un carreau.' : 'Compte les carreaux, puis multiplie par la valeur d\'un carreau.'),
+          solution: `<p class="crs-calc">F = ${L} × ${k} = <span class="c">${L * k} N</span></p>` }] },
+    { titre: 'Dessiner une force à l\'échelle', enonce: `<p>Une force a pour valeur ${F2[0]} N. Échelle : 1 carreau ↔ ${F2[1]} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Combien de carreaux doit mesurer sa flèche ?', label: 'Longueur :', valeur: F2[0] / F2[1], unite: 'carreaux', signe: false, rel: .02,
+        diag: v => (proche(v, F2[0] * F2[1]) ? 'Chaque carreau représente plusieurs newtons : on divise la valeur par la valeur d\'un carreau.' : `Combien de fois ${F2[1]} N dans ${F2[0]} N ?`),
+        solution: `<p class="crs-calc">${F2[0]} ÷ ${F2[1]} = <span class="c">${fmt(F2[0] / F2[1])} carreaux</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Notation et actions réciproques ---------- */
+// [auteur, système, texte]
+const NOTATIONS = [['T', 'L', 'La Terre (T) attire la Lune (L).', 'la force exercée par la Terre sur la Lune'], ['M', 'V', 'Une main (M) tient une valise (V).', 'la force exercée par la main sur la valise'],
+  ['S', 'B', 'Le sol (S) porte un ballon (B).', 'la force exercée par le sol sur le ballon'], ['A', 'B', 'Un fil (A) retient une boule (B).', 'la force exercée par le fil sur la boule']];
+const RECIP = [['La table exerce sur le livre une force de 5 N, verticale, vers le haut.', 'le livre exerce sur la table', '5 N, verticale, vers le bas'],
+  ['La Terre attire la Lune avec une force de 2,0 × 10<sup>20</sup> N.', 'la Lune exerce sur la Terre', '2,0 × 10<sup>20</sup> N, dirigée vers la Lune'],
+  ['Le fil exerce sur la boule une force de 3 N, verticale, vers le haut.', 'la boule exerce sur le fil', '3 N, verticale, vers le bas']];
+function etape3(c_) {
+  const carte = c_.carte('3. Notation et actions réciproques');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Notation.</b> ${FAB('A', 'B')} est la force exercée <b>par A sur B</b> (le système est B). F<sub>A/B</sub>, sans flèche, est sa <b>valeur</b> en newtons.</p></div>
+      <div class="cle"><p><b class="cle-titre">Actions réciproques.</b> Si A exerce une force sur B, alors B exerce sur A une force de même direction, de même valeur et de sens opposé : ${FAB('A', 'B')} = −${FAB('B', 'A')}, et F<sub>A/B</sub> = F<sub>B/A</sub>.</p></div>
+    </div>
+    ${exemple(`<p>Une boule B est accrochée à un fil A. Le fil exerce sur la boule ${FAB('A', 'B')}, verticale, vers le haut (système {la boule}). La boule exerce sur le fil ${FAB('B', 'A')}, verticale, vers le bas (système {le fil}). Les deux forces ont la même valeur.</p>`)}`);
+  const n = hasard(NOTATIONS), r = hasard(RECIP);
+  c_.aToi(carte, [
+    { titre: 'Écrire une force', enonce: `<p>${n[2]}</p>`,
+      parties: [{ type: 'choix', q: `Comment note-t-on ${n[3]} ?`, options: [o('ok', FAB(n[0], n[1])), o('inv', FAB(n[1], n[0])), o('val', `F<sub>${n[0]}/${n[1]}</sub>`)], bonne: 'ok',
+        indices: { inv: 'La première lettre est l\'objet qui <b>exerce</b> la force, la seconde celui qui la <b>subit</b>.', val: 'Sans flèche, c\'est la valeur (un nombre), pas le vecteur.' }, solution: `<p>${FAB(n[0], n[1])} : force exercée par ${n[0]} sur ${n[1]}.</p>` }] },
+    { titre: 'Actions réciproques', enonce: `<p>${r[0]}</p>`,
+      parties: [{ type: 'choix', q: `Quelle force ${r[1]} ?`, options: [o('ok', r[2]), o('meme', 'la même force, dans le même sens'), o('moins', 'une force plus faible'), o('rien', 'aucune force')], bonne: 'ok', colonne: true,
+        indices: { meme: 'Les deux forces sont de sens opposés.', moins: 'Les deux forces ont la même valeur.', rien: 'Si A agit sur B, B agit aussi sur A : actions réciproques.' }, solution: `<p>Actions réciproques : même direction, même valeur, sens opposé.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Système</b> : ce que l'on étudie, écrit entre accolades ; le reste est le <b>milieu extérieur</b>.</p></div>
+    <div class="cle"><p>Une action mécanique est modélisée par une <b>force</b> : point d'application, direction, sens, valeur en <b>newtons</b> (N). Longueur de la flèche proportionnelle à la valeur (échelle).</p></div>
+    <div class="cle"><p>${FAB('A', 'B')} : force exercée par A sur B ; ${FAB('A', 'B')} = −${FAB('B', 'A')} (actions réciproques).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1b_cours.html">Cours : forces à distance, forces de contact →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#force">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+BF.menu('module_1a_cours');
+</script>
+</body>
+</html>

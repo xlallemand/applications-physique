@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : réaction du support — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 6</span>
+    <h2 class="er-titre">Réaction du support</h2>
+    <p class="er-contexte">Le support (sol, table, planche…) touche le système : une bulle dans le diagramme objet-action, <b>une force</b>, la <b>réaction du support</b>. Sans frottement, elle est <b>perpendiculaire au support</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 3 (2de, repris de principe-dynamique, module 2,
+   cours 5, étape 1) : sans frottement, la réaction du support est
+   perpendiculaire au support (<span class="vec-nom">R</span>ₙ ; palet d'air-hockey, skieur sans
+   frottement) ; pas de contact, pas de réaction (valise posée ou portée).
+   ============================================================ */
+const { exemple } = COURS;
+const { nomV, sceneRemplie, diagrammeDe, diagrammesDe, bilan, SITUATIONS } = BF;
+// exemple : diagramme objet-action à côté du dessin
+const figs = s => `<div class="bf-noms-figs"><div class="bf-do-cadre">${diagrammeDe(s)}</div><div class="bf-sc-cadre">${sceneRemplie(s)}</div></div>`;
+
+/* ---------- 1. Sans frottement : la réaction normale ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Sans frottement : la réaction normale');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> <b>Sans frottement</b>, la force du support est <b>perpendiculaire au support</b> : c'est la réaction normale ${nomV('RN')} (N = normale = perpendiculaire), souvent notée simplement ${nomV('R')}. Elle part du point de contact (ou du centre de la surface de contact).</p></div>
+    </div>
+    ${exemple(`<p>${SITUATIONS.brique.enonce}</p>${figs(SITUATIONS.brique)}
+      <p>La planche touche la brique : une bulle, une force, ${nomV('RN')}, depuis le point de contact A, perpendiculaire à la planche (ici verticale, vers le haut).</p>`)}`);
+  c_.aToi(carte, [Object.assign({ titre: 'Le palet d\'air-hockey' }, bilan(SITUATIONS.palet, { jusqua: 'noms' })),
+    Object.assign({ titre: 'Un skieur sans frottement' }, bilan(SITUATIONS.skieurSans, { jusqua: 'trace' }))]);
+  return carte;
+}
+
+/* ---------- 2. Pas de contact, pas de réaction ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Pas de contact, pas de réaction');
+  const deux = [SITUATIONS.valisePosee, SITUATIONS.valisePortee], dos = diagrammesDe(deux);
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> La réaction du support est une force de contact : elle n'existe que si le support <b>touche</b> le système.</p></div>
+    </div>
+    ${exemple(`<div class="bf-ballon deux">${deux.map((s, k) => `<figure><p class="bf-ballon-t">${s.titre}</p>${dos[k]}${sceneRemplie(s)}</figure>`).join('')}</div>
+      <p>Valise posée : le sol la touche, ${nomV('R')} compense le poids. Valise portée : le sol ne la touche plus, il n'y a plus de réaction du sol ; c'est la main qui la retient (${nomV('Fmain')}).</p>`)}`);
+  c_.aToi(carte, [Object.assign({ titre: 'Le ballon au moment de la frappe' }, bilan(SITUATIONS.ballonPendant, { jusqua: 'diagramme' }))]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Sans frottement, la réaction du support est <b>perpendiculaire au support</b> (${nomV('RN')}), depuis le point de contact. Pas de contact, pas de réaction.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3c_cours.html">Cours : tension d'un fil →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#reaction">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+BF.menu('module_3b_cours');
+</script>
+</body>
+</html>

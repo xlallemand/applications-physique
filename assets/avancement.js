@@ -53,6 +53,11 @@
     'transferts-thermiques': { ex: 10, pages: [
       'module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_questions', 'module_3_cours',
       'module_3_questions', 'module_4_cours', 'module_4_questions'] },
+    'bilan-forces': { pages: [
+      'module_1a_cours', 'module_1b_cours', 'module_1_questions', 'module_2_cours', 'module_2_questions',
+      'module_3a_cours', 'module_3b_cours', 'module_3c_cours', 'module_3d_cours', 'module_3e_cours', 'module_3f_cours',
+      'module_3_questions', 'module_4_cours', 'module_4_questions', 'module_5a_cours', 'module_5b_cours', 'module_5c_cours',
+      'module_5_questions', 'module_6_simulation', 'module_6_questions'] },
     'principe-dynamique': { ex: 11, pages: [
       'module_1_cours', 'module_1_questions', 'module_2a_cours', 'module_2b_cours', 'module_2c_cours',
       'module_2d_cours', 'module_2e_cours', 'module_2f_cours', 'module_2_simulation', 'module_2_questions',

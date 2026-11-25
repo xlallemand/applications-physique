@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : frottements solides — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 6 / 6</span>
+    <h2 class="er-titre">Frottements solides</h2>
+    <p class="er-contexte">Avec frottements, la réaction du support n'est plus perpendiculaire au support : on la décompose en <b>réaction normale</b> et <b>frottements</b>, <span class="vec-nom">R</span> = <span class="vec-nom">R</span><sub>N</sub> + <span class="vec-nom">f</span>. Les frottements s'opposent au <b>glissement</b> qu'il y aurait sans eux.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 6 du module 3 (Terminale ; repris de principe-dynamique,
+   module 2, cours 5, étape 2, et du cours de Terminale, I.5) :
+   1. R⃗ = R⃗ₙ + f⃗ : livre tiré par une corde, livre immobile sur un plan
+   incliné (réaction dessinée : BF.sceneRemplie avec reaction) ; « À toi » :
+   brique sur la planche inclinée (BF.bilan arrêté aux noms).
+   2. Sens des frottements : opposés au glissement qu'il y aurait sans
+   frottements (roues d'une voiture à traction avant au démarrage et au
+   freinage, exercice 4 ; gyroroue).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, nomV, sceneRemplie, diagrammeDe, diagrammesDe, bilan, SITUATIONS } = BF;
+const figs = (s, opts) => `<div class="bf-noms-figs"><div class="bf-do-cadre">${diagrammeDe(s)}</div><div class="bf-sc-cadre">${sceneRemplie(s, opts)}</div></div>`;
+
+/* ---------- 1. R⃗ = R⃗ₙ + f⃗ ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Avec frottements : <span class="vec-nom">R</span> = <span class="vec-nom">R</span><sub>N</sub> + <span class="vec-nom">f</span>');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>S'il y a des frottements, on <b>ajoute</b> à la réaction normale une force parallèle au support, les frottements ${nomV('f')} :</p>
+        <p class="crs-formule">${nomV('R')} = ${nomV('RN')} + ${nomV('f')}</p>
+        <ul class="er-liste"><li>${nomV('RN')} : perpendiculaire au support ;</li>
+        <li>${nomV('f')} : parallèle au support, <b>opposée au mouvement qu'il y aurait si le solide glissait sans frottement</b> (opposée au glissement).</li></ul>
+        <p>Dans le diagramme objet-action, le support garde <b>une seule bulle</b> : on écrit ${nomV('RN')} + ${nomV('f')} sur son trait.</p></div>
+    </div>
+    ${exemple(`<p>${SITUATIONS.livreIncline.enonce}</p>${figs(SITUATIONS.livreIncline, { reaction: true })}
+      <p>Sans frottement, le livre glisserait vers le bas de la pente : ${nomV('f')} est donc dirigée vers le haut de la pente. Le plan donne une seule force, ${nomV('R')} (en noir), décomposée en ${nomV('RN')} et ${nomV('f')}. Le livre est immobile : ${nomV('P')} + ${nomV('RN')} + ${nomV('f')} = <span class="vec-nom">0</span>.</p>`)}`);
+  c_.aToi(carte, [Object.assign({ titre: 'La brique sur la planche inclinée' }, bilan(SITUATIONS.incline, { jusqua: 'noms' }))]);
+  return carte;
+}
+
+/* ---------- 2. Le sens des frottements ---------- */
+// [situation, sens de f, explication]
+const CAS = [
+  ['Une voiture à traction avant démarre vers la droite. Frottements de la route sur les <b>roues avant</b> (motrices) :', 'avant', 'Sans frottement, les roues motrices tourneraient sur place (patinage) : leur bas glisserait vers l\'arrière. Les frottements s\'y opposent : vers l\'avant (c\'est la force motrice).'],
+  ['Une voiture à traction avant démarre vers la droite. Frottements de la route sur les <b>roues arrière</b> (non motrices) :', 'arriere', 'Sans frottement, les roues arrière avanceraient sans tourner (elles glisseraient vers l\'avant) : les frottements sont vers l\'arrière.'],
+  ['Une voiture roule vers la droite et freine fort, roues bloquées. Frottements de la route sur les roues :', 'arriere', 'Sans frottement, les roues bloquées glisseraient vers l\'avant : les frottements sont vers l\'arrière.'],
+  ['On pousse une caisse vers la droite sur le sol ; elle glisse. Frottements du sol sur la caisse :', 'arriere', 'La caisse glisse vers la droite : les frottements s\'opposent au glissement, vers la gauche (l\'arrière).'],
+  ['Une gyroroue accélère vers la droite. Frottements du sol sur la roue :', 'avant', 'Sans frottement, la roue tournerait sur place et son bas glisserait vers l\'arrière : les frottements sont vers l\'avant, ils font avancer la gyroroue.'],
+];
+function etape2(c_) {
+  const carte = c_.carte('2. Le sens des frottements');
+  const deux = [SITUATIONS.voiture, SITUATIONS.voitureFrein], dos = diagrammesDe(deux);
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Imagine le mouvement <b>sans frottement</b> : dans quel sens le point de contact glisserait-il sur le support ? Les frottements sont dans le sens <b>opposé</b>.</p></div>
+    </div>
+    ${exemple(`<div class="bf-ballon deux">${deux.map((s, k) => `<figure><p class="bf-ballon-t">${s.titre}</p>${dos[k]}${sceneRemplie(s)}</figure>`).join('')}</div>
+      <p>Au démarrage, sans frottement, les roues avant (motrices) tourneraient sans avancer (patinage) : la route les pousse <b>vers l'avant</b> (${nomV('Fm')}). Les roues arrière avanceraient sans tourner : leurs frottements ${nomV('f')} sont <b>vers l'arrière</b>. Au freinage, les roues presque bloquées glisseraient vers l'avant : tous les frottements sont <b>vers l'arrière</b>.</p>`)}`);
+  c_.aToi(carte, melanger(CAS).slice(0, 3).map((c, k) => ({ titre: `Cas ${k + 1}`, enonce: `<p>${c[0]}</p>`,
+    parties: [{ type: 'choix', q: 'Dans quel sens sont dirigés les frottements ?', options: [o('avant', 'vers l\'avant (vers la droite)'), o('arriere', 'vers l\'arrière (vers la gauche)')], bonne: c[1], melanger: false,
+      indice: 'Imagine le mouvement sans frottement : dans quel sens le point de contact glisserait-il ? Les frottements sont dans le sens opposé.', solution: `<p>${c[2]}</p>` }] })));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">${nomV('R')} = ${nomV('RN')} + ${nomV('f')}</p><p>Sans frottement, la réaction du support est perpendiculaire au support (${nomV('RN')}) ; les frottements ${nomV('f')} sont parallèles au support et s'opposent au glissement qu'il y aurait sans eux. Dans le diagramme, une seule bulle pour le support.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur les forces usuelles →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#frottements">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+BF.menu('module_3f_cours');
+</script>
+</body>
+</html>

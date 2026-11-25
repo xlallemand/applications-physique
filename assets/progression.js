@@ -106,7 +106,7 @@
     if (reste === 'flashcards') return { dossier, type: 'flashcards' };
     if (reste === 'succes') return { dossier, type: 'succes' };
     if (cle === 'combustions-exercices-faits') return { dossier, type: 'liste' };
-    if (cle === 'principe-dynamique-atelier') return { dossier, type: 'atelier' };
+    if (cle === 'principe-dynamique-atelier' || cle === 'bilan-forces-atelier') return { dossier, type: 'atelier' };
     if (cle === 'fractions-college-suivi' || cle === 'equations-college-suivi' || cle === 'equations-physique-mobile-suivi' || cle === 'calcul-numerique-suivi') return { dossier, type: 'suivi-competences' };
     if (cle === 'fractions-college-sauvegarde' || cle === 'equations-college-sauvegarde' || cle === 'equations-physique-mobile-sauvegarde' || cle === 'calcul-numerique-sauvegarde') return null;      // état de la sauvegarde propre à l'appareil : jamais copié
     return { dossier, type: 'inconnue' };

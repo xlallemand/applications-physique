@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 4 (Terminale) : 10 questions : placer G sur six des sept
+   solides (BF.partieCentre, homogènes ou non), deux justifications de
+   la position de G, le mouvement de G, la définition du centre de masse.
+   ============================================================ */
+const { o, fq, hasard, melanger, solide, partieCentre, SOLIDES } = BF;
+
+// justification : [objet, réponse, explication]
+const JUSTIF = [
+  ['Une règle en bois homogène.', 'sym', 'Homogène : G est au centre de symétrie, au milieu de la règle.'],
+  ['Une boule de pétanque (acier homogène).', 'sym', 'Homogène : G est au centre de la boule.'],
+  ['Un balai : un long manche léger et une brosse lourde.', 'lourd', 'Non homogène : G est plus près de la brosse, la partie la plus lourde.'],
+  ['Un camion dont la remorque est chargée de sable à l\'arrière.', 'lourd', 'Non homogène : G est plus près de l\'arrière chargé, la partie la plus lourde.'],
+  ['Une raquette de tennis : un cadre lourd et un manche plus léger.', 'lourd', 'Non homogène : G est plus près du cadre, la partie la plus lourde.'],
+];
+const OPTS_J = [o('sym', 'au centre de symétrie : le solide est homogène'), o('lourd', 'plus près de la partie la plus lourde : le solide n\'est pas homogène'), o('bas', 'toujours au point le plus bas'), o('contact', 'au point de contact avec le sol')];
+
+function tirage() {
+  const ids = melanger(Object.keys(SOLIDES)).slice(0, 6);
+  const qs = ids.map(id => ({ theme: 'Placer le centre de masse', parties: [partieCentre({ solide: id })] }));
+  melanger(JUSTIF).slice(0, 2).forEach(j => qs.push({ theme: 'Position du centre de masse', enonce: `<p>${j[0]}</p>`,
+    parties: [fq.choix('Où se trouve son centre de masse G ?', OPTS_J, j[1], { melanger: false, colonne: true,
+      indices: { sym: 'La masse est-elle répartie de la même façon partout ?', lourd: 'Le solide est fait de la même matière partout : pense à sa symétrie.', bas: 'G n\'a rien à voir avec le point le plus bas.', contact: 'G n\'a rien à voir avec le contact avec le sol.' }, solution: `<p>${j[2]}</p>` })] }));
+  qs.push({ theme: 'Mouvement du centre de masse', enonce: '<p>On lance une clé à molette ; elle tourne sur elle-même en volant.</p>',
+    parties: [fq.choix('Quel point de la clé décrit une parabole, comme une balle lancée ?', [o('G', 'son centre de masse G'), o('bout', 'le bout du manche'), o('tete', 'le centre de la tête'), o('aucun', 'aucun point')], 'G',
+      { indices: { bout: 'Ce point tourne autour de G : sa trajectoire est compliquée.', tete: 'La tête tourne aussi autour de G.', aucun: 'Le mouvement du système est modélisé par celui de son centre de masse.' }, solution: '<p>Le centre de masse G décrit une parabole : le mouvement du système est modélisé par celui de G.</p>' })] });
+  qs.push({ theme: 'Définition', parties: [fq.choix('Le centre de masse d\'un système est :', [o('bary', 'le barycentre des masses du système'), o('geo', 'toujours le milieu géométrique du système'), o('bas', 'son point le plus bas'), o('contact', 'son point de contact avec le support')], 'bary',
+    { indices: { geo: 'Seulement pour un solide homogène (centre de symétrie).', bas: 'Pense au marteau : G est près de la tête.', contact: 'Le poids part de G, la réaction du support part du point de contact : ce sont deux points différents.' }, solution: '<p>Le centre de masse G est le barycentre des masses : la position moyenne de la répartition de la masse.</p>' })] });
+  return melanger(qs);
+}
+
+BF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Centre de masse',
+  intro: '<p class="er-contexte">10 questions : placer le centre de masse de solides homogènes ou non, justifier sa position, le mouvement du centre de masse.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5a_cours.html', label: 'Module 5 : forces qui se compensent →' },
+});
+BF.menu('module_4_questions');
+</script>
+</body>
+</html>

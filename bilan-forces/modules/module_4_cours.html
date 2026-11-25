@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : centre de masse — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Centre de masse</h2>
+    <p class="er-contexte">Les forces à distance partent du <b>centre de masse G</b> du système. Où se trouve ce point ? Au <b>centre de symétrie</b> d'un solide homogène, plus près de la partie la plus <b>lourde</b> sinon.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Module 4 (Terminale, cours I.1) : centre de masse G (barycentre des
+   masses) ; solide homogène : centre de symétrie (BF.solide, plaque,
+   disque ; « À toi » : triangle, anneau, BF.partieCentre) ; solide non
+   homogène : G plus près de la partie la plus lourde (marteau ; « À toi » :
+   haltère, bouteille et justification) ; le mouvement du système modélisé
+   par celui de G (marteau lancé, BF.marteauLance).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, solide, partieCentre, marteauLance, SOLIDES } = BF;
+const fig = (id, legende) => `<figure>${solide(id, { G: true })}<figcaption>${legende || SOLIDES[id].titre}</figcaption></figure>`;
+const POURQUOI = [o('lourd', 'G est plus près de la partie la plus lourde'), o('milieu', 'G est toujours au milieu de l\'objet'), o('volume', 'G est là où il y a le plus de volume'), o('bas', 'G est toujours en bas de l\'objet')];
+const IND_P = { milieu: 'Ce serait vrai pour un solide homogène, avec un centre de symétrie. Ici, la masse n\'est pas répartie de la même façon partout.', volume: 'Ce qui compte, c\'est la masse, pas le volume.', bas: 'G n\'est pas forcément en bas : il est du côté où il y a le plus de masse.' };
+
+/* ---------- 1. Solide homogène ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le centre de masse d\'un solide homogène');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Le <b>centre de masse</b> (ou centre de gravité) G d'un système est le <b>barycentre des masses</b> du système : la position moyenne de la répartition de sa masse.</p>
+        <p>Pour un solide <b>homogène</b> (même matière partout), G est le <b>centre de symétrie</b> du solide (à l'intersection de ses axes de symétrie).</p></div>
+    </div>
+    ${exemple(`<div class="bf-cm-figs">${fig('plaque', 'Plaque rectangulaire : intersection des diagonales')}${fig('disque', 'Disque : son centre')}</div>`)}`);
+  c_.aToi(carte, [{ titre: 'Un triangle', parties: [partieCentre({ solide: 'triangle' })] }, { titre: 'Un anneau', parties: [partieCentre({ solide: 'anneau' })] }]);
+  return carte;
+}
+
+/* ---------- 2. Solide non homogène ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Le centre de masse d\'un solide non homogène');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> Pour un solide <b>non homogène</b>, G est plus près de la partie la plus <b>lourde</b> : la masse « tire » G vers elle.</p></div>
+    </div>
+    ${exemple(`<div class="bf-cm-figs">${fig('marteau')}</div><p>La tête en acier est bien plus lourde que le manche en bois : G n'est pas au milieu du marteau, il est près de la tête (mais pas en son centre : le manche a aussi une masse).</p>`)}`);
+  const pourquoi = { type: 'choix', q: 'Comment justifier la position de G ?', options: POURQUOI, bonne: 'lourd', indices: IND_P, solution: '<p>Solide non homogène : G est plus près de la partie la plus lourde.</p>' };
+  c_.aToi(carte, melanger([{ titre: 'Un haltère', parties: [partieCentre({ solide: 'haltere' }), pourquoi] }, { titre: 'Une bouteille', parties: [partieCentre({ solide: 'bouteille' }), Object.assign({}, pourquoi)] }]));
+  return carte;
+}
+
+/* ---------- 3. Le mouvement du centre de masse ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Le mouvement du centre de masse');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Modèle.</b> Le mouvement d'un système peut être modélisé par le mouvement de son centre de masse G, affecté de la masse totale du système. C'est pourquoi les forces à distance (le poids) partent de G.</p></div>
+    </div>
+    ${exemple(`<div class="bf-sc-cadre">${marteauLance()}</div><p>Un marteau lancé tourne sur lui-même : le bout du manche (trait gris) décrit une courbe compliquée. Mais son centre de masse G décrit une courbe simple, une parabole, comme une balle lancée.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un lancer', enonce: '<p>On lance une raquette de tennis en l\'air : elle tourne sur elle-même.</p>', parties: [{ type: 'choix', q: 'Quel point de la raquette décrit une parabole, comme une balle lancée ?', options: [o('G', 'son centre de masse G'), o('manche', 'le bout du manche'), o('tete', 'le haut du cadre'), o('main', 'le point où on la tenait')], bonne: 'G',
+      indice: 'Le mouvement du système est modélisé par celui d\'un seul point, où toute sa masse est rassemblée.', solution: '<p>Le centre de masse G : c\'est lui qui modélise le mouvement de la raquette.</p>' }] },
+    { titre: 'Le poids', enonce: '<p>Un skieur descend une piste.</p>', parties: [{ type: 'choix', q: 'D\'où part la flèche de son poids ?', options: [o('G', 'du centre de masse G du skieur'), o('ski', 'du contact entre les skis et la neige'), o('tete', 'de sa tête'), o('pieds', 'de ses pieds')], bonne: 'G',
+      indice: 'Le poids est une force à distance.', solution: '<p>Le poids, force à distance, part du centre de masse G.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Centre de masse G : barycentre des masses du système. Solide <b>homogène</b> : G est son <b>centre de symétrie</b>. Solide <b>non homogène</b> : G est plus près de la partie la plus <b>lourde</b>.</p></div>
+    <div class="cle"><p>Le mouvement du système est modélisé par celui de G, affecté de toute sa masse ; les forces à distance partent de G.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur le centre de masse →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5a_cours.html">Module 5 : forces qui se compensent</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+BF.menu('module_4_cours');
+</script>
+</body>
+</html>

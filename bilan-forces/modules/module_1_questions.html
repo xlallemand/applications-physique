@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="situations.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 1 (2de) : 10 questions, une de chaque sorte :
+   système ou milieu extérieur, direction, sens et valeur d'une force
+   dessinée (échelle), longueur d'une flèche, notation <span class="vec-nom">F</span>A/B, actions
+   réciproques, unité et appareil de mesure, force à distance, distance
+   ou contact, point de départ d'une flèche, objet qui ne touche plus.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, V, nomV, cap, DIR_TXT, scene, flecheEchelle, SITUATIONS: S, PARCOURS } = BF;
+const FAB = (a, b) => V('F', `${a}/${b}`);
+const lieu = p => (p === 'G' ? 'du centre G' : `du point ${p}`);
+
+const MILIEU = [
+  ['{la valise}', 'Une valise est posée sur le sol.', 'le sol', 'ext'], ['{la valise}', 'Une valise est posée sur le sol.', 'la poignée de la valise', 'sys'],
+  ['{le parachutiste et son parachute}', 'Un parachutiste descend, parachute ouvert.', 'le parachute', 'sys'], ['{le parachutiste et son parachute}', 'Un parachutiste descend, parachute ouvert.', 'l\'air', 'ext'],
+  ['{la voiture}', 'Une voiture roule sur une route.', 'le moteur', 'sys'], ['{la voiture}', 'Une voiture roule sur une route.', 'la route', 'ext'],
+  ['{le ballon}', 'Un joueur frappe un ballon.', 'le pied du joueur', 'ext'], ['{la boule}', 'Une boule est accrochée à un fil.', 'le fil', 'ext'],
+  ['{la caravane}', 'Une voiture tire une caravane.', 'la voiture', 'ext'], ['{le bateau}', 'Un bateau à voile avance sur la mer.', 'la voile', 'sys'],
+];
+const DISTANCES = [['poids', 'Une pomme tombe d\'un arbre.'], ['poids', 'La Terre attire la Lune.'], ['poids', 'Un parachutiste saute de l\'avion.'],
+  ['mag', 'Un aimant attire un trombone posé à quelques centimètres.'], ['mag', 'L\'aiguille d\'une boussole tourne quand on approche un aimant.'],
+  ['elec', 'Une règle en plastique frottée attire de petits morceaux de papier.'], ['elec', 'Deux charges électriques de signes opposés s\'attirent.']];
+const ACTIONS = [['dist', 'La Terre attire une pomme qui tombe.'], ['dist', 'Un aimant attire un trombone posé à quelques centimètres.'], ['dist', 'Une règle frottée attire de petits morceaux de papier.'],
+  ['cont', 'Une corde tire un traîneau.'], ['cont', 'Le vent pousse la voile d\'un bateau.'], ['cont', 'Une table porte un livre.'], ['cont', 'L\'eau porte un bateau qui flotte.'], ['cont', 'Une voiture tire une caravane.']];
+const NOTATIONS = [['T', 'L', 'La Terre (T) attire la Lune (L).', 'la force exercée par la Terre sur la Lune'], ['M', 'V', 'Une main (M) tient une valise (V).', 'la force exercée par la main sur la valise'],
+  ['S', 'B', 'Le sol (S) porte un ballon (B).', 'la force exercée par le sol sur le ballon'], ['B', 'A', 'Une boule (B) tire sur un fil (A).', 'la force exercée par la boule sur le fil'],
+  ['V', 'C', 'Une voiture (V) tire une caravane (C).', 'la force exercée par la voiture sur la caravane']];
+const RECIP = [['La table exerce sur le livre une force de 5 N, verticale, vers le haut.', 'le livre exerce sur la table', '5 N, verticale, vers le bas', '5 N, verticale, vers le haut'],
+  ['Le fil exerce sur la boule une force de 3 N, verticale, vers le haut.', 'la boule exerce sur le fil', '3 N, verticale, vers le bas', '3 N, verticale, vers le haut'],
+  ['La voiture tire la caravane avec une force de 800 N, horizontale, vers la droite.', 'la caravane exerce sur la voiture', '800 N, horizontale, vers la gauche', '800 N, horizontale, vers la droite']];
+
+const QUESTIONS = [
+  function milieu() {
+    const m = hasard(MILIEU);
+    return { theme: 'Système et milieu extérieur', enonce: `<p>${m[1]} Système : ${m[0]}.</p>`,
+      parties: [fq.choix(`${cap(m[2])} fait partie :`, [o('sys', 'du système'), o('ext', 'du milieu extérieur')], m[3], { melanger: false,
+        indice: m[3] === 'ext' ? `${cap(m[2])} ne fait pas partie de ${m[0]}.` : `${cap(m[2])} fait partie de ${m[0]}.`, solution: `<p>${cap(m[2])} ${m[3] === 'sys' ? 'fait partie du système' : 'est dans le milieu extérieur'}.</p>` })] };
+  },
+  function lire() {
+    const ang = hasard([0, 90, 180, 270]), L = hasard([2, 3, 4]), k = hasard([2, 5, 10, 50]);
+    const pos = { 0: [2, 3], 90: [5, 5], 180: [8, 3], 270: [5, 1] }[ang];
+    return { theme: 'Caractéristiques d\'une force', enonce: `${flecheEchelle({ L, ang, x: pos[0], y: pos[1], pt: 'A' })}<p>Échelle : 1 carreau ↔ ${k} N.</p>`,
+      parties: [fq.choix('Direction et sens de cette force :', [0, 90, 180, 270].map(a => o(String(a), DIR_TXT[a])), String(ang), { melanger: false, colonne: true, indice: 'Regarde dans quel sens pointe la flèche.', solution: `<p>${cap(DIR_TXT[ang])}.</p>` }),
+        fq.nombre('Valeur de cette force :', 'F =', L * k, 'N', { signe: false, tol: 1e-9, diag: v => (proche(v, L) ? `La flèche mesure ${L} carreaux : multiplie par l'échelle.` : 'Nombre de carreaux × valeur d\'un carreau.'), solution: `<p class="ph-calc">F = ${L} × ${k} = <span class="c">${L * k} N</span></p>` })] };
+  },
+  function longueur() {
+    const [F, k] = hasard([[12, 3], [20, 5], [8, 2], [30, 10], [150, 50], [6, 1.5]]);
+    return { theme: 'Échelle', enonce: `<p>Une force a pour valeur ${fmt(F)} N. Échelle : 1 carreau ↔ ${fmt(k)} N.</p>`,
+      parties: [fq.nombre('Longueur de sa flèche :', 'Longueur :', F / k, 'carreaux', { signe: false, rel: .02, diag: v => (proche(v, F * k) ? 'On divise la valeur de la force par la valeur d\'un carreau.' : `Combien de fois ${fmt(k)} N dans ${fmt(F)} N ?`), solution: `<p class="ph-calc">${fmt(F)} ÷ ${fmt(k)} = <span class="c">${fmt(F / k)} carreaux</span></p>` })] };
+  },
+  function notation() {
+    const n = hasard(NOTATIONS);
+    return { theme: 'Notation', enonce: `<p>${n[2]}</p>`,
+      parties: [fq.choix(`Comment note-t-on ${n[3]} ?`, [o('ok', FAB(n[0], n[1])), o('inv', FAB(n[1], n[0])), o('val', `F<sub>${n[0]}/${n[1]}</sub>`), o('p', nomV('P'))], 'ok',
+        { indices: { inv: 'La première lettre est l\'objet qui <b>exerce</b> la force, la seconde celui qui la <b>subit</b>.', val: 'Sans flèche, c\'est la valeur (un nombre), pas le vecteur.', p: `${nomV('P')} est le poids, la force exercée par la Terre.` }, solution: `<p>${FAB(n[0], n[1])} : force exercée par ${n[0]} sur ${n[1]}.</p>` })] };
+  },
+  function reciproque() {
+    const r = hasard(RECIP);
+    return { theme: 'Actions réciproques', enonce: `<p>${r[0]}</p>`,
+      parties: [fq.choix(`Quelle force ${r[1]} ?`, [o('ok', r[2]), o('meme', r[3]), o('moins', 'une force plus faible'), o('rien', 'aucune force')], 'ok',
+        { colonne: true, indices: { meme: 'Les deux forces sont de sens opposés.', moins: 'Les deux forces ont la même valeur.', rien: 'Si A agit sur B, B agit aussi sur A.' }, solution: '<p>Actions réciproques : même direction, même valeur, sens opposé.</p>' })] };
+  },
+  function unite() {
+    return hasard([
+      { theme: 'Valeur d\'une force', parties: [fq.choix('En quelle unité s\'exprime la valeur d\'une force ?', [o('N', 'le newton (N)'), o('kg', 'le kilogramme (kg)'), o('Nkg', 'le newton par kilogramme (N/kg)'), o('J', 'le joule (J)')], 'N',
+        { indices: { kg: 'Le kilogramme est l\'unité de masse.', Nkg: 'Le N/kg est l\'unité de g, l\'intensité de la pesanteur.', J: 'Le joule est l\'unité d\'énergie.' }, solution: '<p>La valeur d\'une force s\'exprime en newtons (N).</p>' })] },
+      { theme: 'Valeur d\'une force', parties: [fq.choix('Avec quel appareil mesure-t-on la valeur d\'une force ?', [o('dyn', 'un dynamomètre'), o('bal', 'une balance'), o('chr', 'un chronomètre'), o('amp', 'un ampèremètre')], 'dyn',
+        { indices: { bal: 'Une balance mesure une masse.', chr: 'Un chronomètre mesure une durée.', amp: 'Un ampèremètre mesure une intensité électrique.' }, solution: '<p>On mesure la valeur d\'une force avec un dynamomètre.</p>' })] },
+    ]);
+  },
+  function distance() {
+    const d = hasard(DISTANCES);
+    return { theme: 'Forces à distance', enonce: `<p>${d[1]}</p>`,
+      parties: [fq.choix('Quelle est cette force à distance ?', [o('poids', 'le poids (attraction gravitationnelle)'), o('mag', 'la force magnétique'), o('elec', 'la force électrique')], d[0],
+        { melanger: false, colonne: true, indices: { poids: 'Y a-t-il un aimant ou un objet chargé ?', mag: 'La force magnétique est exercée par un aimant.', elec: 'La force électrique est exercée par un objet chargé (frotté).' }, solution: '<p>Trois forces à distance seulement : gravitationnelle (poids), électrique, magnétique.</p>' })] };
+  },
+  function type() {
+    const a = hasard(ACTIONS);
+    return { theme: 'À distance ou de contact ?', enonce: `<p>${a[1]}</p>`,
+      parties: [fq.choix('Cette action est :', [o('dist', 'à distance'), o('cont', 'de contact')], a[0], { melanger: false, indice: a[0] === 'dist' ? 'Les deux objets ne se touchent pas.' : 'Les deux objets se touchent.', solution: `<p>${a[0] === 'dist' ? 'Les objets ne se touchent pas : action à distance.' : 'Les objets se touchent : action de contact.'}</p>` })] };
+  },
+  function point() {
+    const s = S[hasard(['brique', 'ressort', 'valisePosee', 'valisePortee', 'ballonAvant', 'livre', 'aimants', 'clou', 'ebonite'])], f = hasard(s.forces);
+    const opts = Object.keys(s.points).map(id => o(id, `${lieu(id)} (${s.nomsPts[id]})`));
+    return { theme: 'Point d\'application', enonce: `<p>${s.enonce}</p><div class="bf-sc-cadre">${scene(s, { marques: Object.keys(s.points) })}</div>`,
+      parties: [fq.choix(`D'où part la flèche de la ${f.lib} ?`, opts, f.pts[0], { melanger: false, colonne: true, indice: f.type === 'distance' ? 'Une force à distance part du centre de masse G du système.' : 'Une force de contact part du point de contact.',
+        solution: `<p>${f.type === 'distance' ? 'Force à distance' : 'Force de contact'} : ${lieu(f.pts[0])}.</p>` })] };
+  },
+  function lache() {
+    const [t, q, ok] = hasard([['Un joueur a lancé une balle ; elle monte, la main ne la touche plus.', 'La main exerce-t-elle encore une force sur la balle ?', 'non'],
+      ['Un footballeur a frappé le ballon ; le ballon s\'éloigne.', 'Le pied exerce-t-il encore une force sur le ballon ?', 'non'],
+      ['Une valise est portée par une personne ; elle ne touche pas le sol.', 'Le sol exerce-t-il une force sur la valise ?', 'non'],
+      ['Un livre est posé sur une table.', 'La table exerce-t-elle une force sur le livre ?', 'oui']]);
+    return { theme: 'Forces de contact', enonce: `<p>${t}</p>`,
+      parties: [fq.choix(q, [o('oui', 'oui'), o('non', 'non')], ok, { melanger: false, indice: ok === 'non' ? 'Une force de contact n\'existe que si les objets se touchent.' : 'Les deux objets se touchent : il y a une force de contact.',
+        solution: `<p>${ok === 'non' ? 'Les objets ne se touchent pas (ou plus) : pas de force de contact.' : 'Les objets se touchent : force de contact.'}</p>` })] };
+  },
+];
+
+BF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Modéliser une action par une force',
+  intro: '<p class="er-contexte">10 questions : système et milieu extérieur, caractéristiques d\'une force et échelle, notation, actions réciproques, forces à distance et de contact.</p>',
+  questions: () => melanger(QUESTIONS.map(f => f())),
+  revoir: { href: 'module_1a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : le diagramme objets-actions →' },
+});
+BF.menu('module_1_questions');
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="situations.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Les forces usuelles</h2>
+  </div>
+<!-- Fiche du module 3 (une section par cours, ancres : poids, reaction, tension, archimede, air, frottements) -->
+
+  <section class="er-card" id="poids">
+    <h3 class="cours-titre">Le poids</h3>
+    <div class="cle"><p class="som-formule">P = m × g</p><p>P en N, m en kg, g = 9,81 N/kg sur Terre (10 N/kg si g n'est pas donné ; 1,62 N/kg sur la Lune). Vertical, vers le bas, depuis le centre de masse G. La Terre est toujours dans le diagramme : le poids est dans tous les bilans. La masse ne dépend pas du lieu.</p></div>
+  </section>
+
+  <section class="er-card" id="reaction">
+    <h3 class="cours-titre">La réaction du support</h3>
+    <div class="cle"><p>Sans frottement : réaction <b>perpendiculaire au support</b> (<span class="vec-nom">R</span><sub>N</sub>, souvent notée <span class="vec-nom">R</span>), depuis le point de contact. Pas de contact, pas de réaction.</p></div>
+    <div class="som-fiche-figs deux" id="figReaction"></div>
+  </section>
+
+  <section class="er-card" id="tension">
+    <h3 class="cours-titre">La tension d'un fil</h3>
+    <div class="cle"><p>Fil, corde, câble, ressort : tension <span class="vec-nom">T</span>, depuis le point d'accroche, <b>le long du fil</b>, vers le point d'attache (un fil ne peut que tirer).</p></div>
+  </section>
+
+  <section class="er-card" id="archimede">
+    <h3 class="cours-titre">La poussée d'Archimède</h3>
+    <div class="cle"><p>Un fluide (eau, huile, air…) exerce la poussée d'Archimède <span class="vec-nom">F</span><sub>archi</sub> : <b>verticale, vers le haut</b>, depuis le centre de la partie immergée. Flotte si F<sub>archi</sub> = P, monte si F<sub>archi</sub> &gt; P, coule si F<sub>archi</sub> &lt; P.</p></div>
+  </section>
+
+  <section class="er-card" id="air">
+    <h3 class="cours-titre">La force de l'air</h3>
+    <div class="cle"><p>L'air touche toujours le système (sauf dans le vide ou dans un liquide) : il a toujours sa bulle dans le diagramme. On <b>néglige</b> sa force (trait barré), sauf si :</p>
+      <ul class="er-liste"><li>ses <b>frottements</b> ne sont pas négligeables (grande vitesse, grande surface : parachute…) : <span class="vec-nom">F</span><sub>air</sub>, opposée au mouvement ;</li>
+      <li>sa <b>poussée d'Archimède</b> n'est pas négligeable (système très léger pour son volume : montgolfière, ballon d'hélium).</li></ul></div>
+    <div class="som-fiche-figs deux" id="helium"></div>
+  </section>
+
+  <section class="er-card" id="frottements">
+    <h3 class="cours-titre">Les frottements solides</h3>
+    <div class="cle"><p class="som-formule"><span class="vec-nom">R</span> = <span class="vec-nom">R</span><sub>N</sub> + <span class="vec-nom">f</span></p><p><span class="vec-nom">R</span><sub>N</sub> perpendiculaire au support ; <span class="vec-nom">f</span> parallèle au support, <b>opposée au glissement</b> qu'il y aurait sans frottement (roue motrice : vers l'avant ; roue non motrice ou freinée : vers l'arrière). Dans le diagramme, une seule bulle pour le support.</p></div>
+    <div class="bf-ballon" id="figFrott"></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3a_cours.html">Revoir les cours</a>
+    <a class="btn-secondary" href="module_3_questions.html">Questions sur les forces usuelles</a>
+  </div>
+</div>
+
+<script>
+// figures : réaction sans frottement, ballon d'hélium, frottements (réaction R⃗ dessinée en noir)
+const S = BF.SITUATIONS;
+document.getElementById('figReaction').innerHTML = ['palet', 'skieurSans'].map(id => `<figure>${BF.sceneRemplie(S[id])}<figcaption>${S[id].titre}</figcaption></figure>`).join('');
+document.getElementById('helium').innerHTML = `${BF.diagrammeDe(S.helium)}${BF.sceneRemplie(S.helium)}`;
+const trois = ['livreIncline', 'voiture', 'voitureFrein'].map(id => S[id]), dos = BF.diagrammesDe(trois);
+document.getElementById('figFrott').innerHTML = trois.map((s, k) => `<figure><p class="bf-ballon-t">${s.titre}</p>${dos[k]}${BF.sceneRemplie(s, { reaction: s.id === 'livreIncline' })}</figure>`).join('');
+BF.menu('fiche_3');
+</script>
+</body>
+</html>

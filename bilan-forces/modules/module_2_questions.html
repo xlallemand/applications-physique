@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="situations.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 2 : 10 questions sur des situations tirées au hasard
+   (situations.js) : 4 diagrammes objet-action à construire (BF.bilan
+   arrêté au diagramme), un diagramme puis le tracé des forces, puis des
+   questions courtes : pointillés ou trait plein, trait barré, nombre de
+   forces d'après le diagramme, force de l'air, objet qui ne touche pas.
+   ============================================================ */
+const { o, fq, hasard, melanger, cap, nomV, bilan, diagrammeDe, scene, reactions, OPTS_AIR, bonneAir, REGLE_AIR, SITUATIONS: S, PARCOURS } = BF;
+const TOUTES = PARCOURS.map(id => S[id]);
+
+const QUESTIONS = [
+  function diagramme() { const s = hasard(TOUTES); return Object.assign({ theme: 'Diagramme objet-action', consigne: s.titre }, bilan(s, { jusqua: 'diagramme' })); },
+  function trace() { const s = hasard(TOUTES.filter(x => x.forces.length <= 3)); return Object.assign({ theme: 'Diagramme, puis tracé', consigne: s.titre }, bilan(s, { jusqua: 'trace' })); },
+  function traits() {
+    const [q, bonne, ind] = hasard([['Dans un diagramme objet-action, une action <b>à distance</b> se représente par :', 'pointilles', 'Un trait plein, c\'est pour une action de contact.'],
+      ['Dans un diagramme objet-action, une action <b>de contact</b> se représente par :', 'plein', 'Les pointillés, c\'est pour une action à distance.']]);
+    return { theme: 'Le diagramme objet-action', parties: [fq.choix(q, [o('pointilles', 'un trait en pointillés'), o('plein', 'un trait plein'), o('barre', 'un trait barré'), o('fleche', 'une flèche')], bonne,
+      { melanger: false, indices: { [bonne === 'plein' ? 'pointilles' : 'plein']: ind, barre: 'Un trait barré indique une force négligeable.', fleche: 'Les flèches (les vecteurs forces) se dessinent sur le schéma, pas dans le diagramme.' }, solution: '<p>Pointillés : à distance ; trait plein : contact ; trait barré : force négligeable.</p>' })] };
+  },
+  function barre() {
+    return { theme: 'Le diagramme objet-action', parties: [fq.choix('Dans un diagramme objet-action, le trait de l\'air est barré. Cela veut dire :', [o('neg', 'la force de l\'air est négligeable : on ne la dessine pas'), o('pas', 'l\'air ne touche pas le système'), o('dist', 'l\'air agit à distance'), o('oubli', 'on a oublié l\'air')], 'neg',
+      { colonne: true, indices: { pas: 'L\'air touche bien le système (il a sa bulle), mais sa force est très faible.', dist: 'L\'air agit par contact.', oubli: 'L\'air a sa bulle : on ne l\'a pas oublié.' }, solution: '<p>Trait barré : force négligeable, qu\'on ne dessine pas sur le schéma.</p>' })] };
+  },
+  function combien() {
+    const s = hasard(TOUTES.filter(x => !reactions(x).length && x.forces.length >= 2));
+    return { theme: 'Nombre de forces', enonce: `<p>${s.enonce}</p><div class="bf-do-cadre">${diagrammeDe(s)}</div>`,
+      parties: [fq.nombre('D\'après ce diagramme objet-action, combien de forces faut-il dessiner sur le schéma ?', 'Nombre de forces :', s.forces.length, '', { signe: false, tol: 1e-9,
+        diag: v => (v === s.acteurs.length ? 'Un trait barré (force négligeable) ne donne pas de force à dessiner.' : 'Une force par bulle reliée au système, sauf si son trait est barré.'),
+        solution: `<p>${s.forces.length} forces : ${s.forces.map(f => nomV(f.noms[0])).join(', ')}.</p>` })] };
+  },
+  function air() {
+    const s = hasard(TOUTES.filter(x => x.air)), bonne = bonneAir(s.air);
+    return { theme: 'La force de l\'air', enonce: `<p>${s.enonce}</p><div class="bf-sc-cadre">${scene(s)}</div>`,
+      parties: [fq.choix('L\'air touche le système : peut-on négliger sa force ?', OPTS_AIR, bonne, { melanger: false, colonne: true, indice: s.air.indice || REGLE_AIR, solution: `<p>${s.air.raison}</p>` })] };
+  },
+  function touche() {
+    const s = hasard(TOUTES.filter(x => (x.distracteurs || []).length)), d = hasard(s.distracteurs);
+    return { theme: 'Objets en contact', enonce: `<p>${s.enonce}</p><div class="bf-sc-cadre">${scene(s)}</div>`,
+      parties: [fq.choix(`Faut-il une bulle (reliée au système) pour ${d.nom} ?`, [o('oui', 'oui : il agit sur le système'), o('non', 'non : il ne touche pas le système')], 'non', { melanger: false, indice: d.diag, solution: `<p>${d.diag}</p>` })] };
+  },
+];
+
+// tirage : 4 diagrammes, 1 diagramme et tracé, puis 5 questions courtes
+function tirage() {
+  const diags = [], vus = [];
+  while (diags.length < 4) { const q = QUESTIONS[0](); if (vus.indexOf(q.consigne) === -1) { vus.push(q.consigne); diags.push(q); } }
+  return diags.concat([QUESTIONS[1]()], melanger(QUESTIONS.slice(2).map(f => f())));
+}
+
+BF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Le diagramme objets-actions',
+  intro: '<p class="er-contexte">10 questions sur des situations tirées au hasard : quatre diagrammes objet-action à construire, un diagramme suivi du tracé des forces, puis des questions courtes (traits, nombre de forces, force de l\'air, objets en contact).</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir la méthode' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : les forces usuelles →' },
+});
+BF.menu('module_2_questions');
+</script>
+</body>
+</html>

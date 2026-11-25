@@ -125,7 +125,7 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 | `chapitre-04.md` | Transformations acide-base | `transformations-acide-base/` | | à faire | | reprend `ph/` puis supprime le dossier |
 | — | Cinématique | `cinematique/` | | fait | | déjà en ligne, aucun prompt |
 | `chapitre-06.md` | Titrages | `titrages/` | | à faire | | liens ↗ vers `titrage-ph/`, `titrage-conductimetrique/` |
-| `bilan-forces.md` | Bilan des forces | `bilan-forces/` | 07 | à faire | | 2de, 1re, Tle |
+| `bilan-forces.md` | Bilan des forces | `bilan-forces/` | 07 | fait | 25/11/2026 | 2de, 1re, Tle ; moteur extrait dans `bilan-forces/modules/bf.js` (`principe-dynamique/` inchangé) ; atelier sur un écran (`modules/atelier.js`, 30 situations, filtre de niveau) ; pas de lien vers `principe-dynamique/` |
 | `chapitre-07.md` | Forces et mouvement : lois de Newton | `lois-newton/` | | à faire | | |
 | `chapitre-08.md` | Mouvement dans un champ uniforme | `champ-uniforme/` | | à faire | | |
 | `travail-force.md` | Travail d'une force | `travail-force/` | 09 | à faire | | spe et STI2D |
