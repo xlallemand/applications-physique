@@ -2,7 +2,7 @@
 
 Lis d'abord `docs/prompts-tspe/00-commun.md` (sources, charte, structure, maquettes, livraison).
 
-**Ce chapitre se fait en deux sessions** (`00-commun.md` §5) :
+**Ce chapitre se fait en deux sessions** (`00-commun.md` §8) :
 
 1. **Étape 1 : maquettes du moteur de dessin des molécules.** Tu t'arrêtes après : le professeur choisit.
 2. **Étape 2 : l'application**, avec la maquette validée et les remarques du professeur.
@@ -210,13 +210,13 @@ Tâches à proposer sur chaque maquette (les mêmes partout, pour comparer) :
 - les couleurs de marquage ;
 - les gestes de conversion.
 
-**Puis arrête-toi** (`00-commun.md` §5).
+**Puis arrête-toi** (`00-commun.md` §8).
 
 ## Étape 2 : l'application
 
 Reprends la maquette validée et les remarques du professeur (données dans le message de la session). Termine `ORGA` (nomenclature, éditeur, conversion, sélection, champ de nom, bulles) puis l'application.
 
-**Tests du moteur** (script Node dans le scratchpad, `00-commun.md` §6) :
+**Tests du moteur** (script Node dans le scratchpad, `00-commun.md` §12) :
 
 - chaque molécule de ce prompt : `ORGA.nommer(ORGA.lire(smiles))` donne le nom attendu, `ORGA.meme(ORGA.lireNom(nom), ORGA.lire(smiles))` est vrai, `ORGA.groupes` donne les groupes attendus ;
 - 500 molécules de chaque fabrique : le nom relu redonne la même molécule.
@@ -245,7 +245,7 @@ Reprends la maquette validée et les remarques du professeur (données dans le m
 
 **Cours 1c : passer d'une écriture à l'autre** : une étape par phrase (les trois phrases ci-dessus, en `.cle`), chacune avec l'outil de conversion en exemple et en « À toi ». « À retenir » : les trois phrases.
 
-**Atelier « Prise en main de l'outil de dessin des molécules »** (sous-module 1, page `simulation`) : toujours la même suite de six molécules, rangées dans cet ordre mais chacune accessible directement (pastilles, `00-commun.md` §3), une par outil de l'éditeur (tirer un trait, appui court pour une ramification, un autre atome, double liaison, triple liaison, topologique). Pas de bilan.
+**Atelier « Prise en main de l'outil de dessin des molécules »** (sous-module 1, page `simulation`) : toujours la même suite de six molécules, rangées dans cet ordre mais chacune accessible directement (pastilles, `00-commun.md` §5), une par outil de l'éditeur (tirer un trait, appui court pour une ramification, un autre atome, double liaison, triple liaison, topologique). Pas de bilan.
 
 **Atelier « Dessin libre de molécules »** (sous-module 1, page `simulation`) : l'éditeur, toutes les écritures, « Vérifier les H ».
 

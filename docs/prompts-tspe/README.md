@@ -21,11 +21,11 @@ Un fichier par chapitre (`chapitre-NN.md`, NN = numéro du dossier du cours dans
 
 | Prompt annexe | Avant |
 |---|---|
-| `outils-communs.md` (éditeur d'équations partagé, pages externes ↗) | 01 (pages ↗) et 04 (éditeur) |
+| `outils-communs.md` (éditeur d'équations partagé, pages externes ↗) | tous (en premier) |
 | `bilan-forces.md` | 07 |
 | `travail-force.md` | 09 |
 | `decroissance-radioactive.md` | 16 |
 | `gaz-parfait.md` | 17 |
 | `modele-oeil.md` | 19 |
 
-Chapitres déjà faits sans ces prompts : 2 (Nomenclature, `chapitre-02.md`) et 5 (Cinématique). Le chapitre 18 attend l'énoncé de ses exercices (`18- Equilibre chimique, pile/Chap18-Exercices_equilibre.pdf`, supprimé du dépôt des cours).
+Chapitres déjà faits : 2 (Nomenclature, avec `chapitre-02.md`) et 5 (Cinématique, sans prompt). Il manque dans le dépôt des cours l'énoncé des exercices du chapitre 18 (`18- Equilibre chimique, pile/Chap18-Exercices_equilibre.pdf`, supprimé) et celui du chapitre 10 (seule la correction est présente) : les prompts disent quoi faire en leur absence.
