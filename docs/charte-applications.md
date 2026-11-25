@@ -347,7 +347,7 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 3. Un bloc **« À toi »** (`c.aToi` du moteur commun, `CIN.aToi` dans Cinématique) : une suite de petites questions du **même type que l'exemple**, de difficulté progressive, sans points. Il faut les réussir (ou afficher la réponse) pour que « Continuer → » apparaisse.
 4. Étape suivante. Le cours se termine par « À retenir ».
 
-Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous forme de questions à résoudre, la réponse affichée est suivie de **« ✍ Complète ton cours : … »** (ce qu'il doit recopier dans son cahier).
+Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous forme de questions à résoudre, la réponse affichée est suivie de **« Bilan : … »** (ce qu'il doit recopier dans son cahier).
 
 ### Bouton « Afficher tout le cours »
 
