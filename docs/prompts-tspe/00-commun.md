@@ -130,7 +130,7 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 | `chapitre-08.md` | Mouvement dans un champ uniforme | `champ-uniforme/` | | à faire | | |
 | `travail-force.md` | Travail d'une force | `travail-force/` | 09 | à faire | | spe et STI2D |
 | `chapitre-09.md` | Énergie et travail | `energie-travail/` | | à faire | | |
-| `chapitre-10.md` | Force des acides et des bases | `force-acides-bases/` | | à faire | | **énoncé des exercices absent du dépôt des cours** (seulement la correction) |
+| `chapitre-10.md` | Force des acides et des bases | `force-acides-bases/` | | à faire | | |
 | `chapitre-11.md` | Ondes sonores et effet Doppler | `ondes-doppler/` | | à faire | | |
 | `chapitre-12.md` | Diffraction et interférences | `diffraction-interferences/` | | à faire | | **deux étapes** (maquettes i = λD/a) |
 | `chapitre-13.md` | Mouvement des satellites et des planètes | `satellites-planetes/` | | à faire | | |

@@ -14,9 +14,8 @@ Lis d'abord `docs/prompts-tspe/00-commun.md` (sources, charte, structure, outils
 | Fichier | Contenu | À lire |
 |---|---|---|
 | `Chap10-Cours_acide_base complete.pdf` (9 p.) | Cours tapé, complété à la main | Non : résumé ci-dessous. Pages 2 (tableaux des exemples 1 et 2), 5 (diagrammes), 9 (acide α-aminé) pour les figures |
-| `Chap10-Exercices acide base correction.pdf` (14 p.) | **Corrections manuscrites seules** des ex. 1 à 18 (titres ci-dessous) | Oui |
-
-**Manque** : l'énoncé des exercices n'est pas dans le dépôt (la correction ne contient que les titres et les solutions). Avant de coder le module d'exercices, vérifie s'il a été ajouté (`ls "10- Force des acides et des bases"`) ; sinon, **reconstitue les énoncés à partir des corrections** (données lisibles dans les calculs), marque-les « énoncé reconstitué » dans les données de l'application et signale-le dans le compte rendu.
+| `Chap10-Exercices acide base.pdf` (3 p.) | Énoncés des ex. 1 à 18 (ex. 1 à 8 tapés, ex. 9 à 18 en images avec diagrammes de distribution : BBT, acide phosphorique) | Oui |
+| `Chap10-Exercices acide base correction.pdf` (14 p.) | Corrections manuscrites des ex. 1 à 18 | Oui |
 
 Le TP de détermination de K<sub>a</sub> n'est pas repris.
 
@@ -88,7 +87,7 @@ Cours : K<sub>a</sub>, pK<sub>a</sub>, échelle des pK<sub>a</sub>, comparer des
 
 ### Module 5 : Exercices
 
-Ex. 1 à 18 (titres de la correction) : 1 pH après dilution ; 2 concentration en ions hydroxyde ; 3 solution d'hydroxyde de sodium ; 4 vitamine C ; 5 couple de l'ammoniac ; 6 acide éthanoïque ; 7 espèce prédominante ; 8 déterminer une constante d'acidité ; 9 estimer la force d'un acide ; 10 comparer la force de deux acides ; 11 comparer la force de deux bases ; 12 acide fort ou faible ; 13 un acide aminé ; 14 zone de virage du BBT ; 15 acide phosphorique ; 16 tampon ammoniacal ; 17 acide faible et équation du second degré ; 18 conservateur alimentaire. Énoncés : voir « Manque » plus haut.
+Ex. 1 à 18 de la feuille : 1 pH après dilution ; 2 concentration en ions hydroxyde ; 3 solution d'hydroxyde de sodium ; 4 vitamine C ; 5 couple de l'ammoniac ; 6 acide éthanoïque ; 7 espèce prédominante ; 8 déterminer une constante d'acidité ; 9 estimer la force d'un acide ; 10 comparer la force de deux acides ; 11 comparer la force de deux bases ; 12 acide fort ou faible ; 13 un acide aminé ; 14 zone de virage du BBT ; 15 acide phosphorique ; 16 tampon ammoniacal ; 17 acide faible et équation du second degré ; 18 conservateur alimentaire.
 
 ## Vérifications propres
 
