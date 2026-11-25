@@ -35,7 +35,7 @@
      'perso'   outil propre à l'application : p.monter(zone, api) → { montrer() }
                api.reussi(note) · api.erreur(diagnostic) · api.compterErreur() · api.effacer() · api.message(h)
      Toutes : p.q (question), p.solution (HTML affiché après la réponse,
-              par ex. « ✍ Complète ton cours : … »),
+              par ex. « Bilan : … »),
               p.aide (true : « Afficher la réponse » proposé tout de suite, pour un outil
               où aucune erreur n'est validée, comme une réaction réglée en direct).
 
