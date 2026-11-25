@@ -97,6 +97,8 @@ Règle de l'enseignant pour **toute page de simulation, d'animation ou de manipu
 | `CCM` (plaque, taches, animation) | `chromatographie/modules/ccm.js` | 07 | 12 |
 | `ETAPES` (gestes dans l'ordre) et `MONTAGE` (circuits) | `assets/etapes.js` ; `assets/montage.js`, `assets/montage.css` | 08 | 09 (MONTAGE) ; 10, 11, 12 (ETAPES) |
 | `PAILLASSE` (verrerie) | `assets/paillasse.js`, `assets/paillasse.css` | 10 | 11, 12 |
+| `DILUTION` (dilution, commun avec la Terminale) | `assets/dilution.js`, `assets/dilution.css` | 10 ou Tle `chapitre-01.md` | 10 ; Tle 01 |
+| `SYNTHESE` (reflux, ampoule à décanter, commun avec la Terminale) | `assets/synthese.js`, `assets/synthese.css` | 12 ou Tle `chapitre-21.md` | 12 ; Tle 21 |
 | `LG` (existant) | `lecture-graphique/modules/lgtools.js`, `lgtools.css` | — | 01, 09, 11, 13 |
 | `ORGA` (existant) | `assets/orga.js`, `assets/orga-dessin.js`, `assets/orga.css` | — | 06 |
 | `VEC` (existant) | `cinematique/modules/vecteurs.js` | — | 13 |

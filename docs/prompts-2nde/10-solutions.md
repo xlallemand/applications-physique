@@ -8,6 +8,7 @@ Lis `docs/prompts-2nde/00-commun.md`, puis exécute ce prompt.
 - Portail : `dom: 'chimie'`, `desc: "Préparer une solution par dissolution puis par dilution, geste par geste, et doser par une échelle de teinte."`
 - Dessin d'en-tête : **nouveau dessin `verrerie`** dans `assets/hero.js` : fiole jaugée avec son trait de jauge, pipette jaugée, bécher et tubes d'une échelle de teinte, en traits fins ; il resservira à `11` et `12`.
 - Cette application crée l'outil partagé **`PAILLASSE`** (`assets/paillasse.js`, `assets/paillasse.css`), réutilisé par `11-identifier-especes.md` et `12-synthese.md`. Elle utilise **`ETAPES`** (`assets/etapes.js`, créé par `08-montage-electrique.md` ; s'il n'existe pas encore, crée-le comme il le décrit).
+- **Mise en commun avec la Terminale spécialité** (décision de l'enseignant) : la manipulation de dilution (module 2) est faite avec l'outil partagé **`DILUTION`** (`assets/dilution.js`, `assets/dilution.css`), commun avec l'application de Terminale « Rappels de chimie » (`docs/prompts-tspe/chapitre-01.md`, module 3). Le premier des deux prompts exécuté crée l'outil (`PAILLASSE` compris s'il n'existe pas), le second le réutilise. Seule différence : ici, **concentration massique seulement** (option `concentration: 'massique'`) et gestes obligatoires ; en Terminale, concentrations molaire et massique. Lis la section « Outil `DILUTION` » de `docs/prompts-tspe/chapitre-01.md`.
 
 ## 2. Objectif et programme
 
@@ -54,6 +55,8 @@ Sources : `08- Solutions aqueuses/Chap08-Cours-Exercices complete.pdf` (p. 1-2 c
 - Puis : **soluté et solvant** (étiquettes à glisser : chlorure de fer (III) / eau) ; **c<sub>m</sub> = m / V<sub>fiole</sub>** = 0,50 / 0,250 = 2,0 g/L ; erreur : V en mL (« 0,002 g/mL : V doit être en L, 250 mL = 0,250 L »).
 
 ### Module 2 : Dilution (manipulation guidée, `module_2_manip.html`)
+
+- **Outil partagé `DILUTION`** (voir §1 et §6) en mode `concentration: 'massique'`, `gestes: true` : choix du matériel, schéma pipette → fiole avec les données à placer (notations de la situation), formule construite, gestes de la fiche ; ce qui suit précise les situations et les diagnostics de la 2nde.
 
 - Paillasse : flacon de solution mère (2,0 g/L), béchers, pipettes jaugées à deux traits (5, 10, 20, 25 mL), propipette, fioles jaugées (50, 100, 250 mL), éprouvettes graduées, pissette, bouchons.
 - Situations accessibles dans n'importe quel ordre (pastilles), chacune avec ses gestes dans l'ordre de la fiche (`00-commun.md` §6 bis).
@@ -102,6 +105,7 @@ Erreurs diagnostiquées : V en mL dans c<sub>m</sub> = m / V ; fraction renvers�
   - niveaux de liquide, ménisque et vue agrandie au niveau de l'œil, couleur et teinte d'un contenu, dissolution animée ;
   - gestes (glisser ou deux appuis) transmis à **`ETAPES`** (ordre imposé, refus expliqués, textes passés en options).
 - **`ETAPES`** (`assets/etapes.js`, créé par `08`) ; s'il faut l'étendre, fais-le de façon compatible et reteste `montage-electrique/`.
+- **`DILUTION`** (`assets/dilution.js`, `assets/dilution.css`), partagé avec la Terminale (`docs/prompts-tspe/chapitre-01.md`, section « Outil `DILUTION` ») : à créer s'il n'existe pas, sinon à réutiliser et, si besoin, à étendre de façon compatible (reteste alors `rappels-chimie/`). Mets à jour le tableau des outils de `docs/prompts-tspe/00-commun.md` §9 si tu le crées.
 - `assets/dragdrop.js`, `BULLE`. Liens « Revois… » : `conversions/`, `equations-en-physique/`, `proportionnalite/`.
 
 ## 7. Vérifications propres

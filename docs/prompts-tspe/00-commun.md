@@ -99,6 +99,7 @@ Le premier prompt qui a besoin d'un outil le crée (comme le décrit le prompt q
 | Pages externes ↗ du `PLAN` | `assets/sommaire.js`, `assets/avancement.js`, `docs/outils/index-recherche.py` | à créer | `outils-communs.md` | tous les chapitres qui ont un module dans une autre application |
 | `DILUTION` : manipulation de dilution (pipette, fiole, schéma des deux solutions) | `assets/dilution.js`, `assets/dilution.css` (sur `PAILLASSE` et `ETAPES`) | à créer | `chapitre-01.md` ou `docs/prompts-2nde/10-solutions.md`, le premier exécuté | 01, 06 ; 2nde `solutions/` |
 | `PAILLASSE` : verrerie dessinée et gestes | `assets/paillasse.js`, `assets/paillasse.css` | à créer | `docs/prompts-2nde/10-solutions.md` (ou 01 s'il passe avant) | 01, 21 ; 2nde 10, 11, 12 |
+| `SYNTHESE` : montage à reflux, ampoule à décanter (modes 2de et Tle) | `assets/synthese.js`, `assets/synthese.css` (sur `PAILLASSE` et `ETAPES`) | à créer | `chapitre-21.md` ou `docs/prompts-2nde/12-synthese.md`, le premier exécuté | 21 ; 2nde `synthese/` |
 | `ETAPES` : gestes dans l'ordre | `assets/etapes.js` | existe | — | 01, 21 |
 | `ORGA` : molécules organiques | `assets/orga.js`, `assets/orga-dessin.js`, `assets/orga.css` | existe | étendu par 15 (flèches courbes) | 03, 04, 10, 15, 21 |
 | `TITRAGE` : simulateur de titrage (modèle + dessin) | `assets/titrage.js`, `assets/titrage.css` | existe (`titrage-ph/`) | — | 06, 10 |

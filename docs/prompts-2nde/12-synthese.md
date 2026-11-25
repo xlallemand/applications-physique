@@ -8,6 +8,7 @@ Lis `docs/prompts-2nde/00-commun.md`, puis exécute ce prompt.
 - Portail : `dom: 'chimie'`, `desc: "Assembler un montage à reflux, chauffer, séparer à l'ampoule à décanter et comparer par CCM."`
 - Dessin d'en-tête : **`verrerie`** (créé par `10-solutions.md`).
 - **Prérequis** : `10-solutions.md` (outils `PAILLASSE`, `ETAPES`) et `07-chromatographie.md` (outil `CCM`) faits. Sinon, crée-les comme ces prompts le décrivent.
+- **Mise en commun avec la Terminale spécialité** (décision de l'enseignant) : le montage à reflux (modules 1 et 2) et l'ampoule à décanter (module 3) sont faits avec l'outil partagé **`SYNTHESE`** (`assets/synthese.js`, `assets/synthese.css`, sur `PAILLASSE` et `ETAPES`), commun avec l'application de Terminale « Synthèse organique » (`docs/prompts-tspe/chapitre-21.md`, module 2). Le premier des deux prompts exécuté crée l'outil, le second le réutilise. Ici : mode `niveau: '2de'` (acétate d'isoamyle, sans quantités de matière). Lis la section « Mise en commun avec la 2nde : outil `SYNTHESE` » de `docs/prompts-tspe/chapitre-21.md`.
 
 ## 2. Objectif et programme
 
@@ -80,6 +81,7 @@ Source : `13- Synthese/TP - synthese ethanoate de linalyle.pdf` (2 p.) ; pour la
 
 ## 6. Outils
 
+- **`SYNTHESE`** (`assets/synthese.js`, `assets/synthese.css`), partagé avec la Terminale (`docs/prompts-tspe/chapitre-21.md`) : à créer s'il n'existe pas (API décrite dans ce prompt de Terminale), sinon à réutiliser en mode `'2de'` ; s'il faut l'étendre, fais-le de façon compatible et reteste `synthese-organique/` ; mets à jour le tableau des outils de `docs/prompts-tspe/00-commun.md` §9 si tu le crées.
 - **`PAILLASSE`** (créé par `10`) à étendre de façon compatible (objets du reflux et de l'extraction) ; **`ETAPES`** (créé par `08`) ; **`CCM`** (`../../chromatographie/modules/ccm.js`, créé par `07`, chargé depuis son dossier). Reteste `solutions/`, `identifier-especes/` et `chromatographie/` après toute modification de ces outils.
 - `assets/pictogrammes/` pour les pictogrammes de danger ; `assets/dragdrop.js`, `BULLE`.
 
