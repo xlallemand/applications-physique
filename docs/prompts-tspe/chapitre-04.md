@@ -77,7 +77,6 @@ Page `entrainement` « Manipulation : l'échange du proton H⁺ » (`module_2_ma
   2. **Réaction entre deux couples** : l'acide d'un couple et la base d'un autre ; le H<sup>+</sup> passe de l'un à l'autre (méthode 1 du professeur, la flèche dessinée) ; l'équation s'écrit, et la méthode 2 (les deux couples l'un sous l'autre, acide et base entourés) s'affiche en regard ;
   3. **Amphotère** : l'eau (et HCO<sub>3</sub><sup>−</sup>, HS<sup>−</sup>) : tantôt elle donne, tantôt elle capte ; autoprotolyse.
 - Banque d'espèces : eau, H<sub>3</sub>O<sup>+</sup>, HO<sup>−</sup>, acide éthanoïque, méthanoïque (fourmis), benzoïque, lactique, ammoniac, ammonium, méthylamine, acide carbonique, hydrogénocarbonate, carbonate, HCl, HNO<sub>3</sub>, HS<sup>−</sup>/H<sub>2</sub>S, acide oxalique (ex. 8), acide ascorbique (AH, ex. 6), aspirine (C<sub>9</sub>H<sub>8</sub>O<sub>4</sub>, ex. 5)… ; situations tirées au hasard, compteur de réussites ; page faite après 3 réussites dans chaque onglet.
-- Bilan « ✍ Complète ton cours » : un acide libère H<sup>+</sup> : il perd un H **et** une charge + ; une base capte H<sup>+</sup> : elle gagne un H **et** une charge +.
 
 ### Module 3 : Polarisation et caractère acide (Lewis)
 

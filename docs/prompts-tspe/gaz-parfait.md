@@ -30,7 +30,7 @@ Consigne du professeur (chapitre « Thermodynamique ») : **développer une autr
 - **Échelle microscopique** reliée en permanence : « T ↗ → agitation ↗ → chocs plus violents et plus fréquents → P ↗ » (phrases courtes qui s'affichent selon le geste).
 - **Gaz réel / limites** : à haute pression ou forte masse volumique, un indicateur montre que les particules ne sont plus « ponctuelles » (taille visible, interactions) et que PV/(nT) s'écarte de R (modèle simple, signalé « illustration »).
 - **Défis « À essayer »** (questions du cours devenues défis, dans n'importe quel ordre, cochés tout seuls) : doubler T (en K !) à V constant → P double ; doubler V à T constante → P divisée par 2 ; doubler n → P double ; agrandir l'enceinte ; chauffer de 20 °C à 40 °C : P ne double pas (diagnostic : « la température doit être en kelvins : 293 K → 313 K ») ; trouver le volume molaire à 20 °C et 1 bar ; trouver le zéro absolu par extrapolation ; montgolfière : comparer la masse volumique de l'air froid et chaud.
-- **Questions** dans le panneau (QCM, valeur à calculer avec l'icône calculatrice, conversions bar → Pa, L → m³, °C → K) et bilan « ✍ Complète ton cours ».
+- **Questions** dans le panneau (QCM, valeur à calculer avec l'icône calculatrice, conversions bar → Pa, L → m³, °C → K).
 
 ## Vérifications propres
 

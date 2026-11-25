@@ -26,7 +26,7 @@ Lis-le en entier avant de commencer : garde tout ce qu'il fait (réglages, grill
 - **Graphique** : points expérimentaux N(t) ; courbe théorique N<sub>0</sub>e<sup>−λt</sup> affichable ; **activité** A = nombre de désintégrations par itération (histogramme) et λN affichables ; **outils de lecture** : t<sub>1/2</sub> (moitié de N<sub>0</sub> reportée sur la courbe), N<sub>0</sub>/2<sup>n</sup> après n demi-vies ; modélisation exponentielle (ajustement de λ par les moindres carrés sur ln N, affiché comme un tableur ou Regressi).
 - **Plusieurs tirages superposés** (option) : l'élève voit que chaque tirage est différent (aléatoire) mais que la moyenne suit la loi, d'autant mieux que N<sub>0</sub> est grand.
 - **Défis « À essayer »** (dans n'importe quel ordre, cochés tout seuls) : constater que le nombre de désintégrations par itération est proportionnel au nombre de noyaux restants (A = λN) ; lire t<sub>1/2</sub> et le comparer à ln 2 / λ ; constater que la demi-vie ne dépend pas de N<sub>0</sub> ; constater qu'on ne peut pas prévoir quel noyau se désintègre (deux tirages) ; montrer qu'avec N<sub>0</sub> grand l'écart à la loi diminue ; après 10 demi-vies, il ne reste presque rien.
-- **Questions** dans le panneau (QCM, valeur à lire) et bilan « ✍ Complète ton cours » : spontané, aléatoire, un noyau ne vieillit pas ; λ probabilité par unité de temps ; A = −dN/dt = λN ; N(t) = N<sub>0</sub>e<sup>−λt</sup> ; t<sub>1/2</sub> = ln 2 / λ.
+- **Questions** dans le panneau (QCM, valeur à lire).
 - Textes valables pour la Terminale spécialité et la STI2D (rien qui suppose l'un des deux cours) ; l'équation différentielle dN/dt + λN = 0 est dans une bulle ⓘ (utile en spécialité, sans être exigée en STI2D).
 
 ## Après la réécriture
