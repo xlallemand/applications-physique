@@ -140,7 +140,7 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 | `chapitre-16.md` | Transformations nucléaires | `transformations-nucleaires/` | | à faire | | |
 | `gaz-parfait.md` | Gaz parfait : PV = nRT | `gaz-parfait/` | 17 | à faire | | |
 | `chapitre-17.md` | Thermodynamique | `thermodynamique/` | | à faire | | |
-| `chapitre-18.md` | Équilibre chimique et piles | `equilibre-piles/` | | à faire | | **énoncé des exercices à remettre dans `Cours-TSpe`** |
+| `chapitre-18.md` | Équilibre chimique et piles | `equilibre-piles/` | | à faire | | |
 | `modele-oeil.md` | Modèle de l'œil | `modele-oeil/` | 19 | à faire | | sort le module 3 de `lentilles/` |
 | `chapitre-19.md` | Lunette astronomique | `lunette-astronomique/` | | à faire | | |
 | `chapitre-20.md` | Mouvements d'un fluide | `mecanique-fluides/` | | à faire | | |

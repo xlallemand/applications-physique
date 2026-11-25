@@ -28,4 +28,4 @@ Un fichier par chapitre (`chapitre-NN.md`, NN = numéro du dossier du cours dans
 | `gaz-parfait.md` | 17 |
 | `modele-oeil.md` | 19 |
 
-Chapitres déjà faits : 2 (Nomenclature, avec `chapitre-02.md`) et 5 (Cinématique, sans prompt). Il manque dans le dépôt des cours l'énoncé des exercices du chapitre 18 (`18- Equilibre chimique, pile/Chap18-Exercices_equilibre.pdf`, supprimé) et celui du chapitre 10 (seule la correction est présente) : les prompts disent quoi faire en leur absence.
+Chapitres déjà faits : 2 (Nomenclature, avec `chapitre-02.md`) et 5 (Cinématique, sans prompt). Il manque dans le dépôt des cours l'énoncé des exercices du chapitre 10 (seule la correction est présente) : le prompt dit quoi faire en son absence.

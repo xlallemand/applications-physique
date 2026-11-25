@@ -14,8 +14,8 @@ Lis d'abord `docs/prompts-tspe/00-commun.md` (sources, charte, structure, outils
 | Fichier | Contenu | À lire |
 |---|---|---|
 | `Chap18-Cours_equilibre_complete.pdf` (9 p.) | Cours tapé, complété à la main | Non : résumé ci-dessous. Pages 4 à 7 (expérience initiale, schéma de la pile, exemples 1 et 2 corrigés), 9 (capacité, solution) pour les figures et les solutions |
-| `Chap18-Exercices_equilibre.pdf` | **Énoncé des exercices : supprimé du dépôt par erreur, le professeur va le remettre** (même nom). S'il n'y est pas au début de la session, **arrête-toi avant le module d'exercices** et signale-le dans le compte rendu (ou, si le professeur l'a dit dans le message de la session, utilise la version de l'historique : `git -C /home/user/Cours-TSpe show 44e314f:"18- Equilibre chimique, pile/Chap18-Exercices_equilibre.pdf" > <scratchpad>/enonce18.pdf`) | Oui |
-| `Chap18-Exercices_equilibre_correction.pdf` (7 p.) | Corrections manuscrites des ex. 1 à 7 au moins (1 taux d'avancement final ; 2 exprimer un quotient de réaction ; 3 calculer une constante d'équilibre ; 4 avancement final à partir de K ; 6 prévoir le sens d'évolution ; 7 exprimer une constante d'équilibre…) | Oui |
+| `Chap18-Exercices_equilibre.pdf` (2 p.) | Énoncés des ex. 1 à 10 (1 taux d'avancement final ; 2 exprimer un quotient de réaction ; 3 calculer une constante d'équilibre ; 4 avancement final à partir de K ; 5, 6 et 8 prévoir le sens d'évolution ; 7 exprimer une constante d'équilibre (dismutation de l'eau de Javel) ; 9 durée de fonctionnement d'une pile diiode-zinc ; 10 pile cuivre-aluminium) | Oui |
+| `Chap18-Exercices_equilibre_correction.pdf` (7 p.) | Corrections manuscrites des ex. 1 à 10 | Oui |
 
 Le TP « pile » n'est pas repris.
 
@@ -67,7 +67,7 @@ Cours : rappel bref (lien facultatif `oxydoreduction-spe/`) ; couples à connaî
 
 ### Module 4 : Exercices
 
-Exercices de la feuille (énoncé : voir « Sources »), avec sa numérotation, guidés à partir des corrections.
+Ex. 1 à 10 de la feuille, avec sa numérotation, guidés à partir des corrections.
 
 ## Vérifications propres
 
