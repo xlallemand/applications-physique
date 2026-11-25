@@ -166,8 +166,8 @@
   const chemin = (pts, X, Y) => 'M' + pts.map(([t, v]) => `${r1(X(t))},${r1(Y(v))}`).join('L');
   const svgOuvrir = (W, H, aria, cls) => `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="mod-svg${cls ? ' ' + cls : ''}" role="img" aria-label="${echapper(aria || 'Graphique')}">`;
 
-  const TITRES = { modulant: 'Signal modulant u(t)', porteuse: 'Porteuse p(t)', am: 'Signal modulé s(t) : modulation d\'amplitude (AM)', fm: 'Signal modulé s(t) : modulation de fréquence (FM)' };
-  const TITRES_COURTS = { modulant: 'Modulant u(t)', porteuse: 'Porteuse p(t)', am: 'Modulé s(t) : AM', fm: 'Modulé s(t) : FM' };
+  const TITRES = { modulant: 'Signal modulant u(t)', porteuse: 'Porteuse p(t)', am: 'Signal modulé s(t) : modulation d\'amplitude (AM)', fm: 'Signal modulé s(t) : modulation de fréquence (FM)' };
+  const TITRES_COURTS = { modulant: 'Modulant u(t)', porteuse: 'Porteuse p(t)', am: 'Modulé s(t) : AM', fm: 'Modulé s(t) : FM' };
 
   // instants du premier maximum et du premier minimum du modulant (repères FM)
   function extremes(e) {
@@ -272,7 +272,7 @@
     return svgRaies({
       W, H: o.H || (etroit ? 230 : 250), fmax, pasF, etiqF: multiples(0, fmax, pasEt), amax: 1.4, pasA: .25, etiqA: [0, .5, 1], haut: 34,
       titreF: 'f (kHz)', titreA: 'Amplitude (V)', raies, cls: 'mod-svg-spectre',
-      aria: o.aria || `Spectre du signal modulé en AM : porteuse à ${fmt(e.F)} kHz, raies latérales de ${fmt(d.de)} à ${fmt(d.a)} kHz, bande occupée ${fmt(d.bande)} kHz`,
+      aria: o.aria || `Spectre du signal modulé en AM : porteuse à ${fmt(e.F)} kHz, raies latérales de ${fmt(d.de)} à ${fmt(d.a)} kHz, bande occupée ${fmt(d.bande)} kHz`,
       avant: g => {
         let s = `<defs><pattern id="${idH}" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="mod-hach" x1="0" y1="0" x2="0" y2="7"/></pattern></defs>`;
         // bande occupée (fond), zone de chevauchement hachurée
@@ -284,7 +284,7 @@
       apres: g => {
         let s = '';
         const yA = g.y0 - 16;
-        if (o.bande !== false && e.Um > 0) s += accolade(g.X(d.de), g.X(d.a), yA, `bande occupée : 2 f<tspan dy="3" font-size="0.75em">h</tspan><tspan dy="-3"> = ${fmt(d.bande)} kHz</tspan>`);
+        if (o.bande !== false && e.Um > 0) s += accolade(g.X(d.de), g.X(d.a), yA, `bande occupée : 2 f<tspan dy="3" font-size="0.75em">h</tspan><tspan dy="-3"> = ${fmt(d.bande)} kHz</tspan>`);
         // bandes latérales (sauf avec une deuxième station : la figure resterait chargée)
         if (o.laterales !== false && F2 == null && d.laterales.some(l => l.a > 1e-6) && g.X(e.F) - g.X(d.de) >= 28) {
           const yL = g.Y(.62);
@@ -324,14 +324,14 @@
       </div>
       <div class="mod-bloc mod-graphes"><div class="mod-g" data-g="modulant"></div><div class="mod-g" data-g="porteuse"></div>
         <div class="mod-cote"><div class="mod-g" data-g="m1"></div><div class="mod-g" data-g="m2"></div></div></div>
-      <div class="mod-alerte" hidden><b>Surmodulation (taux de modulation m &gt; 1, hors programme).</b> L'enveloppe du signal modulé ne suit plus le modulant : l'information est déformée.</div>
+      <div class="mod-alerte" hidden><b>Surmodulation (taux de modulation m &gt; 1, hors programme).</b> L'enveloppe du signal modulé ne suit plus le modulant : l'information est déformée.</div>
       <div class="mod-reglages">
         <div class="mod-forme" role="group" aria-label="Forme du signal modulant"><span class="mod-petit-t">Signal modulant</span>
           <button type="button" class="mod-pill" data-forme="sinus" aria-pressed="false">Sinusoïde</button>
           <button type="button" class="mod-pill" data-forme="son" aria-pressed="false">Son (3 harmoniques)</button></div>
         <label class="mod-reglage"><span class="mod-reglage-nom" data-n="fm"></span><input type="range" data-r="fm" min="0.5" max="1.5" step="0.1" aria-label="Fréquence du modulant f_m, en kHz"></label>
         <label class="mod-reglage"><span class="mod-reglage-nom" data-n="Um"></span><input type="range" data-r="Um" min="0" max="1.2" step="0.05" aria-label="Amplitude du modulant U_m, en volts">
-          <span class="mod-def-m"><b>Taux de modulation</b> (hors programme) : m = U<sub>m</sub> / U<sub>0</sub>, où U<sub>0</sub> = ${fmt(U0)} V est la tension continue ajoutée au modulant dans le modulateur. Il faut m ≤ 1, sinon il y a surmodulation.</span></label>
+          <span class="mod-def-m"><b>Taux de modulation</b> (hors programme) : m = U<sub>m</sub> / U<sub>0</sub>, où U<sub>0</sub> = ${fmt(U0)} V est la tension continue ajoutée au modulant dans le modulateur. Il faut m ≤ 1, sinon il y a surmodulation.</span></label>
         <label class="mod-reglage"><span class="mod-reglage-nom" data-n="F"></span><input type="range" data-r="F" min="10" max="30" step="1" aria-label="Fréquence de la porteuse F, en kHz"></label>
       </div>
       <div class="mod-bloc mod-spectre">
@@ -340,9 +340,9 @@
         <p class="mod-lecture"></p>
         <div class="mod-st2"><label class="mod-case"><input type="checkbox" data-c="station2"><span>Afficher une deuxième station (porteuse F<sub>2</sub>)</span></label>
           <label class="mod-reglage" data-ecart><span class="mod-reglage-nom" data-n="ecart"></span><input type="range" data-r="ecart" min="2" max="14" step="1" aria-label="Écart entre les porteuses, en kHz"></label></div>
-        <p class="mod-fm-note" hidden>En FM, le spectre est plus étendu et plus compliqué : on étudie ici celui de la modulation d'amplitude. Passe en AM pour le voir.</p>
+        <p class="mod-fm-note" hidden>En FM, le spectre est plus étendu et plus compliqué : on étudie ici celui de la modulation d'amplitude. Passe en AM pour le voir.</p>
       </div>
-      <div class="callout mod-ordres"><p><b>Ordres de grandeur réels.</b> Voix et musique : de 20 Hz à 20 kHz. Porteuses : vers 200 kHz pour les grandes ondes (AM), vers 100 MHz pour la radio FM. Ici, les fréquences sont réduites (f<sub>m</sub> ≈ 1 kHz, F ≈ 20 kHz) pour que l'on voie les oscillations de la porteuse.</p></div>`;
+      <div class="callout mod-ordres"><p><b>Ordres de grandeur réels.</b> Voix et musique : de 20 Hz à 20 kHz. Porteuses : vers 200 kHz pour les grandes ondes (AM), vers 100 MHz pour la radio FM. Ici, les fréquences sont réduites (f<sub>m</sub> ≈ 1 kHz, F ≈ 20 kHz) pour que l'on voie les oscillations de la porteuse.</p></div>`;
     zone.appendChild(d);
     const $ = s => d.querySelector(s);
     if (!opts.commandes) $('.mod-reglages').hidden = true;
@@ -386,19 +386,19 @@
       d.querySelectorAll('input[type="range"]').forEach(i => { i.value = e[i.dataset.r]; });
       $('[data-c="station2"]').checked = e.station2;
       $('[data-ecart]').hidden = !e.station2;
-      $('[data-n="fm"]').innerHTML = `Fréquence du modulant : <b>f<sub>m</sub> = ${fmt(e.fm, 1)} kHz</b>`;
+      $('[data-n="fm"]').innerHTML = `Fréquence du modulant : <b>f<sub>m</sub> = ${fmt(e.fm, 1)} kHz</b>`;
       const fm = e.mode === 'fm' || e.comparer, amv = e.mode === 'am' || e.comparer;
-      $('[data-n="Um"]').innerHTML = `Amplitude du modulant : <b>U<sub>m</sub> = ${fmt(e.Um, 2)} V</b>` +
+      $('[data-n="Um"]').innerHTML = `Amplitude du modulant : <b>U<sub>m</sub> = ${fmt(e.Um, 2)} V</b>` +
         (amv ? ` · taux de modulation <b>m = U<sub>m</sub> / U<sub>0</sub> = ${fmt(dd.m, 2)}</b>` : '') + (fm ? ` · excursion <b>ΔF = ${fmt(dd.dF, 1)} kHz</b>` : '');
       $('.mod-def-m').hidden = !amv;                 // définition du taux de modulation : en AM seulement
-      $('[data-n="F"]').innerHTML = `Fréquence de la porteuse : <b>F = ${fmt(e.F)} kHz</b> <span class="mod-ratio">(F / f<sub>m</sub> = ${fmt(+(e.F / e.fm).toFixed(1))})</span>`;
-      $('[data-n="ecart"]').innerHTML = `Écart entre les porteuses : <b>F<sub>2</sub> − F = ${fmt(e.ecart)} kHz</b>`;
+      $('[data-n="F"]').innerHTML = `Fréquence de la porteuse : <b>F = ${fmt(e.F)} kHz</b> <span class="mod-ratio">(F / f<sub>m</sub> = ${fmt(+(e.F / e.fm).toFixed(1))})</span>`;
+      $('[data-n="ecart"]').innerHTML = `Écart entre les porteuses : <b>F<sub>2</sub> − F = ${fmt(e.ecart)} kHz</b>`;
       $('.mod-alerte').hidden = !(dd.surmod && (e.mode === 'am' || e.comparer));
       const raies = e.forme === 'son' ? `F − 3f<sub>m</sub> … F + 3f<sub>m</sub>` : `F − f<sub>m</sub> = ${fmt(e.F - e.fm)} kHz et F + f<sub>m</sub> = ${fmt(e.F + e.fm)} kHz`;
-      let lec = `Porteuse à F = ${fmt(e.F)} kHz ; raies latérales : ${raies}. Plus haute fréquence du modulant : f<sub>h</sub> = ${fmt(dd.fh)} kHz. <b>Bande occupée = 2 f<sub>h</sub> = ${fmt(dd.bande)} kHz</b>, de ${fmt(dd.de)} à ${fmt(dd.a)} kHz.`;
-      if (e.Um === 0) lec = `Sans modulant, il ne reste que la raie de la porteuse, à F = ${fmt(e.F)} kHz : aucune information n'est transmise.`;
-      if (e.station2 && e.Um > 0) lec += e.ecart < dd.bande - 1e-9 ? ` <b>Les deux bandes se chevauchent (hachures) : brouillage.</b> Il faut un écart d'au moins ${fmt(dd.bande)} kHz.`
-        : ' Les deux bandes ne se chevauchent pas : pas de brouillage.';
+      let lec = `Porteuse à F = ${fmt(e.F)} kHz ; raies latérales : ${raies}. Plus haute fréquence du modulant : f<sub>h</sub> = ${fmt(dd.fh)} kHz. <b>Bande occupée = 2 f<sub>h</sub> = ${fmt(dd.bande)} kHz</b>, de ${fmt(dd.de)} à ${fmt(dd.a)} kHz.`;
+      if (e.Um === 0) lec = `Sans modulant, il ne reste que la raie de la porteuse, à F = ${fmt(e.F)} kHz : aucune information n'est transmise.`;
+      if (e.station2 && e.Um > 0) lec += e.ecart < dd.bande - 1e-9 ? ` <b>Les deux bandes se chevauchent (hachures) : brouillage.</b> Il faut un écart d'au moins ${fmt(dd.bande)} kHz.`
+        : ' Les deux bandes ne se chevauchent pas : pas de brouillage.';
       $('.mod-lecture').innerHTML = lec;
     }
     function changer(silencieux) {

@@ -416,7 +416,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -455,8 +455,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -468,7 +468,7 @@
       const q = qs[idx];
       window.SP.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -488,7 +488,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -503,10 +503,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -632,13 +632,13 @@
   const DOCS = {
     ex9: { raies: raiesDe([[0, 2], [50, 8], [100, 11], [200, 5], [250, 15], [300, 1], [400, 7]]),
       opts: { unite: 'V', amax: 16, pasA: 1, etiqA: [0, 1, 5, 10], fmax: 450, pasF: 25, etiqF: [50, 200, 400], titreF: 'f (Hz)', titreA: '<tspan>a</tspan><tspan dy="3.5" font-size="0.75em">n</tspan><tspan dy="-3.5"> (V)</tspan>', H: 250,
-        aria: 'Spectre de u(t) : raies à 0, 50, 100, 200, 250, 300 et 400 Hz' } },
+        aria: 'Spectre de u(t) : raies à 0, 50, 100, 200, 250, 300 et 400 Hz' } },
     ex6Signal: { spec: SPEC.ex6, opts: { tmax: 10.5, pasT: .5, etiqT: [2.5, 5, 7.5, 10], ymin: -1.75, ymax: 1.75, pasY: .25, etiqY: [-1.5, -1, -.5, 0, .5, 1, 1.5], nom: 'u', unite: 'V', titreY: 'u (en V)', aria: 'Signal u(t) de l\'exercice 6, de 0 à 10 ms' } },
     ex6: { raies: raiesDe([[200, 500], [400, 750], [1000, 1000]]),
-      opts: { unite: 'mV', amax: 1050, pasA: 100, etiqA: [0, 200, 400, 600, 800, 1000], fmax: 1350, pasF: 50, etiqF: [250, 500, 750, 1000, 1250], aria: 'Spectre de l\'exercice 6 : raies à 200, 400 et 1 000 Hz' } },
+      opts: { unite: 'mV', amax: 1050, pasA: 100, etiqA: [0, 200, 400, 600, 800, 1000], fmax: 1350, pasF: 50, etiqF: [250, 500, 750, 1000, 1250], aria: 'Spectre de l\'exercice 6 : raies à 200, 400 et 1 000 Hz' } },
     ex11: { raies: raiesDe([[100, .9], [300, .4], [500, .6], [700, .2], [900, .75], [1100, .45], [1300, .1]]),
       opts: { unite: 'V', amax: 1.05, pasA: .1, etiqA: [0, .1, .5, 1], fmax: 1500, pasF: 100, etiqF: [100, 500, 1000], titreA: 'a (en V)', titreF: 'f (en Hz)', H: 230,
-        aria: 'Spectre de l\'exercice 11 : raies à 100, 300, 500, 700, 900, 1 100 et 1 300 Hz' } },
+        aria: 'Spectre de l\'exercice 11 : raies à 100, 300, 500, 700, 900, 1 100 et 1 300 Hz' } },
     ex12Guitare: { raies: raiesDe([[440, 120], [880, 115], [1760, 115], [2200, 25], [3080, 30]]),
       opts: { unite: 'mV', uniteF: 'kHz', amax: 135, pasA: 25, fmax: 4300, pasF: 250, etiqF: [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000],
         titreA: '<tspan>S</tspan><tspan dy="3.5" font-size="0.75em">amplitude</tspan><tspan dy="-3.5"> (en mV)</tspan>', titreF: 'Fréquence (en kHz)', aria: 'Spectre de la guitare folk' } },
@@ -650,7 +650,7 @@
       opts: { unite: 'V', amax: 4.5, pasA: .5, etiqA: [0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4], fmax: 1400, pasF: 50, etiqF: [0, 250, 500, 750, 1000, 1250], titreA: 'Amplitude (V)', titreF: 'Fréquence (Hz)', aria: 'Spectre du son émis par le moteur de la Porsche 911' } },
     ex14: { raies: raiesDe([[50, 100, '100 %'], [150, 86, '86 %'], [250, 81, '81 %'], [350, 72, '72 %']]),
       opts: { unite: '%', amax: 110, pasA: 10, etiqA: [0, 20, 40, 60, 80, 100], fmax: 420, pasF: 50, etiqF: [50, 150, 250, 350], titreA: '(%)', titreF: 'f (Hz)', etiquettes: true,
-        aria: 'Spectre d\'amplitude du courant : raies à 50, 150, 250 et 350 Hz' } },
+        aria: 'Spectre d\'amplitude du courant : raies à 50, 150, 250 et 350 Hz' } },
   };
 
   /* ============================================================
@@ -693,7 +693,7 @@
     const sp = o.sp || spectreAuHasard(), mode = o.mode || 'harmonique';
     const U = sp.unite, nomF = n => `f<sub>${n}</sub>`, nomA = n => `a<sub>${n}</sub>`;
     const solution = o.solution || (mode === 'fondamental'
-      ? `<p>Le fondamental est la première raie après 0 Hz : ${nomF(1)} = ${fmt(sp.f1)} Hz, ${nomA(1)} = ${fmt(sp.a[0])} ${U}.${sp.a0 ? ` La raie à 0 Hz (${fmt(sp.a0)} ${U}) est la composante continue a<sub>0</sub>.` : ''}</p>`
+      ? `<p>Le fondamental est la première raie après 0 Hz : ${nomF(1)} = ${fmt(sp.f1)} Hz, ${nomA(1)} = ${fmt(sp.a[0])} ${U}.${sp.a0 ? ` La raie à 0 Hz (${fmt(sp.a0)} ${U}) est la composante continue a<sub>0</sub>.` : ''}</p>`
       : `<p>Le fondamental est à ${nomF(1)} = ${fmt(sp.f1)} Hz. Le rang d'une raie est n = f<sub>n</sub> / ${nomF(1)}.</p>`);
     return {
       type: 'perso', q: o.q || (mode === 'fondamental'
@@ -710,7 +710,7 @@
         function dessiner() {
           W = Math.min(640, Math.round(zf.clientWidth || zone.clientWidth || 600));
           const H = W < 480 ? 190 : 205, g = F().geomSpectreDe(sp.raies, Object.assign({ W, H }, sp.opts));
-          let svg = F().svgSpectre(sp.raies, Object.assign({ W, H, aria: 'Spectre : touche une raie pour la choisir' }, sp.opts));
+          let svg = F().svgSpectre(sp.raies, Object.assign({ W, H, aria: 'Spectre : touche une raie pour la choisir' }, sp.opts));
           const esp = (g.X(sp.f1) - g.X(0)) * .9, w = Math.max(26, Math.min(esp, 60));
           const sous = choix != null ? `<line class="sp-raie-choisie" x1="${g.X(raie().f)}" y1="${g.y1}" x2="${g.X(raie().f)}" y2="${g.Y(raie().a)}"/>` : '';
           const cols = sp.raies.map((r, i) => `<rect data-raie="${i}" x="${g.X(r.f) - (r.f ? w / 2 : Math.min(w / 2, 22))}" y="${g.y0 - 10}" width="${r.f ? w : Math.min(w / 2, 22) + w / 2}" height="${g.y1 - g.y0 + 26}" fill="transparent"><title>Raie à choisir</title></rect>`).join('');
@@ -720,7 +720,7 @@
           const r = e.target.closest('[data-raie]');
           if (!r || phase > 1 || api.fini()) return;
           choix = +r.dataset.raie;
-          txt.innerHTML = `Raie choisie : la <b>${choix + 1}<sup>e</sup></b> en partant de la gauche (surlignée). Lis sa fréquence et son amplitude.`;
+          txt.innerHTML = `Raie choisie : la <b>${choix + 1}<sup>e</sup></b> en partant de la gauche (surlignée). Lis sa fréquence et son amplitude.`;
           api.effacer();
           dessiner();
         });
@@ -730,7 +730,7 @@
         const v = el('div', 'ph-valeur');
         v.innerHTML = '<span class="ph-lab">f =</span>';
         const cf = champ({ signe: false, aria: 'Fréquence de la raie, en hertz' }), ca = champ({ signe: false, aria: `Amplitude de la raie, en ${U}` });
-        v.appendChild(cf.el); v.appendChild(el('span', 'ph-unite', 'Hz ;')); v.appendChild(el('span', 'ph-lab', 'a =')); v.appendChild(ca.el); v.appendChild(el('span', 'ph-unite', U));
+        v.appendChild(cf.el); v.appendChild(el('span', 'ph-unite', 'Hz ;')); v.appendChild(el('span', 'ph-lab', 'a =')); v.appendChild(ca.el); v.appendChild(el('span', 'ph-unite', U));
         d.appendChild(v);
         const bVal = boutonValider(d);
         [cf, ca].forEach(c => { c.input.addEventListener('input', () => api.effacer()); c.input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider1(); } }); });
@@ -741,11 +741,11 @@
           const r = raie();
           if (mode === 'fondamental' && r.n !== 1) {
             api.erreur(r.n === 0 ? 'La raie à 0 Hz est la <b>composante continue</b> a<sub>0</sub>, pas le fondamental. Le fondamental est la première raie <b>après</b> 0 Hz.'
-              : 'Le fondamental est la raie de <b>plus basse fréquence</b> (la première après 0 Hz) : prends une raie plus à gauche.');
+              : 'Le fondamental est la raie de <b>plus basse fréquence</b> (la première après 0 Hz) : prends une raie plus à gauche.');
             return;
           }
           if (mode === 'harmonique' && r.n < 2) {
-            api.erreur(r.n === 0 ? 'La raie à 0 Hz est la <b>composante continue</b>, pas un harmonique.' : 'Cette raie est le <b>fondamental</b> (rang 1) : choisis une raie plus à droite.');
+            api.erreur(r.n === 0 ? 'La raie à 0 Hz est la <b>composante continue</b>, pas un harmonique.' : 'Cette raie est le <b>fondamental</b> (rang 1) : choisis une raie plus à droite.');
             return;
           }
           const vf = lire(cf.input.value), va = lire(ca.input.value);
@@ -754,9 +754,9 @@
           cf.el.classList.toggle('ko', !okF); ca.el.classList.toggle('ko', !okA);
           if (!okF || !okA) {
             const msg = [];
-            if (!okF) msg.push(proche(vf, r.a, .01) && !proche(r.a, r.f) ? 'Tu as écrit l\'amplitude à la place de la fréquence : la fréquence se lit sur l\'axe <b>horizontal</b>.'
-              : `Fréquence : descends de la raie jusqu'à l'axe horizontal. Une ligne verticale du quadrillage tous les ${fmt(sp.gF)} Hz.`);
-            if (!okA) msg.push(`Amplitude : va du haut de la raie jusqu'à l'axe vertical. Une ligne horizontale du quadrillage tous les ${fmt(sp.gA)} ${U}.`);
+            if (!okF) msg.push(proche(vf, r.a, .01) && !proche(r.a, r.f) ? 'Tu as écrit l\'amplitude à la place de la fréquence : la fréquence se lit sur l\'axe <b>horizontal</b>.'
+              : `Fréquence : descends de la raie jusqu'à l'axe horizontal. Une ligne verticale du quadrillage tous les ${fmt(sp.gF)} Hz.`);
+            if (!okA) msg.push(`Amplitude : va du haut de la raie jusqu'à l'axe vertical. Une ligne horizontale du quadrillage tous les ${fmt(sp.gA)} ${U}.`);
             api.erreur(msg.join('<br>'));
             secouer(v);
             return;
@@ -766,7 +766,7 @@
           phase = 2; api.effacer();
           // phase 2 : le rang de l'harmonique
           const v2 = el('div', 'ph-valeur');
-          v2.innerHTML = `<p class="ph-partie-q" style="width:100%;margin:12px 0 4px !important">Quel est le rang n de cet harmonique ? (Lis d'abord la fréquence ${nomF(1)} du fondamental.)</p><span class="ph-lab">n =</span>`;
+          v2.innerHTML = `<p class="ph-partie-q" style="width:100%;margin:12px 0 4px !important">Quel est le rang n de cet harmonique ? (Lis d'abord la fréquence ${nomF(1)} du fondamental.)</p><span class="ph-lab">n =</span>`;
           cn = champ({ signe: false, aria: 'Rang de l\'harmonique' });
           v2.appendChild(cn.el);
           d.appendChild(v2);
@@ -782,9 +782,9 @@
           if (isNaN(vn)) { secouer(cn.el); api.message('Écris le rang (un nombre entier).'); return; }
           if (vn === r.n) { cn.desactiver(true); bVal2.fermer(); phase = 3; api.reussi(); return; }
           const k = sp.raies.filter(x => x.f && x.f <= r.f).length;
-          api.erreur(vn === k && k !== r.n ? `Le rang n'est pas la position de la raie sur le dessin (des harmoniques peuvent manquer) : le rang est f<sub>n</sub> / ${nomF(1)}.`
-            : vn === r.n - 1 ? `Le fondamental est le rang 1 (la raie à 0 Hz ne compte pas) : le rang est f<sub>n</sub> / ${nomF(1)}.`
-            : `Le rang est f<sub>n</sub> / ${nomF(1)} : divise la fréquence de la raie par celle du fondamental.`);
+          api.erreur(vn === k && k !== r.n ? `Le rang n'est pas la position de la raie sur le dessin (des harmoniques peuvent manquer) : le rang est f<sub>n</sub> / ${nomF(1)}.`
+            : vn === r.n - 1 ? `Le fondamental est le rang 1 (la raie à 0 Hz ne compte pas) : le rang est f<sub>n</sub> / ${nomF(1)}.`
+            : `Le rang est f<sub>n</sub> / ${nomF(1)} : divise la fréquence de la raie par celle du fondamental.`);
           secouer(cn.el);
         }
         bVal.onclick = valider1;
@@ -795,7 +795,7 @@
               if (choix == null || (mode === 'fondamental' ? raie().n !== 1 : raie().n < 2)) choix = sp.raies.findIndex(r => (mode === 'fondamental' ? r.n === 1 : r.n >= 2));
               dessiner();
               const r = raie();
-              txt.innerHTML = `Raie choisie : ${r.n === 1 ? 'le fondamental' : `l'harmonique de rang ${r.n}`}.`;
+              txt.innerHTML = `Raie choisie : ${r.n === 1 ? 'le fondamental' : `l'harmonique de rang ${r.n}`}.`;
               cf.input.value = fmt(r.f); ca.input.value = fmt(r.a);
               cf.el.classList.remove('ko'); ca.el.classList.remove('ko');
               cf.desactiver(true); ca.desactiver(true); bVal.fermer();
@@ -840,7 +840,7 @@
           f1: spec.f1, a0: spec.a0, a: spec.a, tmax: o.tmax, pasT: o.pasT, ymin: o.ymin, ymax: o.ymax, pasY: o.pasY, nom: o.nom || 'u', unite: o.unite || 'V', titreY: o.titreY });
         sim.surChange(() => api.effacer());
         const v = el('div', 'sp-mesure-n');
-        v.innerHTML = '<span class="ph-lab">Nombre de périodes entre les curseurs : n =</span>';
+        v.innerHTML = '<span class="ph-lab">Nombre de périodes entre les curseurs : n =</span>';
         const cn = champ({ signe: false, aria: 'Nombre de périodes encadrées' });
         v.appendChild(cn.el);
         d.appendChild(v);
@@ -855,14 +855,14 @@
           const tmaxAxe = F().axesSignal(spec, { tmax: o.tmax }).tmax, tol = Math.max(2 * F().pasJoli(tmaxAxe, 100), .015 * n * T);
           const k = dt / T;
           if (Math.abs(dt - n * T) <= tol) {
-            if (n < minN) { api.erreur(`C'est juste, mais encadre au moins <b>${minN} périodes</b> : la mesure est plus précise.`); return; }
+            if (n < minN) { api.erreur(`C'est juste, mais encadre au moins <b>${minN} périodes</b> : la mesure est plus précise.`); return; }
             res.dt = dt; res.n = n;
             cn.desactiver(true); bVal.fermer(); api.reussi();
             return;
           }
           api.erreur(Math.abs(k - Math.round(k)) * T <= tol && Math.round(k) >= 1
             ? `Tes curseurs encadrent ${Math.round(k)} période${Math.round(k) > 1 ? 's' : ''}, pas ${n}. Compte les motifs qui se répètent entre les curseurs.`
-            : 'Tes curseurs n\'encadrent pas un nombre entier de périodes : place-les sur deux points <b>identiques</b> du signal (deux sommets les plus hauts, par exemple).');
+            : 'Tes curseurs n\'encadrent pas un nombre entier de périodes : place-les sur deux points <b>identiques</b> du signal (deux sommets les plus hauts, par exemple).');
           secouer(v);
         }
         bVal.onclick = valider;
@@ -913,23 +913,23 @@
      ============================================================ */
   const PLAN = [
     { n: 1, titre: 'Analyse de Fourier', desc: 'Somme de sinusoïdes, composante continue a<sub>0</sub>, pulsation ω = 2πf, harmoniques f<sub>n</sub> = n × f<sub>1</sub>', fiche: 'fiche_1',
-      parties: [{ nom: 'Analyse de Fourier', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Simulateur : synthèse de Fourier' } }] },
+      parties: [{ nom: 'Analyse de Fourier', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Simulateur : synthèse de Fourier' } }] },
     { n: 2, titre: 'Le spectre', desc: 'Raie à 0 Hz, fondamental, harmoniques, amplitudes et rang d\'une raie', fiche: 'fiche_2',
       // deux sous-modules de cours, puis une seule série de questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Lire un spectre', slug: 'lire', cours: 'module_2a_cours', noms: { cours: 'Cours : lire un spectre' } },
-        { nom: 'Rang d\'un harmonique', slug: 'rang', cours: 'module_2b_cours', noms: { cours: 'Cours : rang d\'un harmonique' } },
+        { nom: 'Lire un spectre', slug: 'lire', cours: 'module_2a_cours', noms: { cours: 'Cours : lire un spectre' } },
+        { nom: 'Rang d\'un harmonique', slug: 'rang', cours: 'module_2b_cours', noms: { cours: 'Cours : rang d\'un harmonique' } },
         { nom: 'Le spectre', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Exploiter les graphiques', desc: 'Période mesurée sur plusieurs périodes, f = 1 / T, intervalle de fréquences, bande passante', fiche: 'fiche_3',
       sousModules: true,
       parties: [
-        { nom: 'Fréquence d\'un signal', slug: 'frequence', cours: 'module_3a_cours', noms: { cours: 'Cours : fréquence d\'un signal' } },
-        { nom: 'Bande passante', slug: 'bande', cours: 'module_3b_cours', noms: { cours: 'Cours : bande passante' } },
+        { nom: 'Fréquence d\'un signal', slug: 'frequence', cours: 'module_3a_cours', noms: { cours: 'Cours : fréquence d\'un signal' } },
+        { nom: 'Bande passante', slug: 'bande', cours: 'module_3b_cours', noms: { cours: 'Cours : bande passante' } },
         { nom: 'Exploiter les graphiques', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Exercices', desc: 'Exercices 9, 6, 11, 12, 13 et 14 du manuel, guidés pas à pas', exercices: 'module_4', exNom: 'Exercices 6 à 14', nbEx: 6 },
   ];
-  window.SOM.init({ nom: 'Chapitre 17 : Spectre d\'un signal périodique', id: 'spectre-signal', cleEx: 'spectre-signal-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 17 : Spectre d\'un signal périodique', id: 'spectre-signal', cleEx: 'spectre-signal-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

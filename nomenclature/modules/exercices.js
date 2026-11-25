@@ -39,11 +39,11 @@
     const md = op.condenser ? O.condenser(m, op.condenser).mol : m;
     const d = op.condenser ? O.dessinHTML(md, { ecriture: ec, sansAide: true }) : O.dessinHTML(m, { ecriture: ec, couleurs: r.couleurs, numeros: r.numeros, entourer: op.groupes === false ? null : ent(gs) });
     const leg = op.groupes === false || !gs.length ? '' : O.legendeHTML(gs);
-    const reg = r.variantes && r.variantes.length ? `<p class="orga-note">On regroupe les méthyl, même si l'un est sur le N et l'autre sur un C : ${O.nomHTML(r.parties)} ; on accepte aussi ${r.variantes[0]}.</p>` : '';
+    const reg = r.variantes && r.variantes.length ? `<p class="orga-note">On regroupe les méthyl, même si l'un est sur le N et l'autre sur un C : ${O.nomHTML(r.parties)} ; on accepte aussi ${r.variantes[0]}.</p>` : '';
     return `<div class="nom-fig">${d}</div>${leg}<p class="nom-mol-n">${r.horsProgramme ? '' : O.nomHTML(r.parties)}</p>${reg}`;
   }
   // le groupe d'une molécule à un groupe : entourer, puis nommer le groupe et la famille (ex. 4)
-  const groupe = (s, ec) => [O.partieEntourer(mol(s), { ecriture: ec, q: 'Ex. 4 : entoure le groupe caractéristique, puis valide.' })].concat(O.partiesNommerGroupes(mol(s)));
+  const groupe = (s, ec) => [O.partieEntourer(mol(s), { ecriture: ec, q: 'Ex. 4 : entoure le groupe caractéristique, puis valide.' })].concat(O.partiesNommerGroupes(mol(s)));
 
   /* ---------- Ex. 2 (+ 4) : topologique → semi-développée, puis le groupe ---------- */
   const EX2 = [['a', 'CC(C)C=CC'], ['b', 'CC(C)(O)C(C)CC'], ['c', 'CCC(C)CC=O'], ['d', 'CCC(CC)C(C)C(=O)C(C)C'], ['e', 'CCCC(CC)C(=O)O'],
@@ -86,11 +86,11 @@
     const m = mol(s), r = O.nommer(m);
     const donne = donnee === 'nom' ? `<p class="nom-mol-n"><b>${nomFeuille || r.nom}</b></p>` : dessin(s, { ecriture: donnee, label: CASES[donnee] + ' donnée' });
     const etapes = [];
-    if (donnee !== 'semi') etapes.push(O.partieDessin(m, { ecriture: 'semi', q: 'Formule semi-développée :' }));
-    if (donnee !== 'topo') etapes.push(O.partieDessin(m, { ecriture: 'topo', q: 'Formule topologique :' }));
-    if (donnee !== 'nom') etapes.push(partieNom(m, { ecriture: donnee, q: 'Nom :' }));
-    return enchainer(`<p><b>Ligne ${n}</b> : ${CASES[donnee]} donnée.</p>${donne}`, etapes,
-      `<div class="nom-mols">${O.dessinHTML(m, { ecriture: 'semi', couleurs: r.couleurs, numeros: r.numeros })}${O.dessinHTML(m, { ecriture: 'topo', couleurs: r.couleurs, numeros: r.numeros })}</div><p class="nom-mol-n">${O.nomHTML(r.parties)}</p>${r.variantes.length ? `<p class="orga-note">On regroupe les deux méthyl (l'un sur le N, l'autre sur le C n° 4) : N,4-diméthyl ; le nom de la feuille, ${r.variantes[0]}, est accepté aussi.</p>` : ''}`);
+    if (donnee !== 'semi') etapes.push(O.partieDessin(m, { ecriture: 'semi', q: 'Formule semi-développée :' }));
+    if (donnee !== 'topo') etapes.push(O.partieDessin(m, { ecriture: 'topo', q: 'Formule topologique :' }));
+    if (donnee !== 'nom') etapes.push(partieNom(m, { ecriture: donnee, q: 'Nom :' }));
+    return enchainer(`<p><b>Ligne ${n}</b> : ${CASES[donnee]} donnée.</p>${donne}`, etapes,
+      `<div class="nom-mols">${O.dessinHTML(m, { ecriture: 'semi', couleurs: r.couleurs, numeros: r.numeros })}${O.dessinHTML(m, { ecriture: 'topo', couleurs: r.couleurs, numeros: r.numeros })}</div><p class="nom-mol-n">${O.nomHTML(r.parties)}</p>${r.variantes.length ? `<p class="orga-note">On regroupe les deux méthyl (l'un sur le N, l'autre sur le C n° 4) : N,4-diméthyl ; le nom de la feuille, ${r.variantes[0]}, est accepté aussi.</p>` : ''}`);
   }
   const ex9 = (de, a) => () => EX9.slice(de - 1, a).map(ligne9);
 
@@ -100,29 +100,29 @@
 
   const CTX = (titre, txt) => `<p class="er-contexte"><b>${titre}</b></p><p class="er-contexte">${txt}</p>`;
   const EXERCICES = [
-    { id: '2', num: '2', groupe: 'ecritures', titre: 'Exercices 2 et 4 : de la topologique à la semi-développée', desc: '9 molécules : formule semi-développée, puis le groupe caractéristique (ex. 4)',
-      contexte: CTX('Exercice 2 : passer d\'une formule topologique à une formule semi-développée.', 'Pour chacune des molécules suivantes, écrire la formule semi-développée.') + CTX('Exercice 4 : reconnaître un groupe caractéristique.', 'Pour chaque molécule, entourer et nommer les groupes caractéristiques. Associer à chaque groupe caractéristique la classe fonctionnelle correspondante.'),
+    { id: '2', num: '2', groupe: 'ecritures', titre: 'Exercices 2 et 4 : de la topologique à la semi-développée', desc: '9 molécules : formule semi-développée, puis le groupe caractéristique (ex. 4)',
+      contexte: CTX('Exercice 2 : passer d\'une formule topologique à une formule semi-développée.', 'Pour chacune des molécules suivantes, écrire la formule semi-développée.') + CTX('Exercice 4 : reconnaître un groupe caractéristique.', 'Pour chaque molécule, entourer et nommer les groupes caractéristiques. Associer à chaque groupe caractéristique la classe fonctionnelle correspondante.'),
       parties: ex2 },
-    { id: '3', num: '3', groupe: 'ecritures', titre: 'Exercices 3 et 4 : de la semi-développée à la topologique', desc: '8 molécules : formule topologique, puis le groupe caractéristique (ex. 4)',
-      contexte: CTX('Exercice 3 : passer d\'une formule semi-développée à une formule topologique.', 'Pour chacune des molécules suivantes, écrire la formule topologique. C₂H₅ et (CH₃)₂ sont des écritures abrégées : touche ⓘ sous la formule.') + CTX('Exercice 4 : reconnaître un groupe caractéristique.', 'Entourer et nommer les groupes caractéristiques ; associer la classe fonctionnelle.'),
+    { id: '3', num: '3', groupe: 'ecritures', titre: 'Exercices 3 et 4 : de la semi-développée à la topologique', desc: '8 molécules : formule topologique, puis le groupe caractéristique (ex. 4)',
+      contexte: CTX('Exercice 3 : passer d\'une formule semi-développée à une formule topologique.', 'Pour chacune des molécules suivantes, écrire la formule topologique. C₂H₅ et (CH₃)₂ sont des écritures abrégées : touche ⓘ sous la formule.') + CTX('Exercice 4 : reconnaître un groupe caractéristique.', 'Entourer et nommer les groupes caractéristiques ; associer la classe fonctionnelle.'),
       parties: ex3 },
-    { id: '5', num: '5', groupe: 'groupes', titre: 'Exercice 5 : reconnaître un groupe caractéristique', desc: 'Glycine, sérine, asparagine, phéromone, arôme de cannelle : tous les groupes',
-      contexte: CTX('Exercice 5 : reconnaître un groupe caractéristique.', 'Pour chacune des molécules suivantes, entourer et nommer les groupes caractéristiques. Associer à chaque groupe caractéristique la classe fonctionnelle correspondante.'),
+    { id: '5', num: '5', groupe: 'groupes', titre: 'Exercice 5 : reconnaître un groupe caractéristique', desc: 'Glycine, sérine, asparagine, phéromone, arôme de cannelle : tous les groupes',
+      contexte: CTX('Exercice 5 : reconnaître un groupe caractéristique.', 'Pour chacune des molécules suivantes, entourer et nommer les groupes caractéristiques. Associer à chaque groupe caractéristique la classe fonctionnelle correspondante.'),
       parties: ex5 },
-    { id: '6', num: '6', groupe: 'noms', titre: 'Exercice 6 : écrire une formule semi-développée à partir d\'un nom', desc: '10 noms : dessiner la formule semi-développée',
-      contexte: CTX('Exercice 6 : écrire une formule semi-développée à partir d\'un nom.', 'Écrire les formules semi-développées des molécules suivantes. Le nom de ce que tu dessines s\'affiche en direct.'),
+    { id: '6', num: '6', groupe: 'noms', titre: 'Exercice 6 : écrire une formule semi-développée à partir d\'un nom', desc: '10 noms : dessiner la formule semi-développée',
+      contexte: CTX('Exercice 6 : écrire une formule semi-développée à partir d\'un nom.', 'Écrire les formules semi-développées des molécules suivantes. Le nom de ce que tu dessines s\'affiche en direct.'),
       parties: duNom(EX6, 'semi') },
-    { id: '7', num: '7', groupe: 'noms', titre: 'Exercice 7 : écrire une formule topologique à partir d\'un nom', desc: '8 noms : dessiner la formule topologique',
-      contexte: CTX('Exercice 7 : écrire une formule topologique à partir d\'un nom.', 'Écrire les formules topologiques des molécules suivantes.'),
+    { id: '7', num: '7', groupe: 'noms', titre: 'Exercice 7 : écrire une formule topologique à partir d\'un nom', desc: '8 noms : dessiner la formule topologique',
+      contexte: CTX('Exercice 7 : écrire une formule topologique à partir d\'un nom.', 'Écrire les formules topologiques des molécules suivantes.'),
       parties: duNom(EX7, 'topo') },
-    { id: '9a', num: '9', groupe: 'noms', titre: 'Exercice 9 : compléter le tableau (lignes 1 à 7)', desc: 'Pour chaque ligne, les deux cases vides : semi-développée, topologique ou nom',
-      contexte: CTX('Exercice 9 : compléter les tableaux suivants (lignes 1 à 7).', 'Chaque ligne donne une case : formule semi-développée, formule topologique ou nom. Complète les deux autres.'), parties: ex9(1, 7) },
-    { id: '9b', num: '9', groupe: 'noms', titre: 'Exercice 9 : compléter le tableau (lignes 8 à 15)', desc: 'Pour chaque ligne, les deux cases vides',
-      contexte: CTX('Exercice 9 : compléter les tableaux suivants (lignes 8 à 15).', 'Chaque ligne donne une case : complète les deux autres.'), parties: ex9(8, 15) },
-    { id: '9c', num: '9', groupe: 'noms', titre: 'Exercice 9 : compléter le tableau (lignes 16 à 18)', desc: 'Pour chaque ligne, les deux cases vides',
-      contexte: CTX('Exercice 9 : compléter les tableaux suivants (lignes 16 à 18).', 'Chaque ligne donne une case : complète les deux autres.'), parties: ex9(16, 18) },
-    { id: '10', num: '10', groupe: 'noms', titre: 'Exercice 10 : alcanes cycliques', desc: 'Nommer quatre alcanes cycliques',
-      contexte: CTX('Exercice 10 : alcanes cycliques.', 'Nommer les molécules suivantes.'), parties: ex10 },
+    { id: '9a', num: '9', groupe: 'noms', titre: 'Exercice 9 : compléter le tableau (lignes 1 à 7)', desc: 'Pour chaque ligne, les deux cases vides : semi-développée, topologique ou nom',
+      contexte: CTX('Exercice 9 : compléter les tableaux suivants (lignes 1 à 7).', 'Chaque ligne donne une case : formule semi-développée, formule topologique ou nom. Complète les deux autres.'), parties: ex9(1, 7) },
+    { id: '9b', num: '9', groupe: 'noms', titre: 'Exercice 9 : compléter le tableau (lignes 8 à 15)', desc: 'Pour chaque ligne, les deux cases vides',
+      contexte: CTX('Exercice 9 : compléter les tableaux suivants (lignes 8 à 15).', 'Chaque ligne donne une case : complète les deux autres.'), parties: ex9(8, 15) },
+    { id: '9c', num: '9', groupe: 'noms', titre: 'Exercice 9 : compléter le tableau (lignes 16 à 18)', desc: 'Pour chaque ligne, les deux cases vides',
+      contexte: CTX('Exercice 9 : compléter les tableaux suivants (lignes 16 à 18).', 'Chaque ligne donne une case : complète les deux autres.'), parties: ex9(16, 18) },
+    { id: '10', num: '10', groupe: 'noms', titre: 'Exercice 10 : alcanes cycliques', desc: 'Nommer quatre alcanes cycliques',
+      contexte: CTX('Exercice 10 : alcanes cycliques.', 'Nommer les molécules suivantes.'), parties: ex10 },
   ];
   const GROUPES_EX = [
     { id: 'ecritures', titre: 'Changer d\'écriture et reconnaître le groupe' },

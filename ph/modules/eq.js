@@ -165,7 +165,7 @@
         <div class="eq-pal"></div>
         <div class="eq-ed-actions">
           <button type="button" class="btn-primary eq-verif">✓ Vérifier l'étape</button>
-          ${this.cfg.aides ? '<button type="button" class="btn-small eq-aide">Un coup de pouce ?</button>' : ''}
+          ${this.cfg.aides ? '<button type="button" class="btn-small eq-aide">Un coup de pouce ?</button>' : ''}
         </div>
         <div class="eq-retour"></div>
       </div>
@@ -492,10 +492,10 @@
       this.etat[cote] = cloner(m.f[0].x);
     } else if (contientFn(m, inv) && (!this.cfg.cible || contientId(m, this.cfg.cible))) {
       let pourquoi;
-      if (m.neg && m.f.length === 1) pourquoi = `il y a un signe ${MOINS} devant ${nomInv} : enlève-le d'abord avec l'outil ×(−1), sur les deux membres.`;
-      else if (m.f.length > 1) pourquoi = `${nomInv} est multiplié par autre chose : fais d'abord passer les autres facteurs de l'autre côté.`;
-      else pourquoi = `${nomInv} est dans une fraction : fais d'abord passer le dénominateur de l'autre côté.`;
-      this.message(`<b class="er-ko">Pas encore :</b> ${nomFn} n'annule ${nomInv} que s'il est <b>seul</b> dans son membre. Ici, ${pourquoi}`, 'ko');
+      if (m.neg && m.f.length === 1) pourquoi = `il y a un signe ${MOINS} devant ${nomInv} : enlève-le d'abord avec l'outil ×(−1), sur les deux membres.`;
+      else if (m.f.length > 1) pourquoi = `${nomInv} est multiplié par autre chose : fais d'abord passer les autres facteurs de l'autre côté.`;
+      else pourquoi = `${nomInv} est dans une fraction : fais d'abord passer le dénominateur de l'autre côté.`;
+      this.message(`<b class="er-ko">Pas encore :</b> ${nomFn} n'annule ${nomInv} que s'il est <b>seul</b> dans son membre. Ici, ${pourquoi}`, 'ko');
       return;
     } else {
       this.etat[cote] = P([FN(fn, m)]);
@@ -578,7 +578,7 @@
     // rien n'a changé depuis la dernière étape validée
     const prec = this.historique.length ? this.historique[this.historique.length - 1] : { L: this.cfg.gauche(), R: this.cfg.droite() };
     if (JSON.stringify(prec) === JSON.stringify(this.etat)) {
-      this.message('Rien n\'a changé depuis la dernière étape : fais d\'abord une opération (glisse un outil ou une grandeur), puis vérifie.');
+      this.message('Rien n\'a changé depuis la dernière étape : fais d\'abord une opération (glisse un outil ou une grandeur), puis vérifie.');
       return;
     }
     let juste = true, impossible = false;
@@ -596,8 +596,8 @@
       const seul = ['neg', 'p10', 'log', 'exp', 'ln'].find(o => ((dL[o] || 0) + (dR[o] || 0)) % 2 === 1 || (dL[o] || 0) % 2 !== (dR[o] || 0) % 2);
       let h = '<b class="er-ko">Cette équation n\'est pas juste.</b> ';
       const double = fnDouble(L) || fnDouble(R);
-      if (double) h += `Tu as appliqué ${NOMS_OUTILS[double]} à ${DEJA[double]} : pour annuler ${NOMS_OUTILS[double]}, il faut sa <b>fonction réciproque</b>, ${NOMS_OUTILS[RECIPROQUE[double]]}. Recommence l'étape avec le bon outil.`;
-      else if (seul) h += `Tu as appliqué <b>${NOMS_OUTILS[seul]}</b> à un seul membre : une opération se fait toujours sur <b>les deux membres</b> de l'égalité. Glisse aussi l'outil sur l'autre membre.`;
+      if (double) h += `Tu as appliqué ${NOMS_OUTILS[double]} à ${DEJA[double]} : pour annuler ${NOMS_OUTILS[double]}, il faut sa <b>fonction réciproque</b>, ${NOMS_OUTILS[RECIPROQUE[double]]}. Recommence l'étape avec le bon outil.`;
+      else if (seul) h += `Tu as appliqué <b>${NOMS_OUTILS[seul]}</b> à un seul membre : une opération se fait toujours sur <b>les deux membres</b> de l'égalité. Glisse aussi l'outil sur l'autre membre.`;
       else if (impossible) h += `Elle contient le ${this.cfg.outils.includes('ln') ? 'ln' : 'log'} d'un nombre négatif (ou une division par zéro), ce qui n'existe pas. Vérifie tes opérations, ou recommence l'étape.`;
       else h += this.cfg.indice || 'Ce qui multiplie d\'un côté passe de l\'autre côté en divisant (et inversement). Vérifie tes déplacements, ou recommence l\'étape.';
       this.message(h, 'ko');
@@ -630,7 +630,7 @@
     this.el.raz.classList.add('hidden');
     this.el.fin.classList.remove('hidden');
     const e = this.etat;
-    this.el.fin.innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">Bravo, l'équation est résolue !</b></p><p class="eq-fin-eq">${ligne(e.L, e.R)}</p></div>`;
+    this.el.fin.innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">Bravo, l'équation est résolue !</b></p><p class="eq-fin-eq">${ligne(e.L, e.R)}</p></div>`;
     if (this.cfg.onResolu) this.cfg.onResolu(this.erreurs);
   };
 
@@ -638,7 +638,7 @@
     const a = this.cfg.aides;
     if (!a || this.fini) return;
     const k = Math.min(this.historique.length, a.length - 1);
-    this.message(`<b>Coup de pouce :</b> ${a[k]}`);
+    this.message(`<b>Coup de pouce :</b> ${a[k]}`);
   };
 
   // Correction : les étapes de la solution, sous forme de démonstration

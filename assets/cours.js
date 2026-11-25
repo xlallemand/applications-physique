@@ -360,7 +360,7 @@
       function terminer(vue, note) {
         finie = true;
         aide.remove();
-        const titre = vue ? 'Réponse' : (etat.erreurs ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? 'Réponse' : (etat.erreurs ? 'C\'est juste.' : 'Juste !');
         ret.innerHTML = p.solution || vue || note
           ? `<div class="${vue ? 'callout' : 'callout-success'} er-retour crs-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${p.solution ? `<div>${p.solution}</div>` : ''}</div>`
           : '<p class="crs-ok">✓ Juste</p>';

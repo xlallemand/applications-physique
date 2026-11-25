@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : entraînement — Proportionnalité</title>
+<title>Module 2 : entraînement — Proportionnalité</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="ptools.css">
@@ -35,7 +35,7 @@ const bank = [
     distractors: [{id:'x1', label:'8 s'}, {id:'x2', label:'40 s'}],
     forcedMethod: 'tableau' },
 
-  { text: "Un conducteur ohmique a une résistance de 5 &Omega;, soit 5 V pour 1 A : U et I sont proportionnels car U = R &times; I. Place les grandeurs pour préparer le calcul de la tension à ses bornes pour une intensité de 0,8 A.",
+  { text: "Un conducteur ohmique a une résistance de 5 &Omega;, soit 5 V pour 1 A : U et I sont proportionnels car U = R &times; I. Place les grandeurs pour préparer le calcul de la tension à ses bornes pour une intensité de 0,8 A.",
     labelA:'I', unitA:'A', labelB:'U', unitB:'V',
     a1txt:'1 A', a1val:1, b1txt:'5 V', b1val:5, a2txt:'0,8 A',
     distractors: [{id:'x1', label:'1 V'}, {id:'x2', label:'5 A'}] },
@@ -87,7 +87,7 @@ function renderIntro() {
     <div class="bg-white rounded-xl shadow-lg p-6">
       <span class="content-module-badge">MODULE 2 · ENTRAÎNEMENT</span>
       <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Entraînement</h2>
-      <p class="text-gray-700 mb-2">Pour chaque situation, choisis ta méthode préférée (tableau, coefficient ou retour à l'unité) — sauf quand elle est imposée — puis place les grandeurs au bon endroit pour construire le calcul. Aucun résultat numérique n'est demandé : c'est la construction du calcul qui compte !</p>
+      <p class="text-gray-700 mb-2">Pour chaque situation, choisis ta méthode préférée (tableau, coefficient ou retour à l'unité) — sauf quand elle est imposée — puis place les grandeurs au bon endroit pour construire le calcul. Aucun résultat numérique n'est demandé : c'est la construction du calcul qui compte !</p>
       <button onclick="start()" class="btn-primary mt-2">Commencer →</button>
     </div>`;
 }
@@ -115,7 +115,7 @@ function render() {
 function renderMethodZone(q) {
   const zone = document.getElementById('methodZone');
   if (q.forcedMethod) {
-    zone.innerHTML = `<span class="method-note">Méthode imposée : ${METHOD_LABEL[q.forcedMethod]}</span>`;
+    zone.innerHTML = `<span class="method-note">Méthode imposée : ${METHOD_LABEL[q.forcedMethod]}</span>`;
     return;
   }
   zone.innerHTML = `<div class="method-selector">
@@ -156,16 +156,16 @@ function renderCalcArea(q, method) {
   let linesHtml = '', liveGroups = [];
   if (method === 'coef') {
     linesHtml = `
-      <div class="text-sm font-bold text-gray-500 mb-1">Coefficient :</div>
+      <div class="text-sm font-bold text-gray-500 mb-1">Coefficient :</div>
       <div class="formula-line">k = ${ptFraction('b1', 'a1', 'liveCalc')}</div>
-      <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Valeur recherchée :</div>
+      <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Valeur recherchée :</div>
       <div class="formula-line">? = k &times; ${ptSlot('a2')}</div>`;
     liveGroups = [{ slots: ['b1','a1'], op: 'div', target: '#liveCalc', decimals: 3 }];
   } else {
     linesHtml = `
-      <div class="text-sm font-bold text-gray-500 mb-1">Valeur pour 1 ${q.unitA} :</div>
+      <div class="text-sm font-bold text-gray-500 mb-1">Valeur pour 1 ${q.unitA} :</div>
       <div class="formula-line">1 ${q.unitA} &rarr; ${ptFraction('b1', 'a1', 'liveCalc')}</div>
-      <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Valeur recherchée :</div>
+      <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Valeur recherchée :</div>
       <div class="formula-line">? = (valeur pour 1 ${q.unitA}) &times; ${ptSlot('a2')}</div>`;
     liveGroups = [{ slots: ['b1','a1'], op: 'div', target: '#liveCalc', decimals: 3 }];
   }
@@ -184,7 +184,7 @@ function verifyCalc() {
   const msg = document.getElementById('calcMsg');
   if (r.correct === r.total) {
     msg.style.color = '#166534';
-    msg.innerHTML = '✓ Calcul correctement construit !';
+    msg.innerHTML = '✓ Calcul correctement construit !';
     document.getElementById('verifyRow').style.display = 'none';
     onCalcSuccess(r.total);
   } else {
@@ -211,8 +211,8 @@ function skipQ() { if (questionDone) return; answers.push({ num: idx+1, pts: 0, 
 function finish() {
   document.getElementById('app').innerHTML = ptFinish({
     score, max: maxScore(), trueMax: maxScore(),
-    title: 'Entraînement terminé !', recap: answers,
-    restartFn: 'start()', nextHref: 'module_7.html', nextLabel: 'Module 3 : représentation graphique →',
+    title: 'Entraînement terminé !', recap: answers,
+    restartFn: 'start()', nextHref: 'module_7.html', nextLabel: 'Module 3 : représentation graphique →',
   });
 }
 

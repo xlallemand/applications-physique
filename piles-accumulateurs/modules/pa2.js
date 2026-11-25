@@ -507,7 +507,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -546,8 +546,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -559,7 +559,7 @@
       const q = qs[idx];
       window.PA2.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -579,7 +579,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -594,10 +594,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -681,7 +681,7 @@
     const gr = o.grandeur || 'Énergie';
     const z = (cle, nom, x) => `<div class="pa2-cv-z pa2-cv-${cle}"><p class="pa2-cv-t">${gr} ${nom}</p>` +
       `${x && x.f ? `<div class="pa2-cv-f">${x.f}</div>` : ''}${x && x.v ? `<div class="pa2-cv-v">${x.v}</div>` : ''}</div>`;
-    return `<div class="pa2-cv" role="group" aria-label="Schéma de conversion d'énergie : ${gr.toLowerCase()} apportée, ${o.appareil.replace(/<[^>]+>/g, '')}, ${gr.toLowerCase()} utile et ${gr.toLowerCase()} perdue">
+    return `<div class="pa2-cv" role="group" aria-label="Schéma de conversion d'énergie : ${gr.toLowerCase()} apportée, ${o.appareil.replace(/<[^>]+>/g, '')}, ${gr.toLowerCase()} utile et ${gr.toLowerCase()} perdue">
       ${z('a', 'apportée', o.a)}
       <div class="pa2-cv-fl pa2-cv-fa" aria-hidden="true"></div>
       <div class="pa2-cv-ap"><b>${o.appareil}</b>${o.eta ? `<div class="pa2-cv-eta">${o.eta}</div>` : ''}</div>
@@ -780,7 +780,7 @@
      o = { U, Q (une cellule, V et Ah), cible: { U, Q }, s0, d0 (départ), sMax, dMax, q, solution }
      ============================================================ */
   function partieAssemblage(o) {
-    return { type: 'perso', assemblage: o, q: o.q || `Assemble des cellules (${fmt(o.U)} V ; ${fmt(o.Q)} Ah) pour obtenir une batterie de <b>${fmt(o.cible.U)} V</b> et <b>${fmt(o.cible.Q)} Ah</b>.`,
+    return { type: 'perso', assemblage: o, q: o.q || `Assemble des cellules (${fmt(o.U)} V ; ${fmt(o.Q)} Ah) pour obtenir une batterie de <b>${fmt(o.cible.U)} V</b> et <b>${fmt(o.cible.Q)} Ah</b>.`,
       solution: o.solution || `<p>${fmt(o.cible.U / o.U)} cellule${o.cible.U / o.U > 1 ? 's' : ''} en série (${fmt(o.cible.U / o.U)} × ${fmt(o.U)} V = ${fmt(o.cible.U)} V) dans chaque branche, et ${fmt(o.cible.Q / o.Q)} branche${o.cible.Q / o.Q > 1 ? 's' : ''} en dérivation (${fmt(o.cible.Q / o.Q)} × ${fmt(o.Q)} Ah = ${fmt(o.cible.Q)} Ah).</p>`,
       monter: (zone, api) => assemblage(zone, o, api) };
   }
@@ -789,9 +789,9 @@
     let s = o.s0 || 1, n = o.d0 || 1, fige = false, largeur = 0;
     const d = el('div', 'pa2-as');
     const reglage = (k, nom) => `<div class="pa2-as-b"><span class="pa2-as-nom">${nom}</span>
-      <button type="button" class="pa2-as-pas" data-k="${k}" data-p="-1" aria-label="${nom} : un de moins">−</button>
+      <button type="button" class="pa2-as-pas" data-k="${k}" data-p="-1" aria-label="${nom} : un de moins">−</button>
       <output class="pa2-as-v" data-v="${k}"></output>
-      <button type="button" class="pa2-as-pas" data-k="${k}" data-p="1" aria-label="${nom} : un de plus">+</button></div>`;
+      <button type="button" class="pa2-as-pas" data-k="${k}" data-p="1" aria-label="${nom} : un de plus">+</button></div>`;
     d.innerHTML = `<div class="pa2-as-cmd">${reglage('s', 'Cellules en série')}${reglage('d', 'Branches en dérivation')}</div>
       <div class="pa2-as-fig"></div><div class="pa2-as-res" aria-live="polite"></div>`;
     zone.appendChild(d);
@@ -843,10 +843,10 @@
       const okU = proche(s * o.U, o.cible.U, .001), okQ = proche(n * o.Q, o.cible.Q, .001);
       if (okU && okQ) { figer(); api.reussi(); return; }
       let m;
-      if (proche(n * o.U, o.cible.U, .001) && proche(s * o.Q, o.cible.Q, .001)) m = 'Tu as inversé : en <b>série</b>, les tensions s\'additionnent ; en <b>dérivation</b>, les capacités s\'additionnent.';
-      else if (okU) m = `La tension est bonne. Pour changer la capacité, change le nombre de <b>branches en dérivation</b> : Q = nombre de branches × ${fmt(o.Q)} Ah.`;
-      else if (okQ) m = `La capacité est bonne. La tension se règle avec le nombre de cellules <b>en série</b> : U = nombre de cellules × ${fmt(o.U)} V.`;
-      else m = `En série, les tensions s'additionnent (U = nombre de cellules en série × ${fmt(o.U)} V) ; en dérivation, les capacités s'additionnent (Q = nombre de branches × ${fmt(o.Q)} Ah).`;
+      if (proche(n * o.U, o.cible.U, .001) && proche(s * o.Q, o.cible.Q, .001)) m = 'Tu as inversé : en <b>série</b>, les tensions s\'additionnent ; en <b>dérivation</b>, les capacités s\'additionnent.';
+      else if (okU) m = `La tension est bonne. Pour changer la capacité, change le nombre de <b>branches en dérivation</b> : Q = nombre de branches × ${fmt(o.Q)} Ah.`;
+      else if (okQ) m = `La capacité est bonne. La tension se règle avec le nombre de cellules <b>en série</b> : U = nombre de cellules × ${fmt(o.U)} V.`;
+      else m = `En série, les tensions s'additionnent (U = nombre de cellules en série × ${fmt(o.U)} V) ; en dérivation, les capacités s'additionnent (Q = nombre de branches × ${fmt(o.Q)} Ah).`;
       api.erreur(m);
       secouer(figZ);
     };
@@ -887,7 +887,7 @@
       s += `<rect x="${x + larg * .2}" y="${y + 10}" width="${larg * .6}" height="${hFace - 20}" rx="6" class="pa2-b-etiq"/>`;
       o.lignes.forEach((l, i) => { s += `<text x="${x + larg / 2}" y="${y + 33 + i * 22}" text-anchor="middle" class="pa2-b-t">${l}</text>`; });
       const H = y + hFace + 8;
-      return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="pa2-batt" role="img" aria-label="${o.aria || 'Batterie : ' + o.lignes.join(', ')}">${s}</svg>`;
+      return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="pa2-batt" role="img" aria-label="${o.aria || 'Batterie : ' + o.lignes.join(', ')}">${s}</svg>`;
     }, 'pa2-fig-batt');
   }
 
@@ -898,11 +898,11 @@
      ============================================================ */
   const TECHNOS = [
     { nom: 'Plomb-acide', em: [30, 50], fem: 2.1, cycles: '400 - 1 200', usage: 'voitures thermiques, alimentations électriques de secours' },
-    { nom: 'Ni-Cd', em: [45, 80], fem: 1.2, cycles: '2 000', usage: 'usages industriels : très fiable, longue durée de vie (12 à 15 ans) ; cadmium polluant et toxique' },
+    { nom: 'Ni-Cd', em: [45, 80], fem: 1.2, cycles: '2 000', usage: 'usages industriels : très fiable, longue durée de vie (12 à 15 ans) ; cadmium polluant et toxique' },
     { nom: 'Ni-MH', em: [60, 110], fem: 1.2, cycles: '1 500', usage: 'appareils portables, voitures hybrides' },
     { nom: 'Li-ion', em: [150, 250], fem: 3.6, cycles: '500 - 1 000', usage: 'électronique portable, voitures électriques' },
   ];
-  const NOTE_LIION = 'Le manuel indique 1 500 - 2 500 Wh·kg<sup>−1</sup> pour le Li-ion : c\'est une coquille (un facteur 10). Les accumulateurs Li-ion stockent en réalité 150 à 250 Wh·kg<sup>−1</sup>.';
+  const NOTE_LIION = 'Le manuel indique 1 500 - 2 500 Wh·kg<sup>−1</sup> pour le Li-ion : c\'est une coquille (un facteur 10). Les accumulateurs Li-ion stockent en réalité 150 à 250 Wh·kg<sup>−1</sup>.';
   // tableau comparatif (usages : true pour ajouter la colonne des usages)
   function tableauTechnos(usages) {
     return `<div class="ph-defile"><table class="ph-tableau pa2-technos"><tr><th>Type d'accumulateur</th><th>Énergie massique (Wh·kg<sup>−1</sup>)</th><th>f.é.m. (V)</th><th>Nombre de cycles de charge</th>${usages ? '<th>Utilisation</th>' : ''}</tr>
@@ -924,7 +924,7 @@
       parties: [{ nom: 'Branchements', cours: 'module_4_cours', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices du manuel', desc: 'Exercices 7, 10, 11 et 14 (p. 40-41) et activité 2 (p. 37)', exercices: 'module_5', exNom: 'Exercices 7 à 14 et activité 2', nbEx: 5 },
   ];
-  window.SOM.init({ nom: 'Chapitre 2 : Piles et accumulateurs', id: 'piles-accumulateurs', cleEx: 'piles-accumulateurs-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 2 : Piles et accumulateurs', id: 'piles-accumulateurs', cleEx: 'piles-accumulateurs-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

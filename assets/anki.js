@@ -371,7 +371,7 @@
     const b = th.base;
     const accent = v => `--accent-ink: ${v['accent-ink']}; --cle-bg: ${v['cle-bg']}; --cle-line: ${v['cle-line']};`;
     return [
-      '/* Flashcards Physique-Chimie : la fiche du site (couleurs et police du thème) */',
+      '/* Flashcards Physique-Chimie : la fiche du site (couleurs et police du thème) */',
       '.card { margin: 0; padding: 12px; text-align: left; }',
       `.pc-carte { --ink: ${b.ink}; --ink-2: ${b['ink-2']}; --sheet: ${b.sheet}; --paper: ${b.paper}; --paper-3: ${b['paper-3']}; --line-strong: ${b['line-strong']}; ${accent(th.ici)}`,
       '  box-sizing: border-box; max-width: 680px; min-height: 280px; margin: 0 auto; padding: 18px 24px 20px;',
@@ -393,7 +393,7 @@
       '.pc-carte .rev-rappel p, .pc-carte .rev-rappel div, .pc-carte .rev-rappel ol, .pc-carte .rev-rappel ul, .pc-carte .rev-rappel li { display: inline; margin: 0; padding: 0; }',
       '.pc-carte .rev-rappel .rev-fig, .pc-carte .rev-rappel .rev-defile, .pc-carte .rev-rappel img, .pc-carte .rev-rappel table, .pc-carte .rev-rappel small, .pc-carte .rev-rappel .rev-outils { display: none; }',
       '.pc-carte .rev-rappel .rev-formule { display: inline; padding: 0; background: none; font: inherit; }',
-      '.pc-carte .rev-rappel .rev-formule::after { content: " : "; }',
+      '.pc-carte .rev-rappel .rev-formule::after { content: " : "; }',
       '.pc-carte #answer { margin: 0; border: none; border-top: 1px dashed var(--line-strong); }',
       '.pc-carte .rev-rep { font-size: 1.05rem; line-height: 1.5; }',
       '.pc-carte .rev-rep p { margin: 0; }',

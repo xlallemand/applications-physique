@@ -42,27 +42,27 @@
   const A = {
     eaRappel: {
       id: 'ea-rappel', titre: 'rappel',
-      html: `<p>Un <b>spectre d'émission</b> est celui de la lumière émise directement par une source : un corps chauffé (toutes les couleurs) ou une lampe spectrale (quelques raies colorées sur fond noir).</p>
-        <p>Un <b>spectre d'absorption</b> est obtenu quand de la lumière blanche traverse une substance (gaz, solution colorée) qui absorbe certaines couleurs : elles sont remplacées par des <b>raies noires</b> ou une <b>bande noire</b> sur le fond coloré.</p>`,
+      html: `<p>Un <b>spectre d'émission</b> est celui de la lumière émise directement par une source : un corps chauffé (toutes les couleurs) ou une lampe spectrale (quelques raies colorées sur fond noir).</p>
+        <p>Un <b>spectre d'absorption</b> est obtenu quand de la lumière blanche traverse une substance (gaz, solution colorée) qui absorbe certaines couleurs : elles sont remplacées par des <b>raies noires</b> ou une <b>bande noire</b> sur le fond coloré.</p>`,
       apres: miniSpectres([['Émission', S.emr('Hg')], ['Absorption', S.abr('Hg')]]),
     },
     eaVisuel: html => ({ id: 'ea-visuel', titre: 'regarde bien', html: `<p>${html}</p>` }),
     crRappel: {
       id: 'cr-rappel', titre: 'rappel',
       html: `<p>Un <b>spectre continu</b> contient toutes les couleurs, sans interruption, comme un arc-en-ciel (une large bande noire peut s'y ajouter si une solution colorée en absorbe une partie).</p>
-        <p>Un <b>spectre de raies</b> ne contient que quelques raies fines : colorées sur fond noir (émission) ou noires sur fond coloré (absorption).</p>`,
+        <p>Un <b>spectre de raies</b> ne contient que quelques raies fines : colorées sur fond noir (émission) ou noires sur fond coloré (absorption).</p>`,
       apres: miniSpectres([['Continu', S.emc(6000)], ['De raies', S.emr('Na')], ['De raies', S.abr('He')]]),
     },
     crVisuel: html => ({ id: 'cr-visuel', titre: 'regarde bien', html: `<p>${html}</p>` }),
     t4Rappel: {
       id: 't4-rappel', titre: 'les quatre types',
-      html: '<p>Les quatre types de spectres :</p>',
+      html: '<p>Les quatre types de spectres :</p>',
       apres: miniSpectres([['Émission, continu', S.emc(6000)], ['Émission, de raies', S.emr('Hg')], ['Absorption, de raies', S.abr('Hg')], ['Absorption, continu', { fond: 'continu', T: null, bandes: [[500, 580, 1]] }]]),
     },
     t4Visuel: {
       id: 't4-visuel', titre: 'méthode',
-      html: `<p>Pose-toi deux questions :</p><ol class="er-liste"><li>Y a-t-il des parties <b>noires sur un fond coloré</b> (raies ou bande) ? Si oui, c'est un spectre d'<b>absorption</b>, sinon d'<b>émission</b>.</li>
-        <li>La lumière forme-t-elle <b>quelques raies fines</b> (spectre de raies), ou <b>une bande de couleurs continue</b> (spectre continu) ?</li></ol>`,
+      html: `<p>Pose-toi deux questions :</p><ol class="er-liste"><li>Y a-t-il des parties <b>noires sur un fond coloré</b> (raies ou bande) ? Si oui, c'est un spectre d'<b>absorption</b>, sinon d'<b>émission</b>.</li>
+        <li>La lumière forme-t-elle <b>quelques raies fines</b> (spectre de raies), ou <b>une bande de couleurs continue</b> (spectre continu) ?</li></ol>`,
     },
     srcRappel: {
       id: 'src-rappel', titre: 'rappel',
@@ -77,24 +77,24 @@
     },
     corrVisuel: {
       id: 'corr-visuel', titre: 'méthode',
-      html: '<p>Lis la longueur d\'onde de chaque raie colorée sur la graduation (en nm). Cherche ensuite le spectre dont les raies noires sont exactement aux mêmes valeurs : il doit y en avoir autant, au même endroit.</p>',
+      html: '<p>Lis la longueur d\'onde de chaque raie colorée sur la graduation (en nm). Cherche ensuite le spectre dont les raies noires sont exactement aux mêmes valeurs : il doit y en avoir autant, au même endroit.</p>',
     },
     tRappel: {
       id: 't-rappel', titre: 'rappel',
-      html: `<p>Plus un corps chauffé est <b>chaud</b>, plus son spectre <b>s'enrichit vers le violet</b>. Un corps peu chaud n'émet surtout que du rouge ; en chauffant, l'orange, le jaune, le vert, puis le bleu et le violet apparaissent et deviennent plus intenses. Pour un corps très chaud, le rouge devient relativement plus faible que le bleu.</p>`,
+      html: `<p>Plus un corps chauffé est <b>chaud</b>, plus son spectre <b>s'enrichit vers le violet</b>. Un corps peu chaud n'émet surtout que du rouge ; en chauffant, l'orange, le jaune, le vert, puis le bleu et le violet apparaissent et deviennent plus intenses. Pour un corps très chaud, le rouge devient relativement plus faible que le bleu.</p>`,
       apres: miniSpectres([[deg(1500), S.emc(1500)], [deg(3000), S.emc(3000)], [deg(6000), S.emc(6000)], [deg(20000), S.emc(20000)]]),
     },
     tVisuel: {
       id: 't-visuel', titre: 'repères', action: 'reperes',
-      html: '<p>Sur chaque spectre, un trait blanc en pointillés indique où commence le spectre côté violet (quand il ne commence pas dès 400 nm), et la couleur du corps chauffé est dessinée à côté. Rappel : rouge (le moins chaud) → orange → jaune → blanc → bleu (le plus chaud).</p>',
+      html: '<p>Sur chaque spectre, un trait blanc en pointillés indique où commence le spectre côté violet (quand il ne commence pas dès 400 nm), et la couleur du corps chauffé est dessinée à côté. Rappel : rouge (le moins chaud) → orange → jaune → blanc → bleu (le plus chaud).</p>',
     },
     coulRappel: {
       id: 'coul-rappel', titre: 'couleur et température',
-      html: '<p>La couleur d\'une étoile dépend de sa température de surface. Du moins chaud au plus chaud : <b>rouge → orange → jaune → blanche → bleue</b>. Le Soleil (environ 5 500 °C) est une étoile blanche. Une étoile rouge émet surtout du rouge ; une étoile bleue est si chaude que son spectre est riche en bleu et en violet.</p>',
+      html: '<p>La couleur d\'une étoile dépend de sa température de surface. Du moins chaud au plus chaud : <b>rouge → orange → jaune → blanche → bleue</b>. Le Soleil (environ 5 500 °C) est une étoile blanche. Une étoile rouge émet surtout du rouge ; une étoile bleue est si chaude que son spectre est riche en bleu et en violet.</p>',
     },
     compRappel: {
       id: 'comp-rappel', titre: 'méthode',
-      html: '<p>Déplace le curseur : le spectre du corps chauffé change. Compare surtout les <b>deux extrémités</b> des spectres : la partie violette et la partie rouge. Quand les deux spectres sont identiques, le corps chauffé a la même température que la surface de l\'étoile.</p>',
+      html: '<p>Déplace le curseur : le spectre du corps chauffé change. Compare surtout les <b>deux extrémités</b> des spectres : la partie violette et la partie rouge. Quand les deux spectres sont identiques, le corps chauffé a la même température que la surface de l\'étoile.</p>',
     },
     compVisuel: {
       id: 'comp-visuel', titre: 'guidage', action: 'guider',
@@ -123,8 +123,8 @@
     },
     etRappel: {
       id: 'et-rappel', titre: 'la lumière d\'une étoile',
-      html: `<p>Les <b>régions internes</b> d'une étoile, très chaudes, émettent un <b>spectre continu</b> : c'est le fond coloré, qui renseigne sur la température.</p>
-        <p>Cette lumière traverse ensuite les <b>couches superficielles</b>, plus froides, qui contiennent des éléments chimiques à l'état d'atomes. Ces éléments <b>absorbent</b> certaines radiations : ce sont les <b>raies noires</b>, qui renseignent sur la composition de l'étoile.</p>`,
+      html: `<p>Les <b>régions internes</b> d'une étoile, très chaudes, émettent un <b>spectre continu</b> : c'est le fond coloré, qui renseigne sur la température.</p>
+        <p>Cette lumière traverse ensuite les <b>couches superficielles</b>, plus froides, qui contiennent des éléments chimiques à l'état d'atomes. Ces éléments <b>absorbent</b> certaines radiations : ce sont les <b>raies noires</b>, qui renseignent sur la composition de l'étoile.</p>`,
     },
   };
 
@@ -138,78 +138,78 @@
     abb: { label: 'Absorption, continu (bande)', ea: 'absorption', cr: 'continu' },
   };
   const DESCRIPTION = {
-    emc: 'toutes les couleurs, sans aucune partie noire : c\'est la lumière émise par un corps chauffé',
-    emr: 'quelques raies colorées sur un fond noir : la source n\'émet que certaines couleurs',
-    abr: 'toutes les couleurs sauf quelques raies noires : ces couleurs ont été absorbées par un gaz',
-    abb: 'toutes les couleurs sauf une large bande noire : ces couleurs ont été absorbées par une solution colorée ou un filtre',
+    emc: 'toutes les couleurs, sans aucune partie noire : c\'est la lumière émise par un corps chauffé',
+    emr: 'quelques raies colorées sur un fond noir : la source n\'émet que certaines couleurs',
+    abr: 'toutes les couleurs sauf quelques raies noires : ces couleurs ont été absorbées par un gaz',
+    abb: 'toutes les couleurs sauf une large bande noire : ces couleurs ont été absorbées par une solution colorée ou un filtre',
   };
   const ELS_RAIES = ['H', 'He', 'Na', 'Hg', 'Li', 'Ba', 'Ca'];
   const spectreType = (t, el) => (t === 'emc' ? S.emc() : t === 'abb' ? S.abb() : S[t](el || choisir(ELS_RAIES)));
   const capital = s => s.charAt(0).toUpperCase() + s.slice(1);
 
   const SITU_EA = [
-    ['On observe directement, avec un spectroscope, la lumière d\'une lampe à vapeur de sodium.', 'emission', 'La lumière vient directement de la source : c\'est un spectre d\'émission.'],
-    ['On observe la lumière blanche d\'une lampe après qu\'elle a traversé une vapeur de sodium froide.', 'absorption', 'La lumière blanche a traversé un gaz qui en absorbe une partie : c\'est un spectre d\'absorption.'],
-    ['On observe la lumière émise par le filament d\'une lampe à incandescence.', 'emission', 'La lumière vient directement du filament chauffé : c\'est un spectre d\'émission (continu).'],
-    ['On observe la lumière blanche après qu\'elle a traversé une solution bleue de sulfate de cuivre.', 'absorption', 'La lumière blanche a traversé une solution qui absorbe certaines couleurs : c\'est un spectre d\'absorption.'],
-    ['On observe la lumière des tubes au néon du plafond.', 'emission', 'La lumière vient directement du gaz excité dans les tubes : c\'est un spectre d\'émission.'],
+    ['On observe directement, avec un spectroscope, la lumière d\'une lampe à vapeur de sodium.', 'emission', 'La lumière vient directement de la source : c\'est un spectre d\'émission.'],
+    ['On observe la lumière blanche d\'une lampe après qu\'elle a traversé une vapeur de sodium froide.', 'absorption', 'La lumière blanche a traversé un gaz qui en absorbe une partie : c\'est un spectre d\'absorption.'],
+    ['On observe la lumière émise par le filament d\'une lampe à incandescence.', 'emission', 'La lumière vient directement du filament chauffé : c\'est un spectre d\'émission (continu).'],
+    ['On observe la lumière blanche après qu\'elle a traversé une solution bleue de sulfate de cuivre.', 'absorption', 'La lumière blanche a traversé une solution qui absorbe certaines couleurs : c\'est un spectre d\'absorption.'],
+    ['On observe la lumière des tubes au néon du plafond.', 'emission', 'La lumière vient directement du gaz excité dans les tubes : c\'est un spectre d\'émission.'],
   ];
   const SITU_CR = [
-    ['La lumière du filament d\'une lampe à incandescence.', 'continu', 'Un corps chauffé émet toutes les couleurs : spectre continu.'],
-    ['La lumière d\'une lampe spectrale à vapeur de mercure.', 'raies', 'Un gaz excité n\'émet que certaines couleurs : spectre de raies.'],
+    ['La lumière du filament d\'une lampe à incandescence.', 'continu', 'Un corps chauffé émet toutes les couleurs : spectre continu.'],
+    ['La lumière d\'une lampe spectrale à vapeur de mercure.', 'raies', 'Un gaz excité n\'émet que certaines couleurs : spectre de raies.'],
     ['La lumière d\'une plaque électrique chauffée au rouge.', 'continu', 'Un corps chauffé émet un spectre continu.'],
     ['La lumière d\'une lampe au néon.', 'raies', 'Un gaz excité émet un spectre de raies.'],
-    ['La lumière émise par les régions internes, très chaudes, d\'une étoile.', 'continu', 'Ces régions se comportent comme un corps chauffé : spectre continu.'],
-    ['La lumière blanche après la traversée d\'une vapeur froide d\'hydrogène.', 'raies', 'Le gaz absorbe seulement certaines couleurs : spectre de raies (d\'absorption).'],
+    ['La lumière émise par les régions internes, très chaudes, d\'une étoile.', 'continu', 'Ces régions se comportent comme un corps chauffé : spectre continu.'],
+    ['La lumière blanche après la traversée d\'une vapeur froide d\'hydrogène.', 'raies', 'Le gaz absorbe seulement certaines couleurs : spectre de raies (d\'absorption).'],
   ];
 
   function qEA(t) {
     return {
-      type: 'choix', theme: 'Émission ou absorption ?',
-      consigne: 'Ce spectre est-il un spectre d\'émission ou un spectre d\'absorption ?',
+      type: 'choix', theme: 'Émission ou absorption ?',
+      consigne: 'Ce spectre est-il un spectre d\'émission ou un spectre d\'absorption ?',
       spectres: [{ nom: '', o: spectreType(t) }],
       options: [{ id: 'emission', label: 'Spectre d\'émission' }, { id: 'absorption', label: 'Spectre d\'absorption' }],
       bonne: TYPES[t].ea,
       explication: `On voit ${DESCRIPTION[t]}. C'est un spectre d'${TYPES[t].ea === 'emission' ? 'émission' : 'absorption'}.`,
-      aides: [A.eaRappel, A.eaVisuel(`Ici, on voit ${DESCRIPTION[t].split(' : ')[0]}.`)],
+      aides: [A.eaRappel, A.eaVisuel(`Ici, on voit ${DESCRIPTION[t].split(' : ')[0]}.`)],
     };
   }
   function qCR(t) {
     return {
-      type: 'choix', theme: 'Continu ou de raies ?',
-      consigne: 'Ce spectre est-il un spectre continu ou un spectre de raies ?',
+      type: 'choix', theme: 'Continu ou de raies ?',
+      consigne: 'Ce spectre est-il un spectre continu ou un spectre de raies ?',
       spectres: [{ nom: '', o: spectreType(t) }],
       options: [{ id: 'continu', label: 'Spectre continu' }, { id: 'raies', label: 'Spectre de raies' }],
       bonne: TYPES[t].cr,
       explication: `On voit ${DESCRIPTION[t]}. C'est un spectre ${TYPES[t].cr === 'continu' ? 'continu' : 'de raies'}.`,
       aides: [A.crRappel, A.crVisuel(t === 'abb'
         ? 'Ici, les couleurs forment une bande continue, interrompue par une large bande noire (pas par des raies fines).'
-        : `Ici, on voit ${DESCRIPTION[t].split(' : ')[0]}.`)],
+        : `Ici, on voit ${DESCRIPTION[t].split(' : ')[0]}.`)],
     };
   }
 
   function qSituEA(s) {
     return {
-      type: 'choix', theme: 'Émission ou absorption ?',
-      consigne: `${s[0]} Obtient-on un spectre d'émission ou un spectre d'absorption ?`,
+      type: 'choix', theme: 'Émission ou absorption ?',
+      consigne: `${s[0]} Obtient-on un spectre d'émission ou un spectre d'absorption ?`,
       options: [{ id: 'emission', label: 'Spectre d\'émission' }, { id: 'absorption', label: 'Spectre d\'absorption' }],
       bonne: s[1], explication: s[2],
-      aides: [A.eaRappel, A.eaVisuel('La lumière arrive-t-elle directement de la source (émission), ou a-t-elle traversé une substance qui en absorbe une partie (absorption) ?')],
+      aides: [A.eaRappel, A.eaVisuel('La lumière arrive-t-elle directement de la source (émission), ou a-t-elle traversé une substance qui en absorbe une partie (absorption) ?')],
     };
   }
   function qSituCR(s) {
     return {
-      type: 'choix', theme: 'Continu ou de raies ?',
-      consigne: `${s[0]} Son spectre est-il continu ou de raies ?`,
+      type: 'choix', theme: 'Continu ou de raies ?',
+      consigne: `${s[0]} Son spectre est-il continu ou de raies ?`,
       options: [{ id: 'continu', label: 'Spectre continu' }, { id: 'raies', label: 'Spectre de raies' }],
       bonne: s[1], explication: s[2],
-      aides: [A.crRappel, A.crVisuel('Un corps chauffé émet toutes les couleurs ; un gaz (qui émet ou qui absorbe) ne concerne que quelques couleurs bien précises.')],
+      aides: [A.crRappel, A.crVisuel('Un corps chauffé émet toutes les couleurs ; un gaz (qui émet ou qui absorbe) ne concerne que quelques couleurs bien précises.')],
     };
   }
   function q4Types(t) {
     return {
       type: 'choix', theme: 'Les quatre types de spectres',
-      consigne: 'Quel est le type de ce spectre ?',
+      consigne: 'Quel est le type de ce spectre ?',
       spectres: [{ nom: '', o: spectreType(t) }],
       options: Object.keys(TYPES).map(id => ({ id, label: TYPES[id].label })),
       bonne: t,
@@ -228,10 +228,10 @@
     const ordre = melanger(Object.keys(TYPES));
     return {
       type: 'choix', theme: 'Les quatre types de spectres',
-      consigne: `Quel spectre obtient-on en observant ${sources[cible]} ?`,
+      consigne: `Quel spectre obtient-on en observant ${sources[cible]} ?`,
       options: ordre.map((t, k) => ({ id: t, label: `Spectre ${LETTRES[k]}`, spectre: t === 'emc' ? S.emc(6000) : spectreType(t, el) })),
       bonne: cible,
-      explication: `Pour ${sources[cible]}, on obtient un spectre d'${TYPES[cible].label.toLowerCase().replace(', ', ' ')} (${DESCRIPTION[cible].split(' : ')[0]}).`,
+      explication: `Pour ${sources[cible]}, on obtient un spectre d'${TYPES[cible].label.toLowerCase().replace(', ', ' ')} (${DESCRIPTION[cible].split(' : ')[0]}).`,
       aides: [A.srcRappel, A.t4Visuel],
     };
   }
@@ -241,11 +241,11 @@
     const opts = melanger(els);
     return {
       type: 'choix', theme: 'Les quatre types de spectres',
-      consigne: 'Voici le spectre d\'émission d\'un élément chimique. Quel est le spectre d\'absorption de ce même élément ?',
+      consigne: 'Voici le spectre d\'émission d\'un élément chimique. Quel est le spectre d\'absorption de ce même élément ?',
       spectres: [{ nom: 'Émission', o: S.emr(el) }],
       options: opts.map((x, k) => ({ id: x, label: `Spectre ${LETTRES[k]}`, spectre: S.abr(x) })),
       bonne: el,
-      explication: `Le spectre ${LETTRES[opts.indexOf(el)]} a ses raies noires exactement aux mêmes longueurs d'onde que les raies colorées du spectre d'émission (c'est le ${nomMin(el)}) : un élément absorbe les radiations qu'il est capable d'émettre.`,
+      explication: `Le spectre ${LETTRES[opts.indexOf(el)]} a ses raies noires exactement aux mêmes longueurs d'onde que les raies colorées du spectre d'émission (c'est le ${nomMin(el)}) : un élément absorbe les radiations qu'il est capable d'émettre.`,
       aides: [A.corrRappel, A.corrVisuel],
     };
   }
@@ -296,10 +296,10 @@
     const ordre = temps.map((_, k) => 't' + k);
     return {
       type: 'ordre', theme,
-      consigne: `Touche les spectres dans l'ordre des températures <b>croissantes</b> : d'abord celui du corps le moins chaud, à la fin celui du plus chaud.`,
+      consigne: `Touche les spectres dans l'ordre des températures <b>croissantes</b> : d'abord celui du corps le moins chaud, à la fin celui du plus chaud.`,
       items, ordre,
       indice: 'Le spectre d\'un corps plus chaud s\'étend plus loin vers le violet, et son bleu est plus intense par rapport au rouge.',
-      explication: `Du moins chaud au plus chaud : ${ordre.map(id => items.find(i => i.id === id).label).join(', ')} (${temps.map(deg).join(' ; ')}). Plus la température est élevée, plus le spectre s'enrichit vers le violet.`,
+      explication: `Du moins chaud au plus chaud : ${ordre.map(id => items.find(i => i.id === id).label).join(', ')} (${temps.map(deg).join(' ; ')}). Plus la température est élevée, plus le spectre s'enrichit vers le violet.`,
       aides: [A.tRappel, A.tVisuel],
     };
   }
@@ -309,7 +309,7 @@
       type: 'choix', theme, consigne,
       options: opts.map((T, k) => ({ id: 't' + T, label: `${quoi} ${LETTRES[k]}`, spectre: S.emc(T) })),
       bonne: 't' + Tc,
-      explication: `Le spectre ${LETTRES[opts.indexOf(Tc)]} s'étend plus loin vers le violet et contient plus de bleu : c'est le plus chaud (${deg(Tc)}, contre ${deg(Math.min(T1, T2))}).`,
+      explication: `Le spectre ${LETTRES[opts.indexOf(Tc)]} s'étend plus loin vers le violet et contient plus de bleu : c'est le plus chaud (${deg(Tc)}, contre ${deg(Math.min(T1, T2))}).`,
       aides: [A.tRappel, A.tVisuel],
     };
   }
@@ -335,10 +335,10 @@
     // 1 : filament le plus chaud
     const [f1, f2] = choisir([[900, 1800], [1300, 2500], [1300, 3500]]);
     qs.push(qPlusChaud(f1, f2, 'Le plus chaud',
-      'On augmente l\'intensité du courant qui traverse le filament d\'une lampe : il chauffe de plus en plus. Quel spectre correspond au filament le plus chaud ?', 'Spectre'));
+      'On augmente l\'intensité du courant qui traverse le filament d\'une lampe : il chauffe de plus en plus. Quel spectre correspond au filament le plus chaud ?', 'Spectre'));
     // 2 : étoile la plus chaude
     const [e1, e2] = choisir([[3500, 12000], [3000, 7500], [5000, 20000]]);
-    qs.push(qPlusChaud(e1, e2, 'Le plus chaud', 'Voici les spectres (fond continu) de deux étoiles. Laquelle a la température de surface la plus élevée ?', 'Étoile'));
+    qs.push(qPlusChaud(e1, e2, 'Le plus chaud', 'Voici les spectres (fond continu) de deux étoiles. Laquelle a la température de surface la plus élevée ?', 'Étoile'));
     // 3 et 4 : classer
     qs.push(qOrdre(tirerEchelle(3, 2), 'Classer selon la température', 'Spectre'));
     qs.push(qOrdre(tirerEchelle(4, 2), 'Classer selon la température', 'Étoile'));
@@ -350,28 +350,28 @@
       consigne: 'Les étoiles n\'ont pas toutes la même couleur. Touche-les dans l\'ordre des températures de surface <b>croissantes</b>.',
       items: its, ordre: cs.map(c => c.id),
       indice: 'Une étoile rouge est peu chaude, une étoile bleue est très chaude.',
-      explication: `Du moins chaud au plus chaud : ${cs.map(c => c.label.toLowerCase()).join(', ')}.`,
+      explication: `Du moins chaud au plus chaud : ${cs.map(c => c.label.toLowerCase()).join(', ')}.`,
       aides: [A.coulRappel],
     });
     // 6 : spectre → couleur
     const trio = [COULEURS[0], COULEURS[2], COULEURS[4]], c = choisir(trio);
     qs.push({
       type: 'choix', theme: 'Couleur et température',
-      consigne: 'Voici le fond continu du spectre d\'une étoile. Quelle est la couleur de cette étoile ?',
+      consigne: 'Voici le fond continu du spectre d\'une étoile. Quelle est la couleur de cette étoile ?',
       spectres: [{ nom: '', o: S.emc(c.T) }],
       options: trio.map(x => ({ id: x.id, label: x.label, etoile: x.T })),
       bonne: c.id,
-      explication: c.id === 'rouge' ? 'Le spectre est surtout rouge : le violet et le bleu sont très faibles. C\'est une étoile peu chaude, rouge.'
-        : c.id === 'jaune' ? 'Toutes les couleurs sont présentes, mais le bleu et le violet sont plus faibles que le jaune et le rouge : c\'est une étoile jaune, un peu moins chaude que le Soleil (qui est une étoile blanche).'
-          : 'Le bleu et le violet sont intenses et le rouge est plus faible : c\'est une étoile très chaude, bleue.',
+      explication: c.id === 'rouge' ? 'Le spectre est surtout rouge : le violet et le bleu sont très faibles. C\'est une étoile peu chaude, rouge.'
+        : c.id === 'jaune' ? 'Toutes les couleurs sont présentes, mais le bleu et le violet sont plus faibles que le jaune et le rouge : c\'est une étoile jaune, un peu moins chaude que le Soleil (qui est une étoile blanche).'
+          : 'Le bleu et le violet sont intenses et le rouge est plus faible : c\'est une étoile très chaude, bleue.',
       aides: [A.tRappel, A.coulRappel],
     });
     // 7 et 8 : comparateur
     melanger([3000, 4000, 5500, 7500, 10000]).slice(0, 2).sort((a, b) => a - b)
-      .forEach(T => qs.push(qComparateur(T, 'Lire une température : comparer les spectres')));
+      .forEach(T => qs.push(qComparateur(T, 'Lire une température : comparer les spectres')));
     // 9 et 10 : profil
     melanger([2500, 3000, 3500, 4000, 4500, 5000, 6000, 7000]).slice(0, 2)
-      .forEach(T => qs.push(qProfil(T, 'Lire une température : profil d\'intensité')));
+      .forEach(T => qs.push(qProfil(T, 'Lire une température : profil d\'intensité')));
     return qs;
   }
 
@@ -402,7 +402,7 @@
     const noms = c.presents.map(id => c.refs.find(r => r.id === id).nom.toLowerCase());
     return {
       type: 'elements', theme, consigne, o: c.o, refs: c.refs, presents: c.presents, outil: outil || 'B',
-      explication: `${nom ? `${capital(nom)} contient` : 'L\'étoile contient'} : ${noms.join(', ')}. Toutes leurs raies se retrouvent en raies noires dans le spectre${c.refs.length > c.presents.length ? ' ; chacun des autres éléments a au moins une raie absente du spectre de l\'étoile' : ''}.`,
+      explication: `${nom ? `${capital(nom)} contient` : 'L\'étoile contient'} : ${noms.join(', ')}. Toutes leurs raies se retrouvent en raies noires dans le spectre${c.refs.length > c.presents.length ? ' ; chacun des autres éléments a au moins une raie absente du spectre de l\'étoile' : ''}.`,
       aides: [A.elRappel, A.elVisuel],
     };
   }
@@ -444,11 +444,11 @@
     const plus = c.p.slice().sort((a, b) => b.ab - a.ab)[0].id;
     qs.push({
       type: 'choix', theme: 'L\'élément le plus abondant',
-      consigne: 'Cette étoile contient deux éléments chimiques. Lequel est présent en plus grande quantité dans ses couches superficielles ?',
+      consigne: 'Cette étoile contient deux éléments chimiques. Lequel est présent en plus grande quantité dans ses couches superficielles ?',
       spectres: [{ nom: 'Étoile', o: c.o }].concat(c.presents.map(id => ({ nom: E[id].nom, o: { fond: 'noir', emission: E[id].raies, hauteur: 30, axe: false } }))),
       options: c.presents.map(id => ({ id, label: E[id].nom })),
       bonne: plus,
-      explication: `Les raies du ${nomMin(plus)} sont les plus noires : c'est l'élément le plus abondant dans les couches superficielles de l'étoile.`,
+      explication: `Les raies du ${nomMin(plus)} sont les plus noires : c'est l'élément le plus abondant dans les couches superficielles de l'étoile.`,
       aides: [A.abRappel],
     });
     // 10 : trois parmi six
@@ -488,19 +488,19 @@
     // étoile 1 : type de spectre
     qs.push({
       type: 'choix', theme: `${s1.Nom} · Type de spectre`,
-      consigne: `Voici le spectre de la lumière de ${s1.nom}. De quel type est ce spectre ?`,
+      consigne: `Voici le spectre de la lumière de ${s1.nom}. De quel type est ce spectre ?`,
       spectres: [{ nom: s1.Nom, o: s1.c.o }],
       options: Object.keys(TYPES).map(id => ({ id, label: TYPES[id].label })),
       bonne: 'abr',
-      explication: 'Des raies noires sur un fond coloré continu : c\'est un spectre d\'absorption de raies. Le fond continu est émis par les régions internes de l\'étoile, les raies noires sont dues aux éléments de ses couches superficielles.',
+      explication: 'Des raies noires sur un fond coloré continu : c\'est un spectre d\'absorption de raies. Le fond continu est émis par les régions internes de l\'étoile, les raies noires sont dues aux éléments de ses couches superficielles.',
       aides: [A.t4Rappel, A.etRappel],
     });
     qs.push(temperature(s1));
-    qs.push(qElements(s1.c, `${s1.Nom} · Composition`, `Quels éléments chimiques sont présents dans les couches superficielles de ${s1.nom} ?`, s1.nom));
+    qs.push(qElements(s1.c, `${s1.Nom} · Composition`, `Quels éléments chimiques sont présents dans les couches superficielles de ${s1.nom} ?`, s1.nom));
     // étoile 2 : origine du fond continu
     qs.push({
       type: 'choix', theme: `${s2.Nom} · Le fond continu`,
-      consigne: `Voici le spectre de ${s2.nom}. D'où provient le fond coloré continu de ce spectre ?`,
+      consigne: `Voici le spectre de ${s2.nom}. D'où provient le fond coloré continu de ce spectre ?`,
       spectres: [{ nom: s2.Nom, o: s2.c.o }],
       options: melanger([
         { id: 'int', label: 'Des régions internes de l\'étoile, très chaudes' },
@@ -508,15 +508,15 @@
         { id: 'terre', label: 'De l\'atmosphère de la Terre' },
       ]),
       bonne: 'int',
-      explication: 'Les régions internes, très chaudes, se comportent comme un corps chauffé : elles émettent un spectre continu. C\'est lui qui renseigne sur la température de l\'étoile.',
+      explication: 'Les régions internes, très chaudes, se comportent comme un corps chauffé : elles émettent un spectre continu. C\'est lui qui renseigne sur la température de l\'étoile.',
       aides: [A.etRappel],
     });
     qs.push(temperature(s2));
-    qs.push(qElements(s2.c, `${s2.Nom} · Composition`, `Quels éléments chimiques sont présents dans les couches superficielles de ${s2.nom} ?`, s2.nom));
+    qs.push(qElements(s2.c, `${s2.Nom} · Composition`, `Quels éléments chimiques sont présents dans les couches superficielles de ${s2.nom} ?`, s2.nom));
     // étoile 3 : origine des raies noires
     qs.push({
       type: 'choix', theme: `${s3.Nom} · Les raies noires`,
-      consigne: `Voici le spectre de ${s3.nom}. Pourquoi observe-t-on des raies noires ?`,
+      consigne: `Voici le spectre de ${s3.nom}. Pourquoi observe-t-on des raies noires ?`,
       spectres: [{ nom: s3.Nom, o: s3.c.o }],
       options: melanger([
         { id: 'abs', label: 'Les éléments des couches superficielles absorbent certaines radiations' },
@@ -524,11 +524,11 @@
         { id: 'trou', label: 'Certaines zones de l\'étoile n\'émettent aucune lumière' },
       ]),
       bonne: 'abs',
-      explication: 'La lumière émise par les régions internes traverse les couches superficielles, plus froides : leurs éléments chimiques absorbent les radiations qu\'ils seraient capables d\'émettre. Ces raies noires renseignent sur la composition de l\'étoile.',
+      explication: 'La lumière émise par les régions internes traverse les couches superficielles, plus froides : leurs éléments chimiques absorbent les radiations qu\'ils seraient capables d\'émettre. Ces raies noires renseignent sur la composition de l\'étoile.',
       aides: [A.etRappel],
     });
     qs.push(temperature(s3));
-    qs.push(qElements(s3.c, `${s3.Nom} · Composition`, `Quels éléments chimiques sont présents dans les couches superficielles de ${s3.nom} ?`, s3.nom));
+    qs.push(qElements(s3.c, `${s3.Nom} · Composition`, `Quels éléments chimiques sont présents dans les couches superficielles de ${s3.nom} ?`, s3.nom));
     // classement des trois étoiles
     const tri = stars.slice().sort((a, b) => a.T - b.T);
     qs.push({
@@ -536,8 +536,8 @@
       consigne: 'Touche les spectres des trois étoiles dans l\'ordre des températures de surface <b>croissantes</b>.',
       items: melanger(stars).map(s => ({ id: s.nom, label: s.Nom, spectre: { fond: 'continu', T: s.T, absorption: s.c.o.absorption } })),
       ordre: tri.map(s => s.nom),
-      indice: 'Compare le fond coloré : plus l\'étoile est chaude, plus son spectre est riche en bleu et en violet.',
-      explication: `Du moins chaud au plus chaud : ${tri.map(s => `${s.nom} (${deg(s.T)})`).join(', ')}.`,
+      indice: 'Compare le fond coloré : plus l\'étoile est chaude, plus son spectre est riche en bleu et en violet.',
+      explication: `Du moins chaud au plus chaud : ${tri.map(s => `${s.nom} (${deg(s.T)})`).join(', ')}.`,
       aides: [A.tRappel, A.tVisuel],
     });
     return qs;

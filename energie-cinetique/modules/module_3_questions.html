@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 : questions sur l'énergie cinétique — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<title>Module 3 : questions sur l'énergie cinétique — Chapitre 7 : Théorème de l'énergie cinétique</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="ec.css">
@@ -53,13 +53,13 @@ const G1 = [
     const t = hasard([12, 19, 26, 33, 40]), kmh = hasard([54, 72, 90]), m = t * 1000, v = kmh / 3.6, e = ec(m, v);
     return { theme: 'Énergie cinétique d\'un camion', enonce: `<p>Un camion de <b>${t} t</b> roule à <b>${kmh} km/h</b>.</p>`,
       parties: [{ type: 'sci', q: `Calcule son énergie cinétique ${EC_} (3 chiffres significatifs).`, label: `${EC_} =`, valeur: e, unite: 'J', cs: 3, rel: .01,
-        diag: x => diagEc(x, m, v, { v: kmh, m: t }), solution: calc(`m = ${t} × 1 000 = ${fmt(m)} kg ; v = ${kmh} / 3,6 = ${fmt(v)} m/s`) + calc(`${EC_} = 0,5 × ${fmt(m)} × ${fmt(v)}² ≈ ${c(sci(e, 3) + ' J')}`) }] };
+        diag: x => diagEc(x, m, v, { v: kmh, m: t }), solution: calc(`m = ${t} × 1 000 = ${fmt(m)} kg ; v = ${kmh} / 3,6 = ${fmt(v)} m/s`) + calc(`${EC_} = 0,5 × ${fmt(m)} × ${fmt(v)}² ≈ ${c(sci(e, 3) + ' J')}`) }] };
   },
   function balle() {
     const [qui, g, v] = hasard([['Une balle de tennis', 58, 40], ['Une balle de golf', 46, 60], ['Un ballon de foot', 430, 25], ['Une balle de ping-pong', 2.7, 20]]), m = g / 1000, e = ec(m, v);
     return { theme: 'Énergie cinétique d\'une balle', enonce: `<p>${qui} de <b>${fmt(g)} g</b> vole à ${v} m/s.</p>`,
       parties: [fq.nombre(`Calcule son énergie cinétique ${EC_} (3 chiffres significatifs).`, `${EC_} =`, e, 'J', { signe: false, rel: .01, affiche: fmt(r3(e)),
-        diag: x => diagEc(x, m, v, { m: g }), solution: calc(`m = ${fmt(g)} g = ${fmt(m)} kg ; ${EC_} = 0,5 × ${fmt(m)} × ${v}² ≈ ${c(fmt(r3(e)) + ' J')}`) })] };
+        diag: x => diagEc(x, m, v, { m: g }), solution: calc(`m = ${fmt(g)} g = ${fmt(m)} kg ; ${EC_} = 0,5 × ${fmt(m)} × ${v}² ≈ ${c(fmt(r3(e)) + ' J')}`) })] };
   },
   function pieton() {
     const [qui, m, v] = hasard([['Un piéton', 70, 1.5], ['Une coureuse', 55, 5], ['Un cycliste et son vélo', 85, 8], ['Un skieur', 80, 15]]), e = ec(m, v);
@@ -74,7 +74,7 @@ function qVitesse() {
   const [qui, m, v] = hasard([['Une boule de pétanque', .8, 5], ['Un chariot', 20, 3], ['Un cycliste et son vélo', 80, 9], ['Une voiture', 1000, 20], ['Un camion', 20000, 25]]), e = ec(m, v);
   return { theme: 'Vitesse à partir de l\'énergie cinétique', enonce: `<p>${qui} de ${fmt(m)} kg a une énergie cinétique de ${fmt(e)} J.</p>`,
     parties: [fq.nombre('Calcule sa vitesse.', 'v =', v, 'm/s', { signe: false, rel: .01,
-      diag: x => (proche(x, v * v, .02) ? 'Tu as trouvé v² : prends la <b>racine carrée</b>.' : proche(x, Math.sqrt(e / m), .02) ? 'v² = 2 × E<sub>c</sub> / m : n\'oublie pas le 2.' : proche(x, Math.sqrt(2 * e * m), .02) ? 'On <b>divise</b> par m.' : 'v = √(2 × E<sub>c</sub> / m).'),
+      diag: x => (proche(x, v * v, .02) ? 'Tu as trouvé v² : prends la <b>racine carrée</b>.' : proche(x, Math.sqrt(e / m), .02) ? 'v² = 2 × E<sub>c</sub> / m : n\'oublie pas le 2.' : proche(x, Math.sqrt(2 * e * m), .02) ? 'On <b>divise</b> par m.' : 'v = √(2 × E<sub>c</sub> / m).'),
       solution: calc(`v = ${rac(fr('2 × ' + fmt(e), fmt(m)))} = ${rac(fmt(v * v))} = ${c(fmt(v) + ' m/s')}`) })] };
 }
 function qVitesseKmh() {
@@ -90,25 +90,25 @@ const G2 = [qVitesse, qVitesse, qVitesseKmh];
 const G3 = [
   function double() {
     const [txt, bon, ind, sol] = hasard([
-      ['Une voiture passe de 45 km/h à 90 km/h.', '4', { 2: 'La vitesse est au carré : 2² = 4.' }, 'v × 2 → E<sub>c</sub> × 4.'],
-      ['Un skieur passe de 5 m/s à 15 m/s.', '9', { 3: 'La vitesse est au carré : 3² = 9.' }, 'v × 3 → E<sub>c</sub> × 9.'],
+      ['Une voiture passe de 45 km/h à 90 km/h.', '4', { 2: 'La vitesse est au carré : 2² = 4.' }, 'v × 2 → E<sub>c</sub> × 4.'],
+      ['Un skieur passe de 5 m/s à 15 m/s.', '9', { 3: 'La vitesse est au carré : 3² = 9.' }, 'v × 3 → E<sub>c</sub> × 9.'],
       ['À la même vitesse, une remorque chargée a une masse double de la remorque vide.', '2', { 4: 'La masse n\'est pas au carré.' }, 'm × 2 → E<sub>c</sub> × 2.'],
     ]);
     return { theme: 'Effet de la vitesse et de la masse', enonce: `<p>${txt}</p>`,
-      parties: [fq.choix(`Par combien ${EC_} est-elle multipliée ?`, ['2', '3', '4', '9'].map(x => o(x, '× ' + x)), bon, { melanger: false, indices: ind, indice: 'm au premier degré, v au carré.', solution: `<p>${sol}</p>` })] };
+      parties: [fq.choix(`Par combien ${EC_} est-elle multipliée ?`, ['2', '3', '4', '9'].map(x => o(x, '× ' + x)), bon, { melanger: false, indices: ind, indice: 'm au premier degré, v au carré.', solution: `<p>${sol}</p>` })] };
   },
   function compare() {
-    return { theme: 'Comparer des énergies cinétiques', enonce: '<p>A : une voiture de 1 000 kg à 30 m/s. B : un camion de 4 000 kg à 15 m/s.</p>',
-      parties: [fq.choix('Lequel a la plus grande énergie cinétique ?', [o('A', 'la voiture A'), o('B', 'le camion B'), o('eg', 'ils ont la même')], 'eg',
-        { melanger: false, indices: { A: 'Calcule : 0,5 × 1 000 × 30² et 0,5 × 4 000 × 15².', B: 'Calcule : 0,5 × 1 000 × 30² et 0,5 × 4 000 × 15².' },
-          solution: calc(`A : 0,5 × 1 000 × 30² = 450 000 J ; B : 0,5 × 4 000 × 15² = 450 000 J`) + '<p>Une masse 4 fois plus grande compense une vitesse 2 fois plus petite (2² = 4).</p>' })] };
+    return { theme: 'Comparer des énergies cinétiques', enonce: '<p>A : une voiture de 1 000 kg à 30 m/s. B : un camion de 4 000 kg à 15 m/s.</p>',
+      parties: [fq.choix('Lequel a la plus grande énergie cinétique ?', [o('A', 'la voiture A'), o('B', 'le camion B'), o('eg', 'ils ont la même')], 'eg',
+        { melanger: false, indices: { A: 'Calcule : 0,5 × 1 000 × 30² et 0,5 × 4 000 × 15².', B: 'Calcule : 0,5 × 1 000 × 30² et 0,5 × 4 000 × 15².' },
+          solution: calc(`A : 0,5 × 1 000 × 30² = 450 000 J ; B : 0,5 × 4 000 × 15² = 450 000 J`) + '<p>Une masse 4 fois plus grande compense une vitesse 2 fois plus petite (2² = 4).</p>' })] };
   },
 ];
 
 /* ---------- Groupe 4 : unité ---------- */
 function unite() {
-  return { theme: 'Unité', parties: [fq.choix('L\'énergie cinétique s\'exprime en :', [o('J', 'joules (J)'), o('W', 'watts (W)'), o('N', 'newtons (N)'), o('ms', 'm/s')], 'J',
-    { indices: { W: 'Le watt est l\'unité des puissances.', N: 'Le newton est l\'unité des forces.', ms: 'm/s est l\'unité de la vitesse.' }, solution: '<p>Une énergie s\'exprime en joules : kg × (m/s)² = J.</p>' })] };
+  return { theme: 'Unité', parties: [fq.choix('L\'énergie cinétique s\'exprime en :', [o('J', 'joules (J)'), o('W', 'watts (W)'), o('N', 'newtons (N)'), o('ms', 'm/s')], 'J',
+    { indices: { W: 'Le watt est l\'unité des puissances.', N: 'Le newton est l\'unité des forces.', ms: 'm/s est l\'unité de la vitesse.' }, solution: '<p>Une énergie s\'exprime en joules : kg × (m/s)² = J.</p>' })] };
 }
 
 // tirage : 4 + 3 + 2 + 1 questions
@@ -119,10 +119,10 @@ function tirage() {
 EC.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Énergie cinétique',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : énergie cinétique d\'une voiture, d\'un camion, d\'une balle, vitesse à partir de l\'énergie cinétique, effet de la vitesse et de la masse.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : énergie cinétique d\'une voiture, d\'un camion, d\'une balle, vitesse à partir de l\'énergie cinétique, effet de la vitesse et de la masse.</p>',
   questions: tirage,
   revoir: { href: 'module_3a_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_4a_cours.html', label: 'Module 4 : théorème de l\'énergie cinétique →' },
+  suite: { href: 'module_4a_cours.html', label: 'Module 4 : théorème de l\'énergie cinétique →' },
 });
 EC.menu('module_3_questions');
 </script>

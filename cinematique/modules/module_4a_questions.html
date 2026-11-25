@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 4 : questions sur le vecteur position — Cinématique</title>
+<title>Module 4 : questions sur le vecteur position — Cinématique</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="cin.css">
@@ -36,37 +36,37 @@ const opts = (bonne, autres) => { const vus = new Set([bonne]); return [o('ok', 
 /* ---------- QCM ---------- */
 function ecritureQCM() {
   const x = fonction(), y = fonction();
-  return choix('Vecteur position', `x(t) = ${poly(x)} et y(t) = ${poly(y)}. Le vecteur position s'écrit :`,
+  return choix('Vecteur position', `x(t) = ${poly(x)} et y(t) = ${poly(y)}. Le vecteur position s'écrit :`,
     opts(`${N('OM')}(t) = ${par(x)}${I} + ${par(y)}${J}`, [`${N('OM')}(t) = ${par(y)}${I} + ${par(x)}${J}`, `${N('OM')}(t) = ${poly(x)} + ${poly(y)}`, `${N('OM')}(t) = (${poly(x)} + ${poly(y)})${I}`]), 'ok',
     `${N('OM')}(t) = x(t)${I} + y(t)${J}.`, 'x(t) va devant i⃗, y(t) devant j⃗.');
 }
 function initialQCM() {
   const x = fonction(), y = fonction();
-  return choix('Vecteur position', `x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m). À l'instant initial, le point M a pour coordonnées :`,
-    opts(col(x[2], y[2]), [col(x[0] || x[1], y[0] || y[1]), col(0, 0), col(y[2], x[2]), col(x[2] + 1, y[2])]), 'ok', `On remplace t par 0 : x(0) = ${fmt(x[2])} m et y(0) = ${fmt(y[2])} m.`, 'Remplace t par 0.', { colonne: false });
+  return choix('Vecteur position', `x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m). À l'instant initial, le point M a pour coordonnées :`,
+    opts(col(x[2], y[2]), [col(x[0] || x[1], y[0] || y[1]), col(0, 0), col(y[2], x[2]), col(x[2] + 1, y[2])]), 'ok', `On remplace t par 0 : x(0) = ${fmt(x[2])} m et y(0) = ${fmt(y[2])} m.`, 'Remplace t par 0.', { colonne: false });
 }
 function dateQCM() {
   const x = [nz(3), entre(-6, 6), entre(-6, 6)], y = [0, nz(5), entre(-6, 6)], t = entre(1, 3);
   // erreur fréquente : −t² calculé comme (−t)²
   const xFaux = x[0] < 0 ? -x[0] * t * t + x[1] * t + x[2] : x[0] * t + x[1] * t + x[2];
-  return choix('Position à une date', `x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m, t en s). À t = ${t} s, le point M a pour coordonnées :`,
+  return choix('Position à une date', `x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m, t en s). À t = ${t} s, le point M a pour coordonnées :`,
     opts(col(val(x, t), val(y, t)), [col(val(y, t), val(x, t)), col(x[2], y[2]), col(xFaux, val(y, t)), col(val(x, t) + 2, val(y, t))]), 'ok',
-    `x(${t}) = ${fmt(val(x, t))} m et y(${t}) = ${fmt(val(y, t))} m.`, `Remplace t par ${t} dans x(t), puis dans y(t). Attention : ${M}t² = ${M}(t²).`, { colonne: false });
+    `x(${t}) = ${fmt(val(x, t))} m et y(${t}) = ${fmt(val(y, t))} m.`, `Remplace t par ${t} dans x(t), puis dans y(t). Attention : ${M}t² = ${M}(t²).`, { colonne: false });
 }
 function lireQCM() {
   const x = [nz(5), entre(-6, 6), 0], y = [0, nz(6), entre(-6, 6)];
-  return choix('Coordonnées', `${N('OM')}(t) = ${par(x)}${I} + ${par(y)}${J} (en m). Les coordonnées du point M sont :`,
+  return choix('Coordonnées', `${N('OM')}(t) = ${par(x)}${I} + ${par(y)}${J} (en m). Les coordonnées du point M sont :`,
     opts(`x(t) = ${poly(x)} et y(t) = ${poly(y)}`, [`x(t) = ${poly(y)} et y(t) = ${poly(x)}`, `x(t) = ${fmt(x[0])} et y(t) = ${fmt(y[1])}`, `x(t) = ${poly(x)} + ${poly(y)}`]), 'ok',
-    `Le nombre devant ${I} est x(t), le nombre devant ${J} est y(t).`, 'Devant i⃗ : x(t) ; devant j⃗ : y(t).');
+    `Le nombre devant ${I} est x(t), le nombre devant ${J} est y(t).`, 'Devant i⃗ : x(t) ; devant j⃗ : y(t).');
 }
 let deja = [];
 function cours() {
   const liste = [
-    () => choix('Question de cours', `Le vecteur position ${N('OM')}(t) va :`, [o('ok', 'de l\'origine O du repère au point M'), o('a', 'du point M à l\'origine O'), o('b', 'd\'une position du point à la position suivante'), o('c', 'du point M au centre de la trajectoire')], 'ok', `${N('OM')} part de l'origine O et sa pointe est sur le point M.`, 'Lis le nom du vecteur : de O vers M.'),
-    () => choix('Question de cours', 'Les coordonnées x(t) et y(t) du vecteur position s\'expriment en :', [o('ok', 'm'), o('a', 's'), o('b', `m·s<sup>${M}1</sup>`), o('c', 'sans unité')], 'ok', 'Ce sont des positions : elles s\'expriment en mètres.', 'x et y sont des positions.', { colonne: false }),
-    () => choix('Question de cours', 'Dans l\'espace, le vecteur position s\'écrit :', [o('ok', `${N('OM')}(t) = x(t)${I} + y(t)${J} + z(t)${K}`), o('a', `${N('OM')}(t) = x(t) + y(t) + z(t)`), o('b', `${N('OM')}(t) = x(t)${I} + y(t)${J}`), o('c', `${N('OM')}(t) = (x(t) + y(t) + z(t))${K}`)], 'ok', `On ajoute une troisième coordonnée z(t) et un troisième vecteur unitaire ${K}.`, 'Une coordonnée par vecteur unitaire.'),
-    () => choix('Question de cours', 'Parmi ces écritures, laquelle n\'est pas équivalente aux autres ?', [o('ok', `${N('OM')}(t) = x(t) + y(t)`), o('a', `M ${col('x(t)', 'y(t)')}`), o('b', `${N('OM')}(t) ${col('x(t)', 'y(t)')}`), o('c', `${N('OM')}(t) = x(t)${I} + y(t)${J}`)], 'ok', `x(t) + y(t) est un nombre, pas un vecteur : il manque ${I} et ${J}.`, 'Un vecteur ne peut pas être égal à un nombre.'),
-    () => choix('Question de cours', 'Pour un point en mouvement, les coordonnées x(t) et y(t) :', [o('ok', 'dépendent du temps'), o('a', 'sont constantes'), o('b', 'sont toujours positives'), o('c', 'sont toujours égales')], 'ok', 'Le point se déplace : sa position, donc ses coordonnées, changent avec le temps.', 'Que se passe-t-il quand le point bouge ?'),
+    () => choix('Question de cours', `Le vecteur position ${N('OM')}(t) va :`, [o('ok', 'de l\'origine O du repère au point M'), o('a', 'du point M à l\'origine O'), o('b', 'd\'une position du point à la position suivante'), o('c', 'du point M au centre de la trajectoire')], 'ok', `${N('OM')} part de l'origine O et sa pointe est sur le point M.`, 'Lis le nom du vecteur : de O vers M.'),
+    () => choix('Question de cours', 'Les coordonnées x(t) et y(t) du vecteur position s\'expriment en :', [o('ok', 'm'), o('a', 's'), o('b', `m·s<sup>${M}1</sup>`), o('c', 'sans unité')], 'ok', 'Ce sont des positions : elles s\'expriment en mètres.', 'x et y sont des positions.', { colonne: false }),
+    () => choix('Question de cours', 'Dans l\'espace, le vecteur position s\'écrit :', [o('ok', `${N('OM')}(t) = x(t)${I} + y(t)${J} + z(t)${K}`), o('a', `${N('OM')}(t) = x(t) + y(t) + z(t)`), o('b', `${N('OM')}(t) = x(t)${I} + y(t)${J}`), o('c', `${N('OM')}(t) = (x(t) + y(t) + z(t))${K}`)], 'ok', `On ajoute une troisième coordonnée z(t) et un troisième vecteur unitaire ${K}.`, 'Une coordonnée par vecteur unitaire.'),
+    () => choix('Question de cours', 'Parmi ces écritures, laquelle n\'est pas équivalente aux autres ?', [o('ok', `${N('OM')}(t) = x(t) + y(t)`), o('a', `M ${col('x(t)', 'y(t)')}`), o('b', `${N('OM')}(t) ${col('x(t)', 'y(t)')}`), o('c', `${N('OM')}(t) = x(t)${I} + y(t)${J}`)], 'ok', `x(t) + y(t) est un nombre, pas un vecteur : il manque ${I} et ${J}.`, 'Un vecteur ne peut pas être égal à un nombre.'),
+    () => choix('Question de cours', 'Pour un point en mouvement, les coordonnées x(t) et y(t) :', [o('ok', 'dépendent du temps'), o('a', 'sont constantes'), o('b', 'sont toujours positives'), o('c', 'sont toujours égales')], 'ok', 'Le point se déplace : sa position, donc ses coordonnées, changent avec le temps.', 'Que se passe-t-il quand le point bouge ?'),
   ];
   if (deja.length >= liste.length) deja = [];
   const k = hasard(liste.map((_, i) => i).filter(i => !deja.includes(i)));
@@ -78,13 +78,13 @@ function cours() {
 function initial() {
   const x = fonction(), y = fonction();
   return { theme: 'Vecteur position', consigne: `Un point M a pour coordonnées x(t) = ${poly(x)} et y(t) = ${poly(y)} (x et y en m, t en s). Donne les coordonnées de ${N('OM')}(0).`,
-    parties: [{ type: 'coord', label: `${N('OM')}(0)`, valeurs: [x[2], y[2]], unite: 'm', indice: 'Remplace t par 0 : il ne reste que les termes constants.', solution: `x(0) = ${fmt(x[2])} m et y(0) = ${fmt(y[2])} m : ${N('OM')}(0) ${col(x[2], y[2])}` }] };
+    parties: [{ type: 'coord', label: `${N('OM')}(0)`, valeurs: [x[2], y[2]], unite: 'm', indice: 'Remplace t par 0 : il ne reste que les termes constants.', solution: `x(0) = ${fmt(x[2])} m et y(0) = ${fmt(y[2])} m : ${N('OM')}(0) ${col(x[2], y[2])}` }] };
 }
 function date() {
   const x = fonction(), y = fonction(), t = entre(1, 4);
   return { theme: 'Position à une date', consigne: `Un point M a pour coordonnées x(t) = ${poly(x)} et y(t) = ${poly(y)} (x et y en m, t en s). Calcule les coordonnées du point M à t = ${t} s.`,
-    parties: [{ type: 'coord', label: `${N('OM')}(${t})`, valeurs: [val(x, t), val(y, t)], unite: 'm', indice: `Remplace t par ${t} dans x(t) et dans y(t). Attention : ${M}t² = ${M}(t²).`,
-      solution: `x(${t}) = ${fmt(val(x, t))} m ; y(${t}) = ${fmt(val(y, t))} m` }] };
+    parties: [{ type: 'coord', label: `${N('OM')}(${t})`, valeurs: [val(x, t), val(y, t)], unite: 'm', indice: `Remplace t par ${t} dans x(t) et dans y(t). Attention : ${M}t² = ${M}(t²).`,
+      solution: `x(${t}) = ${fmt(val(x, t))} m ; y(${t}) = ${fmt(val(y, t))} m` }] };
 }
 function ecriture() {
   const x = fonction(), y = fonction();
@@ -100,7 +100,7 @@ function lecture() {
     figure: z => new VEC.Repere(z, { mode: 'aucun', vecteurs: [{ nom: 'OM', dep: [0, 0], coord: [a, b], fixe: true, coul: getComputedStyle(document.documentElement).getPropertyValue('--accent-ink').trim() }],
       points: [{ x: a, y: b, nom: 'M', dx: a > 0 ? 12 : -12, dy: b > 0 ? -8 : 18 }], unitaires: false }),
     parties: [{ type: 'coord', label: `${N('OM')}(${t})`, valeurs: [a, b], unite: 'm', lecture: true, indice: 'Lis l\'abscisse du point M (horizontalement), puis son ordonnée (verticalement).',
-      solution: `M a pour abscisse ${fmt(a)} m et pour ordonnée ${fmt(b)} m : ${N('OM')}(${t}) ${col(a, b)} = ${ij(a, b)}` }] };
+      solution: `M a pour abscisse ${fmt(a)} m et pour ordonnée ${fmt(b)} m : ${N('OM')}(${t}) ${col(a, b)} = ${ij(a, b)}` }] };
 }
 
 // 6 QCM et 4 questions à saisie
@@ -112,10 +112,10 @@ function tirage() {
 CIN.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 4 · QUESTIONS 1/4', titre: 'Le vecteur position',
-  intro: '<p class="er-contexte">10 questions tirées au hasard, surtout des QCM : écrire le vecteur position, coordonnées à l\'instant initial et à une date donnée, lecture sur un repère.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard, surtout des QCM : écrire le vecteur position, coordonnées à l\'instant initial et à une date donnée, lecture sur un repère.</p>',
   questions: tirage,
   revoir: { href: 'module_4a_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_4b_cours.html', label: 'Cours : le vecteur vitesse →' },
+  suite: { href: 'module_4b_cours.html', label: 'Cours : le vecteur vitesse →' },
 });
 CIN.menu('module_4a_questions');
 </script>

@@ -399,7 +399,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || (note && typeof note === 'string')) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${typeof note === 'string' ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -434,8 +434,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -447,7 +447,7 @@
       const q = qs[idx];
       window.NUC.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -467,7 +467,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -482,10 +482,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -625,38 +625,38 @@
   const RADIO = ['alpha', 'moins', 'plus'];
   const NOM_TYPE = { fission: 'fission', fusion: 'fusion', alpha: 'radioactivité α', moins: 'radioactivité β<sup>−</sup>', plus: 'radioactivité β<sup>+</sup>' };
   const IND_PART = {
-    alpha: `Radioactivité α : le noyau émet un noyau d'hélium ${lisible(noyau(4, 2, 'He'))}. Regarde la particule émise.`,
-    moins: `Radioactivité β<sup>−</sup> : le noyau émet un électron ${lisible(noyau(0, -1, 'e'))} (−1 en bas). Regarde la particule émise.`,
-    plus: `Radioactivité β<sup>+</sup> : le noyau émet un positron ${lisible(noyau(0, 1, 'e'))} (+1 en bas). Regarde la particule émise.`,
+    alpha: `Radioactivité α : le noyau émet un noyau d'hélium ${lisible(noyau(4, 2, 'He'))}. Regarde la particule émise.`,
+    moins: `Radioactivité β<sup>−</sup> : le noyau émet un électron ${lisible(noyau(0, -1, 'e'))} (−1 en bas). Regarde la particule émise.`,
+    plus: `Radioactivité β<sup>+</sup> : le noyau émet un positron ${lisible(noyau(0, 1, 'e'))} (+1 en bas). Regarde la particule émise.`,
   };
   // diagnostic de chaque mauvais choix
   function indicesClasse(a) {
     const ind = {};
     const cote = a.maxG > a.maxD ? 'à gauche' : a.maxD > a.maxG ? 'à droite' : 'des deux côtés';
     if (RADIO.includes(a.type)) {
-      ind.fission = 'Un seul réactif : ce n\'est pas une fission. Pour une fission, il faut deux réactifs : le neutron qui percute un gros noyau.';
-      ind.fusion = 'Un seul noyau à gauche : rien ne fusionne. Un noyau seul qui se transforme en émettant une particule, c\'est une radioactivité.';
+      ind.fission = 'Un seul réactif : ce n\'est pas une fission. Pour une fission, il faut deux réactifs : le neutron qui percute un gros noyau.';
+      ind.fusion = 'Un seul noyau à gauche : rien ne fusionne. Un noyau seul qui se transforme en émettant une particule, c\'est une radioactivité.';
       RADIO.forEach(t => { if (t !== a.type) ind[t] = IND_PART[t]; });
     } else {
-      RADIO.forEach(t => { ind[t] = `Il y a ${a.reactifs} noyaux à gauche : ce n'est pas une radioactivité (un noyau seul se désintègre).`; });
-      if (a.type === 'fission') ind.fusion = `Le plus grand nombre de nucléons (${a.max}) est ${cote} : pour une fusion, il serait à droite (des petits noyaux en donnent un plus gros).`;
-      else ind.fission = `Le plus grand nombre de nucléons (${a.max}) est ${cote} : pour une fission, il serait à gauche (un gros noyau se scinde en noyaux plus petits).`;
+      RADIO.forEach(t => { ind[t] = `Il y a ${a.reactifs} noyaux à gauche : ce n'est pas une radioactivité (un noyau seul se désintègre).`; });
+      if (a.type === 'fission') ind.fusion = `Le plus grand nombre de nucléons (${a.max}) est ${cote} : pour une fusion, il serait à droite (des petits noyaux en donnent un plus gros).`;
+      else ind.fission = `Le plus grand nombre de nucléons (${a.max}) est ${cote} : pour une fission, il serait à gauche (un gros noyau se scinde en noyaux plus petits).`;
     }
     return ind;
   }
   // justification rédigée
   function explication(a) {
-    if (a.type === 'fission') return `Le plus grand nombre de nucléons, ${a.max}, est à gauche : un gros noyau donne des noyaux plus petits. C'est une <b>fission</b>.`;
-    if (a.type === 'fusion') return `Le plus grand nombre de nucléons, ${a.max}, est à droite : des petits noyaux en donnent un plus gros. C'est une <b>fusion</b>.`;
-    const debut = a.maxG > a.maxD ? `Le plus grand nombre de nucléons, ${a.max}, est à gauche, mais il n'y a qu'un seul réactif : ce n'est pas une fission.`
+    if (a.type === 'fission') return `Le plus grand nombre de nucléons, ${a.max}, est à gauche : un gros noyau donne des noyaux plus petits. C'est une <b>fission</b>.`;
+    if (a.type === 'fusion') return `Le plus grand nombre de nucléons, ${a.max}, est à droite : des petits noyaux en donnent un plus gros. C'est une <b>fusion</b>.`;
+    const debut = a.maxG > a.maxD ? `Le plus grand nombre de nucléons, ${a.max}, est à gauche, mais il n'y a qu'un seul réactif : ce n'est pas une fission.`
       : `Le plus grand nombre de nucléons, ${a.max}, est le même à gauche et à droite.`;
     const p = PARTICULES[a.type];
-    return `${debut} Un noyau seul se désintègre en émettant un ${p.nom} ${lisible(noyau(p.A, p.Z, p.s))} : c'est une <b>${NOM_TYPE[a.type]}</b>.`;
+    return `${debut} Un noyau seul se désintègre en émettant un ${p.nom} ${lisible(noyau(p.A, p.Z, p.s))} : c'est une <b>${NOM_TYPE[a.type]}</b>.`;
   }
   // partie « Quelle est la nature de cette transformation ? »
   const partieClasse = (g, d, opts) => {
     const a = analyse(g, d);
-    return Object.assign({ type: 'choix', q: 'Fission, fusion ou radioactivité ?', options: TYPES, bonne: a.type, melanger: false, indices: indicesClasse(a), solution: `<p>${explication(a)}</p>` }, opts);
+    return Object.assign({ type: 'choix', q: 'Fission, fusion ou radioactivité ?', options: TYPES, bonne: a.type, melanger: false, indices: indicesClasse(a), solution: `<p>${explication(a)}</p>` }, opts);
   };
 
   /* ============================================================
@@ -756,7 +756,7 @@
     function diagnostic(vals, ok) {
       // A et Z inversés
       if (cases.some(ca => ca.q === 'A' && vals.get(ca) === ca.x.Z && cases.some(u => u.x === ca.x && u.q === 'Z' && vals.get(u) === ca.x.A))) {
-        return 'Tu as inversé A et Z : A, en haut, est le nombre de <b>nucléons</b> ; Z, en bas, le nombre de <b>protons</b>.';
+        return 'Tu as inversé A et Z : A, en haut, est le nombre de <b>nucléons</b> ; Z, en bas, le nombre de <b>protons</b>.';
       }
       const faux = q => cases.find((ca, j) => ca.q === q && !ok[j]);
       const fA = faux('k') || faux('A'), fZ = faux('Z');
@@ -764,16 +764,16 @@
       if (fA) {
         const ici = fA.c, autre = ici === 'g' ? 'd' : 'g';
         const voulu = somme(autre, 'A', vals), obtenu = somme(ici, 'A', vals);
-        let h = `Conservation de A (nombre de nucléons) : la somme des A ${nomCote(autre)} vaut ${ecrSomme(autre, 'A', vals, true)} ; ${nomCote(ici)}, avec tes nombres, elle vaut ${ecrSomme(ici, 'A', vals)}.`;
-        if (neutrons(autre) && obtenu === voulu - neutrons(autre)) h += ` N'oublie pas ${neutrons(autre) > 1 ? 'les neutrons' : 'le neutron'} ${nomCote(autre)} : chaque neutron compte pour 1 nucléon.`;
-        else if (fA.q === 'k') h += fA.x.s === 'n' ? ' Chaque neutron compte pour A = 1 : x neutrons comptent pour x × 1.' : ` Chaque noyau ${lisible(noyau(fA.x.A, fA.x.Z, fA.x.s))} compte pour A = ${fA.x.A} : x noyaux comptent pour x × ${fA.x.A}.`;
+        let h = `Conservation de A (nombre de nucléons) : la somme des A ${nomCote(autre)} vaut ${ecrSomme(autre, 'A', vals, true)} ; ${nomCote(ici)}, avec tes nombres, elle vaut ${ecrSomme(ici, 'A', vals)}.`;
+        if (neutrons(autre) && obtenu === voulu - neutrons(autre)) h += ` N'oublie pas ${neutrons(autre) > 1 ? 'les neutrons' : 'le neutron'} ${nomCote(autre)} : chaque neutron compte pour 1 nucléon.`;
+        else if (fA.q === 'k') h += fA.x.s === 'n' ? ' Chaque neutron compte pour A = 1 : x neutrons comptent pour x × 1.' : ` Chaque noyau ${lisible(noyau(fA.x.A, fA.x.Z, fA.x.s))} compte pour A = ${fA.x.A} : x noyaux comptent pour x × ${fA.x.A}.`;
         return h;
       }
       if (fZ) {
         const ici = fZ.c, autre = ici === 'g' ? 'd' : 'g';
-        let h = `Conservation de Z (nombre de charge) : la somme des Z ${nomCote(autre)} vaut ${ecrSomme(autre, 'Z', vals, true)} ; ${nomCote(ici)}, avec tes nombres, elle vaut ${ecrSomme(ici, 'Z', vals)}.`;
+        let h = `Conservation de Z (nombre de charge) : la somme des Z ${nomCote(autre)} vaut ${ecrSomme(autre, 'Z', vals, true)} ; ${nomCote(ici)}, avec tes nombres, elle vaut ${ecrSomme(ici, 'Z', vals)}.`;
         if (lesNoyaux(def.g.concat(def.d)).some(x => x.s === 'n')) h += ' Le neutron compte pour Z = 0 (aucun proton).';
-        if (lesNoyaux(def.g.concat(def.d)).some(x => x.s === 'e')) h += ' Attention au signe : l\'électron compte pour Z = −1, le positron pour Z = +1.';
+        if (lesNoyaux(def.g.concat(def.d)).some(x => x.s === 'e')) h += ' Attention au signe : l\'électron compte pour Z = −1, le positron pour Z = +1.';
         return h;
       }
       return 'Vérifie tes nombres.';
@@ -784,14 +784,14 @@
       const x = symbole, part = particuleDe(x);
       grille = el('div', 'nuc-choixs');
       if (part) {
-        grille.innerHTML = `<p class="nuc-choixs-t">Quelle particule a A = ${x.A} et Z = ${signe(x.Z)} ?</p><div class="ph-choix">${
+        grille.innerHTML = `<p class="nuc-choixs-t">Quelle particule a A = ${x.A} et Z = ${signe(x.Z)} ?</p><div class="ph-choix">${
           Object.keys(PARTICULES).map(k => `<button type="button" class="btn-secondary" data-k="${k}">${lisible(noyau(PARTICULES[k].A, PARTICULES[k].Z, PARTICULES[k].s))}&nbsp; ${PARTICULES[k].nom}</button>`).join('')}</div>`;
       } else {
         // extrait de 12 éléments consécutifs contenant Z (à une place au hasard)
         const nb = 12, debut = Math.max(1, Math.min(ELEMENTS.length - nb, x.Z - entre(2, nb - 3)));
         let cs12 = '';
         for (let z = debut; z < debut + nb; z++) cs12 += `<button type="button" class="nuc-elt" data-z="${z}" aria-label="${nomDe(z)}, Z = ${z}"><span class="nuc-elt-z">${z}</span><span class="nuc-elt-s">${symboleDe(z)}</span><span class="nuc-elt-n">${nomDe(z)}</span></button>`;
-        grille.innerHTML = `<p class="nuc-choixs-t">Extrait de la classification : trouve l'élément de numéro atomique Z = ${x.Z}.</p><div class="nuc-elts">${cs12}</div>`;
+        grille.innerHTML = `<p class="nuc-choixs-t">Extrait de la classification : trouve l'élément de numéro atomique Z = ${x.Z}.</p><div class="nuc-elts">${cs12}</div>`;
       }
       suite.appendChild(grille);
       grille.querySelectorAll('button').forEach(b => {
@@ -802,8 +802,8 @@
           b.classList.add('faux'); b.disabled = true;
           if (part) {
             const p = PARTICULES[b.dataset.k];
-            api.erreur(`${lisible(noyau(p.A, p.Z, p.s))} a A = ${p.A} et Z = ${signe(p.Z)}. Compare avec les nombres trouvés : A = ${x.A} et Z = ${signe(x.Z)}.`);
-          } else api.erreur(`${cap(nomDe(+b.dataset.z))} a pour numéro atomique Z = ${b.dataset.z}. C'est Z (le nombre de protons) qui fixe l'élément : cherche Z = ${x.Z}.`);
+            api.erreur(`${lisible(noyau(p.A, p.Z, p.s))} a A = ${p.A} et Z = ${signe(p.Z)}. Compare avec les nombres trouvés : A = ${x.A} et Z = ${signe(x.Z)}.`);
+          } else api.erreur(`${cap(nomDe(+b.dataset.z))} a pour numéro atomique Z = ${b.dataset.z}. C'est Z (le nombre de protons) qui fixe l'élément : cherche Z = ${x.Z}.`);
         };
       });
     }
@@ -818,14 +818,14 @@
       ligne.innerHTML = `<span class="nuc-eq">${['g', 'd'].map(c => cotes[c].map(x => (x === 'γ' ? ecrire(x)
         : `<span class="nuc-esp">${coef(x.k)}${noyau(`<button type="button" class="nuc-a-b" data-a="${x.A}" aria-label="A = ${x.A}">${x.A}</button>`, x.Z, x.s)}</span>`)).join(PLUS)).join(FLECHE)}</span>`;
       ligne.classList.add('reperer');
-      consigneRep = el('p', 'nuc-choixs-t', 'Repère le plus grand nombre de nucléons A : touche-le dans l\'équation.');
+      consigneRep = el('p', 'nuc-choixs-t', 'Repère le plus grand nombre de nucléons A : touche-le dans l\'équation.');
       suite.appendChild(consigneRep);
       ligne.querySelectorAll('.nuc-a-b').forEach(b => {
         b.onclick = () => {
           if (api.fini() || phase !== 'reperer' || b.disabled) return;
           if (+b.dataset.a === a.max) { entourer(); suivante(); return; }
           b.classList.add('faux');
-          api.erreur(`${b.dataset.a} n'est pas le plus grand : compare les nombres du haut (A) de tous les noyaux, à gauche et à droite de la flèche.`);
+          api.erreur(`${b.dataset.a} n'est pas le plus grand : compare les nombres du haut (A) de tous les noyaux, à gauche et à droite de la flèche.`);
         };
       });
     }
@@ -838,7 +838,7 @@
     function classer() {
       const p = partieClasse(def.g, def.d);
       const z = el('div', 'nuc-classe');
-      z.innerHTML = '<p class="nuc-choixs-t">Fission, fusion ou radioactivité ?</p><div></div><p class="nuc-explic" hidden></p>';
+      z.innerHTML = '<p class="nuc-choixs-t">Fission, fusion ou radioactivité ?</p><div></div><p class="nuc-explic" hidden></p>';
       suite.appendChild(z);
       const expl = z.querySelector('.nuc-explic');
       const montrerExpl = () => { expl.innerHTML = explication(a); expl.hidden = false; };
@@ -881,16 +881,16 @@
     const inconnueA = tous.find(x => inc(x).includes('k') || inc(x).includes('A'));
     if (inconnueA) {
       const nomI = inc(inconnueA).includes('k') ? 'x' : 'A', v = nomI === 'x' ? inconnueA.k : inconnueA.A;
-      h.push(`A : ${cote(g, 'A')} = ${cote(d, 'A')}, donc ${nomI} = <span class="c">${v}</span>`);
+      h.push(`A : ${cote(g, 'A')} = ${cote(d, 'A')}, donc ${nomI} = <span class="c">${v}</span>`);
     }
     const inconnueZ = tous.find(x => inc(x).includes('Z'));
-    if (inconnueZ) h.push(`Z : ${cote(g, 'Z')} = ${cote(d, 'Z')}, donc Z = <span class="c">${signe(inconnueZ.Z)}</span>`);
+    if (inconnueZ) h.push(`Z : ${cote(g, 'Z')} = ${cote(d, 'Z')}, donc Z = <span class="c">${signe(inconnueZ.Z)}</span>`);
     const sym = tous.find(x => inc(x).includes('s'));
     let fin = '';
     if (sym) {
       const p = particuleDe(sym);
-      fin = p ? `<p>A = ${sym.A} et Z = ${signe(sym.Z)} : c'est un ${PARTICULES[p].nom} ${lisible(noyau(sym.A, sym.Z, sym.s))}.</p>`
-        : `<p>Z = ${sym.Z} : c'est l'élément ${nomDe(sym.Z)}, ${lisible(noyau(sym.A, sym.Z, sym.s))}.</p>`;
+      fin = p ? `<p>A = ${sym.A} et Z = ${signe(sym.Z)} : c'est un ${PARTICULES[p].nom} ${lisible(noyau(sym.A, sym.Z, sym.s))}.</p>`
+        : `<p>Z = ${sym.Z} : c'est l'élément ${nomDe(sym.Z)}, ${lisible(noyau(sym.A, sym.Z, sym.s))}.</p>`;
     }
     const sans = l => l.map(x => (x === 'γ' ? x : Object.assign({}, x, { inc: '' })));
     return h.map(t => `<p class="ph-calc">${t}</p>`).join('') + fin + `<p class="ph-calc">${lisible(equation(sans(g), sans(d)))}</p>`;
@@ -1011,7 +1011,7 @@
         champsK.forEach((c, j) => c.ch.el.classList.toggle('ko', !ok[j]));
         if (ok.every(Boolean)) { champsK.forEach(c => c.ch.desactiver(true)); produits(); suivante(); return; }
         const f = champsK.find((c, j) => !ok[j]);
-        api.erreur(f.l.x.k > 1 ? `Le coefficient est le nombre écrit devant l'espèce dans l'équation : ${f.l.x.k} ${lisible(noyau(f.l.x.A, f.l.x.Z, f.l.x.s))}, donc ${f.l.x.k} × ${mDe(f.l.x)}.`
+        api.erreur(f.l.x.k > 1 ? `Le coefficient est le nombre écrit devant l'espèce dans l'équation : ${f.l.x.k} ${lisible(noyau(f.l.x.A, f.l.x.Z, f.l.x.s))}, donc ${f.l.x.k} × ${mDe(f.l.x)}.`
           : 'Quand aucun nombre n\'est écrit devant l\'espèce, son coefficient est 1.');
         secouer(box);
       };
@@ -1022,7 +1022,7 @@
     function etapeSimplifier() {
       const kd = double.x.k, kg = doubleG.x.k, att = kd - kg;
       simpl = el('div', 'nuc-tdm-etape');
-      simpl.innerHTML = `<p>${cap(PARTICULES[particuleDe(double.x)] ? PARTICULES[particuleDe(double.x)].nom + 's' : 'noyaux')} des deux côtés : ${kd} × ${mDe(double.x)} dans les produits, ${kg} × ${mDe(double.x)} dans les réactifs. Dans Δm = m<sub>produits</sub> − m<sub>réactifs</sub>, combien de ${mDe(double.x)} reste-t-il ?</p>
+      simpl.innerHTML = `<p>${cap(PARTICULES[particuleDe(double.x)] ? PARTICULES[particuleDe(double.x)].nom + 's' : 'noyaux')} des deux côtés : ${kd} × ${mDe(double.x)} dans les produits, ${kg} × ${mDe(double.x)} dans les réactifs. Dans Δm = m<sub>produits</sub> − m<sub>réactifs</sub>, combien de ${mDe(double.x)} reste-t-il ?</p>
         <div class="ph-valeur"><span class="ph-lab">Δm contient</span><span data-ch></span><span class="ph-unite">× ${mDe(double.x)}</span></div><p class="nuc-tdm-expr" hidden></p>`;
       suite.appendChild(simpl);
       const ch = champ({ petit: true, aria: 'Nombre de masses du neutron dans Δm' });
@@ -1036,9 +1036,9 @@
         const v = lire(ch.input.value);
         if (isNaN(v) || !Number.isInteger(v)) { secouer(simpl); api.message('Écris un nombre entier.'); return; }
         if (v === att) { ch.desactiver(true); montrerExpr(); suivante(); return; }
-        api.erreur(v === kd + kg ? `Δm = m<sub>produits</sub> − m<sub>réactifs</sub> : on soustrait ${mDe(double.x)} des réactifs, ${kd} − ${kg}.`
-          : v === kd ? `Retire aussi ${kg > 1 ? `les ${kg}` : 'celui'} des réactifs : ${kd} − ${kg}.`
-          : v === -att ? `Δm = produits − réactifs : ${kd} − ${kg}, pas l'inverse.` : `Produits moins réactifs : ${kd} − ${kg}.`);
+        api.erreur(v === kd + kg ? `Δm = m<sub>produits</sub> − m<sub>réactifs</sub> : on soustrait ${mDe(double.x)} des réactifs, ${kd} − ${kg}.`
+          : v === kd ? `Retire aussi ${kg > 1 ? `les ${kg}` : 'celui'} des réactifs : ${kd} − ${kg}.`
+          : v === -att ? `Δm = produits − réactifs : ${kd} − ${kg}, pas l'inverse.` : `Produits moins réactifs : ${kd} − ${kg}.`);
         secouer(simpl);
       };
     }
@@ -1066,7 +1066,7 @@
         ['g', 'd'].forEach(c => som[c].el.classList.toggle('ko', !ok[c]));
         if (ok.g && ok.d) { ['g', 'd'].forEach(c => som[c].desactiver(true)); suivante(); return; }
         const c = ok.g ? 'd' : 'g', sans = cols[c].reduce((s, l) => s + l.m.v, 0);
-        api.erreur(Math.abs(v[c] - sans) <= P[c] * 2 + 1e-12 ? 'N\'oublie pas les coefficients : chaque masse est multipliée par son coefficient avant d\'additionner.'
+        api.erreur(Math.abs(v[c] - sans) <= P[c] * 2 + 1e-12 ? 'N\'oublie pas les coefficients : chaque masse est multipliée par son coefficient avant d\'additionner.'
           : `Additionne les lignes de la colonne des ${c === 'g' ? 'réactifs' : 'produits'} (coefficient × masse).`);
         secouer(box);
       };
@@ -1099,7 +1099,7 @@
       bVal.onclick = () => {
         if (api.fini() || phase !== 'dm') return;
         const v = chDm.lireV();
-        if (isNaN(v)) { secouer(d); api.message(enKg ? 'Écris Δm en écriture scientifique : le nombre, puis l\'exposant (entier, avec ± s\'il est négatif).' : 'Écris un nombre (avec une virgule).'); return; }
+        if (isNaN(v)) { secouer(d); api.message(enKg ? 'Écris Δm en écriture scientifique : le nombre, puis l\'exposant (entier, avec ± s\'il est négatif).' : 'Écris un nombre (avec une virgule).'); return; }
         if (proche(v, dm, enKg ? .01 : .005)) { chDm.desactiver(); suivante(); return; }
         api.erreur(diagDm(v));
         secouer(d);
@@ -1109,20 +1109,20 @@
     function diagDm(v) {
       const sansCoef = def.d.reduce((s, l) => s + l.m.v, 0) - def.g.reduce((s, l) => s + l.m.v, 0);
       const sansNg = doubleG ? dm + doubleG.x.k * doubleG.m.v : null;
-      if (proche(v, -dm, .01)) return 'Tu as calculé m<sub>réactifs</sub> − m<sub>produits</sub>. C\'est l\'inverse : Δm = m<sub>produits</sub> − m<sub>réactifs</sub>, qui est négatif ici (de la masse disparaît).';
-      if (Math.abs(sansCoef - dm) > Math.abs(dm) * .01 && proche(v, sansCoef, .01)) return 'Tu as oublié un coefficient : multiplie chaque masse par le nombre écrit devant l\'espèce (par exemple 2 × m(n)).';
-      if (sansNg != null && proche(v, sansNg, .01)) return `Tu as oublié ${mDe(doubleG.x)} des réactifs : il faut le retirer (le neutron qui percute le noyau).`;
-      if (enKg && proche(v, dm / 1.660539e-27, .01)) return 'Les masses sont en kg : Δm aussi.';
-      if (!enKg && proche(v, dm * 1.660539e-27, .01)) return 'Les masses sont en u : donne Δm en u (la conversion en kg vient ensuite).';
+      if (proche(v, -dm, .01)) return 'Tu as calculé m<sub>réactifs</sub> − m<sub>produits</sub>. C\'est l\'inverse : Δm = m<sub>produits</sub> − m<sub>réactifs</sub>, qui est négatif ici (de la masse disparaît).';
+      if (Math.abs(sansCoef - dm) > Math.abs(dm) * .01 && proche(v, sansCoef, .01)) return 'Tu as oublié un coefficient : multiplie chaque masse par le nombre écrit devant l\'espèce (par exemple 2 × m(n)).';
+      if (sansNg != null && proche(v, sansNg, .01)) return `Tu as oublié ${mDe(doubleG.x)} des réactifs : il faut le retirer (le neutron qui percute le noyau).`;
+      if (enKg && proche(v, dm / 1.660539e-27, .01)) return 'Les masses sont en kg : Δm aussi.';
+      if (!enKg && proche(v, dm * 1.660539e-27, .01)) return 'Les masses sont en u : donne Δm en u (la conversion en kg vient ensuite).';
       if (v * dm > 0) { const k = Math.log10(v / dm); if (Math.abs(k - Math.round(k)) < .005) return 'Vérifie la puissance de 10.'; }
-      return 'Fais la somme de chaque colonne (coefficient × masse), puis la différence : produits moins réactifs.';
+      return 'Fais la somme de chaque colonne (coefficient × masse), puis la différence : produits moins réactifs.';
     }
     // bilan : sommes et Δm écrits dans le tableau
     function resultat() {
       sommes();
       if (!suite.querySelector('.nuc-tdm-res')) {
         const r = el('p', 'nuc-tdm-res');
-        r.innerHTML = `Δm = ${ecrireS(S.d, P.d)} − ${ecrireS(S.g, P.g)} = <b>${enKg ? sciCourt(dm, 5) : fmt(dm, Math.round(-Math.log10(Math.min(P.g, P.d))))}${ESP}${U}</b>. Δm est négatif : la masse des produits est plus petite que celle des réactifs.`;
+        r.innerHTML = `Δm = ${ecrireS(S.d, P.d)} − ${ecrireS(S.g, P.g)} = <b>${enKg ? sciCourt(dm, 5) : fmt(dm, Math.round(-Math.log10(Math.min(P.g, P.d))))}${ESP}${U}</b>. Δm est négatif : la masse des produits est plus petite que celle des réactifs.`;
         suite.appendChild(r);
       }
     }
@@ -1180,61 +1180,61 @@
   // E = |Δm| × c²
   function diagE(v, dm, c) {
     const E = Math.abs(dm) * c * c;
-    if (v < 0 && egal(-v, E)) return 'E = |Δm| × c² : on prend la valeur absolue de Δm. L\'énergie libérée est positive.';
-    if (egal(Math.abs(v), Math.abs(dm) * c)) return 'Tu n\'as pas élevé c au carré : E = |Δm| × c².';
+    if (v < 0 && egal(-v, E)) return 'E = |Δm| × c² : on prend la valeur absolue de Δm. L\'énergie libérée est positive.';
+    if (egal(Math.abs(v), Math.abs(dm) * c)) return 'Tu n\'as pas élevé c au carré : E = |Δm| × c².';
     if (egal(Math.abs(v), Math.abs(dm) * c * c / 1.660539e-27) || egal(Math.abs(v), Math.abs(dm) / 1.660539e-27 * c * c)) return 'Δm doit être en kg.';
-    if (decale(Math.abs(v), E)) return 'Vérifie la puissance de 10 : Δm en kg, c en m·s<sup>−1</sup>, (10<sup>8</sup>)<sup>2</sup> = 10<sup>16</sup>.';
+    if (decale(Math.abs(v), E)) return 'Vérifie la puissance de 10 : Δm en kg, c en m·s<sup>−1</sup>, (10<sup>8</sup>)<sup>2</sup> = 10<sup>16</sup>.';
     return 'E = |Δm| × c², avec Δm en kg et c en m·s<sup>−1</sup>.';
   }
   // J → MeV
   function diagMeV(v, EJ) {
-    if (egal(v, EJ / EV) || egal(v, EJ / MEV * 1e6)) return 'Ça, c\'est l\'énergie en eV. 1 MeV = 10<sup>6</sup> eV : divise encore par 10<sup>6</sup>.';
-    if (egal(v, EJ * MEV) || egal(v, EJ * EV)) return 'Pour passer des joules aux MeV, on divise par 1,60 × 10<sup>−13</sup> J (1 MeV = 1,60 × 10<sup>−13</sup> J) : on ne multiplie pas.';
-    if (decale(v, EJ / MEV)) return 'Vérifie la puissance de 10 : 1 MeV = 1,60 × 10<sup>−13</sup> J.';
+    if (egal(v, EJ / EV) || egal(v, EJ / MEV * 1e6)) return 'Ça, c\'est l\'énergie en eV. 1 MeV = 10<sup>6</sup> eV : divise encore par 10<sup>6</sup>.';
+    if (egal(v, EJ * MEV) || egal(v, EJ * EV)) return 'Pour passer des joules aux MeV, on divise par 1,60 × 10<sup>−13</sup> J (1 MeV = 1,60 × 10<sup>−13</sup> J) : on ne multiplie pas.';
+    if (decale(v, EJ / MEV)) return 'Vérifie la puissance de 10 : 1 MeV = 1,60 × 10<sup>−13</sup> J.';
     return 'E (en MeV) = E (en J) / 1,60 × 10<sup>−13</sup>.';
   }
   // MeV → J
   function diagJ(v, EM) {
-    if (egal(v, EM / MEV)) return 'Des MeV aux joules, on multiplie par 1,60 × 10<sup>−13</sup> : on ne divise pas.';
-    if (egal(v, EM * EV)) return 'Ça, c\'est la conversion des eV : 1 MeV = 10<sup>6</sup> eV = 1,60 × 10<sup>−13</sup> J.';
-    if (decale(v, EM * MEV)) return 'Vérifie la puissance de 10 : 1 MeV = 1,60 × 10<sup>−13</sup> J.';
+    if (egal(v, EM / MEV)) return 'Des MeV aux joules, on multiplie par 1,60 × 10<sup>−13</sup> : on ne divise pas.';
+    if (egal(v, EM * EV)) return 'Ça, c\'est la conversion des eV : 1 MeV = 10<sup>6</sup> eV = 1,60 × 10<sup>−13</sup> J.';
+    if (decale(v, EM * MEV)) return 'Vérifie la puissance de 10 : 1 MeV = 1,60 × 10<sup>−13</sup> J.';
     return 'E (en J) = E (en MeV) × 1,60 × 10<sup>−13</sup>.';
   }
   // u → kg
   function diagKg(v, mu) {
     if (egal(Math.abs(v), Math.abs(mu) / U_KG)) return 'On multiplie par 1,660539 × 10<sup>−27</sup> kg (la masse de 1 u), on ne divise pas.';
-    if (v * mu < 0) return 'Garde le signe de Δm : il est négatif.';
-    if (decale(v, mu * U_KG)) return 'Vérifie la puissance de 10 : 1 u = 1,660539 × 10<sup>−27</sup> kg.';
+    if (v * mu < 0) return 'Garde le signe de Δm : il est négatif.';
+    if (decale(v, mu * U_KG)) return 'Vérifie la puissance de 10 : 1 u = 1,660539 × 10<sup>−27</sup> kg.';
     return 'm (en kg) = m (en u) × 1,660539 × 10<sup>−27</sup>.';
   }
   // N = m / m(1 noyau), m de l'échantillon en g (écrite mt dans l'énoncé), m1 en kg
   function diagN(v, mg, m1, mt) {
     const N = mg * 1e-3 / m1;
     const enKg = mt && / g$/.test(mt) ? mt.replace(/ g$/, ' × 10<sup>−3</sup> kg') : `${sci(mg * 1e-3, 3)} kg`;
-    if (egal(v, N * 1e3)) return `Convertis d'abord la masse de l'échantillon en kg : ${mt || fmt(mg) + ' g'} = ${enKg}. Les deux masses doivent être dans la même unité.`;
-    if (egal(v, 1 / N) || egal(v, 1e-3 / N)) return 'N = m / m(1 noyau) : la masse de l\'échantillon divisée par la masse d\'un noyau, pas l\'inverse.';
+    if (egal(v, N * 1e3)) return `Convertis d'abord la masse de l'échantillon en kg : ${mt || fmt(mg) + ' g'} = ${enKg}. Les deux masses doivent être dans la même unité.`;
+    if (egal(v, 1 / N) || egal(v, 1e-3 / N)) return 'N = m / m(1 noyau) : la masse de l\'échantillon divisée par la masse d\'un noyau, pas l\'inverse.';
     if (decale(v, N)) return 'Vérifie la puissance de 10 (les deux masses en kg).';
     return 'N = m / m(1 noyau), avec les deux masses en kg.';
   }
   // E = N × E(1 noyau)
   function diagEtot(v, N, E1) {
-    if (egal(v, N / E1) || egal(v, E1 / N)) return 'On multiplie : E = N × E(1 réaction). Chaque noyau libère la même énergie.';
-    if (decale(v, N * E1)) return 'Vérifie la puissance de 10 : 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a + b</sup>.';
+    if (egal(v, N / E1) || egal(v, E1 / N)) return 'On multiplie : E = N × E(1 réaction). Chaque noyau libère la même énergie.';
+    if (decale(v, N * E1)) return 'Vérifie la puissance de 10 : 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a + b</sup>.';
     return 'E = N × E(1 réaction).';
   }
   // m(pétrole) = E / PC, PC = 42 MJ·kg⁻¹
   function diagPetrole(v, E) {
     const m = E / PC;
-    if (egal(v, E / 42)) return 'PC = 42 MJ·kg<sup>−1</sup> = 42 × 10<sup>6</sup> J·kg<sup>−1</sup> : convertis les MJ en J.';
-    if (egal(v, E * PC) || egal(v, PC / E)) return 'm = E / PC : on divise l\'énergie par le pouvoir calorifique.';
-    if (egal(v, m / 1000)) return 'Ça, c\'est en tonnes : la réponse est demandée en kg (1 t = 1 000 kg).';
-    if (decale(v, m)) return 'Vérifie la puissance de 10 : 42 MJ = 42 × 10<sup>6</sup> J.';
-    return 'm = E / PC : 1 kg de pétrole libère 42 × 10<sup>6</sup> J.';
+    if (egal(v, E / 42)) return 'PC = 42 MJ·kg<sup>−1</sup> = 42 × 10<sup>6</sup> J·kg<sup>−1</sup> : convertis les MJ en J.';
+    if (egal(v, E * PC) || egal(v, PC / E)) return 'm = E / PC : on divise l\'énergie par le pouvoir calorifique.';
+    if (egal(v, m / 1000)) return 'Ça, c\'est en tonnes : la réponse est demandée en kg (1 t = 1 000 kg).';
+    if (decale(v, m)) return 'Vérifie la puissance de 10 : 42 MJ = 42 × 10<sup>6</sup> J.';
+    return 'm = E / PC : 1 kg de pétrole libère 42 × 10<sup>6</sup> J.';
   }
   // activité = P / E(1 désintégration)
   function diagActivite(v, P, E1) {
-    if (egal(v, E1 / P)) return 'A = P / E(1 désintégration) : la puissance divisée par l\'énergie d\'une désintégration, pas l\'inverse.';
-    if (egal(v, P * E1)) return 'On divise : chaque seconde, la source libère P joules, et chaque désintégration en libère E.';
+    if (egal(v, E1 / P)) return 'A = P / E(1 désintégration) : la puissance divisée par l\'énergie d\'une désintégration, pas l\'inverse.';
+    if (egal(v, P * E1)) return 'On divise : chaque seconde, la source libère P joules, et chaque désintégration en libère E.';
     if (decale(v, P / E1)) return 'Vérifie la puissance de 10.';
     return 'Nombre de désintégrations par seconde = P / E(1 désintégration).';
   }
@@ -1280,7 +1280,7 @@
     s += amas(232, 176, 10, 14, r) + txt(232, 176 + rayonAmas(24, r) + 13, 'xénon 140');
     s += fleche(326, 92, 366, 66) + `<circle cx="376" cy="60" r="6" class="nuc-neutron"/>`;
     s += fleche(326, 132, 366, 158) + `<circle cx="376" cy="164" r="6" class="nuc-neutron"/>` + txt(376, 116, 'neutrons');
-    return svgFig(400, 228, s, 'Fission : un neutron percute un noyau d\'uranium 235, qui se scinde en strontium 94 et xénon 140 en libérant deux neutrons et de l\'énergie');
+    return svgFig(400, 228, s, 'Fission : un neutron percute un noyau d\'uranium 235, qui se scinde en strontium 94 et xénon 140 en libérant deux neutrons et de l\'énergie');
   }
   // fusion : ²H + ³H → ⁴He + n + énergie
   function dessinFusion() {
@@ -1291,7 +1291,7 @@
     s += fleche(70, 60, 150, 92) + fleche(70, 140, 150, 112);
     s += eclat(196, 102, 46, 28, false) + amas(196, 102, 2, 2, r) + txt(196, 40, 'énergie', 'nuc-fig-e') + txt(196, 170, 'hélium 4');
     s += fleche(246, 102, 334, 102) + `<circle cx="352" cy="102" r="7" class="nuc-neutron"/>` + txt(352, 132, 'neutron libre');
-    return svgFig(400, 200, s, 'Fusion : un noyau de deutérium et un noyau de tritium s\'associent en un noyau d\'hélium 4, en libérant un neutron et de l\'énergie');
+    return svgFig(400, 200, s, 'Fusion : un noyau de deutérium et un noyau de tritium s\'associent en un noyau d\'hélium 4, en libérant un neutron et de l\'énergie');
   }
   // légende commune
   const legende = '<p class="nuc-legende"><span class="nuc-leg nuc-leg-p"></span> proton <span class="nuc-leg nuc-leg-n"></span> neutron</p>';
@@ -1302,27 +1302,27 @@
      PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
      ============================================================ */
   const PLAN = [
-    { n: 1, titre: 'Fission, fusion ou radioactivité ?', desc: 'Fission, fusion, reconnaître une réaction d\'après son équation, compléter une équation (A, Z, x)', fiche: 'fiche_1',
+    { n: 1, titre: 'Fission, fusion ou radioactivité ?', desc: 'Fission, fusion, reconnaître une réaction d\'après son équation, compléter une équation (A, Z, x)', fiche: 'fiche_1',
       sousModules: true,
       parties: [
-        { nom: 'Fission et fusion', slug: 'reconnaitre', cours: 'module_1a_cours', noms: { cours: 'Cours : fission et fusion' } },
-        { nom: 'Compléter une équation', slug: 'completer', cours: 'module_1b_cours', noms: { cours: 'Cours : compléter une équation' } },
+        { nom: 'Fission et fusion', slug: 'reconnaitre', cours: 'module_1a_cours', noms: { cours: 'Cours : fission et fusion' } },
+        { nom: 'Compléter une équation', slug: 'completer', cours: 'module_1b_cours', noms: { cours: 'Cours : compléter une équation' } },
         { nom: 'Fission, fusion ou radioactivité', questions: 'module_1_questions' }] },
     { n: 2, titre: 'Défaut de masse et énergie libérée', desc: 'Δm = m<sub>produits</sub> − m<sub>réactifs</sub>, tableau du défaut de masse, masses en u, E = |Δm| × c², joules et MeV', fiche: 'fiche_2',
       sousModules: true,
       parties: [
-        { nom: 'Le défaut de masse', slug: 'defaut', cours: 'module_2a_cours', noms: { cours: 'Cours : le défaut de masse' } },
-        { nom: 'L\'énergie libérée', slug: 'energie', cours: 'module_2b_cours', noms: { cours: 'Cours : l\'énergie libérée' } },
+        { nom: 'Le défaut de masse', slug: 'defaut', cours: 'module_2a_cours', noms: { cours: 'Cours : le défaut de masse' } },
+        { nom: 'L\'énergie libérée', slug: 'energie', cours: 'module_2b_cours', noms: { cours: 'Cours : l\'énergie libérée' } },
         { nom: 'Défaut de masse et énergie', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Énergie d\'un échantillon', desc: 'Nombre de noyaux, énergie de m grammes de combustible, masse de pétrole équivalente, activité', fiche: 'fiche_3',
       sousModules: true,
       parties: [
-        { nom: 'Nombre de noyaux et énergie', slug: 'echantillon', cours: 'module_3a_cours', noms: { cours: 'Cours : énergie d\'un échantillon' } },
-        { nom: 'Pétrole et activité', slug: 'comparaison', cours: 'module_3b_cours', noms: { cours: 'Cours : comparaison avec le pétrole, activité' } },
+        { nom: 'Nombre de noyaux et énergie', slug: 'echantillon', cours: 'module_3a_cours', noms: { cours: 'Cours : énergie d\'un échantillon' } },
+        { nom: 'Pétrole et activité', slug: 'comparaison', cours: 'module_3b_cours', noms: { cours: 'Cours : comparaison avec le pétrole, activité' } },
         { nom: 'Énergie d\'un échantillon', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Exercices', desc: 'Exercices 1 à 7 de la feuille : réactions, défaut de masse, énergie libérée, bombe H, sonde New Horizons', exercices: 'module_4', exNom: 'Exercices de la feuille', nbEx: 7 },
+    { n: 4, titre: 'Exercices', desc: 'Exercices 1 à 7 de la feuille : réactions, défaut de masse, énergie libérée, bombe H, sonde New Horizons', exercices: 'module_4', exNom: 'Exercices de la feuille', nbEx: 7 },
   ];
-  window.SOM.init({ nom: 'Chapitre 13 : Énergie nucléaire', id: 'energie-nucleaire', cleEx: 'energie-nucleaire-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 13 : Énergie nucléaire', id: 'energie-nucleaire', cleEx: 'energie-nucleaire-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

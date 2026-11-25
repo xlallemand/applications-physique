@@ -492,7 +492,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -531,8 +531,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -544,7 +544,7 @@
       const q = qs[idx];
       window.TE.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -564,7 +564,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -579,10 +579,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       marquer({ note });
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -650,7 +650,7 @@
         // la manipulation demandée n'est pas faite : on le dit, sans compter d'erreur
         const manque = q.prealable ? q.prealable() : null;
         if (manque) {
-          retour.innerHTML = `<div class="callout-accent"><b>Avant de répondre :</b> ${manque}</div>`;
+          retour.innerHTML = `<div class="callout-accent"><b>Avant de répondre :</b> ${manque}</div>`;
           secouer(retour);
           return;
         }
@@ -667,7 +667,7 @@
         b.classList.add('opt-correct');
         boutons.forEach(x => { x.disabled = true; });
         const bravo = valeur(q.bravo);
-        retour.innerHTML = `<div class="callout-success"><p><b>${erreurs ? 'C\'est juste.' : 'Juste !'}</b> ${bravo}</p></div>`;
+        retour.innerHTML = `<div class="callout-success"><p><b>${erreurs ? 'C\'est juste.' : 'Juste !'}</b> ${bravo}</p></div>`;
         faites.push({ resume: valeur(q.resume), bravo });
         if (q.apres) q.apres();
         const fin = n === questions.length - 1;
@@ -851,7 +851,7 @@
       ] },
     { n: 3, titre: 'Risque électrique', desc: 'Disjoncteurs, disjoncteur différentiel, mise à la terre', fiche: 'fiche_3',
       parties: [{ nom: 'Risque électrique', cours: 'module_3_cours', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Puissance et transport en exercices', desc: 'Transformateurs et charge avec facteur de puissance : méthode, exemples, exercices', fiche: 'fiche_4',
+    { n: 4, titre: 'Puissance et transport en exercices', desc: 'Transformateurs et charge avec facteur de puissance : méthode, exemples, exercices', fiche: 'fiche_4',
       exercices: 'module_4_exercices', exNom: 'Exercices', nbEx: 14,
       parties: [{ nom: 'Méthode et exemples', slug: 'methode', cours: 'module_4_cours' }] },
   ];
@@ -953,7 +953,7 @@
     // accueil de l'application : bandeau avec le lien vers le portail des applications
     if (cle === 'accueil') {
       racine.innerHTML = '<div class="app-topbar"><a class="te-pilule" href="../index.html"><span aria-hidden="true">←</span><span class="te-court">Applications</span><span class="te-long">Toutes les applications</span></a>' +
-        '<div class="app-topbar-title"><span class="app-name">Chapitre 4 : Transport et distribution de l\'électricité</span></div></div><div class="app-topbar-spacer"></div>';
+        '<div class="app-topbar-title"><span class="app-name">Chapitre 4 : Transport et distribution de l\'électricité</span></div></div><div class="app-topbar-spacer"></div>';
       return;
     }
     if (!situer(cle)) return;
@@ -971,10 +971,10 @@
       const multi = s.m.parties && s.m.parties.length > 1;
       const ou = s.onglet === 'exercices' || s.onglet === 'fiche' || !multi ? NOMS_PAGES[s.onglet] : `${s.p.nom} · ${NOMS_PAGES[s.onglet]}`;
       racine.innerHTML =
-        `<div class="te-barre"><button type="button" class="te-ou" aria-expanded="false" aria-controls="te-som" aria-label="Sommaire : module ${s.m.n}, ${ou}">` +
+        `<div class="te-barre"><button type="button" class="te-ou" aria-expanded="false" aria-controls="te-som" aria-label="Sommaire : module ${s.m.n}, ${ou}">` +
         `<span class="te-snum">${s.m.n}</span><span class="te-ou-t"><small>${s.m.titre}</small><b>${ou}</b></span><span class="te-ou-chev" aria-hidden="true">▾</span></button></div>` +
         '<div class="te-barre-esp"></div><div class="te-voile"></div>' +
-        `<aside class="te-som" id="te-som" aria-label="Sommaire"><div class="te-som-tete"><a class="te-som-app" href="../index.html">Chapitre 4 : Transport et distribution de l'électricité</a>` +
+        `<aside class="te-som" id="te-som" aria-label="Sommaire"><div class="te-som-tete"><a class="te-som-app" href="../index.html">Chapitre 4 : Transport et distribution de l'électricité</a>` +
         // bouton « Accueil » : portail des applications (index.html à la racine du dépôt)
         '<a class="te-pilule" href="../../index.html"><span aria-hidden="true">⌂</span>Accueil</a></div>' +
         `<p class="te-som-lab">Sommaire</p><nav class="te-som-arbre" aria-label="Modules">${sommaire(s, pages, ex)}</nav></aside>`;

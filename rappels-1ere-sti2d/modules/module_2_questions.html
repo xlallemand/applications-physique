@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : questions sur les pictogrammes de sécurité — Rappels de 1ère STI2D</title>
+<title>Module 2 : questions sur les pictogrammes de sécurité — Rappels de 1ère STI2D</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="rp.css">
@@ -26,30 +26,30 @@ const { o, fq, PICTOS, PICTO, picto, partieSens, partieImage, partiePrecaution, 
 const seul = id => `<div class="rp-picto-seul">${picto(id)}</div>`;
 
 // signification (image donnée)
-const qSens = id => ({ theme: 'Signification', enonce: seul(id), parties: [partieSens(id)], bilan: `${PICTO(id).nom} : ${PICTO(id).danger}.` });
+const qSens = id => ({ theme: 'Signification', enonce: seul(id), parties: [partieSens(id)], bilan: `${PICTO(id).nom} : ${PICTO(id).danger}.` });
 // pictogramme (danger donné)
-const qImage = id => ({ theme: 'Reconnaître le pictogramme', parties: [partieImage(id)], bilan: `${PICTO(id).nom} : ${PICTO(id).dessin}.` });
+const qImage = id => ({ theme: 'Reconnaître le pictogramme', parties: [partieImage(id)], bilan: `${PICTO(id).nom} : ${PICTO(id).dessin}.` });
 // précaution
 const qPrecaution = id => ({ theme: 'Précautions', enonce: seul(id),
-  parties: [partieSens(id), partiePrecaution(id)], bilan: `${PICTO(id).nom} : ${PICTO(id).precaution}.` });
+  parties: [partieSens(id), partiePrecaution(id)], bilan: `${PICTO(id).nom} : ${PICTO(id).precaution}.` });
 // inflammable ou comburant ?
 function qFeu() {
   return hasard([
-    { theme: 'Inflammable ou comburant ?', consigne: 'Le dioxygène pur ne brûle pas lui-même, mais il fait brûler les autres produits beaucoup plus vite.',
-      parties: [partieImage('comburant', 'Quel pictogramme porte une bouteille de dioxygène ?')], bilan: 'Comburant : une flamme au-dessus d\'un cercle.' },
-    { theme: 'Inflammable ou comburant ?', consigne: 'L\'éthanol (alcool à brûler) prend feu au contact d\'une flamme.',
-      parties: [partieImage('inflammable', 'Quel pictogramme porte un flacon d\'éthanol ?')], bilan: 'Inflammable : une flamme seule.' },
+    { theme: 'Inflammable ou comburant ?', consigne: 'Le dioxygène pur ne brûle pas lui-même, mais il fait brûler les autres produits beaucoup plus vite.',
+      parties: [partieImage('comburant', 'Quel pictogramme porte une bouteille de dioxygène ?')], bilan: 'Comburant : une flamme au-dessus d\'un cercle.' },
+    { theme: 'Inflammable ou comburant ?', consigne: 'L\'éthanol (alcool à brûler) prend feu au contact d\'une flamme.',
+      parties: [partieImage('inflammable', 'Quel pictogramme porte un flacon d\'éthanol ?')], bilan: 'Inflammable : une flamme seule.' },
   ]);
 }
 // étiquette : lequel de ces dangers n'est pas signalé ?
 function qEtiquette() {
   const ids = melanger(PICTOS.map(x => x.id)), sur = ids.slice(0, 3), absent = ids[3];
-  return { theme: 'Lire une étiquette', consigne: 'L\'étiquette d\'un produit porte ces trois pictogrammes :',
+  return { theme: 'Lire une étiquette', consigne: 'L\'étiquette d\'un produit porte ces trois pictogrammes :',
     enonce: `<div class="rp-pictos-ligne">${sur.map(id => picto(id)).join('')}</div>`,
-    parties: [fq.choix('Lequel de ces dangers n\'est <b>pas</b> signalé ?', sur.concat([absent]).map(id => o(id, PICTO(id).nom)), absent, {
+    parties: [fq.choix('Lequel de ces dangers n\'est <b>pas</b> signalé ?', sur.concat([absent]).map(id => o(id, PICTO(id).nom)), absent, {
       colonne: true,
-      indices: Object.fromEntries(sur.map(id => [id, `${PICTO(id).nom} est bien signalé : c'est ${PICTO(id).dessin}.`])),
-      solution: `<div class="rp-pictos-ligne">${sur.map(id => picto(id, { legende: true })).join('')}</div><p>Le danger « ${PICTO(absent).nom} » n'est pas signalé.</p>` })] };
+      indices: Object.fromEntries(sur.map(id => [id, `${PICTO(id).nom} est bien signalé : c'est ${PICTO(id).dessin}.`])),
+      solution: `<div class="rp-pictos-ligne">${sur.map(id => picto(id, { legende: true })).join('')}</div><p>Le danger « ${PICTO(absent).nom} » n'est pas signalé.</p>` })] };
 }
 
 function tirage() {
@@ -61,10 +61,10 @@ function tirage() {
 RP.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Les pictogrammes de sécurité',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : la signification d\'un pictogramme, le pictogramme d\'un danger, les précautions à prendre et la lecture d\'une étiquette.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : la signification d\'un pictogramme, le pictogramme d\'un danger, les précautions à prendre et la lecture d\'une étiquette.</p>',
   questions: tirage,
   revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_3.html', label: 'Module 3 : exercices →' },
+  suite: { href: 'module_3.html', label: 'Module 3 : exercices →' },
 });
 RP.menu('module_2_questions');
 </script>

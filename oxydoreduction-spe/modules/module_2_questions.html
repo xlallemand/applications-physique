@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : questions sur les demi-équations — Oxydoréduction</title>
+<title>Module 2 : questions sur les demi-équations — Oxydoréduction</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="../../assets/molecules.css">
@@ -45,13 +45,13 @@ function qEau() {
   const k = hasard(['MnO4', 'Cr2O7', 'SO4', 'NO3', 'IO3', 'ClO']), s = sol(k), T = s.etapes[0], F = s.etapes[1];
   const c = F.some(t => t.role === 'eau' && t.cote === 'g') ? 'g' : 'd', n = nb(F, 'H2O', c);
   const OG = membre(T, 'g').reduce((x, t) => x + t.coef * (DEMI.outils.compo(t.f).O || 0), 0), OD = membre(T, 'd').reduce((x, t) => x + t.coef * (DEMI.outils.compo(t.f).O || 0), 0);
-  return { theme: `Équilibrer O avec ${H2O}`, enonce: `<p>Demi-équation du couple ${OX.couple(C[k])}, après l'étape 1 :</p>${ecr(T)}`,
+  return { theme: `Équilibrer O avec ${H2O}`, enonce: `<p>Demi-équation du couple ${OX.couple(C[k])}, après l'étape 1 :</p>${ecr(T)}`,
     parties: [
-      fq.choix(`De quel côté ajoutes-tu des molécules ${H2O} ?`, [o('g', 'à gauche'), o('d', 'à droite')], c, { melanger: false,
-        indices: { [autre(c)]: `Compte les atomes O : ${OG} à gauche, ${OD} à droite. On ajoute l'eau du côté où il en manque.` },
-        solution: `<p>${OG} atomes O à gauche, ${OD} à droite : il en manque ${cote(c)}.</p>` }),
-      fq.nombre(`Combien de molécules ${H2O} ajoutes-tu ${cote(c)} ?`, 'Nombre :', n, H2O, { signe: false,
-        diag: () => `Compte les atomes O : ${OG} à gauche, ${OD} à droite. Une molécule ${H2O} apporte <b>un</b> atome O.`,
+      fq.choix(`De quel côté ajoutes-tu des molécules ${H2O} ?`, [o('g', 'à gauche'), o('d', 'à droite')], c, { melanger: false,
+        indices: { [autre(c)]: `Compte les atomes O : ${OG} à gauche, ${OD} à droite. On ajoute l'eau du côté où il en manque.` },
+        solution: `<p>${OG} atomes O à gauche, ${OD} à droite : il en manque ${cote(c)}.</p>` }),
+      fq.nombre(`Combien de molécules ${H2O} ajoutes-tu ${cote(c)} ?`, 'Nombre :', n, H2O, { signe: false,
+        diag: () => `Compte les atomes O : ${OG} à gauche, ${OD} à droite. Une molécule ${H2O} apporte <b>un</b> atome O.`,
         solution: ecr(F) }),
     ] };
 }
@@ -59,9 +59,9 @@ function qEau() {
 function qH() {
   const k = hasard(['MnO4', 'Cr2O7', 'SO4', 'NO3', 'IO3', 'Ac']), s = sol(k), T = s.etapes[1], F = s.etapes[2];
   const n = nb(F, 'H^+', 'g') - nb(T, 'H^+', 'g'), w = nb(T, 'H2O', 'd');
-  return { theme: `Équilibrer H avec ${HP}`, enonce: `<p>Demi-équation du couple ${OX.couple(C[k])}, après l'étape 2 :</p>${ecr(T)}`,
-    parties: [fq.nombre(`Combien d'ions ${HP} ajoutes-tu à gauche ?`, 'Nombre :', n, HP, { signe: false,
-      diag: v => (w && v === n - w ? `Chaque molécule ${H2O} contient <b>2</b> atomes H : ${w}&nbsp;${H2O}, c'est ${w} × 2 = ${2 * w} atomes H.` : 'Compte tous les atomes H de chaque côté, sans oublier ceux de l\'eau ; un ion H<sup>+</sup> apporte un atome H.'),
+  return { theme: `Équilibrer H avec ${HP}`, enonce: `<p>Demi-équation du couple ${OX.couple(C[k])}, après l'étape 2 :</p>${ecr(T)}`,
+    parties: [fq.nombre(`Combien d'ions ${HP} ajoutes-tu à gauche ?`, 'Nombre :', n, HP, { signe: false,
+      diag: v => (w && v === n - w ? `Chaque molécule ${H2O} contient <b>2</b> atomes H : ${w}&nbsp;${H2O}, c'est ${w} × 2 = ${2 * w} atomes H.` : 'Compte tous les atomes H de chaque côté, sans oublier ceux de l\'eau ; un ion H<sup>+</sup> apporte un atome H.'),
       solution: ecr(F) })] };
 }
 /* ---------- charge totale d'un membre ---------- */
@@ -72,24 +72,24 @@ function qCharge() {
   const det = L.filter(t => q(t.f)).map(t => (t.coef > 1 ? `${t.coef} × (${fc(q(t.f))})` : `(${fc(q(t.f))})`)).join(' + ');
   const neg = L.find(t => q(t.f) < 0), multi = L.find(t => t.coef > 1);
   return { theme: 'Charge totale d\'un membre', enonce: `<p class="ox-eqn">${L.map(t => kf(t.coef, t.f)).join(' + ')}</p>`,
-    parties: [fq.nombre('Quelle est la charge totale de ce membre ?', 'Charge totale =', v, '', { affiche: fc(v),
-      diag: x => (neg && x === signe && signe !== v ? `${h(neg.f)} porte une charge <b>négative</b> : elle compte en moins.`
-        : multi && x === coef && coef !== v ? `N'oublie pas de multiplier chaque charge par le nombre stœchiométrique : ${kf(multi.coef, multi.f)}, c'est ${multi.coef} × (${fc(q(multi.f))}).`
-        : `Additionne : ${det}.`),
+    parties: [fq.nombre('Quelle est la charge totale de ce membre ?', 'Charge totale =', v, '', { affiche: fc(v),
+      diag: x => (neg && x === signe && signe !== v ? `${h(neg.f)} porte une charge <b>négative</b> : elle compte en moins.`
+        : multi && x === coef && coef !== v ? `N'oublie pas de multiplier chaque charge par le nombre stœchiométrique : ${kf(multi.coef, multi.f)}, c'est ${multi.coef} × (${fc(q(multi.f))}).`
+        : `Additionne : ${det}.`),
       solution: `<p class="ox-eqn">${det} = <span class="c">${fc(v)}</span></p>` })] };
 }
 /* ---------- électrons : côté et nombre ---------- */
 function qElectrons() {
   const k = hasard(['MnO4', 'Cr2O7', 'SO4', 'NO3', 'IO3', 'S4O6', 'I2', 'H2O2', 'Fe3']), s = sol(k), T = s.etapes[2], F = s.etapes[3];
   const G = chargeDe(membre(T, 'g')), D = chargeDe(membre(T, 'd')), n = G - D;
-  return { theme: 'Équilibrer les charges', enonce: `<p>Demi-équation du couple ${OX.couple(C[k])}, sans les électrons :</p>${ecr(T)}`,
+  return { theme: 'Équilibrer les charges', enonce: `<p>Demi-équation du couple ${OX.couple(C[k])}, sans les électrons :</p>${ecr(T)}`,
     parties: [
-      fq.choix('De quel côté ajoutes-tu les électrons ?', [o('g', 'à gauche'), o('d', 'à droite')], 'g', { melanger: false,
-        indices: { d: `Charge totale : ${fc(G)} à gauche, ${fc(D)} à droite. Un électron (−1) fait baisser la charge : on les ajoute du côté où elle est la plus grande, celui de l'oxydant.` },
-        solution: `<p>${fc(G)} &gt; ${fc(D)} : les électrons vont à gauche, avec l'oxydant.</p>` }),
-      fq.nombre('Combien d\'électrons ajoutes-tu à gauche ?', 'n =', n, EL, { signe: false,
+      fq.choix('De quel côté ajoutes-tu les électrons ?', [o('g', 'à gauche'), o('d', 'à droite')], 'g', { melanger: false,
+        indices: { d: `Charge totale : ${fc(G)} à gauche, ${fc(D)} à droite. Un électron (−1) fait baisser la charge : on les ajoute du côté où elle est la plus grande, celui de l'oxydant.` },
+        solution: `<p>${fc(G)} &gt; ${fc(D)} : les électrons vont à gauche, avec l'oxydant.</p>` }),
+      fq.nombre('Combien d\'électrons ajoutes-tu à gauche ?', 'n =', n, EL, { signe: false,
         diag: v => (D && v === Math.abs(G + D) ? `Tu as additionné les charges. La charge de gauche (${fc(G)}) doit descendre à ${fc(D)}.`
-          : `Calcule la charge totale de chaque côté. Avec ${v}&nbsp;${EL} à gauche, la charge de gauche devient ${fc(G)} − ${v} = ${fc(G - v)} ; elle doit valoir ${fc(D)}.`),
+          : `Calcule la charge totale de chaque côté. Avec ${v}&nbsp;${EL} à gauche, la charge de gauche devient ${fc(G)} − ${v} = ${fc(G - v)} ; elle doit valoir ${fc(D)}.`),
         solution: ecr(F) }),
     ] };
 }
@@ -107,10 +107,10 @@ function qBonne() {
     o('nb', variante(T => { T.find(t => t.f === 'e^-').coef = nFaux; })),
   ];
   if (hp && w && hp.coef === 2 * w) opts.push(o('h', variante(T => { T.find(t => t.f === 'H^+').coef = w; })));
-  return { theme: 'La bonne demi-équation', parties: [fq.choix(`Quelle est la demi-équation équilibrée du couple ${OX.couple(C[k])} ?`, opts, 'ok', { colonne: true,
-    indices: { cote: 'Les électrons sont du mauvais côté : ils s\'écrivent avec l\'oxydant, du côté où la charge est la plus grande.',
-      nb: `Le nombre d'électrons est faux : sans eux, la charge vaut ${fc(G)} à gauche et ${fc(D)} à droite.`,
-      h: `Il manque des ions ${HP} : chaque molécule ${H2O} contient 2 atomes H.` },
+  return { theme: 'La bonne demi-équation', parties: [fq.choix(`Quelle est la demi-équation équilibrée du couple ${OX.couple(C[k])} ?`, opts, 'ok', { colonne: true,
+    indices: { cote: 'Les électrons sont du mauvais côté : ils s\'écrivent avec l\'oxydant, du côté où la charge est la plus grande.',
+      nb: `Le nombre d'électrons est faux : sans eux, la charge vaut ${fc(G)} à gauche et ${fc(D)} à droite.`,
+      h: `Il manque des ions ${HP} : chaque molécule ${H2O} contient 2 atomes H.` },
     solution: ecr(F) })] };
 }
 /* ---------- demi-équations entières avec l'outil, d'un seul tenant (aucune validation intermédiaire) ---------- */
@@ -129,11 +129,11 @@ function tirage() {
 OX.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Équilibrer une demi-équation',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : chaque étape de la méthode, puis 5 demi-équations entières à écrire d\'un seul tenant avec l\'outil (les 3 premières avec l\'aide si besoin, les 2 dernières sans aide).</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : chaque étape de la méthode, puis 5 demi-équations entières à écrire d\'un seul tenant avec l\'outil (les 3 premières avec l\'aide si besoin, les 2 dernières sans aide).</p>',
   aidesPayantes: true,
   questions: tirage,
   revoir: { href: 'module_2a_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_3_cours.html', label: 'Module 3 : écrire l\'équation d\'une réaction →' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : écrire l\'équation d\'une réaction →' },
 });
 OX.menu('module_2_questions');
 </script>

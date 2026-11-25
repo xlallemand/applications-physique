@@ -433,7 +433,7 @@
       const videsATort = inconnues ? slots.filter(s => !s.querySelector('.sc-chip') && !estInconnue(s)) : [];
       if (videsATort.length >= 2) {
         secouer(d.querySelector('.sc-palette'));
-        api.message(`Il reste ${videsATort.length} cases à remplir : seule la case de l'inconnue reste vide.`);
+        api.message(`Il reste ${videsATort.length} cases à remplir : seule la case de l'inconnue reste vide.`);
         return;
       }
       // étiquettes mal placées, puis case laissée vide à tort (ce n'est pas une inconnue)
@@ -449,8 +449,8 @@
         .concat(videsATort.map(s => (p.indicesCases && p.indicesCases[s.dataset.slot]) || '').filter(Boolean));
       const phr = [];
       if (fausses.length) phr.push(`${fausses.length > 1 ? `${fausses.length} étiquettes sont mal placées` : 'Une étiquette est mal placée'} (case rouge)`);
-      if (videsATort.length) phr.push('la case vide en rouge n\'est pas une inconnue : sa valeur est connue, place-la');
-      const txt = phr.join(' ; ');
+      if (videsATort.length) phr.push('la case vide en rouge n\'est pas une inconnue : sa valeur est connue, place-la');
+      const txt = phr.join(' ; ');
       api.erreur(txt.charAt(0).toUpperCase() + txt.slice(1) + '.' + (indices.length ? '<br>' + indices.map(t => '☛ ' + t).join('<br>') : ''));
       secouer(d.querySelector('.ce-sch') || d);
     };
@@ -577,7 +577,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || (note && typeof note === 'string')) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${typeof note === 'string' ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -612,8 +612,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -625,7 +625,7 @@
       const q = qs[idx];
       window.CE.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -645,7 +645,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -660,10 +660,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -795,7 +795,7 @@
       s += txt(260, 28, 'fusion', 'ce-t-a', 'middle') + txt(260, 82, 'solidification', 'ce-t-a', 'middle');
       s += txt(122, 186, 'sublimation', 'ce-t-a', 'end') + txt(170, 120, 'condensation', 'ce-t-a');
       s += txt(330, 150, 'vaporisation', 'ce-t-a', 'end') + txt(398, 186, 'liquéfaction', 'ce-t-a');
-      return { W, H, svg: s, aria: 'Les six changements d\'état : fusion du solide au liquide, solidification du liquide au solide, vaporisation du liquide au gaz, liquéfaction du gaz au liquide, sublimation du solide au gaz, condensation du gaz au solide' };
+      return { W, H, svg: s, aria: 'Les six changements d\'état : fusion du solide au liquide, solidification du liquide au solide, vaporisation du liquide au gaz, liquéfaction du gaz au liquide, sublimation du solide au gaz, condensation du gaz au solide' };
     },
     // représentations microscopiques : o.ordre (ex. ['l', 's', 'g']), o.numeros (1, 2, 3), o.noms (nom de l'état)
     micro(o) {
@@ -808,8 +808,8 @@
         if (o.numeros) s += `<g class="ce-num-d"><circle cx="${x0 + 90}" cy="176" r="12"/>${txt(x0 + 90, 181, k + 1, '', 'middle')}</g>`;
         else if (o.noms) s += txt(x0 + 90, 182, 'état ' + NOM_ETAT[e], 'ce-t-a', 'middle');
       });
-      return { W, H, svg: s, aria: 'Représentations microscopiques de l\'eau : ' + ordre.map((e, k) => (o.numeros ? `${k + 1}, ` : '') + {
-        s: 'molécules serrées et rangées régulièrement', l: 'molécules serrées, en désordre', g: 'molécules très éloignées les unes des autres' }[e]).join(' ; ') };
+      return { W, H, svg: s, aria: 'Représentations microscopiques de l\'eau : ' + ordre.map((e, k) => (o.numeros ? `${k + 1}, ` : '') + {
+        s: 'molécules serrées et rangées régulièrement', l: 'molécules serrées, en désordre', g: 'molécules très éloignées les unes des autres' }[e]).join(' ; ') };
     },
     /* liaison hydrogène (exercice 7) : o.rep = 1 (bonne : H d'une molécule – O d'une autre),
        2 (H – H de deux molécules), 3 (H – H d'une même molécule) ; o.legende : noms des liaisons */
@@ -845,9 +845,9 @@
         }
       }
       if (o.numero) s += `<g class="ce-num-d"><circle cx="16" cy="16" r="12"/>${txt(16, 21, rep, '', 'middle')}</g>`;
-      return { W, H, svg: s, aria: rep === 1 ? 'Deux molécules d\'eau : un atome H (δ+) d\'une molécule est relié en pointillés à l\'atome O (2δ−) de l\'autre molécule'
-        : rep === 2 ? 'Deux molécules d\'eau : un atome H (δ+) d\'une molécule est relié en pointillés à un atome H (δ+) de l\'autre molécule'
-          : 'Une molécule d\'eau : ses deux atomes H (δ+) sont reliés en pointillés' };
+      return { W, H, svg: s, aria: rep === 1 ? 'Deux molécules d\'eau : un atome H (δ+) d\'une molécule est relié en pointillés à l\'atome O (2δ−) de l\'autre molécule'
+        : rep === 2 ? 'Deux molécules d\'eau : un atome H (δ+) d\'une molécule est relié en pointillés à un atome H (δ+) de l\'autre molécule'
+          : 'Une molécule d\'eau : ses deux atomes H (δ+) sont reliés en pointillés' };
     },
     // expérience : un filet d'eau est dévié par une règle électrisée par frottement
     filet() {
@@ -884,7 +884,7 @@
         const m = [[X(.75) + 22, Y(-10) + 8], [X(2.3), Y(0) + 22], [X(4.2) + 24, Y(50) + 8], [X(6.8), Y(100) + 22], [X(9) + 22, Y(110) + 8]];
         m.forEach(([x, y], k) => { s += `<g class="ce-num-q"><rect x="${f1(x - 15)}" y="${f1(y - 11)}" width="30" height="22" rx="11"/>${txt(x, y + 5, `Q<tspan dy="4" font-size="10">${k + 1}</tspan>`, '', 'middle')}</g>`; });
       }
-      return { W, H, svg: s, aria: 'Courbe de chauffage de l\'eau : la température de la glace monte de −20 °C à 0 °C, reste à 0 °C pendant la fusion (palier), monte de 0 à 100 °C, reste à 100 °C pendant l\'ébullition (palier), puis la vapeur dépasse 100 °C' };
+      return { W, H, svg: s, aria: 'Courbe de chauffage de l\'eau : la température de la glace monte de −20 °C à 0 °C, reste à 0 °C pendant la fusion (palier), monte de 0 à 100 °C, reste à 100 °C pendant l\'ébullition (palier), puis la vapeur dépasse 100 °C' };
     },
     /* pompe à chaleur (exercice 17) : o.vide → cases à remplir (cases 1 à 6) */
     pac(o) {
@@ -897,8 +897,8 @@
       if (!o.vide) s += txt(176, 122, 'Q<tspan dy="4" font-size="11">f</tspan>', 'ce-t-n') + txt(176, 230, 'Q<tspan dy="4" font-size="11">c</tspan>', 'ce-t-n') + txt(262, 158, 'W<tspan dy="4" font-size="11">e</tspan>', 'ce-t-n', 'middle');
       else [[160, 52, 1], [370, 170, 2], [160, 288, 3], [206, 114, 4], [268, 202, 5], [206, 228, 6]].forEach(([x, y, n]) => { s += `<g class="ce-pose-num"><circle cx="${x}" cy="${y}" r="14"/>${txt(x, y + 5, n, '', 'middle')}</g>`; });
       return { W, H, svg: s, cases: { air: [160, 52, 1], res: [370, 170, 2], eau: [160, 288, 3], qf: [206, 114, 4], we: [268, 202, 5], qc: [206, 228, 6] },
-        aria: o.vide ? 'Schéma de la pompe à chaleur à compléter : trois cercles vides (1 en haut, 2 à droite, 3 en bas) reliés au fluide de la PAC par trois flèches (4 vers le fluide depuis le haut, 5 vers le fluide depuis la droite, 6 du fluide vers le bas)'
-          : 'Pompe à chaleur : l\'air extérieur cède Q f au fluide de la PAC, le réseau électrique lui fournit W e, le fluide cède Q c à l\'eau du bassin' };
+        aria: o.vide ? 'Schéma de la pompe à chaleur à compléter : trois cercles vides (1 en haut, 2 à droite, 3 en bas) reliés au fluide de la PAC par trois flèches (4 vers le fluide depuis le haut, 5 vers le fluide depuis la droite, 6 du fluide vers le bas)'
+          : 'Pompe à chaleur : l\'air extérieur cède Q f au fluide de la PAC, le réseau électrique lui fournit W e, le fluide cède Q c à l\'eau du bassin' };
     },
     /* circuit du dégivrage (bac blanc) : batterie 28,0 V, M₁ sur le fil du haut, résistance R, M₂ en dérivation ;
        o.com : bornes COM dessinées ; o.vide : emplacements numérotés des bornes (1 à 4) */
@@ -923,8 +923,8 @@
       if (o.com) s += txt(268, yh - 10, 'COM', 'ce-t-com') + txt(xM - 8, 162, 'COM', 'ce-t-com', 'end');
       if (o.vide) [[196, 92, 1], [284, 92, 2], [404, 88, 3], [404, 152, 4]].forEach(([x, y, n]) => { s += `<g class="ce-pose-num"><circle cx="${x}" cy="${y}" r="14"/>${txt(x, y + 5, n, '', 'middle')}</g>`; });
       return { W, H, svg: s, cases: { b1: [196, 92, 1], b2: [284, 92, 2], b3: [404, 88, 3], b4: [404, 152, 4] },
-        aria: 'Circuit du dégivrage : la batterie de 28,0 V (+ en haut) alimente la résistance R ; l\'appareil M1 est sur le fil du haut, en série ; l\'appareil M2 est branché entre le fil du haut et le fil du bas, en dérivation' +
-          (o.com ? ' ; borne COM de M1 à droite, borne COM de M2 en bas' : '') + (o.vide ? ' ; emplacements des bornes : 1 à gauche de M1, 2 à droite de M1, 3 en haut de M2, 4 en bas de M2' : '') };
+        aria: 'Circuit du dégivrage : la batterie de 28,0 V (+ en haut) alimente la résistance R ; l\'appareil M1 est sur le fil du haut, en série ; l\'appareil M2 est branché entre le fil du haut et le fil du bas, en dérivation' +
+          (o.com ? ' ; borne COM de M1 à droite, borne COM de M2 en bas' : '') + (o.vide ? ' ; emplacements des bornes : 1 à gauche de M1, 2 à droite de M1, 3 en haut de M2, 4 en bas de M2' : '') };
     },
   };
   function dessin(type, o) {
@@ -1083,7 +1083,7 @@
     // points triple et critique
     s += `<circle cx="${f1(G.xu(TP[0]))}" cy="${f1(G.yv(TP[1]))}" r="4.5" class="ce-pt-fixe"/><circle cx="${f1(G.xu(CP[0]))}" cy="${f1(G.yv(CP[1]))}" r="4.5" class="ce-pt-fixe"/>`;
     s += txt(G.xu(TP[0]) + 8, G.yv(TP[1]) + 16, 'point triple', 'ce-t-pt');
-    s += txt(G.xu(CP[0]) + 2, G.yv(CP[1]) - (o.critique ? 24 : 9), 'point critique', 'ce-t-pt', 'end') + (o.critique ? txt(G.xu(CP[0]) + 2, G.yv(CP[1]) - 9, '(374 °C ; 221 bar)', 'ce-t-p', 'end') : '');
+    s += txt(G.xu(CP[0]) + 2, G.yv(CP[1]) - (o.critique ? 24 : 9), 'point critique', 'ce-t-pt', 'end') + (o.critique ? txt(G.xu(CP[0]) + 2, G.yv(CP[1]) - 9, '(374 °C ; 221 bar)', 'ce-t-p', 'end') : '');
     // noms des courbes (fusion : à droite de la courbe ; vaporisation : en dessous ; sublimation : au-dessus)
     if (o.courbes) {
       const p = G.W < 440, cc = p ? 'ce-t-courbe petit' : 'ce-t-courbe';
@@ -1122,8 +1122,8 @@
       if (o.mobile) s += `<circle cx="${f1(x)}" cy="${f1(y)}" r="22" class="ce-poignee"/>`;
       s += `<circle cx="${f1(x)}" cy="${f1(y)}" r="7.5" class="ce-pt${o.mobile ? ' mobile' : ''}"/>`;
     }
-    const aria = 'Diagramme d\'état de l\'eau, schématique : zones solide (à gauche), liquide (en haut, au milieu) et gaz (en bas à droite), séparées par les courbes de sublimation, de fusion et de vaporisation qui se rejoignent au point triple ; la courbe de vaporisation s\'arrête au point critique' +
-      (o.point ? `. Point placé à ${fmt(o.point.T)} °C et ${fmt(o.point.P)} bar` : '') + (o.points ? '. Points ' + o.points.map(q => `${q.nom} (${fmt(q.T)} °C ; ${fmt(q.P)} bar)`).join(', ') : '') + (o.fleche ? `. Flèche horizontale à ${fmt(o.fleche.P)} bar, de ${fmt(o.fleche.T1)} °C à ${fmt(o.fleche.T2)} °C` : '');
+    const aria = 'Diagramme d\'état de l\'eau, schématique : zones solide (à gauche), liquide (en haut, au milieu) et gaz (en bas à droite), séparées par les courbes de sublimation, de fusion et de vaporisation qui se rejoignent au point triple ; la courbe de vaporisation s\'arrête au point critique' +
+      (o.point ? `. Point placé à ${fmt(o.point.T)} °C et ${fmt(o.point.P)} bar` : '') + (o.points ? '. Points ' + o.points.map(q => `${q.nom} (${fmt(q.T)} °C ; ${fmt(q.P)} bar)`).join(', ') : '') + (o.fleche ? `. Flèche horizontale à ${fmt(o.fleche.P)} bar, de ${fmt(o.fleche.T1)} °C à ${fmt(o.fleche.T2)} °C` : '');
     return `<svg viewBox="0 0 ${G.W} ${G.H}" class="ce-diag" role="img" aria-label="${aria}">${s}</svg>`;
   }
   const figDiag = o => figure(W => svgDiag(geoDiag(W), o), 'ce-fig-diag');
@@ -1169,7 +1169,7 @@
       if (o.nums) s += `<g class="ce-pose-num"><circle cx="${f1(G.xu(u))}" cy="${f1(G.yv(v))}" r="14"/>${txt(G.xu(u), G.yv(v) + 5, o.nums[e], '', 'middle')}</g>`;
       else if (o.noms) s += txt(G.xu(u), G.yv(v), NOMS_EAU[e], cz, 'middle');
     });
-    const aria = 'Diagramme d\'état d\'une espèce chimique, schématique, sans valeurs : trois zones séparées par les courbes de sublimation, de fusion (qui penche vers la droite) et de vaporisation ; ' +
+    const aria = 'Diagramme d\'état d\'une espèce chimique, schématique, sans valeurs : trois zones séparées par les courbes de sublimation, de fusion (qui penche vers la droite) et de vaporisation ; ' +
       (o.nums ? `zone ${o.nums.s} en haut à gauche, zone ${o.nums.l} en haut au milieu, zone ${o.nums.g} en bas à droite` : o.noms ? 'solide en haut à gauche, liquide en haut au milieu, gaz en bas à droite' : 'zones sans nom');
     return `<svg viewBox="0 0 ${G.W} ${G.H}" class="ce-diag" role="img" aria-label="${aria}">${s}</svg>`;
   }
@@ -1189,7 +1189,7 @@
         <div class="ce-dg-l"><span class="ce-dg-lab">T</span><button type="button" class="ce-dg-b" data-a="t-" aria-label="Température plus basse">−</button><span class="ce-dg-v" data-v="t"></span><button type="button" class="ce-dg-b" data-a="t+" aria-label="Température plus haute">+</button></div>
         <div class="ce-dg-l"><span class="ce-dg-lab">P</span><button type="button" class="ce-dg-b" data-a="p-" aria-label="Pression plus basse">−</button><span class="ce-dg-v" data-v="p"></span><button type="button" class="ce-dg-b" data-a="p+" aria-label="Pression plus haute">+</button></div>
         <p class="ce-dg-aide">Fais glisser le point ●, ou règle T et P avec les boutons.</p></div>`}
-      <p class="ce-dg-q">Dans quel état est l'eau en ce point ?</p>
+      <p class="ce-dg-q">Dans quel état est l'eau en ce point ?</p>
       <div class="ce-dg-etats" role="group" aria-label="État de l'eau">${['s', 'l', 'g'].map(e => `<button type="button" class="ce-tg" data-e="${e}" aria-pressed="false">${NOMS_EAU[e]}</button>`).join('')}</div>
       <p class="ce-dg-res" hidden></p>`;
     zone.appendChild(d);
@@ -1257,12 +1257,12 @@
       dessiner();
     }
     const DIAG = {
-      'l-g': 'Le point est <b>sous</b> la courbe de vaporisation : la pression est trop faible, l\'eau s\'est vaporisée.',
-      'g-l': 'Le point est <b>au-dessus</b> de la courbe de vaporisation : à cette pression, l\'eau ne bout pas encore à cette température.',
-      's-l': 'Le point est à <b>droite</b> de la courbe de fusion (vers 0 °C) : la glace a fondu.',
+      'l-g': 'Le point est <b>sous</b> la courbe de vaporisation : la pression est trop faible, l\'eau s\'est vaporisée.',
+      'g-l': 'Le point est <b>au-dessus</b> de la courbe de vaporisation : à cette pression, l\'eau ne bout pas encore à cette température.',
+      's-l': 'Le point est à <b>droite</b> de la courbe de fusion (vers 0 °C) : la glace a fondu.',
       'l-s': 'Le point est à <b>gauche</b> de la courbe de fusion, du côté des basses températures.',
-      's-g': 'Le point est <b>sous</b> la courbe de sublimation (en bas à gauche) : à pression très faible, la glace se sublime.',
-      'g-s': 'Le point est <b>au-dessus</b> de la courbe de sublimation et à gauche de la courbe de fusion : ce n\'est pas la zone gaz.',
+      's-g': 'Le point est <b>sous</b> la courbe de sublimation (en bas à gauche) : à pression très faible, la glace se sublime.',
+      'g-s': 'Le point est <b>au-dessus</b> de la courbe de sublimation et à gauche de la courbe de fusion : ce n\'est pas la zone gaz.',
     };
     bVal.onclick = () => {
       if (fini || api.fini()) return;
@@ -1280,12 +1280,12 @@
     return { montrer() { iT = iT0; iP = iP0; reveler(); } };
   }
   const OU_EST = {
-    s: 'à gauche de la courbe de fusion et au-dessus de la courbe de sublimation : zone <b>solide</b>',
-    l: 'entre la courbe de fusion et la courbe de vaporisation : zone <b>liquide</b>',
-    g: 'sous la courbe de vaporisation (et de sublimation) : zone <b>gaz</b>',
+    s: 'à gauche de la courbe de fusion et au-dessus de la courbe de sublimation : zone <b>solide</b>',
+    l: 'entre la courbe de fusion et la courbe de vaporisation : zone <b>liquide</b>',
+    g: 'sous la courbe de vaporisation (et de sublimation) : zone <b>gaz</b>',
   };
   function partieDiag(o) {
-    const sol = o.solution || `<p>Le point (${deg(o.T)} ; ${fmtP(o.P)}) est ${OU_EST[etatDiag(o.T, o.P)]}.</p>`;
+    const sol = o.solution || `<p>Le point (${deg(o.T)} ; ${fmtP(o.P)}) est ${OU_EST[etatDiag(o.T, o.P)]}.</p>`;
     return { type: 'perso', q: o.q || `Place le point T = ${deg(o.T)}, P = ${fmtP(o.P)} sur le diagramme, puis dis dans quel état est l'eau.`,
       solution: sol, correction: sol, o, monter: (zone, api) => outilDiag(zone, o, api) };
   }
@@ -1304,10 +1304,10 @@
   const COURBES = {
     // fluide R22 (exercice 15) : pression relative nulle à −40 °C, 8 bar à 20 °C
     r22: { f: T => 1.2546 * (Math.exp(.033305 * (T + 40)) - 1), deb: -40, fin: 25, t: { min: -45, max: 30, pas: 10, sous: 5 }, p: { max: 11, pas: 2, sous: 1 },
-      noms: ['Température (°C)', 'Pression relative (bar)'], aria: 'Relation pression-température du R22 : la pression relative de vaporisation vaut 0 à −40 °C, environ 3,5 bar à 0 °C et 8 bar à 20 °C ; elle augmente de plus en plus vite' },
+      noms: ['Température (°C)', 'Pression relative (bar)'], aria: 'Relation pression-température du R22 : la pression relative de vaporisation vaut 0 à −40 °C, environ 3,5 bar à 0 °C et 8 bar à 20 °C ; elle augmente de plus en plus vite' },
     // eau : température d'ébullition selon la pression
     eau: { f: psatEau, deb: 20, fin: 142, t: { min: 20, max: 145, pas: 20, sous: 10 }, p: { max: 4, pas: .5, sous: .25 },
-      noms: ['Température (°C)', 'Pression (bar)'], aria: 'Courbe de vaporisation de l\'eau : pression de 0,02 bar à 20 °C, 0,5 bar vers 81 °C, 1 bar à 100 °C, 2 bar vers 120 °C, 3,6 bar à 140 °C' },
+      noms: ['Température (°C)', 'Pression (bar)'], aria: 'Courbe de vaporisation de l\'eau : pression de 0,02 bar à 20 °C, 0,5 bar vers 81 °C, 1 bar à 100 °C, 2 bar vers 120 °C, 3,6 bar à 140 °C' },
   };
   // température de vaporisation à la pression P (lecture « à l'envers »)
   const tVap = (def, P) => inverse(def.f, P, def.deb, def.fin);
@@ -1437,7 +1437,7 @@
     const tc = [];
     if (pb.fus != null && (pb.noms.s && pb.noms.l)) tc.push(`fusion à ${deg(pb.fus)}`);
     if (pb.vap != null) tc.push(`${pb.pression ? 'vaporisation' : 'ébullition'} à ${deg(pb.vap)}`);
-    h += `<p class="ph-donnees">Données : ${pb.donnees.map(x => x.html).join(' ; ')}.<br>Changements d'état${pressionTxt(pb)} : ${tc.join(', ')}.</p>`;
+    h += `<p class="ph-donnees">Données : ${pb.donnees.map(x => x.html).join(' ; ')}.<br>Changements d'état${pressionTxt(pb)} : ${tc.join(', ')}.</p>`;
     return h;
   }
 
@@ -1458,11 +1458,11 @@
       const dedans = `<span class="ce-sb-e">${b.e == null ? '?' : pb.noms[b.e]}</span>${avecM ? `<span class="ce-sb-m">m = ${pb.mKg}</span>` : ''}`;
       const cls = `ce-sb ce-sb-${b.e || 'x'}${avecM ? ' avec-m' : ''}${o.sel === k ? ' sel' : ''}${o.ko === k ? ' ko' : ''}`;
       h += `<div class="ce-sb-col"><span class="ce-sb-t">${tete}</span>${o.edit
-        ? `<button type="button" class="${cls}" data-k="${k}" aria-label="Bulle ${k + 1} : ${b.e == null ? 'état à choisir' : pb.noms[b.e]}, ${b.t == null ? 'température à choisir' : deg(b.t)}">${dedans}</button>`
+        ? `<button type="button" class="${cls}" data-k="${k}" aria-label="Bulle ${k + 1} : ${b.e == null ? 'état à choisir' : pb.noms[b.e]}, ${b.t == null ? 'température à choisir' : deg(b.t)}">${dedans}</button>`
         : `<div class="${cls}">${dedans}</div>`}</div>`;
     });
     const min = bulles.length * 116 + (bulles.length - 1) * 70 + 16;
-    const aria = 'Schéma des étapes : ' + bulles.map(b => (b.e == null ? '?' : pb.noms[b.e]) + ' à ' + (b.t == null ? '?' : fmt(b.t)) + ' °C').join(', puis ');
+    const aria = 'Schéma des étapes : ' + bulles.map(b => (b.e == null ? '?' : pb.noms[b.e]) + ' à ' + (b.t == null ? '?' : fmt(b.t)) + ' °C').join(', puis ');
     return `<div class="ce-ligne-cont"><div class="ce-sch" data-min="${min}" role="${o.edit ? 'group' : 'img'}" aria-label="${aria}">${h}</div></div>`;
   }
   // schéma juste du problème, avec les énergies déjà trouvées
@@ -1474,33 +1474,33 @@
     const n = bulles.length, vide = bulles.findIndex(b => b.e == null || b.t == null);
     if (vide >= 0) return { message: `Choisis l'état et la température de la bulle ${vide + 1}.` };
     const b0 = bulles[0];
-    if (b0.e !== pb.ei || b0.t !== pb.ti) return { k: 0, erreur: `La première bulle est l'état de départ de l'énoncé : ${bulleTxt(pb, { e: pb.ei, t: pb.ti })}.` };
-    if (n === 1) return { message: `Ajoute des bulles jusqu'à l'état final : ${bulleTxt(pb, { e: pb.ef, t: pb.tf })}.` };
+    if (b0.e !== pb.ei || b0.t !== pb.ti) return { k: 0, erreur: `La première bulle est l'état de départ de l'énoncé : ${bulleTxt(pb, { e: pb.ei, t: pb.ti })}.` };
+    if (n === 1) return { message: `Ajoute des bulles jusqu'à l'état final : ${bulleTxt(pb, { e: pb.ef, t: pb.tf })}.` };
     const P = pressionTxt(pb);
     for (let k = 1; k < n; k++) {
       const a = bulles[k - 1], b = bulles[k], i = k, j = k + 1;
-      if (a.e === b.e && a.t === b.t) return { k, erreur: `Les bulles ${i} et ${j} sont identiques : retire la bulle ${j}.` };
-      if (a.e !== b.e && a.t !== b.t) return { k, erreur: `Entre les bulles ${i} et ${j}, l'état change : la température doit rester la même (un changement d'état se fait à température fixe).` };
+      if (a.e === b.e && a.t === b.t) return { k, erreur: `Les bulles ${i} et ${j} sont identiques : retire la bulle ${j}.` };
+      if (a.e !== b.e && a.t !== b.t) return { k, erreur: `Entre les bulles ${i} et ${j}, l'état change : la température doit rester la même (un changement d'état se fait à température fixe).` };
       if (a.e !== b.e && Math.abs(RANG[a.e] - RANG[b.e]) === 2) {
-        return { k, erreur: `Entre les bulles ${i} et ${j}, ${pb.le[a.e]} passe directement à l'état ${NOM_ETAT[b.e]} : ${P.trim()}, il faut d'abord ${a.e === 's' ? 'une fusion' : 'une liquéfaction'} (bulle « ${pb.noms.l} » entre les deux).` };
+        return { k, erreur: `Entre les bulles ${i} et ${j}, ${pb.le[a.e]} passe directement à l'état ${NOM_ETAT[b.e]} : ${P.trim()}, il faut d'abord ${a.e === 's' ? 'une fusion' : 'une liquéfaction'} (bulle « ${pb.noms.l} » entre les deux).` };
       }
       const dir = a.e === b.e ? Math.sign(b.t - a.t) : Math.sign(RANG[b.e] - RANG[a.e]);
-      if (dir !== pb.sens) return { k, erreur: `Entre les bulles ${i} et ${j}, on ${dir > 0 ? 'chauffe' : 'refroidit'} : ici, on ${pb.sens > 0 ? 'chauffe' : 'refroidit'} du début à la fin, la transformation va dans un seul sens.` };
+      if (dir !== pb.sens) return { k, erreur: `Entre les bulles ${i} et ${j}, on ${dir > 0 ? 'chauffe' : 'refroidit'} : ici, on ${pb.sens > 0 ? 'chauffe' : 'refroidit'} du début à la fin, la transformation va dans un seul sens.` };
       if (a.e !== b.e) {
         const tc = tChangement(pb, a.e, b.e);
-        if (a.t !== tc) return { k, erreur: `La ${NOMS_TRANS[natureDe(a, b)]} se fait à ${deg(tc)}${P}, pas à ${deg(a.t)} : il faut d'abord ${a.t < tc ? 'chauffer' : 'refroidir'} ${pb.le[a.e]} jusqu'à ${deg(tc)}.` };
+        if (a.t !== tc) return { k, erreur: `La ${NOMS_TRANS[natureDe(a, b)]} se fait à ${deg(tc)}${P}, pas à ${deg(a.t)} : il faut d'abord ${a.t < tc ? 'chauffer' : 'refroidir'} ${pb.le[a.e]} jusqu'à ${deg(tc)}.` };
       }
       // l'état de la bulle j est-il possible à sa température ?
-      if (b.e === 's' && pb.fus != null && b.t > pb.fus) return { k, erreur: `${cap(pb.le.s)} ne peut pas dépasser ${deg(pb.fus)} : il faut d'abord ${pb.pron.s} faire fondre.` };
-      if (b.e === 'l' && pb.vap != null && b.t > pb.vap) return { k, erreur: `${cap(pb.le.l)} ne dépasse pas ${deg(pb.vap)}${P} : il faut d'abord ${pb.pron.l} vaporiser.` };
-      if (b.e === 'l' && pb.fus != null && pb.noms.s && b.t < pb.fus) return { k, erreur: `${cap(pb.le.l)} ne descend pas sous ${deg(pb.fus)} : il faut d'abord ${pb.pron.l} solidifier.` };
-      if (b.e === 'g' && pb.vap != null && b.t < pb.vap) return { k, erreur: `${cap(pb.le.g)} ne descend pas sous ${deg(pb.vap)}${P} : il faut d'abord ${pb.pron.g} liquéfier.` };
-      if (k >= 2 && bulles[k - 2].e === a.e && a.e === b.e) return { k: k - 1, erreur: `Les bulles ${k - 1}, ${i} et ${j} sont toutes « ${pb.noms[a.e]} » : un seul changement de température suffit, retire la bulle ${i}.` };
+      if (b.e === 's' && pb.fus != null && b.t > pb.fus) return { k, erreur: `${cap(pb.le.s)} ne peut pas dépasser ${deg(pb.fus)} : il faut d'abord ${pb.pron.s} faire fondre.` };
+      if (b.e === 'l' && pb.vap != null && b.t > pb.vap) return { k, erreur: `${cap(pb.le.l)} ne dépasse pas ${deg(pb.vap)}${P} : il faut d'abord ${pb.pron.l} vaporiser.` };
+      if (b.e === 'l' && pb.fus != null && pb.noms.s && b.t < pb.fus) return { k, erreur: `${cap(pb.le.l)} ne descend pas sous ${deg(pb.fus)} : il faut d'abord ${pb.pron.l} solidifier.` };
+      if (b.e === 'g' && pb.vap != null && b.t < pb.vap) return { k, erreur: `${cap(pb.le.g)} ne descend pas sous ${deg(pb.vap)}${P} : il faut d'abord ${pb.pron.g} liquéfier.` };
+      if (k >= 2 && bulles[k - 2].e === a.e && a.e === b.e) return { k: k - 1, erreur: `Les bulles ${k - 1}, ${i} et ${j} sont toutes « ${pb.noms[a.e]} » : un seul changement de température suffit, retire la bulle ${i}.` };
     }
     const der = bulles[n - 1];
-    if (der.e !== pb.ef || der.t !== pb.tf) return { k: n - 1, erreur: `Le schéma se termine par l'état final de l'énoncé : ${bulleTxt(pb, { e: pb.ef, t: pb.tf })}.` };
+    if (der.e !== pb.ef || der.t !== pb.tf) return { k: n - 1, erreur: `Le schéma se termine par l'état final de l'énoncé : ${bulleTxt(pb, { e: pb.ef, t: pb.tf })}.` };
     const can = pb.bulles;
-    if (can.length !== n || can.some((b, k) => b.e !== bulles[k].e || b.t !== bulles[k].t)) return { k: 0, erreur: 'Compare ton schéma avec l\'énoncé : une bulle par état, de l\'état de départ à l\'état final.' };
+    if (can.length !== n || can.some((b, k) => b.e !== bulles[k].e || b.t !== bulles[k].t)) return { k: 0, erreur: 'Compare ton schéma avec l\'énoncé : une bulle par état, de l\'état de départ à l\'état final.' };
     return null;
   }
 
@@ -1523,7 +1523,7 @@
       if (fini) { ze.innerHTML = ''; ze.hidden = true; return; }
       zs.querySelectorAll('button.ce-sb').forEach(b => { b.onclick = () => { sel = +b.dataset.k; rendre(); }; });
       const b = bulles[sel];
-      ze.innerHTML = `<p class="ce-ed-t">Bulle ${sel + 1}${sel === 0 ? ' : état de départ' : ''}</p>
+      ze.innerHTML = `<p class="ce-ed-t">Bulle ${sel + 1}${sel === 0 ? ' : état de départ' : ''}</p>
         <div class="ce-ed-l"><span class="ce-ed-lab">État</span><div class="ce-ed-ch">${etats.map(e => `<button type="button" class="ce-tg" data-e="${e}" aria-pressed="${b.e === e}">${pb.etats[e]}</button>`).join('')}</div></div>
         <div class="ce-ed-l"><span class="ce-ed-lab">Température</span><div class="ce-ed-ch">${temps.map(t => `<button type="button" class="ce-tg" data-t="${t}" aria-pressed="${b.t === t}">${deg(t)}</button>`).join('')}</div></div>
         <div class="ce-ed-act">${bulles.length < 7 ? '<button type="button" class="btn-small" data-a="plus">＋ Ajouter une bulle</button>' : ''}${bulles.length > 1 ? '<button type="button" class="btn-small" data-a="moins">Retirer la dernière bulle</button>' : ''}</div>`;
@@ -1544,8 +1544,8 @@
     return { montrer() { bulles = pb.bulles.map(b => Object.assign({}, b)); fini = true; bVal.fermer(); rendre(); } };
   }
   const partieConstruire = (pb, o) => Object.assign({ type: 'perso', pb,
-    q: 'Construis le schéma des étapes : une bulle par état (état physique et température), de l\'état de départ à l\'état final. Touche une bulle pour la modifier.',
-    solution: `<p>${pb.bulles.map(b => bulleTxt(pb, b)).join(' → ')} : ${pb.etapes.length} étape${pb.etapes.length > 1 ? 's' : ''}.</p>`,
+    q: 'Construis le schéma des étapes : une bulle par état (état physique et température), de l\'état de départ à l\'état final. Touche une bulle pour la modifier.',
+    solution: `<p>${pb.bulles.map(b => bulleTxt(pb, b)).join(' → ')} : ${pb.etapes.length} étape${pb.etapes.length > 1 ? 's' : ''}.</p>`,
     monter: (zone, api) => construire(zone, { pb }, api) }, o);
 
   /* ---------- Outil 2 : nature de chaque flèche (grille) ---------- */
@@ -1555,16 +1555,16 @@
       const indices = {};
       ids.forEach(x => {
         if (x === et.n) return;
-        indices[x] = et.n === 'temp' ? `${nomQ(pb, et.k)} : l'état ne change pas (${pb.noms[et.a.e]}), seule la température varie.`
-          : x === 'temp' ? `${nomQ(pb, et.k)} : l'état change (${pb.noms[et.a.e]} → ${pb.noms[et.b.e]}) à température fixe.`
-            : `${nomQ(pb, et.k)} : ${NOM_ETAT[et.a.e]} → ${NOM_ETAT[et.b.e]}, c'est une ${NOMS_TRANS[et.n]}.`;
+        indices[x] = et.n === 'temp' ? `${nomQ(pb, et.k)} : l'état ne change pas (${pb.noms[et.a.e]}), seule la température varie.`
+          : x === 'temp' ? `${nomQ(pb, et.k)} : l'état change (${pb.noms[et.a.e]} → ${pb.noms[et.b.e]}) à température fixe.`
+            : `${nomQ(pb, et.k)} : ${NOM_ETAT[et.a.e]} → ${NOM_ETAT[et.b.e]}, c'est une ${NOMS_TRANS[et.n]}.`;
       });
-      return { id: 'f' + et.k, label: `${nomQ(pb, et.k)} : ${bulleTxt(pb, et.a)} → ${bulleTxt(pb, et.b)}`, bonne: et.n, indices };
+      return { id: 'f' + et.k, label: `${nomQ(pb, et.k)} : ${bulleTxt(pb, et.a)} → ${bulleTxt(pb, et.b)}`, bonne: et.n, indices };
     });
-    return Object.assign({ type: 'grille', q: 'Pour chaque flèche : changement de température, ou changement d\'état (lequel) ?',
+    return Object.assign({ type: 'grille', q: 'Pour chaque flèche : changement de température, ou changement d\'état (lequel) ?',
       options: ids.map(x => ({ id: x, label: NOMS_TRANS[x] })), lignes,
       figure: z => { z.innerHTML = schemaPb(pb); },
-      solution: `<p>${pb.etapes.map(et => `${nomQ(pb, et.k)} : ${NOMS_TRANS[et.n]}`).join(' ; ')}.</p>` }, o);
+      solution: `<p>${pb.etapes.map(et => `${nomQ(pb, et.k)} : ${NOMS_TRANS[et.n]}`).join(' ; ')}.</p>` }, o);
   }
 
   /* ---------- Outil 3 : une flèche : formule, donnée, calcul de Qᵢ ---------- */
@@ -1579,14 +1579,14 @@
     }
     const neg = et.n === 'sol' || et.n === 'liq';
     return `<p class="ph-calc">${Qn} = m × ${neg ? `(−${sym})` : sym} = ${m} × ${neg ? `(−${val})` : val}</p><p class="ph-calc">${Qn} ${aff ? '≈' : '='} <span class="c">${sci(et.Q, 3)} J</span></p>` +
-      (neg ? `<p>Pour une ${NOMS_TRANS[et.n]}, L = −${sym} : le système cède de l'énergie.</p>` : '');
+      (neg ? `<p>Pour une ${NOMS_TRANS[et.n]}, L = −${sym} : le système cède de l'énergie.</p>` : '');
   }
   function outilFleche(zone, o, api) {
     const pb = o.pb, et = pb.etapes[o.k], Qn = nomQ(pb, o.k);
     const dn = id => pb.donnees.find(x => x.id === id);
     let f = null, dsel = null, fini = false;
     const d = el('div', 'ce-fq');
-    d.innerHTML = `<p class="ce-fq-t"><b>${Qn}</b> : ${bulleTxt(pb, et.a)} → ${bulleTxt(pb, et.b)}</p>
+    d.innerHTML = `<p class="ce-fq-t"><b>${Qn}</b> : ${bulleTxt(pb, et.a)} → ${bulleTxt(pb, et.b)}</p>
       <div class="ce-fq-l"><span class="ce-fq-lab">Formule</span><div class="ce-fq-ch" data-g="f">
         <button type="button" class="ce-tg" data-f="c" aria-pressed="false">${Qn} = m × c × (T<sub>f</sub> − T<sub>i</sub>)</button>
         <button type="button" class="ce-tg" data-f="L" aria-pressed="false">${Qn} = m × L</button></div></div>
@@ -1613,14 +1613,14 @@
       if (proche(x, -Q, .01)) {
         if (et.n === 'temp') {
           const dT = et.b.t - et.a.t;
-          return `${dT > 0 ? 'La température monte' : 'La température baisse'} : T<sub>f</sub> − T<sub>i</sub> = ${fmt(et.b.t)} − ${par(et.a.t)} = ${fmt(dT)} °C, donc ${Qn} ${dT > 0 ? '> 0' : '< 0'}.`;
+          return `${dT > 0 ? 'La température monte' : 'La température baisse'} : T<sub>f</sub> − T<sub>i</sub> = ${fmt(et.b.t)} − ${par(et.a.t)} = ${fmt(dT)} °C, donc ${Qn} ${dT > 0 ? '> 0' : '< 0'}.`;
         }
-        return et.n === 'fus' || et.n === 'vap' ? `Pour une ${NOMS_TRANS[et.n]}, le système reçoit de l'énergie : L > 0, donc ${Qn} > 0.`
-          : `Pour une ${NOMS_TRANS[et.n]}, L = −L<sub>${et.tr}</sub> : ${Qn} est négative (le système cède de l'énergie).`;
+        return et.n === 'fus' || et.n === 'vap' ? `Pour une ${NOMS_TRANS[et.n]}, le système reçoit de l'énergie : L > 0, donc ${Qn} > 0.`
+          : `Pour une ${NOMS_TRANS[et.n]}, L = −L<sub>${et.tr}</sub> : ${Qn} est négative (le système cède de l'énergie).`;
       }
-      if (/g$/.test(pb.mTxt) && !/kg$/.test(pb.mTxt) && proche(x, Q * 1000, .01)) return `La masse doit être en kg : ${pb.mTxt} = ${pb.mKg}.`;
-      if (proche(x, Q / 1000, .01) || proche(x, -Q / 1000, .01)) return dd.k ? `Convertis la donnée en J : ${dd.html} = ${dd.html.split(' = ')[1].replace(/^([\d ,]+) k/, (m0, nb) => `${nb.trim()} × 10<sup>3</sup> `)}.` : `Donne ${Qn} en joules (J).`;
-      if (et.n === 'temp' && (proche(x, pb.m * pb.c[et.a.e] * et.b.t, .01) || proche(x, pb.m * pb.c[et.a.e] * et.a.t, .01))) return `C'est l'écart de température qui compte : T<sub>f</sub> − T<sub>i</sub> = ${fmt(et.b.t)} − ${par(et.a.t)} = ${fmt(et.b.t - et.a.t)} °C.`;
+      if (/g$/.test(pb.mTxt) && !/kg$/.test(pb.mTxt) && proche(x, Q * 1000, .01)) return `La masse doit être en kg : ${pb.mTxt} = ${pb.mKg}.`;
+      if (proche(x, Q / 1000, .01) || proche(x, -Q / 1000, .01)) return dd.k ? `Convertis la donnée en J : ${dd.html} = ${dd.html.split(' = ')[1].replace(/^([\d ,]+) k/, (m0, nb) => `${nb.trim()} × 10<sup>3</sup> `)}.` : `Donne ${Qn} en joules (J).`;
+      if (et.n === 'temp' && (proche(x, pb.m * pb.c[et.a.e] * et.b.t, .01) || proche(x, pb.m * pb.c[et.a.e] * et.a.t, .01))) return `C'est l'écart de température qui compte : T<sub>f</sub> − T<sub>i</sub> = ${fmt(et.b.t)} − ${par(et.a.t)} = ${fmt(et.b.t - et.a.t)} °C.`;
       if (et.n === 'temp') return `${Qn} = m × c × (T<sub>f</sub> − T<sub>i</sub>) avec m en kg, c en J·kg<sup>−1</sup>·K<sup>−1</sup> et T<sub>f</sub> − T<sub>i</sub> = ${fmt(et.b.t)} − ${par(et.a.t)}.`;
       return `${Qn} = m × ${et.n === 'sol' || et.n === 'liq' ? '(−L)' : 'L'} avec m en kg et L en J·kg<sup>−1</sup>.`;
     }
@@ -1635,11 +1635,11 @@
       if (fini || api.fini()) return;
       if (!f || !dsel) { api.message('Choisis la formule et la donnée de cette flèche.'); return; }
       const va = lire(a.input.value), vn = lire(n.input.value);
-      if (isNaN(va)) { secouer(v); api.message(`Écris ${Qn} : le nombre devant la puissance de 10.`); return; }
+      if (isNaN(va)) { secouer(v); api.message(`Écris ${Qn} : le nombre devant la puissance de 10.`); return; }
       if (isNaN(vn) || !Number.isInteger(vn)) { secouer(v); api.message('Écris l\'exposant de la puissance de 10 (un nombre entier).'); return; }
       if (f !== bonF) {
-        api.erreur(bonF === 'c' ? `Entre ces deux bulles, l'état ne change pas (${pb.noms[et.a.e]}) : seule la température varie, la formule utilise c et l'écart de température.`
-          : `Entre ces deux bulles, la température ne change pas (ΔT = 0) : c'est une ${NOMS_TRANS[et.n]}, la formule utilise la chaleur latente L.`);
+        api.erreur(bonF === 'c' ? `Entre ces deux bulles, l'état ne change pas (${pb.noms[et.a.e]}) : seule la température varie, la formule utilise c et l'écart de température.`
+          : `Entre ces deux bulles, la température ne change pas (ΔT = 0) : c'est une ${NOMS_TRANS[et.n]}, la formule utilise la chaleur latente L.`);
         secouer(d.querySelector('[data-g="f"]'));
         return;
       }
@@ -1647,9 +1647,9 @@
       if (dsel !== et.donnee) {
         api.erreur(et.n === 'temp'
           ? (ch.type === 'L' ? 'Pour un changement de température, il faut une capacité thermique massique c, pas une chaleur latente.'
-            : `C'est ${pb.le[et.a.e]} qui change de température : prends la capacité thermique massique de cet état.`)
+            : `C'est ${pb.le[et.a.e]} qui change de température : prends la capacité thermique massique de cet état.`)
           : (ch.type === 'c' ? 'Pour un changement d\'état, il faut une chaleur latente L, pas une capacité thermique massique.'
-            : `C'est une ${NOMS_TRANS[et.n]} : prends la chaleur latente de ${et.tr === 'fus' ? 'fusion' : 'vaporisation'}.`));
+            : `C'est une ${NOMS_TRANS[et.n]} : prends la chaleur latente de ${et.tr === 'fus' ? 'fusion' : 'vaporisation'}.`));
         secouer(d.querySelector('[data-g="d"]'));
         return;
       }
@@ -1669,7 +1669,7 @@
     };
   }
   const partieFleche = (pb, k, o) => Object.assign({ type: 'perso', pb, k,
-    q: `Flèche ${nomQ(pb, k)} : choisis la formule et la donnée, puis calcule ${nomQ(pb, k)} (3 chiffres significatifs, signe compris).`,
+    q: `Flèche ${nomQ(pb, k)} : choisis la formule et la donnée, puis calcule ${nomQ(pb, k)} (3 chiffres significatifs, signe compris).`,
     figure: z => { z.innerHTML = schemaPb(pb, { actif: k }); },
     solution: calculEtape(pb, pb.etapes[k], true), monter: (zone, api) => outilFleche(zone, { pb, k }, api) }, o);
 
@@ -1679,17 +1679,17 @@
     const nom = pb.etapes.map(e => nomQ(pb, e.k)).join(' + ');
     return Object.assign({ type: 'sci', q: `Calcule l'énergie totale ${Qn} = ${nom} (3 chiffres significatifs).`, label: `${Qn} =`, valeur: pb.Q, unite: 'J', cs: 3, rel: .01,
       figure: z => { z.innerHTML = schemaPb(pb); },
-      diag: v => (Qs.some(x => x < 0) && Qs.some(x => x > 0) && proche(v, abs, .01) ? 'Additionne les énergies avec leur signe : une énergie négative se retranche.'
-        : Qs.some((x, k) => proche(v, pb.Q - x, .01)) ? `Il manque une flèche : ${Qn} = ${nom}.`
+      diag: v => (Qs.some(x => x < 0) && Qs.some(x => x > 0) && proche(v, abs, .01) ? 'Additionne les énergies avec leur signe : une énergie négative se retranche.'
+        : Qs.some((x, k) => proche(v, pb.Q - x, .01)) ? `Il manque une flèche : ${Qn} = ${nom}.`
           : `${Qn} = ${nom}, chaque énergie avec son signe.`),
       solution: `<p class="ph-calc">${Qn} = ${nom}</p><p class="ph-calc">${Qn} = ${Qs.map(x => sci(x, 3)).join(' + ').replace(/\+ −/g, '− ')} ≈ <span class="c">${sci(pb.Q, 3)} J</span></p>` }, o);
   }
   function partieSens(pb, o) {
     const Qn = pb.nomQ, recoit = pb.Q > 0;
-    return Object.assign({ type: 'choix', q: `D'après le signe de ${Qn}, le système (${NOM_CORPS[pb.corps] || 'le corps'}) reçoit-il ou cède-t-il de l'énergie ?`,
+    return Object.assign({ type: 'choix', q: `D'après le signe de ${Qn}, le système (${NOM_CORPS[pb.corps] || 'le corps'}) reçoit-il ou cède-t-il de l'énergie ?`,
       options: [{ id: 'r', label: 'il reçoit de l\'énergie' }, { id: 'c', label: 'il cède de l\'énergie' }], bonne: recoit ? 'r' : 'c', melanger: false,
-      indices: { r: `${Qn} < 0 : l'énergie est cédée au milieu extérieur.`, c: `${Qn} > 0 : l'énergie est reçue par le système.` },
-      solution: `<p>${Qn} ${recoit ? '> 0 : le système <b>reçoit</b>' : '< 0 : le système <b>cède</b>'} ${sci(Math.abs(pb.Q), 3)} J${recoit ? '' : ' au milieu extérieur'}.</p>` }, o);
+      indices: { r: `${Qn} < 0 : l'énergie est cédée au milieu extérieur.`, c: `${Qn} > 0 : l'énergie est reçue par le système.` },
+      solution: `<p>${Qn} ${recoit ? '> 0 : le système <b>reçoit</b>' : '< 0 : le système <b>cède</b>'} ${sci(Math.abs(pb.Q), 3)} J${recoit ? '' : ' au milieu extérieur'}.</p>` }, o);
   }
   // toute la méthode : construire, nature, chaque flèche, somme, interprétation ; o.sans : parties à ne pas poser
   function etapes(pb, o) {
@@ -1768,8 +1768,8 @@
     { n: 2, titre: 'Diagramme d\'état (P, T)', desc: 'Zones, point triple, point critique, état d\'une espèce, température de changement d\'état et pression', fiche: 'fiche_2',
       sousModules: true,
       parties: [
-        { nom: 'Lire le diagramme d\'état', slug: 'diagramme', cours: 'module_2a_cours', noms: { cours: 'Cours : lire le diagramme d\'état' } },
-        { nom: 'Changement d\'état et pression', slug: 'pression', cours: 'module_2b_cours', noms: { cours: 'Cours : changement d\'état et pression' } },
+        { nom: 'Lire le diagramme d\'état', slug: 'diagramme', cours: 'module_2a_cours', noms: { cours: 'Cours : lire le diagramme d\'état' } },
+        { nom: 'Changement d\'état et pression', slug: 'pression', cours: 'module_2b_cours', noms: { cours: 'Cours : changement d\'état et pression' } },
         { nom: 'Diagramme d\'état', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Énergie et changement de température', desc: 'Q = m × c × (T<sub>f</sub> − T<sub>i</sub>), c selon l\'état, énergie reçue ou cédée', fiche: 'fiche_3',
       parties: [{ nom: 'Changement de température', cours: 'module_3_cours', questions: 'module_3_questions' }] },
@@ -1778,12 +1778,12 @@
     { n: 5, titre: 'La méthode du schéma des étapes', desc: 'Bulles et flèches, Q = m c ΔT ou Q = m L pour chaque flèche, Q = Q<sub>1</sub> + Q<sub>2</sub> + …', fiche: 'fiche_5',
       sousModules: true,
       parties: [
-        { nom: 'Une ou deux étapes', slug: 'deux', cours: 'module_5a_cours', noms: { cours: 'Cours : une ou deux étapes' } },
-        { nom: 'Plusieurs étapes', slug: 'plusieurs', cours: 'module_5b_cours', noms: { cours: 'Cours : plusieurs étapes' } },
-        { nom: 'Refroidissement', slug: 'refroidissement', cours: 'module_5c_cours', noms: { cours: 'Cours : refroidissement' } },
-        { nom: 'Entraînement', entrainement: 'module_5_entrainement', noms: { entrainement: 'Entraînement : problèmes au hasard' } },
+        { nom: 'Une ou deux étapes', slug: 'deux', cours: 'module_5a_cours', noms: { cours: 'Cours : une ou deux étapes' } },
+        { nom: 'Plusieurs étapes', slug: 'plusieurs', cours: 'module_5b_cours', noms: { cours: 'Cours : plusieurs étapes' } },
+        { nom: 'Refroidissement', slug: 'refroidissement', cours: 'module_5c_cours', noms: { cours: 'Cours : refroidissement' } },
+        { nom: 'Entraînement', entrainement: 'module_5_entrainement', noms: { entrainement: 'Entraînement : problèmes au hasard' } },
         { nom: 'Schéma des étapes', questions: 'module_5_questions' }] },
-    { n: 6, titre: 'Exercices', desc: 'Exercices 13, 14, 10, 15, 7, 8 et 17 de la feuille, exercice de bac blanc « Dégivrage »', exercices: 'module_6', exNom: 'Exercices de la feuille', nbEx: 8 },
+    { n: 6, titre: 'Exercices', desc: 'Exercices 13, 14, 10, 15, 7, 8 et 17 de la feuille, exercice de bac blanc « Dégivrage »', exercices: 'module_6', exNom: 'Exercices de la feuille', nbEx: 8 },
   ];
   window.SOM.init({ nom: 'Chapitre 11 : Changements d\'état et transferts thermiques', id: 'changements-etat', cleEx: 'changements-etat-exercices', plan: PLAN, flashcards: true });
   const menu = cle => window.SOM.menu(cle);

@@ -79,9 +79,9 @@
   const ORDRE = { ox: 0, red: 0, h: 1, e: 2, eau: 3 };
   const ETAPES = [
     { titre: 'Éléments autres que O et H' },
-    { titre: 'O : ajouter H<sub>2</sub>O' },
-    { titre: 'H : ajouter H<sup>+</sup>' },
-    { titre: 'Charges : ajouter e<sup>−</sup>' },
+    { titre: 'O : ajouter H<sub>2</sub>O' },
+    { titre: 'H : ajouter H<sup>+</sup>' },
+    { titre: 'Charges : ajouter e<sup>−</sup>' },
   ];
 
   // Difficultés repérées par les diagnostics (code → libellé)
@@ -201,16 +201,16 @@
       T[0].coef = b / g; T[1].coef = a / g;
       const n = T[0].coef * a;
       if (T[0].coef === 1 && T[1].coef === 1) {
-        textes.push(`${X} est déjà équilibré : ${n} atome${s(n)} ${X} de chaque côté.`);
-        c1 += ` Il y a ${n} atome${s(n)} ${X} de chaque côté : ${X} est déjà équilibré, laisse 1 devant chaque espèce.`;
+        textes.push(`${X} est déjà équilibré : ${n} atome${s(n)} ${X} de chaque côté.`);
+        c1 += ` Il y a ${n} atome${s(n)} ${X} de chaque côté : ${X} est déjà équilibré, laisse 1 devant chaque espèce.`;
       } else {
-        textes.push(`Il y a ${a} atome${s(a)} ${X} dans ${nOx} et ${b} dans ${nRed} : on écrit ${kf(T[0].coef, cp.ox)} et ${kf(T[1].coef, cp.red)}, soit ${n} atomes ${X} de chaque côté.`);
+        textes.push(`Il y a ${a} atome${s(a)} ${X} dans ${nOx} et ${b} dans ${nRed} : on écrit ${kf(T[0].coef, cp.ox)} et ${kf(T[1].coef, cp.red)}, soit ${n} atomes ${X} de chaque côté.`);
         const regler = T.filter(t => t.coef > 1).map(t => `devant ${html(t.f)} sur <b>${t.coef}</b>`).join(' et ');
-        c1 += ` Il y a ${a} atome${s(a)} ${X} dans ${nOx} et ${b} dans ${nRed} : avec la flèche ▲, règle le nombre ${regler}.`;
+        c1 += ` Il y a ${a} atome${s(a)} ${X} dans ${nOx} et ${b} dans ${nRed} : avec la flèche ▲, règle le nombre ${regler}.`;
       }
     } else {
-      textes.push('Il n\'y a pas d\'autre élément que O et H dans ce couple : rien à équilibrer à cette étape.');
-      c1 += ' Il n\'y a pas d\'autre élément que O et H dans ce couple : laisse 1 devant chaque espèce.';
+      textes.push('Il n\'y a pas d\'autre élément que O et H dans ce couple : rien à équilibrer à cette étape.');
+      c1 += ' Il n\'y a pas d\'autre élément que O et H dans ce couple : laisse 1 devant chaque espèce.';
     }
     consignes.push(c1 + ' Puis valide l\'étape.');
     etapes.push(copie());
@@ -220,13 +220,13 @@
       const c = OG > OD ? 'd' : 'g', k = Math.abs(OG - OD);
       const deja = T.find(x => x.f === EAU && x.cote === c);
       const tout = ajouter('eau', EAU, c, k);
-      textes.push(`Il y a ${OG} atome${s(OG)} O ${cote('g')} et ${OD} ${cote('d')} : il manque ${k} atome${s(k)} O ${cote(c)}, on ajoute ${k}&nbsp;H<sub>2</sub>O ${cote(c)}${tout}.`);
-      consignes.push(`Il y a ${OG} atome${s(OG)} O ${cote('g')} et ${OD} ${cote('d')} : il manque ${k} atome${s(k)} O ${cote(c)}. ` +
+      textes.push(`Il y a ${OG} atome${s(OG)} O ${cote('g')} et ${OD} ${cote('d')} : il manque ${k} atome${s(k)} O ${cote(c)}, on ajoute ${k}&nbsp;H<sub>2</sub>O ${cote(c)}${tout}.`);
+      consignes.push(`Il y a ${OG} atome${s(OG)} O ${cote('g')} et ${OD} ${cote('d')} : il manque ${k} atome${s(k)} O ${cote(c)}. ` +
         (deja ? `Glisse H<sub>2</sub>O ${cote(c)}, puis règle le nombre devant H<sub>2</sub>O sur <b>${deja.coef}</b>.`
           : `Glisse H<sub>2</sub>O ${cote(c)}, puis règle son nombre sur <b>${k}</b> (une molécule d'eau apporte un atome O). Valide l'étape.`));
     } else {
-      textes.push(OG ? `O est déjà équilibré (${OG} atome${s(OG)} de chaque côté) : <b>pas besoin d'ajouter H<sub>2</sub>O</b>.` : 'Il n\'y a pas d\'atome O : <b>pas besoin d\'ajouter H<sub>2</sub>O</b>.');
-      consignes.push(`${OG ? `Il y a ${OG} atome${s(OG)} O de chaque côté : O est déjà équilibré.` : 'Il n\'y a pas d\'atome O.'} N'ajoute pas d'eau : valide directement l'étape.`);
+      textes.push(OG ? `O est déjà équilibré (${OG} atome${s(OG)} de chaque côté) : <b>pas besoin d'ajouter H<sub>2</sub>O</b>.` : 'Il n\'y a pas d\'atome O : <b>pas besoin d\'ajouter H<sub>2</sub>O</b>.');
+      consignes.push(`${OG ? `Il y a ${OG} atome${s(OG)} O de chaque côté : O est déjà équilibré.` : 'Il n\'y a pas d\'atome O.'} N'ajoute pas d'eau : valide directement l'étape.`);
     }
     etapes.push(copie());
     // 3. H avec H+ (un ion H+ apporte un atome H)
@@ -236,13 +236,13 @@
       const c = HG > HD ? 'd' : 'g', k = Math.abs(HG - HD);
       const deja = T.find(x => x.f === HP && x.cote === c);
       const tout = ajouter('h', HP, c, k);
-      textes.push(`Il y a ${HG} atome${s(HG)} H ${cote('g')} et ${HD} ${cote('d')} : il manque ${k} atome${s(k)} H ${cote(c)}, on ajoute ${k}&nbsp;H<sup>+</sup> ${cote(c)}${tout}.`);
-      consignes.push(`Il y a ${HG} atome${s(HG)} H ${cote('g')} et ${HD} ${cote('d')}${eau} : il manque ${k} atome${s(k)} H ${cote(c)}. ` +
+      textes.push(`Il y a ${HG} atome${s(HG)} H ${cote('g')} et ${HD} ${cote('d')} : il manque ${k} atome${s(k)} H ${cote(c)}, on ajoute ${k}&nbsp;H<sup>+</sup> ${cote(c)}${tout}.`);
+      consignes.push(`Il y a ${HG} atome${s(HG)} H ${cote('g')} et ${HD} ${cote('d')}${eau} : il manque ${k} atome${s(k)} H ${cote(c)}. ` +
         (deja ? `Glisse H<sup>+</sup> ${cote(c)}, puis règle le nombre devant H<sup>+</sup> sur <b>${deja.coef}</b>.`
           : `Glisse H<sup>+</sup> ${cote(c)}, puis règle son nombre sur <b>${k}</b> (un ion H<sup>+</sup> apporte un atome H). Valide l'étape.`));
     } else {
-      textes.push(HG ? `H est déjà équilibré (${HG} atome${s(HG)} de chaque côté) : <b>pas besoin d'ajouter H<sup>+</sup></b>.` : 'Il n\'y a pas d\'atome H : <b>pas besoin d\'ajouter H<sup>+</sup></b>.');
-      consignes.push(`${HG ? `Il y a ${HG} atome${s(HG)} H de chaque côté : H est déjà équilibré.` : 'Il n\'y a pas d\'atome H.'} N'ajoute pas d'ions H<sup>+</sup> : valide directement l'étape.`);
+      textes.push(HG ? `H est déjà équilibré (${HG} atome${s(HG)} de chaque côté) : <b>pas besoin d'ajouter H<sup>+</sup></b>.` : 'Il n\'y a pas d\'atome H : <b>pas besoin d\'ajouter H<sup>+</sup></b>.');
+      consignes.push(`${HG ? `Il y a ${HG} atome${s(HG)} H de chaque côté : H est déjà équilibré.` : 'Il n\'y a pas d\'atome H.'} N'ajoute pas d'ions H<sup>+</sup> : valide directement l'étape.`);
     }
     etapes.push(copie());
     // 4. charges avec e− (un électron fait baisser la charge de 1)
@@ -253,7 +253,7 @@
     textes.push(c === 'g'
       ? `Sans les électrons, la charge totale vaut ${fq(G0)} ${cote('g')} et ${fq(D0)} ${cote('d')}. Avec ${n}&nbsp;e<sup>−</sup> ${cote('g')}, cette charge devient ${fq(G0)} − ${n} = ${fq(D0)}.`
       : `Sans les électrons, la charge totale vaut ${fq(G0)} ${cote('g')} et ${fq(D0)} ${cote('d')}. Avec ${-n}&nbsp;e<sup>−</sup> ${cote('d')}, cette charge devient ${fq(D0)} − ${-n} = ${fq(G0)}.`);
-    consignes.push(`Charge totale ${cote('g')} : ${dG} ; ${cote('d')} : ${dD}. Un électron porte la charge −1 : glisse e<sup>−</sup> ${cote(c)}, du côté où la charge est la plus grande, puis règle leur nombre sur <b>${Math.abs(n)}</b> (l'écart entre ${fq(G0)} et ${fq(D0)}). Valide l'étape.`);
+    consignes.push(`Charge totale ${cote('g')} : ${dG} ; ${cote('d')} : ${dD}. Un électron porte la charge −1 : glisse e<sup>−</sup> ${cote(c)}, du côté où la charge est la plus grande, puis règle leur nombre sur <b>${Math.abs(n)}</b> (l'écart entre ${fq(G0)} et ${fq(D0)}). Valide l'étape.`);
     etapes.push(copie());
     return { etapes, textes, consignes, html: ecrire(reel(T, M.inv), M.signe) };
   }
@@ -279,15 +279,15 @@
     function v1(T) {
       const ox = role(T, 'ox'), red = role(T, 'red');
       if (!ox || !red) return { format: true, msg: `Glisse l'oxydant et le réducteur du couple ${nOx} / ${nRed} dans la demi-équation.` };
-      if (ox.cote === red.cote) return { code: 'placement', msg: `L'oxydant et le réducteur ne vont pas du même côté ${du} : l'oxydant ${nOx} ${cote('g')}, le réducteur ${nRed} ${cote('d')}.` };
+      if (ox.cote === red.cote) return { code: 'placement', msg: `L'oxydant et le réducteur ne vont pas du même côté ${du} : l'oxydant ${nOx} ${cote('g')}, le réducteur ${nRed} ${cote('d')}.` };
       if (ox.cote === 'd') {
-        if (reactif && inv) return { code: 'placement', msg: `Le réactif est ${nRed} : il s'écrit à gauche du signe =, et l'oxydant ${nOx} qu'il forme à droite. C'est une oxydation : ${forme}.` };
-        if (reactif) return { code: 'placement', msg: `Le réactif est ${nOx} : il s'écrit à gauche du signe =, et le réducteur ${nRed} qu'il forme à droite. C'est une réduction : ${forme}.` };
-        return { code: 'placement', msg: `Tu as inversé l'oxydant et le réducteur. On écrit l'oxydant ${nOx} ${cote('g')} ${du} et le réducteur ${nRed} ${cote('d')} : ${forme}. Dans le couple ${nOx} / ${nRed}, l'oxydant est écrit en premier.` };
+        if (reactif && inv) return { code: 'placement', msg: `Le réactif est ${nRed} : il s'écrit à gauche du signe =, et l'oxydant ${nOx} qu'il forme à droite. C'est une oxydation : ${forme}.` };
+        if (reactif) return { code: 'placement', msg: `Le réactif est ${nOx} : il s'écrit à gauche du signe =, et le réducteur ${nRed} qu'il forme à droite. C'est une réduction : ${forme}.` };
+        return { code: 'placement', msg: `Tu as inversé l'oxydant et le réducteur. On écrit l'oxydant ${nOx} ${cote('g')} ${du} et le réducteur ${nRed} ${cote('d')} : ${forme}. Dans le couple ${nOx} / ${nRed}, l'oxydant est écrit en premier.` };
       }
       const els = autres(cp);
       if (!els.length) {
-        if (ox.coef !== 1 || red.coef !== 1) return { code: 'elements', msg: 'Dans ce couple, il n\'y a pas d\'autre élément que O et H : il n\'y a rien à équilibrer à cette étape. Laisse 1 devant chaque espèce.' };
+        if (ox.coef !== 1 || red.coef !== 1) return { code: 'elements', msg: 'Dans ce couple, il n\'y a pas d\'autre élément que O et H : il n\'y a rien à équilibrer à cette étape. Laisse 1 devant chaque espèce.' };
         return { ok: true };
       }
       for (const X of els) {
@@ -296,12 +296,12 @@
         const a = compo(cp.ox)[X] || 0, b = compo(cp.red)[X] || 0;
         const compte = `Il y a ${g} atome${s(g)} ${X} ${cote('g')} et ${d} ${cote('d')}.`;
         // l'indice recopié devant l'espèce qui le porte : 2 Cr2O7^2- = Cr^3+
-        if (a > 1 && ox.coef === a && red.coef === 1) return { code: 'indice', msg: `${compte} Le ${a} de ${nOx} est un indice : une seule entité ${nOx} contient déjà ${a} atomes ${X}. Ce n'est pas devant ${nOx} qu'il faut un nombre.` };
-        if (b > 1 && red.coef === b && ox.coef === 1) return { code: 'indice', msg: `${compte} Le ${b} de ${nRed} est un indice : une seule entité ${nRed} contient déjà ${b} atomes ${X}. Ce n'est pas devant ${nRed} qu'il faut un nombre.` };
+        if (a > 1 && ox.coef === a && red.coef === 1) return { code: 'indice', msg: `${compte} Le ${a} de ${nOx} est un indice : une seule entité ${nOx} contient déjà ${a} atomes ${X}. Ce n'est pas devant ${nOx} qu'il faut un nombre.` };
+        if (b > 1 && red.coef === b && ox.coef === 1) return { code: 'indice', msg: `${compte} Le ${b} de ${nRed} est un indice : une seule entité ${nRed} contient déjà ${b} atomes ${X}. Ce n'est pas devant ${nRed} qu'il faut un nombre.` };
         return { code: 'elements', msg: `${compte} Règle les nombres devant ${nOx} et ${nRed} avec les flèches pour en avoir autant des deux côtés.` };
       }
       const k = pgcd(ox.coef, red.coef);
-      if (k > 1) return { code: 'simplifier', msg: `${els.join(', ')} est bien équilibré, mais il faut les plus petits nombres possibles : ${ox.coef} et ${red.coef} se divisent tous les deux par ${k}.` };
+      if (k > 1) return { code: 'simplifier', msg: `${els.join(', ')} est bien équilibré, mais il faut les plus petits nombres possibles : ${ox.coef} et ${red.coef} se divisent tous les deux par ${k}.` };
       return { ok: true };
     }
 
@@ -310,18 +310,18 @@
     function vElement(T, el, f, code, nom) {
       const G = nb(T, 'g', el), D = nb(T, 'd', el), aG = ajoutes(T, f, 'g'), aD = ajoutes(T, f, 'd');
       const G0 = G - aG, D0 = D - aD;                           // sans les espèces ajoutées
-      if (aG > 0 && aD > 0) return { code, msg: `Tu as ajouté ${nom} des deux côtés ${du}. Il n'en faut que d'un seul côté : celui où il manque des atomes ${el}.` };
+      if (aG > 0 && aD > 0) return { code, msg: `Tu as ajouté ${nom} des deux côtés ${du}. Il n'en faut que d'un seul côté : celui où il manque des atomes ${el}.` };
       if (G === D) return { ok: true };
-      if (G0 === D0) return { code, msg: `L'élément ${el} était déjà équilibré (${G0} atome${s(G0)} de chaque côté) : il ne faut pas ${nom} ici. Retire ${html(f)} : fais-le glisser hors de la demi-équation.` };
+      if (G0 === D0) return { code, msg: `L'élément ${el} était déjà équilibré (${G0} atome${s(G0)} de chaque côté) : il ne faut pas ${nom} ici. Retire ${html(f)} : fais-le glisser hors de la demi-équation.` };
       const m = G0 < D0 ? 'g' : 'd', a = m === 'g' ? aG : aD, ecart = Math.abs(G0 - D0);
       const compte = `Il y a ${G} atome${s(G)} ${el} ${cote('g')} et ${D} ${cote('d')}`;
-      if (!aG && !aD) return { code, msg: `${compte} : ajoute ${nom} du côté où il en manque.` };
+      if (!aG && !aD) return { code, msg: `${compte} : ajoute ${nom} du côté où il en manque.` };
       if (!a) return { code: code + '-cote', msg: `Tu as mis ${html(f)} ${cote(autre(m))}, où il y a déjà le plus d'atomes ${el} (${Math.max(G0, D0)} contre ${Math.min(G0, D0)}). Il faut l'ajouter ${cote(m)}, là où il en manque.` };
       // H : chaque molécule d'eau de l'autre côté comptée pour un seul atome H
       const w = el === 'H' ? molecules(T, EAU, autre(m)) : 0;
-      if (w && a === ecart - w) return { code: 'h-eau', msg: `Chaque molécule H<sub>2</sub>O contient 2 atomes H : ${w}&nbsp;H<sub>2</sub>O, c'est ${w} × 2 = ${2 * w} atomes H.` };
-      if (a < ecart) return { code, msg: `${compte} : il en manque encore ${cote(m)}. Chaque ${html(f)} apporte un seul atome ${el}.` };
-      return { code, msg: `Il y a maintenant trop d'atomes ${el} ${cote(m)} : ${m === 'g' ? G : D} contre ${m === 'g' ? D : G} ${cote(autre(m))}. Chaque ${html(f)} apporte un seul atome ${el}.` };
+      if (w && a === ecart - w) return { code: 'h-eau', msg: `Chaque molécule H<sub>2</sub>O contient 2 atomes H : ${w}&nbsp;H<sub>2</sub>O, c'est ${w} × 2 = ${2 * w} atomes H.` };
+      if (a < ecart) return { code, msg: `${compte} : il en manque encore ${cote(m)}. Chaque ${html(f)} apporte un seul atome ${el}.` };
+      return { code, msg: `Il y a maintenant trop d'atomes ${el} ${cote(m)} : ${m === 'g' ? G : D} contre ${m === 'g' ? D : G} ${cote(autre(m))}. Chaque ${html(f)} apporte un seul atome ${el}.` };
     }
     const v2 = T => vElement(T, 'O', EAU, 'eau', 'des molécules d\'eau H<sub>2</sub>O');
     const v3 = T => vElement(T, 'H', HP, 'h', 'des ions H<sup>+</sup>');
@@ -332,19 +332,19 @@
       const G0 = qG + eG, D0 = qD + eD;                          // charges sans les électrons
       const n = G0 - D0;                                           // électrons attendus (côté de l'oxydant)
       const rappel = deja ? ` Sans les électrons, la charge totale vaut ${fq(G0)} ${cote('g')} et ${fq(D0)} ${cote('d')}.` : '';
-      if (eG && eD) return { code: 'e-deux', msg: `Tu as mis des électrons des deux côtés ${du} : il n'en faut que d'un seul côté.` };
+      if (eG && eD) return { code: 'e-deux', msg: `Tu as mis des électrons des deux côtés ${du} : il n'en faut que d'un seul côté.` };
       if (qG === qD) return { ok: true };
-      if (!eG && !eD) return { code: 'e-oubli', msg: 'Les charges ne sont pas égales des deux côtés : ajoute des électrons e<sup>−</sup>.' + rappel };
+      if (!eG && !eD) return { code: 'e-oubli', msg: 'Les charges ne sont pas égales des deux côtés : ajoute des électrons e<sup>−</sup>.' + rappel };
       if (eD) {
-        if (eD === n) return { code: 'e-signe', msg: `Tu as fait comme si un électron portait une charge +1. Il porte une charge <b>−1</b> : des électrons ${cote('d')} font baisser la charge ${de('d')}, l'écart entre les deux côtés augmente. Les électrons se placent du côté de l'oxydant : ${forme}.` + rappel };
-        return { code: 'e-cote', msg: `Les électrons se placent du côté de l'oxydant, ${cote('g')} : ${forme}. ${inv ? 'Le réducteur cède des électrons : ils apparaissent avec l\'oxydant qu\'il forme.' : 'C\'est l\'oxydant qui capte les électrons.'}` + rappel };
+        if (eD === n) return { code: 'e-signe', msg: `Tu as fait comme si un électron portait une charge +1. Il porte une charge <b>−1</b> : des électrons ${cote('d')} font baisser la charge ${de('d')}, l'écart entre les deux côtés augmente. Les électrons se placent du côté de l'oxydant : ${forme}.` + rappel };
+        return { code: 'e-cote', msg: `Les électrons se placent du côté de l'oxydant, ${cote('g')} : ${forme}. ${inv ? 'Le réducteur cède des électrons : ils apparaissent avec l\'oxydant qu\'il forme.' : 'C\'est l\'oxydant qui capte les électrons.'}` + rappel };
       }
       // électrons du côté de l'oxydant, mauvais nombre : quelle erreur de calcul de la charge ?
       const d = diagCharge(T, eG, G0, D0);
       if (d) return d;
       return { code: 'e-nombre', msg: deja
-        ? `Sans les électrons, la charge totale vaut ${fq(G0)} ${cote('g')} et ${fq(D0)} ${cote('d')}. Avec ${eG}&nbsp;e<sup>−</sup> ${cote('g')}, la charge ${de('g')} devient ${fq(G0)} − ${eG} = ${fq(G0 - eG)} : elle doit être égale à ${fq(D0)}.`
-        : `Ce n'est pas le bon nombre d'électrons. Calcule la charge totale de chaque côté, sans les électrons : chaque e<sup>−</sup> ajouté ${cote('g')} fait baisser la charge ${de('g')} de 1.` };
+        ? `Sans les électrons, la charge totale vaut ${fq(G0)} ${cote('g')} et ${fq(D0)} ${cote('d')}. Avec ${eG}&nbsp;e<sup>−</sup> ${cote('g')}, la charge ${de('g')} devient ${fq(G0)} − ${eG} = ${fq(G0 - eG)} : elle doit être égale à ${fq(D0)}.`
+        : `Ce n'est pas le bon nombre d'électrons. Calcule la charge totale de chaque côté, sans les électrons : chaque e<sup>−</sup> ajouté ${cote('g')} fait baisser la charge ${de('g')} de 1.` };
     }
     // k électrons du côté de l'oxydant au lieu de G0 − D0 : on cherche l'erreur de calcul qui donne k
     // (un seul diagnostic possible, sinon message général)
@@ -355,13 +355,13 @@
       const neg = L.find(t => q(t.f) < 0);
       if (neg && k === Math.abs(somme(t => t.coef * Math.abs(q(t.f))))) {
         const v = neg.coef * q(neg.f);
-        pistes.push({ code: 'charge-signe', msg: `Attention au signe : ${kf(neg.coef, neg.f)} porte une charge négative. Dans la charge totale, elle compte ${fq(v)}, pas ${fq(-v)}.` });
+        pistes.push({ code: 'charge-signe', msg: `Attention au signe : ${kf(neg.coef, neg.f)} porte une charge négative. Dans la charge totale, elle compte ${fq(v)}, pas ${fq(-v)}.` });
       }
       const multi = L.find(t => t.coef > 1);
       if (multi && k === Math.abs(somme(t => q(t.f)))) {
-        pistes.push({ code: 'charge-coef', msg: `N'oublie pas de multiplier la charge d'un ion par son nombre stœchiométrique : ${kf(multi.coef, multi.f)}, c'est ${multi.coef} × (${fq(q(multi.f))}) = ${fq(multi.coef * q(multi.f))}.` });
+        pistes.push({ code: 'charge-coef', msg: `N'oublie pas de multiplier la charge d'un ion par son nombre stœchiométrique : ${kf(multi.coef, multi.f)}, c'est ${multi.coef} × (${fq(q(multi.f))}) = ${fq(multi.coef * q(multi.f))}.` });
       }
-      if (D0 && k === Math.abs(G0 + D0)) pistes.push({ code: 'charge-somme', msg: `Tu as additionné les charges des deux côtés (${fq(G0)} et ${fq(D0)}). Les électrons doivent faire passer la charge ${de('g')} de ${fq(G0)} à ${fq(D0)} : de combien doit-elle baisser ?` });
+      if (D0 && k === Math.abs(G0 + D0)) pistes.push({ code: 'charge-somme', msg: `Tu as additionné les charges des deux côtés (${fq(G0)} et ${fq(D0)}). Les électrons doivent faire passer la charge ${de('g')} de ${fq(G0)} à ${fq(D0)} : de combien doit-elle baisser ?` });
       if (D0 && k === Math.abs(G0)) pistes.push({ code: 'charge-seul', msg: `Tu as fait comme si la charge ${de('g')} devait arriver à 0. Elle doit devenir égale à la charge ${de('d')}, ${fq(D0)}.` });
       return pistes.length === 1 ? pistes[0] : null;
     }
@@ -393,7 +393,7 @@
      termes [{ f, cote, coef }] aux côtés écrits ; o = { sens, reactif } */
   function verifier(cp, termes, o) {
     const C = controles(cp, o), { du } = C.M;
-    if (!termes.length) return { format: true, msg: 'Cette demi-équation est vide : glisse les espèces du couple et, si besoin, H<sub>2</sub>O, H<sup>+</sup> et e<sup>−</sup>.' };
+    if (!termes.length) return { format: true, msg: 'Cette demi-équation est vide : glisse les espèces du couple et, si besoin, H<sub>2</sub>O, H<sup>+</sup> et e<sup>−</sup>.' };
     // une seule fois chaque espèce de chaque côté
     const T = [];
     termes.forEach(t => {
@@ -402,10 +402,10 @@
     });
     for (const t of T) {
       t.role = t.f === cp.ox ? 'ox' : t.f === cp.red ? 'red' : t.f === EAU ? 'eau' : t.f === HP ? 'h' : t.f === E ? 'e' : null;
-      if (!t.role) return { code: 'espece', msg: `${html(t.f)} n'appartient pas au couple ${html(cp.ox)} / ${html(cp.red)} : cette demi-équation ne contient que les espèces de ce couple et, si besoin, H<sub>2</sub>O, H<sup>+</sup> et e<sup>−</sup>.` };
+      if (!t.role) return { code: 'espece', msg: `${html(t.f)} n'appartient pas au couple ${html(cp.ox)} / ${html(cp.red)} : cette demi-équation ne contient que les espèces de ce couple et, si besoin, H<sub>2</sub>O, H<sup>+</sup> et e<sup>−</sup>.` };
     }
     const deux = T.find(t => T.some(u => u !== t && u.f === t.f && u.cote !== t.cote));
-    if (deux) return { code: deux.role === 'e' ? 'e-deux' : 'placement', msg: `${html(deux.f)} figure des deux côtés ${du} : il ne doit figurer que d'un seul côté.` };
+    if (deux) return { code: deux.role === 'e' ? 'e-deux' : 'placement', msg: `${html(deux.f)} figure des deux côtés ${du} : il ne doit figurer que d'un seul côté.` };
     return C.libre(reel(T, C.M.inv), 0);
   }
 
@@ -445,7 +445,7 @@
         <p class="ox-consigne"></p>
         <div class="er-actions ox-actions">
           <button type="button" class="btn-primary ox-valider">${libre ? 'Valider' : 'Valider l\'étape'}</button>
-          <button type="button" class="btn-small ox-b-inv${opts.inverser ? '' : ' hidden'}" aria-label="Inverser la demi-équation : échanger les deux membres">⇄ Inverser</button>
+          <button type="button" class="btn-small ox-b-inv${opts.inverser ? '' : ' hidden'}" aria-label="Inverser la demi-équation : échanger les deux membres">⇄ Inverser</button>
           <button type="button" class="btn-small ox-b-aides hidden" aria-expanded="false"></button>
           <button type="button" class="btn-small ox-b-montrer hidden">${libre ? 'Afficher la réponse' : 'Afficher la réponse de l\'étape'}</button>
           <button type="button" class="btn-small ox-b-zero${opts.recommencer === false ? ' hidden' : ''}">Recommencer</button>
@@ -504,13 +504,13 @@
     }
     // consigne de l'étape en cours (détaillée en mode « explique »)
     function consigne() {
-      if (libre) return opts.consigne || `Écris la demi-équation du couple ${nOx} / ${nRed} : glisse les espèces, règle les nombres avec les flèches, puis valide une seule fois, quand tout est équilibré.`;
+      if (libre) return opts.consigne || `Écris la demi-équation du couple ${nOx} / ${nRed} : glisse les espèces, règle les nombres avec les flèches, puis valide une seule fois, quand tout est équilibré.`;
       if (opts.explique) return `<b>Étape ${etape + 1}.</b> ${ref.consignes[etape]}`;
       const c = [
         `Glisse l'oxydant ${cote('g')} ${du} et le réducteur ${cote('d')}. Puis, avec les flèches, équilibre les éléments autres que O et H.`,
-        'Équilibre l\'élément O : glisse H<sub>2</sub>O du côté où il manque des atomes O, puis règle le nombre de molécules d\'eau. Si O est déjà équilibré, valide directement.',
-        'Équilibre l\'élément H : glisse H<sup>+</sup> du côté où il manque des atomes H, puis règle leur nombre. Si H est déjà équilibré, valide directement.',
-        `Équilibre les charges : glisse des électrons e<sup>−</sup> (charge −1 chacun) d'un côté ${du}, puis règle leur nombre pour avoir la même charge totale des deux côtés.`,
+        'Équilibre l\'élément O : glisse H<sub>2</sub>O du côté où il manque des atomes O, puis règle le nombre de molécules d\'eau. Si O est déjà équilibré, valide directement.',
+        'Équilibre l\'élément H : glisse H<sup>+</sup> du côté où il manque des atomes H, puis règle leur nombre. Si H est déjà équilibré, valide directement.',
+        `Équilibre les charges : glisse des électrons e<sup>−</sup> (charge −1 chacun) d'un côté ${du}, puis règle leur nombre pour avoir la même charge totale des deux côtés.`,
       ];
       return `<b>Étape ${etape + 1}.</b> ${c[etape]}`;
     }
@@ -570,7 +570,7 @@
       b.textContent = aides ? 'Masquer les aides' : modeAides === 'payant' && !aidesVues ? 'Afficher les aides (1 point de moins)' : 'Afficher les aides';
       b.setAttribute('aria-expanded', String(aides));
       if (!visible) return;
-      if (!T.length) { box.innerHTML = '<p class="ox-aide-vide">Glisse les espèces : l\'aide compte alors les atomes de chaque côté.</p>'; return; }
+      if (!T.length) { box.innerHTML = '<p class="ox-aide-vide">Glisse les espèces : l\'aide compte alors les atomes de chaque côté.</p>'; return; }
       const enCours = parElement && !fini();
       let els = autres(cp), avecCharge = true;
       if (enCours) {
@@ -666,11 +666,11 @@
       if (k === 0) T.forEach(t => { if (estCouple(t)) t.base = t.coef; });   // nombres du couple fixés
       vues[k] = vue;
       etape++;
-      const titre = vue ? 'Réponse' : erreurs.slice(libre ? 0 : k, k + 1).some(Boolean) ? 'C\'est juste.' : 'Juste !';
+      const titre = vue ? 'Réponse' : erreurs.slice(libre ? 0 : k, k + 1).some(Boolean) ? 'C\'est juste.' : 'Juste !';
       let h = `<p><b class="${vue ? '' : 'er-ok'}">${titre}</b> ${libre ? 'La demi-équation est équilibrée.' : ref.textes[k]}</p>`;
       if (fini() && derniere === 3 && opts.final !== false) {
         h += `<div class="ox-final">${ecrire(T, signe)}</div>
-          <p>Autant d'atomes de chaque élément et la même charge (${fq(charges(T, 'g'))}) de chaque côté : la demi-équation est équilibrée.</p>`;
+          <p>Autant d'atomes de chaque élément et la même charge (${fq(charges(T, 'g'))}) de chaque côté : la demi-équation est équilibrée.</p>`;
       }
       // partie d'un moteur de questions : la réponse affichée par le moteur suffit ;
       // dans une série, le dernier message passe dans celui du moteur (« Juste ! » ou « C'est juste. »)

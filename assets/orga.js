@@ -97,7 +97,7 @@
       const deux = s.substr(i, 2);
       if (deux === 'Cl' || deux === 'Br') { el = deux; i += 2; }
       else if ('CNOFIS'.includes(c)) { el = c; i++; }
-      else throw new Error('ORGA.lire : caractère inattendu « ' + c + ' » dans ' + s);
+      else throw new Error('ORGA.lire : caractère inattendu « ' + c + ' » dans ' + s);
       const k = mol.atomes.push({ el }) - 1;
       if (prec >= 0) lier(mol, prec, k, ordre);
       prec = k; ordre = 1;
@@ -386,14 +386,14 @@
   function diagLiaison(mol, i, plus) {
     const el = mol.atomes[i].el, v = valence(el), s = somme(mol, i);
     if (s + plus <= v) return null;
-    if (s >= v) return `${cap(CE(el))} a déjà ${liaisonsTxt(s)} : un ${el} en fait ${v}.`;
-    return `${cap(CE(el))} a déjà ${liaisonsTxt(s)} : avec ${ORDRE_TXT[plus]}, il en aurait ${s + plus} (un ${el} en fait ${v}).`;
+    if (s >= v) return `${cap(CE(el))} a déjà ${liaisonsTxt(s)} : un ${el} en fait ${v}.`;
+    return `${cap(CE(el))} a déjà ${liaisonsTxt(s)} : avec ${ORDRE_TXT[plus]}, il en aurait ${s + plus} (un ${el} en fait ${v}).`;
   }
 
   function diagNouvel(el, o) {
     const v = valence(el);
     if (o <= v) return null;
-    return `Un ${el} ne fait que ${liaisonsTxt(v)} : pas de ${o === 2 ? 'double' : 'triple'} liaison.`;
+    return `Un ${el} ne fait que ${liaisonsTxt(v)} : pas de ${o === 2 ? 'double' : 'triple'} liaison.`;
   }
 
   // H d'un atome : « Ce C a 2 liaisons : il lui faut 2 H (4 liaisons en tout). »
@@ -403,8 +403,8 @@
     // atome qui a déjà toutes ses liaisons : on n'a pas à y toucher (aucun H)
     if (h == null && !faut) return null;
     const besoin = faut ? `il lui faut ${faut} H (${v} liaisons en tout)` : `il ne lui faut aucun H (il a déjà ses ${v} liaisons)`;
-    if (h == null) return `${cap(CE(el))} n'a pas encore ses H : il a ${liaisonsTxt(s)}, ${besoin}.`;
-    return `${cap(CE(el))} a ${liaisonsTxt(s)} : ${besoin}.`;
+    if (h == null) return `${cap(CE(el))} n'a pas encore ses H : il a ${liaisonsTxt(s)}, ${besoin}.`;
+    return `${cap(CE(el))} a ${liaisonsTxt(s)} : ${besoin}.`;
   }
 
   /* ============================================================
@@ -669,7 +669,7 @@
       const e = [el(l.a), el(l.b)].sort().join('');
       if (e !== 'CC' && e !== 'CO') return hp('cette double liaison n\'est pas au programme');
     }
-    if (mol.liaisons.some(l => el(l.a) !== 'C' && el(l.b) !== 'C')) return hp('deux atomes autres que C liés entre eux : hors programme');
+    if (mol.liaisons.some(l => el(l.a) !== 'C' && el(l.b) !== 'C')) return hp('deux atomes autres que C liés entre eux : hors programme');
     const couverts = new Set();
     gs.forEach(g => g.atomes.forEach(i => couverts.add(i)));
     for (let i = 0; i < n; i++) {
@@ -677,13 +677,13 @@
       return hp(el(i) === 'O' ? 'un atome O qui n\'appartient à aucun groupe du cours (éther) n\'est pas au programme' : `un atome ${el(i)} qui n'appartient à aucun groupe du cours n'est pas au programme`);
     }
     const fonctions = gs.filter(g => g.cle !== 'halogeno');
-    if (fonctions.length > 1) return hp('il y a plusieurs groupes caractéristiques : on ne nomme ici que les molécules qui n\'en ont qu\'un');
+    if (fonctions.length > 1) return hp('il y a plusieurs groupes caractéristiques : on ne nomme ici que les molécules qui n\'en ont qu\'un');
     const f = fonctions[0] || null;
     if (f && ['aldehyde', 'cetone', 'acide', 'ester', 'amide'].includes(f.cle) && adj[f.atomes[0]].some(v => HALO_NOM[el(v.j)])) return hp('un halogène sur le C d\'un groupe C=O n\'est pas au programme');
     const famille = f ? f.cle : (gs.length ? 'halogeno' : 'alcane');
     const cyc = cycles(mol);
     if (cyc.length) {
-      if (f || cyc.length > 1) return hp(f ? 'un cycle avec un groupe caractéristique n\'est pas au programme' : 'plusieurs cycles : hors programme');
+      if (f || cyc.length > 1) return hp(f ? 'un cycle avec un groupe caractéristique n\'est pas au programme' : 'plusieurs cycles : hors programme');
       return nommerCyclo(mol, adj, cyc[0], famille, force);
     }
     const Cs = new Set(); mol.atomes.forEach((a, i) => { if (a.el === 'C') Cs.add(i); });
@@ -749,20 +749,20 @@
     // une seule chaîne : reliée, sans embranchement
     const deg = i => adj[i].filter(v => S.has(v.j)).length;
     const relies = branche(adj, [...S][0], new Set(mol.atomes.map((a, i) => i).filter(i => !S.has(i))));
-    if (relies.length !== S.size) return { ok: false, diag: 'Ces C ne sont pas tous reliés : la chaîne est une suite de C liés les uns aux autres.' };
+    if (relies.length !== S.size) return { ok: false, diag: 'Ces C ne sont pas tous reliés : la chaîne est une suite de C liés les uns aux autres.' };
     // alcane cyclique : la chaîne principale est le cycle (ses C n'ont pas de bout : on le teste avant la forme d'une chaîne)
     if (res.cyclo) {
       const ok = res.chaine.length === S.size && res.chaine.every(i => S.has(i));
-      return ok ? { ok: true, orientations: res.chaines.optimales.map(c => c.chaine) } : { ok: false, diag: 'Dans un alcane cyclique, la chaîne principale est le cycle : touche tous ses C, et seulement eux.' };
+      return ok ? { ok: true, orientations: res.chaines.optimales.map(c => c.chaine) } : { ok: false, diag: 'Dans un alcane cyclique, la chaîne principale est le cycle : touche tous ses C, et seulement eux.' };
     }
-    if ([...S].some(i => deg(i) > 2) || (S.size > 1 && [...S].filter(i => deg(i) === 1).length !== 2)) return { ok: false, diag: 'Ces C ne forment pas une seule chaîne : une chaîne n\'a pas d\'embranchement, elle va d\'un bout à l\'autre.' };
+    if ([...S].some(i => deg(i) > 2) || (S.size > 1 && [...S].filter(i => deg(i) === 1).length !== 2)) return { ok: false, diag: 'Ces C ne forment pas une seule chaîne : une chaîne n\'a pas d\'embranchement, elle va d\'un bout à l\'autre.' };
     const ch = res.chaines;
-    if (res.famille === 'ester' && !S.has(ch.depart)) return { ok: false, diag: 'La chaîne principale d\'un ester est celle qui porte le C=O (elle donne l\'alcanoate) : la chaîne liée à l\'O donne l\'alkyle.' };
+    if (res.famille === 'ester' && !S.has(ch.depart)) return { ok: false, diag: 'La chaîne principale d\'un ester est celle qui porte le C=O (elle donne l\'alcanoate) : la chaîne liée à l\'O donne l\'alkyle.' };
     if (res.famille === 'amine' && ![...S].some(i => adj[i].some(v => mol.atomes[v.j].el === 'N'))) return { ok: false, diag: 'La chaîne principale d\'une amine est liée au N.' };
     if (ch.contient.some(g => !S.has(g))) return { ok: false, diag: 'La chaîne principale doit contenir le groupe caractéristique' + (res.famille === 'alcene' ? ' (les deux C de la C=C).' : ' (le C qui le porte).') };
     const memes = ch.tous.filter(c => c.chaine.length === S.size && c.chaine.every(i => S.has(i)));
-    if (S.size < ch.L || !memes.length) return { ok: false, diag: 'Il y a une chaîne plus longue' + (ch.contient.length ? ' qui contient le groupe' : '') + ' : elle n\'est pas toujours dessinée en ligne droite.' };
-    if (memes[0].subs.length < ch.S) return { ok: false, diag: 'Il y a une autre chaîne aussi longue : à longueur égale, on prend celle qui porte le plus de ramifications.' };
+    if (S.size < ch.L || !memes.length) return { ok: false, diag: 'Il y a une chaîne plus longue' + (ch.contient.length ? ' qui contient le groupe' : '') + ' : elle n\'est pas toujours dessinée en ligne droite.' };
+    if (memes[0].subs.length < ch.S) return { ok: false, diag: 'Il y a une autre chaîne aussi longue : à longueur égale, on prend celle qui porte le plus de ramifications.' };
     const opt = memes.filter(c => c.optimale);
     if (!opt.length) return { ok: false, diag: 'Il y a une autre chaîne aussi longue, avec des numéros plus petits pour les ramifications.' };
     return { ok: true, orientations: opt.map(c => c.chaine) };
@@ -775,17 +775,17 @@
     const opt = memes.filter(c => c.optimale && c.chaine[0] === i);
     if (opt.length) return { ok: true, chaine: opt[0].chaine };
     if (!S.has(i)) return { ok: false, diag: 'Le n° 1 est un C de la chaîne principale.' };
-    if (res.cyclo) return { ok: false, diag: 'Dans un cycle, le n° 1 est sur un C qui porte une ramification, choisi pour que les numéros soient les plus petits possibles (à égalité : la ramification qui vient la première dans l\'ordre alphabétique).' };
+    if (res.cyclo) return { ok: false, diag: 'Dans un cycle, le n° 1 est sur un C qui porte une ramification, choisi pour que les numéros soient les plus petits possibles (à égalité : la ramification qui vient la première dans l\'ordre alphabétique).' };
     const depuis = memes.find(c => c.chaine[0] === i);
     if (!depuis) {
       if (TERMINAUX.includes(res.famille)) return { ok: false, diag: 'Le C du groupe caractéristique porte le n° 1.' };
       return { ok: false, diag: 'Le n° 1 est à un bout de la chaîne.' };
     }
     const best = memes.find(c => c.optimale);
-    if (depuis.locG !== best.locG) return { ok: false, diag: 'Le C qui porte le groupe doit avoir le plus petit numéro possible : pars de l\'autre bout.' };
+    if (depuis.locG !== best.locG) return { ok: false, diag: 'Le C qui porte le groupe doit avoir le plus petit numéro possible : pars de l\'autre bout.' };
     const l1 = depuis.cle.slice(1, 1 + depuis.subs.length), l2 = best.cle.slice(1, 1 + best.subs.length);
     if (cmpCles(l1, l2) !== 0) return { ok: false, diag: 'En partant de l\'autre bout, les numéros des ramifications sont plus petits.' };
-    return { ok: false, diag: 'Les numéros sont les mêmes dans les deux sens : à égalité, le plus petit numéro va à la ramification qui vient la première dans l\'ordre alphabétique.' };
+    return { ok: false, diag: 'Les numéros sont les mêmes dans les deux sens : à égalité, le plus petit numéro va à la ramification qui vient la première dans l\'ordre alphabétique.' };
   }
 
   /* ============================================================
@@ -986,7 +986,7 @@
   const ACCENTUES = ['méthyl', 'éthyl', 'méthan', 'éthan', 'tétra', 'décyl', 'déc', 'ène', 'oïque'];
   function remarqueAccents(saisie, att) {
     const s = saisie.toLowerCase();
-    for (const w of ACCENTUES) if (att.nom.includes(w) && !s.includes(w) && sansAccent(s).includes(sansAccent(w))) return `Pense aux accents : ${w}.`;
+    for (const w of ACCENTUES) if (att.nom.includes(w) && !s.includes(w) && sansAccent(s).includes(sansAccent(w))) return `Pense aux accents : ${w}.`;
     return 'Pense aux accents.';
   }
 
@@ -994,9 +994,9 @@
   function diagFormat(s) {
     const lettre = '[a-zàâäéèêëîïôöùûüç]';
     const sansEsp = s.replace(/^acide\s+/i, '').replace(/\s+(de\s+|d'\s*)/i, '#');
-    if (/\s/.test(sansEsp)) return 'Pas d\'espace dans le nom (seulement dans « acide … » et « … de … »).';
-    if (/\d\s*[-.;]\s*\d/.test(s)) return 'Entre deux chiffres, on met une virgule : 2,3-diméthyl.';
-    if (new RegExp('\\d' + lettre, 'i').test(s) || new RegExp(lettre + '\\d', 'i').test(s)) return 'Entre un chiffre et une lettre, on met un tiret : 2-méthyl, pentan-2-ol.';
+    if (/\s/.test(sansEsp)) return 'Pas d\'espace dans le nom (seulement dans « acide … » et « … de … »).';
+    if (/\d\s*[-.;]\s*\d/.test(s)) return 'Entre deux chiffres, on met une virgule : 2,3-diméthyl.';
+    if (new RegExp('\\d' + lettre, 'i').test(s) || new RegExp(lettre + '\\d', 'i').test(s)) return 'Entre un chiffre et une lettre, on met un tiret : 2-méthyl, pentan-2-ol.';
     const re = new RegExp('(' + lettre + ')-(' + lettre + ')', 'gi');
     let m;
     while ((m = re.exec(s))) {
@@ -1005,11 +1005,11 @@
       const apresN = /n/i.test(m[2]) && /[-,]/.test(s[i + 3] || '');
       if (!avantN && !apresN) {
         const g = (s.slice(0, i + 1).match(/[a-zàâäéèêëîïôöùûüç]+$/i) || [''])[0], d = (s.slice(i + 2).match(/^[a-zàâäéèêëîïôöùûüç]+/i) || [''])[0];
-        return `Pas de tiret entre deux lettres : « ${g}-${d} » s'écrit « ${g}${d} ».`;
+        return `Pas de tiret entre deux lettres : « ${g}-${d} » s'écrit « ${g}${d} ».`;
       }
       re.lastIndex = i + 1;
     }
-    if (/,-|-,|,,|--/.test(s)) return 'Vérifie les virgules et les tirets : une virgule entre deux chiffres, un tiret entre un chiffre et une lettre.';
+    if (/,-|-,|,,|--/.test(s)) return 'Vérifie les virgules et les tirets : une virgule entre deux chiffres, un tiret entre un chiffre et une lettre.';
     return null;
   }
 
@@ -1019,13 +1019,13 @@
 
   function diagFamille(st, E) {
     const suf = st.suffixe, att = SUF_ATT[E.famille];
-    const fin = `Cette molécule est ${UN[E.famille]} : terminaison « -${SUF_AFF[att]} »${E.famille === 'acide' ? ' (acide …-oïque)' : E.famille === 'ester' ? ' (…oate de …yle)' : ''}.`;
-    if (suf === 'one' && att === 'al') return 'Le C=O est au bout de la chaîne (son C porte un H) : c\'est un aldéhyde, terminaison « -al », pas une cétone.';
-    if (suf === 'al' && att === 'one') return 'Le C=O est entre deux C : c\'est une cétone, terminaison « -one », pas un aldéhyde.';
-    if (att === 'oique' && (suf === 'ol' || suf === 'one' || suf === 'al')) return 'Le C porte un =O et un OH : ensemble, ils forment le groupe carboxyle (un acide carboxylique : acide …-oïque), pas un alcool ni une cétone.';
-    if (att === 'oate' && suf === 'oique') return 'Le O lié au C=O est lié à un autre C, pas à un H : c\'est un ester (…oate de …yle), pas un acide.';
-    if (att === 'amide' && (suf === 'amine' || suf === 'one')) return 'Le N est lié au C du C=O : ensemble ils forment le groupe amide (terminaison « -amide »), pas une amine ni une cétone.';
-    return `Ta terminaison « -${SUF_AFF[suf]} » est celle des ${DES[suf]}. ${fin}`;
+    const fin = `Cette molécule est ${UN[E.famille]} : terminaison « -${SUF_AFF[att]} »${E.famille === 'acide' ? ' (acide …-oïque)' : E.famille === 'ester' ? ' (…oate de …yle)' : ''}.`;
+    if (suf === 'one' && att === 'al') return 'Le C=O est au bout de la chaîne (son C porte un H) : c\'est un aldéhyde, terminaison « -al », pas une cétone.';
+    if (suf === 'al' && att === 'one') return 'Le C=O est entre deux C : c\'est une cétone, terminaison « -one », pas un aldéhyde.';
+    if (att === 'oique' && (suf === 'ol' || suf === 'one' || suf === 'al')) return 'Le C porte un =O et un OH : ensemble, ils forment le groupe carboxyle (un acide carboxylique : acide …-oïque), pas un alcool ni une cétone.';
+    if (att === 'oate' && suf === 'oique') return 'Le O lié au C=O est lié à un autre C, pas à un H : c\'est un ester (…oate de …yle), pas un acide.';
+    if (att === 'amide' && (suf === 'amine' || suf === 'one')) return 'Le N est lié au C du C=O : ensemble ils forment le groupe amide (terminaison « -amide »), pas une amine ni une cétone.';
+    return `Ta terminaison « -${SUF_AFF[suf]} » est celle des ${DES[suf]}. ${fin}`;
   }
 
   // la ramification d'un bout (1-méthyl, 2-éthyl…) prolonge la chaîne
@@ -1036,7 +1036,7 @@
       if (k > 10 || !p.locs) continue;
       for (const loc of p.locs) {
         if (loc === 'N') continue;
-        if ((!terminal && loc <= k) || loc >= st.n + 1 - k) return `Un ${p.nom} sur le C n° ${loc} prolonge la chaîne : ses C font partie de la chaîne principale.`;
+        if ((!terminal && loc <= k) || loc >= st.n + 1 - k) return `Un ${p.nom} sur le C n° ${loc} prolonge la chaîne : ses C font partie de la chaîne principale.`;
       }
     }
     return '';
@@ -1047,40 +1047,40 @@
     const fam = familleDe(st);
     // 1. famille, « acide », cycle
     if (SUF_ATT[E.famille] !== st.suffixe) return diagFamille(st, E);
-    if (E.acide && !st.acide) return 'Le nom d\'un acide carboxylique commence par « acide » : acide …-oïque.';
-    if (!E.acide && st.acide) return 'Ce n\'est pas un acide carboxylique : pas de « acide » dans le nom.';
-    if (E.cyclo && !st.cyclo) return 'Les C forment un cycle : le nom de la chaîne commence par « cyclo » (cyclohexane).';
-    if (!E.cyclo && st.cyclo) return 'Il n\'y a pas de cycle dans cette molécule : pas de « cyclo ».';
-    if (notes.yleEnTrop) return 'Pas de « e » à la fin du nom d\'une ramification : méthyl, éthyl, propyl.';
+    if (E.acide && !st.acide) return 'Le nom d\'un acide carboxylique commence par « acide » : acide …-oïque.';
+    if (!E.acide && st.acide) return 'Ce n\'est pas un acide carboxylique : pas de « acide » dans le nom.';
+    if (E.cyclo && !st.cyclo) return 'Les C forment un cycle : le nom de la chaîne commence par « cyclo » (cyclohexane).';
+    if (!E.cyclo && st.cyclo) return 'Il n\'y a pas de cycle dans cette molécule : pas de « cyclo ».';
+    if (notes.yleEnTrop) return 'Pas de « e » à la fin du nom d\'une ramification : méthyl, éthyl, propyl.';
     // 2. ester : les deux chaînes
     if (E.alkyle) {
-      if (!st.alkyle) return 'Un ester se nomme « …oate de …yle » : l\'alcanoate (chaîne du C=O), puis l\'alkyle (chaîne liée à l\'O).';
-      if (st.n === E.alkyle.n && st.alkyle.n === E.n && E.n !== E.alkyle.n) return 'Tu as inversé les deux chaînes : la chaîne qui porte le C=O donne l\'alcanoate ; la chaîne liée à l\'O donne l\'alkyle.';
+      if (!st.alkyle) return 'Un ester se nomme « …oate de …yle » : l\'alcanoate (chaîne du C=O), puis l\'alkyle (chaîne liée à l\'O).';
+      if (st.n === E.alkyle.n && st.alkyle.n === E.n && E.n !== E.alkyle.n) return 'Tu as inversé les deux chaînes : la chaîne qui porte le C=O donne l\'alcanoate ; la chaîne liée à l\'O donne l\'alkyle.';
     }
     // 3. longueur de la chaîne principale
     if (st.n !== E.n) {
       const gr = ['alcane', 'halogeno'].includes(E.famille) ? '' : ' qui contient le groupe';
-      if (st.n < E.n) return `Ta chaîne a ${st.n} C ; il y en a une de ${E.n}${gr}.${prolongement(st, fam) ? ' ' + prolongement(st, fam) : ' Elle n\'est pas toujours dessinée en ligne droite.'}`;
+      if (st.n < E.n) return `Ta chaîne a ${st.n} C ; il y en a une de ${E.n}${gr}.${prolongement(st, fam) ? ' ' + prolongement(st, fam) : ' Elle n\'est pas toujours dessinée en ligne droite.'}`;
       return `Ta chaîne a ${st.n} C, mais la plus longue chaîne${gr} n'en a que ${E.n}. Recompte les C.`;
     }
     if (E.alkyle) {
-      if (st.alkyle.n !== E.alkyle.n) return `La chaîne liée à l'O (l'alkyle) a ${E.alkyle.n} C dans sa chaîne la plus longue : compte-les à partir du C lié à l'O.`;
+      if (st.alkyle.n !== E.alkyle.n) return `La chaîne liée à l'O (l'alkyle) a ${E.alkyle.n} C dans sa chaîne la plus longue : compte-les à partir du C lié à l'O.`;
       const pa = st.alkyle.prefixes.map(p => (p.locs || []).join(',') + '-' + p.mult + sansAccent(p.nom)).join('-');
       const pe = E.alkyle.prefixes.map(p => p.locs.join(',') + '-' + MULT_SA_INV(p.locs.length) + sansAccent(p.nom)).join('-');
-      if (sansAccent(pa) !== sansAccent(pe)) return 'Vérifie l\'alkyle (la chaîne liée à l\'O) : on numérote sa chaîne à partir du C lié à l\'O (1-méthyléthyle, 2-méthylpropyle).';
+      if (sansAccent(pa) !== sansAccent(pe)) return 'Vérifie l\'alkyle (la chaîne liée à l\'O) : on numérote sa chaîne à partir du C lié à l\'O (1-méthyléthyle, 2-méthylpropyle).';
     }
     // 4. numéro du groupe
     if (['alcene', 'alcool', 'cetone', 'amine'].includes(E.famille)) {
       if (st.loc == null) {
-        if (E.gEcrit) return `Il manque le numéro du groupe : il se place juste devant la terminaison (${EX_LOC[E.famille]}) ; c'est le n° de l'atome de carbone qui porte le groupe caractéristique.`;
+        if (E.gEcrit) return `Il manque le numéro du groupe : il se place juste devant la terminaison (${EX_LOC[E.famille]}) ; c'est le n° de l'atome de carbone qui porte le groupe caractéristique.`;
       } else if (st.loc !== E.locG) {
         if (E.famille === 'alcene' && st.loc === E.locG + 1) return 'Le n° d\'une double liaison est celui de son premier C (le plus petit des deux).';
         const inverse = E.famille === 'alcene' ? E.n - E.locG : E.n + 1 - E.locG;
-        if (st.loc === inverse) return 'En partant de l\'autre bout, le numéro du groupe est plus petit : le C qui porte le groupe doit avoir le plus petit numéro possible.';
-        return 'Le numéro du groupe est celui de l\'atome de carbone qui porte le groupe caractéristique : vérifie la numérotation.';
+        if (st.loc === inverse) return 'En partant de l\'autre bout, le numéro du groupe est plus petit : le C qui porte le groupe doit avoir le plus petit numéro possible.';
+        return 'Le numéro du groupe est celui de l\'atome de carbone qui porte le groupe caractéristique : vérifie la numérotation.';
       }
     } else if (st.loc != null && st.loc !== 1 && TERMINAUX.includes(E.famille)) {
-      return `Le C du groupe est toujours le n° 1 : on n'écrit pas son numéro (…${SUF_AFF[SUF_ATT[E.famille]]}).`;
+      return `Le C du groupe est toujours le n° 1 : on n'écrit pas son numéro (…${SUF_AFF[SUF_ATT[E.famille]]}).`;
     }
     // 5. ramifications
     const S = st.prefixes, EP = E.prefixes;
@@ -1088,37 +1088,37 @@
     for (const p of S) if (!EP.some(e => e.nom === p.nom)) {
       if (kDe(p.nom) > 10) return `Il n'y a pas ${deNom(p.nom)} dans cette molécule.`;
       const manque = EP.find(e => !S.some(q => q.nom === e.nom) && !e.halo);
-      return manque ? `Il n'y a pas ${deNom(p.nom)} dans cette molécule : compte les C de chaque ramification (méthyl : 1 C, éthyl : 2 C, propyl : 3 C).` : `Il n'y a pas ${deNom(p.nom)} dans cette molécule.`;
+      return manque ? `Il n'y a pas ${deNom(p.nom)} dans cette molécule : compte les C de chaque ramification (méthyl : 1 C, éthyl : 2 C, propyl : 3 C).` : `Il n'y a pas ${deNom(p.nom)} dans cette molécule.`;
     }
-    for (const e of EP) if (!S.some(p => p.nom === e.nom)) return e.halo ? `Il manque un halogène : ${e.nom} (${e.locs.length > 1 ? MULT[e.locs.length] + e.nom : e.nom}).` : `Il manque une ramification : compte toutes les ramifications de la chaîne principale.`;
+    for (const e of EP) if (!S.some(p => p.nom === e.nom)) return e.halo ? `Il manque un halogène : ${e.nom} (${e.locs.length > 1 ? MULT[e.locs.length] + e.nom : e.nom}).` : `Il manque une ramification : compte toutes les ramifications de la chaîne principale.`;
     for (const e of EP) {
       const ts = total(S, e.nom), te = e.locs.length;
-      if (ts < te) return `Il y a ${te} ${e.nom} : préfixe « ${MULT[te]} » et un numéro pour chacun.`;
+      if (ts < te) return `Il y a ${te} ${e.nom} : préfixe « ${MULT[te]} » et un numéro pour chacun.`;
       if (ts > te) return `Il n'y a ${te === 1 ? 'qu\'un' : 'que ' + te} ${e.nom}${te > 1 ? ' (' + MULT[te] + e.nom + ')' : ''}.`;
     }
     const vus = new Set();
     for (const p of S) {
       if (vus.has(p.nom)) {
         const locs = S.filter(q => q.nom === p.nom).flatMap(q => q.locs || []).sort((a, b) => (a === 'N' ? 0 : a) - (b === 'N' ? 0 : b));
-        return `Les ramifications identiques se regroupent : ${locs.length ? locs.join(',') + '-' : ''}${MULT[total(S, p.nom)]}${p.nom} (di, tri, tétra…).`;
+        return `Les ramifications identiques se regroupent : ${locs.length ? locs.join(',') + '-' : ''}${MULT[total(S, p.nom)]}${p.nom} (di, tri, tétra…).`;
       }
       vus.add(p.nom);
     }
     for (const p of S) {
       const k = MULT_SA[sansAccent(p.mult)] || 1;
       if (!p.locs) continue;
-      if (p.locs.length > 1 && !p.mult) return `${p.locs.length} ${p.nom} : on écrit ${p.locs.join(',')}-${MULT[p.locs.length]}${p.nom}.`;
-      if (p.locs.length < k) return `« ${p.mult} » veut dire ${k} : il faut ${k} numéros, un par ramification, même s'ils sont égaux (2,2-diméthyl).`;
-      if (p.locs.length > k) return `${p.locs.length} numéros : il y a ${p.locs.length} ${p.nom}, préfixe « ${MULT[p.locs.length]} ».`;
+      if (p.locs.length > 1 && !p.mult) return `${p.locs.length} ${p.nom} : on écrit ${p.locs.join(',')}-${MULT[p.locs.length]}${p.nom}.`;
+      if (p.locs.length < k) return `« ${p.mult} » veut dire ${k} : il faut ${k} numéros, un par ramification, même s'ils sont égaux (2,2-diméthyl).`;
+      if (p.locs.length > k) return `${p.locs.length} numéros : il y a ${p.locs.length} ${p.nom}, préfixe « ${MULT[p.locs.length]} ».`;
     }
     for (const e of EP) {
       const p = S.find(q => q.nom === e.nom);
       const eN = e.locs.filter(l => l === 'N').length, sN = (p.locs || []).filter(l => l === 'N').length;
-      if (eN > sN) return `${ceNom(e.nom)} est accroché sur le N : on écrit N-${e.nom}.`;
+      if (eN > sN) return `${ceNom(e.nom)} est accroché sur le N : on écrit N-${e.nom}.`;
       if (sN > eN) return `${ceNom(e.nom)} n'est pas accroché sur le N, mais sur un C de la chaîne.`;
     }
     const sansNum = S.find(q => !q.locs && EP.find(e => e.nom === q.nom).ecrits);
-    if (sansNum) return `Il manque ${nbDe(sansNum) > 1 ? 'les numéros' : 'le numéro'} : ${sansNum.nom} sur quel${nbDe(sansNum) > 1 ? 's' : ''} C ?`;
+    if (sansNum) return `Il manque ${nbDe(sansNum) > 1 ? 'les numéros' : 'le numéro'} : ${sansNum.nom} sur quel${nbDe(sansNum) > 1 ? 's' : ''} C ?`;
     // valeurs des numéros
     const numeriques = (locs, inv) => (locs || []).filter(l => l !== 'N').map(l => (inv ? E.n + 1 - l : l));
     let differe = false, inverse = true, memeEnsemble = true;
@@ -1134,22 +1134,22 @@
     if (differe) {
       tousS.sort((a, b) => a - b); tousE.sort((a, b) => a - b);
       if (tousS.join() !== tousE.join()) memeEnsemble = false;
-      if (memeEnsemble) return 'Les numéros sont les mêmes dans les deux sens : à égalité, le plus petit numéro va à la ramification qui vient la première dans l\'ordre alphabétique.';
+      if (memeEnsemble) return 'Les numéros sont les mêmes dans les deux sens : à égalité, le plus petit numéro va à la ramification qui vient la première dans l\'ordre alphabétique.';
       if (inverse && !TERMINAUX.includes(E.famille) && !E.cyclo) return 'En partant de l\'autre bout de la chaîne, les numéros sont plus petits.';
       if (E.cyclo) return 'Numérote le cycle pour que les numéros soient les plus petits possibles (et le n° 1 à la ramification qui vient la première dans l\'ordre alphabétique).';
-      return 'Vérifie les numéros : ce sont ceux des C de la chaîne principale qui portent les ramifications, en partant du bon bout.';
+      return 'Vérifie les numéros : ce sont ceux des C de la chaîne principale qui portent les ramifications, en partant du bon bout.';
     }
     // ordre alphabétique (la variante « N-… d'abord » est acceptée)
     const ordre = S.map(p => p.nom);
     const trie = ordre.slice().sort(ordreAlpha);
     if (ordre.join() !== trie.join() && !(att.variantes || []).length) {
       const avecMult = S.slice().sort((a, b) => ordreAlpha(a.mult + a.nom, b.mult + b.nom)).map(p => p.nom);
-      if (ordre.join() === avecMult.join()) return 'Di, tri, tétra… ne comptent pas dans l\'ordre alphabétique : on classe éthyl, méthyl… (é avant m).';
-      return 'Les ramifications s\'écrivent dans l\'ordre alphabétique (é avant m ; di, tri… ne comptent pas).';
+      if (ordre.join() === avecMult.join()) return 'Di, tri, tétra… ne comptent pas dans l\'ordre alphabétique : on classe éthyl, méthyl… (é avant m).';
+      return 'Les ramifications s\'écrivent dans l\'ordre alphabétique (é avant m ; di, tri… ne comptent pas).';
     }
-    if (notes.elision) return 'Devant une voyelle, on enlève le « e » de « ane » : butan-2-ol, butanal.';
-    if (notes.alkyleSansE) return 'Dans « …oate de …yle », l\'alkyle prend un « e » à la fin : éthyle, butyle.';
-    if (notes.deManquant) return 'Un ester se nomme « …oate de …yle » : n\'oublie pas « de » (ou « d\' » devant une voyelle).';
+    if (notes.elision) return 'Devant une voyelle, on enlève le « e » de « ane » : butan-2-ol, butanal.';
+    if (notes.alkyleSansE) return 'Dans « …oate de …yle », l\'alkyle prend un « e » à la fin : éthyle, butyle.';
+    if (notes.deManquant) return 'Un ester se nomme « …oate de …yle » : n\'oublie pas « de » (ou « d\' » devant une voyelle).';
     return null;
   }
   const MULT_SA_INV = k => sansAccent(MULT[k]);
@@ -1159,7 +1159,7 @@
 
   function diagnostiquerNom(saisie, mol) {
     const att = mol && mol.nom ? mol : nommer(mol);
-    if (att.horsProgramme) return { ok: false, diag: 'Cette molécule n\'est pas au programme : ' + att.horsProgramme + '.' };
+    if (att.horsProgramme) return { ok: false, diag: 'Cette molécule n\'est pas au programme : ' + att.horsProgramme + '.' };
     const s = normaliserSaisie(saisie);
     if (!s) return { ok: false, vide: true, diag: 'Écris le nom.' };
     const formes = [att.nom].concat(att.variantes || []);
@@ -1170,21 +1170,21 @@
     const an = analyserNom(s);
     const format = diagFormat(s);
     if (!an.st) {
-      if (an.notes.numeroDevant) return { ok: false, diag: 'Le numéro du groupe se place juste devant la terminaison : pentan-2-ol, pas 2-pentanol.' };
-      if (an.notes.yleEnTrop) return { ok: false, diag: 'Pas de « e » à la fin du nom d\'une ramification : méthyl, éthyl, propyl.' };
-      if (an.notes.terminaison) return { ok: false, diag: 'Il manque la fin du nom : la terminaison de la famille (pentane, pentan-2-ol, pentanal…).' };
-      return { ok: false, diag: format || 'Je ne reconnais pas ce nom : vérifie l\'orthographe (méthyl, éthyl… ; pentane, pentan-2-ol, pentanal…).' };
+      if (an.notes.numeroDevant) return { ok: false, diag: 'Le numéro du groupe se place juste devant la terminaison : pentan-2-ol, pas 2-pentanol.' };
+      if (an.notes.yleEnTrop) return { ok: false, diag: 'Pas de « e » à la fin du nom d\'une ramification : méthyl, éthyl, propyl.' };
+      if (an.notes.terminaison) return { ok: false, diag: 'Il manque la fin du nom : la terminaison de la famille (pentane, pentan-2-ol, pentanal…).' };
+      return { ok: false, diag: format || 'Je ne reconnais pas ce nom : vérifie l\'orthographe (méthyl, éthyl… ; pentane, pentan-2-ol, pentanal…).' };
     }
     const d = comparerNoms(an, att);
     if (d) return { ok: false, diag: d };
     if (format) return { ok: false, diag: format };
     // dernière vérification : le nom décrit bien la molécule
     const r = construireNom(an.st);
-    if (!r.mol || !meme(r.mol, molDe(mol))) return { ok: false, diag: 'Ce nom ne correspond pas à cette molécule : relis la chaîne principale et les ramifications.' };
+    if (!r.mol || !meme(r.mol, molDe(mol))) return { ok: false, diag: 'Ce nom ne correspond pas à cette molécule : relis la chaîne principale et les ramifications.' };
     // « pentan-1-oate », « butan-1-al » : faux (on n'écrit pas le 1), mais la molécule est la bonne :
     // l'outil le signale comme une erreur, affiche le bon nom et valide quand même
     if (an.st.loc === 1 && TERMINAUX.includes(att.famille)) {
-      return { ok: true, numeroUn: true, diag: `Le C du groupe ${TXT_UN[att.famille]} est toujours le n° 1 : on n'écrit pas ce « 1 ». Le nom juste est <b>${att.nom}</b>.` };
+      return { ok: true, numeroUn: true, diag: `Le C du groupe ${TXT_UN[att.famille]} est toujours le n° 1 : on n'écrit pas ce « 1 ». Le nom juste est <b>${att.nom}</b>.` };
     }
     const acc = sansAccent(s) === s && att.nom !== sansAccent(att.nom);
     return { ok: true, remarque: acc ? remarqueAccents(s, att) : '' };
@@ -1295,16 +1295,16 @@
   }
   // explications des étiquettes condensées (bulles d'aide)
   const AIDES_CONDENSEES = {
-    C2H5: 'C₂H₅ est l\'écriture abrégée de –CH₂–CH₃ : 2 C et 5 H, un groupe éthyle.',
-    C3H7: 'C₃H₇ est l\'écriture abrégée de –CH₂–CH₂–CH₃ : 3 C et 7 H, un groupe propyle.',
-    '(CH2)5': '(CH₂)₅ : cinq groupes –CH₂– à la suite, –CH₂–CH₂–CH₂–CH₂–CH₂–.',
-    '(CH2)2': '(CH₂)₂ : deux groupes –CH₂– à la suite, –CH₂–CH₂–.',
-    '(CH2)3': '(CH₂)₃ : trois groupes –CH₂– à la suite, –CH₂–CH₂–CH₂–.',
-    '(CH2)4': '(CH₂)₄ : quatre groupes –CH₂– à la suite, –CH₂–CH₂–CH₂–CH₂–.',
-    C6H5: 'C₆H₅ : un cycle de 6 C (cycle benzénique) qui porte 5 H ; il est lié à la molécule par son 6e C.',
-    'C(CH3)2': 'C(CH₃)₂ : un C qui porte deux groupes –CH₃ (les parenthèses : ce qui est accroché sur le C).',
-    'CH(CH3)2': 'CH(CH₃)₂ : un C qui porte un H et deux groupes –CH₃.',
-    '(CH3)2': '(CH₃)₂ : deux groupes –CH₃ accrochés sur l\'atome écrit juste avant.',
+    C2H5: 'C₂H₅ est l\'écriture abrégée de –CH₂–CH₃ : 2 C et 5 H, un groupe éthyle.',
+    C3H7: 'C₃H₇ est l\'écriture abrégée de –CH₂–CH₂–CH₃ : 3 C et 7 H, un groupe propyle.',
+    '(CH2)5': '(CH₂)₅ : cinq groupes –CH₂– à la suite, –CH₂–CH₂–CH₂–CH₂–CH₂–.',
+    '(CH2)2': '(CH₂)₂ : deux groupes –CH₂– à la suite, –CH₂–CH₂–.',
+    '(CH2)3': '(CH₂)₃ : trois groupes –CH₂– à la suite, –CH₂–CH₂–CH₂–.',
+    '(CH2)4': '(CH₂)₄ : quatre groupes –CH₂– à la suite, –CH₂–CH₂–CH₂–CH₂–.',
+    C6H5: 'C₆H₅ : un cycle de 6 C (cycle benzénique) qui porte 5 H ; il est lié à la molécule par son 6e C.',
+    'C(CH3)2': 'C(CH₃)₂ : un C qui porte deux groupes –CH₃ (les parenthèses : ce qui est accroché sur le C).',
+    'CH(CH3)2': 'CH(CH₃)₂ : un C qui porte un H et deux groupes –CH₃.',
+    '(CH3)2': '(CH₃)₂ : deux groupes –CH₃ accrochés sur l\'atome écrit juste avant.',
   };
 
   const ORGA = racine.ORGA || {};

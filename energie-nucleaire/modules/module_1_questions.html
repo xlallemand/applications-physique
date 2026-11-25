@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 : questions sur fission, fusion et radioactivité — Chapitre 13 : Énergie nucléaire</title>
+<title>Module 1 : questions sur fission, fusion et radioactivité — Chapitre 13 : Énergie nucléaire</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="nuc.css">
@@ -95,7 +95,7 @@ function qNoyau() {
   const ks = dd.map((x, i) => i).filter(i => dd[i] !== 'γ' && dd[i].s !== 'n' && dd[i].s !== 'e');
   const i = hasard(ks);
   dd[i] = trou(dd[i], dd[i].k > 1 ? 'Zs' : 'AZs');
-  return { theme: 'Compléter une équation', consigne: 'Complète l\'équation : trouve A et Z par conservation, puis l\'élément d\'après Z.',
+  return { theme: 'Compléter une équation', consigne: 'Complète l\'équation : trouve A et Z par conservation, puis l\'élément d\'après Z.',
     parties: [partieReaction({ g, d: dd }, { q: 'Trouve les nombres (Valider), puis l\'élément dans la classification.', solution: redaction(g, dd) })] };
 }
 // particule à trouver (neutron, électron, positron), puis classer
@@ -105,36 +105,36 @@ function qParticule() {
   if (i < 0) return qParticule();
   const dd = d.slice();
   dd[i] = trou(dd[i], 'AZs');
-  return { theme: 'Particule émise', consigne: 'Complète l\'équation : quelle particule est formée ?',
+  return { theme: 'Particule émise', consigne: 'Complète l\'équation : quelle particule est formée ?',
     parties: [partieReaction({ g, d: dd, classer: true }, { q: 'Trouve A et Z de la particule (Valider), la particule, puis classe la réaction.', solution: `${redaction(g, dd)}<p>${explication(analyse(g, d))}</p>` })] };
 }
 // réaction chimique ou nucléaire ? le neutron ?
 function qNotion() {
   const [g, d] = famille(hasard(['fission', 'fusion']));
   return hasard([
-    { theme: 'Réaction nucléaire', enonce: eqHTML(g, d), parties: [{ type: 'choix', q: 'Cette réaction est-elle une réaction chimique ?', colonne: true,
-      options: [o('ok', 'Non : les éléments ne sont pas conservés'), o('oui', 'Oui : A et Z sont conservés'), o('o2', 'Non : il n\'y a pas de dioxygène')], bonne: 'ok',
-      indices: { oui: 'A et Z se conservent, mais les éléments changent : compare les symboles à gauche et à droite.', o2: 'Ce n\'est pas la raison : compare les éléments à gauche et à droite.' },
-      solution: '<p>Ce n\'est pas une réaction chimique : les éléments ne sont pas conservés (un noyau change d\'élément).</p>' }] },
-    { theme: 'Le neutron', enonce: `<p class="ph-calc">${L(noyau(1, 0, 'n'))}</p>`, parties: [{ type: 'choix', q: 'Que signifie cette notation ?', colonne: true,
-      options: [o('ok', 'un neutron : 0 proton et 1 nucléon'), o('p', 'un proton : 1 proton et 0 neutron'), o('inv', 'une particule de 1 proton et 0 nucléon')], bonne: 'ok',
-      indices: { p: 'Le nombre du bas, Z = 0, est le nombre de protons.', inv: 'En haut, A = 1 est le nombre de nucléons ; en bas, Z = 0 le nombre de protons.' },
-      solution: '<p>Z = 0 : aucun proton ; A = 1 : un nucléon, donc 1 − 0 = 1 neutron. C\'est un neutron.</p>' }] },
+    { theme: 'Réaction nucléaire', enonce: eqHTML(g, d), parties: [{ type: 'choix', q: 'Cette réaction est-elle une réaction chimique ?', colonne: true,
+      options: [o('ok', 'Non : les éléments ne sont pas conservés'), o('oui', 'Oui : A et Z sont conservés'), o('o2', 'Non : il n\'y a pas de dioxygène')], bonne: 'ok',
+      indices: { oui: 'A et Z se conservent, mais les éléments changent : compare les symboles à gauche et à droite.', o2: 'Ce n\'est pas la raison : compare les éléments à gauche et à droite.' },
+      solution: '<p>Ce n\'est pas une réaction chimique : les éléments ne sont pas conservés (un noyau change d\'élément).</p>' }] },
+    { theme: 'Le neutron', enonce: `<p class="ph-calc">${L(noyau(1, 0, 'n'))}</p>`, parties: [{ type: 'choix', q: 'Que signifie cette notation ?', colonne: true,
+      options: [o('ok', 'un neutron : 0 proton et 1 nucléon'), o('p', 'un proton : 1 proton et 0 neutron'), o('inv', 'une particule de 1 proton et 0 nucléon')], bonne: 'ok',
+      indices: { p: 'Le nombre du bas, Z = 0, est le nombre de protons.', inv: 'En haut, A = 1 est le nombre de nucléons ; en bas, Z = 0 le nombre de protons.' },
+      solution: '<p>Z = 0 : aucun proton ; A = 1 : un nucléon, donc 1 − 0 = 1 neutron. C\'est un neutron.</p>' }] },
   ]);
 }
 // définitions
 function qDef() {
   return hasard([
-    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une fission, c\'est :', colonne: true,
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une fission, c\'est :', colonne: true,
       options: [o('ok', 'un noyau lourd qui se scinde en deux noyaux plus légers, sous l\'impact d\'un neutron'), o('fus', 'deux noyaux légers qui s\'associent en un noyau plus lourd'), o('radio', 'un noyau qui émet spontanément une particule α ou β')], bonne: 'ok',
       indices: { fus: 'Ça, c\'est la fusion.', radio: 'Ça, c\'est la radioactivité.' }, solution: '<p>Un noyau lourd, percuté par un neutron, se scinde en deux noyaux plus légers.</p>' }] },
-    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une fusion, c\'est :', colonne: true,
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une fusion, c\'est :', colonne: true,
       options: [o('ok', 'deux noyaux légers qui s\'associent en un noyau plus lourd'), o('fis', 'un noyau lourd qui se scinde en deux noyaux plus légers'), o('chim', 'une combustion de l\'hydrogène')], bonne: 'ok',
-      indices: { fis: 'Ça, c\'est la fission.', chim: 'Une combustion est une réaction chimique : les noyaux n\'y changent pas.' }, solution: '<p>Deux noyaux légers s\'associent pour former un noyau plus lourd.</p>' }] },
-    { theme: 'Un seul réactif', enonce: eqHTML(...RADIOS[0]()), parties: [{ type: 'choix', q: 'Le plus grand nombre de nucléons (235) est à gauche. Est-ce une fission ?', colonne: true,
-      options: [o('ok', 'Non : un seul réactif, c\'est une radioactivité α'), o('fis', 'Oui : le plus grand nombre de nucléons est à gauche'), o('fus', 'Non : c\'est une fusion')], bonne: 'ok',
-      indices: { fis: 'Pour une fission, il faut deux réactifs : le neutron qui percute le noyau.', fus: 'Un seul noyau à gauche : rien ne fusionne.' },
-      solution: '<p>Un seul réactif, qui émet un noyau d\'hélium : radioactivité α. Pour une fission, il faut le neutron en plus.</p>' }] },
+      indices: { fis: 'Ça, c\'est la fission.', chim: 'Une combustion est une réaction chimique : les noyaux n\'y changent pas.' }, solution: '<p>Deux noyaux légers s\'associent pour former un noyau plus lourd.</p>' }] },
+    { theme: 'Un seul réactif', enonce: eqHTML(...RADIOS[0]()), parties: [{ type: 'choix', q: 'Le plus grand nombre de nucléons (235) est à gauche. Est-ce une fission ?', colonne: true,
+      options: [o('ok', 'Non : un seul réactif, c\'est une radioactivité α'), o('fis', 'Oui : le plus grand nombre de nucléons est à gauche'), o('fus', 'Non : c\'est une fusion')], bonne: 'ok',
+      indices: { fis: 'Pour une fission, il faut deux réactifs : le neutron qui percute le noyau.', fus: 'Un seul noyau à gauche : rien ne fusionne.' },
+      solution: '<p>Un seul réactif, qui émet un noyau d\'hélium : radioactivité α. Pour une fission, il faut le neutron en plus.</p>' }] },
   ]);
 }
 
@@ -145,11 +145,11 @@ function tirage() {
 
 NUC.serie({
   app: document.getElementById('app'),
-  badge: 'MODULE 1 · QUESTIONS', titre: 'Fission, fusion ou radioactivité ?',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : reconnaître une fission, une fusion ou une radioactivité d\'après l\'équation, trouver le nombre x de neutrons, A, Z ou l\'élément par conservation.</p>',
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Fission, fusion ou radioactivité ?',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : reconnaître une fission, une fusion ou une radioactivité d\'après l\'équation, trouver le nombre x de neutrons, A, Z ou l\'élément par conservation.</p>',
   questions: tirage,
   revoir: { href: 'module_1a_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_2a_cours.html', label: 'Module 2 : défaut de masse →' },
+  suite: { href: 'module_2a_cours.html', label: 'Module 2 : défaut de masse →' },
 });
 NUC.menu('module_1_questions');
 </script>

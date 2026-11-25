@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : questions sur le pH — pH</title>
+<title>Module 2 : questions sur le pH — pH</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="ph.css">
@@ -35,17 +35,17 @@ const concentration = () => hasard([1.5, 2.0, 2.5, 3.2, 4.0, 5.0, 6.3, 7.9, 8.4]
 /* ---------- Groupe 1 : définition ---------- */
 const G1 = [
   function formulePH() {
-    return { theme: 'Définition', parties: [{ type: 'choix', q: 'Quelle est la définition du pH ?', colonne: true,
+    return { theme: 'Définition', parties: [{ type: 'choix', q: 'Quelle est la définition du pH ?', colonne: true,
       options: [
         { id: 'ok', label: eq(P(S(tp)), P(FN('log', fracH()), true)) },
         { id: 'a', label: eq(P(S(tp)), P(FN('log', fracH()))) },
         { id: 'b', label: eq(P(S(tp)), P(FN('log', F(S(t0), S(tH))), true)) },
         { id: 'c', label: eq(P(S(tp)), P(FN('p10', P(fracH(), true)))) }],
-      bonne: 'ok', indice: 'Le pH est positif pour des concentrations plus petites que 1 mol·L<sup>−1</sup> : il faut un signe − devant log.',
+      bonne: 'ok', indice: 'Le pH est positif pour des concentrations plus petites que 1 mol·L<sup>−1</sup> : il faut un signe − devant log.',
       solution: `pH = ${M}log(${H3O} / c°), avec c° = 1 ${UNITE}.` }] };
   },
   function formuleH() {
-    return { theme: 'Définition', parties: [{ type: 'choix', q: `Quelle relation permet de calculer ${H3O} à partir du pH ?`, colonne: true,
+    return { theme: 'Définition', parties: [{ type: 'choix', q: `Quelle relation permet de calculer ${H3O} à partir du pH ?`, colonne: true,
       options: [
         { id: 'ok', label: eq(P(S(tH)), P([S(t0), FN('p10', P(S(tp), true))])) },
         { id: 'a', label: eq(P(S(tH)), P([S(t0), FN('p10', P(S(tp)))])) },
@@ -55,24 +55,24 @@ const G1 = [
       solution: `pH = ${M}log(${H3O} / c°) ⇔ ${H3O} = c° × 10<sup>${M}pH</sup>.` }] };
   },
   function c0() {
-    return { theme: 'La concentration standard', parties: [{ type: 'choix', q: 'Dans la définition du pH, c° est :', colonne: true,
+    return { theme: 'La concentration standard', parties: [{ type: 'choix', q: 'Dans la définition du pH, c° est :', colonne: true,
       options: [
         { id: 'ok', label: `la concentration standard, c° = 1 ${UNITE}` },
         { id: 'a', label: 'la concentration de la solution avant dilution' },
         { id: 'b', label: `la concentration en ions oxonium de l'eau pure, 10<sup>${M}7</sup> ${UNITE}` },
         { id: 'c', label: 'la concentration en acide apporté' }],
       bonne: 'ok', indice: 'C\'est une valeur fixe, qui sert à obtenir un nombre sans unité.',
-      solution: `c° = 1 ${UNITE} est la concentration standard : diviser par c° donne un nombre sans unité, dont on peut calculer le log.` }] };
+      solution: `c° = 1 ${UNITE} est la concentration standard : diviser par c° donne un nombre sans unité, dont on peut calculer le log.` }] };
   },
   function unite() {
-    return { theme: 'Définition', parties: [{ type: 'choix', q: 'Quelle est l\'unité du pH ?', melanger: false,
-      options: [{ id: 'ok', label: 'aucune : le pH est sans dimension' }, { id: 'a', label: UNITE }, { id: 'b', label: 'mol' }, { id: 'c', label: 'g·L<sup>−1</sup>' }],
+    return { theme: 'Définition', parties: [{ type: 'choix', q: 'Quelle est l\'unité du pH ?', melanger: false,
+      options: [{ id: 'ok', label: 'aucune : le pH est sans dimension' }, { id: 'a', label: UNITE }, { id: 'b', label: 'mol' }, { id: 'c', label: 'g·L<sup>−1</sup>' }],
       bonne: 'ok', indice: `On divise ${H3O} par c° avant de calculer le log.`, solution: `${H3O} / c° n'a pas d'unité, donc le pH non plus.` }] };
   },
   function validite() {
-    return { theme: 'Validité', parties: [{ type: 'choix', q: `La relation pH = ${M}log(${H3O} / c°) est valable :`, colonne: true,
+    return { theme: 'Validité', parties: [{ type: 'choix', q: `La relation pH = ${M}log(${H3O} / c°) est valable :`, colonne: true,
       options: [
-        { id: 'ok', label: 'dans un certain domaine de concentrations : pas pour les concentrations trop élevées ou trop faibles' },
+        { id: 'ok', label: 'dans un certain domaine de concentrations : pas pour les concentrations trop élevées ou trop faibles' },
         { id: 'a', label: 'pour toutes les solutions aqueuses, sans exception' },
         { id: 'b', label: 'seulement pour les solutions très concentrées' }],
       bonne: 'ok', indice: 'Rappelle-toi le graphique pH mesuré / pH théorique du cours.',
@@ -80,10 +80,10 @@ const G1 = [
   },
   function sens() {
     const plus = Math.random() < .5;
-    return { theme: 'pH et concentration', parties: [{ type: 'choix', q: `Plus la concentration en ions oxonium ${H3O} est ${plus ? 'grande' : 'petite'} :`, melanger: false,
+    return { theme: 'pH et concentration', parties: [{ type: 'choix', q: `Plus la concentration en ions oxonium ${H3O} est ${plus ? 'grande' : 'petite'} :`, melanger: false,
       options: [{ id: 'p', label: 'plus le pH est petit' }, { id: 'g', label: 'plus le pH est grand' }, { id: 'm', label: 'le pH ne change pas' }],
-      bonne: plus ? 'p' : 'g', indice: `Compare : ${H3O} = 10<sup>${M}2</sup> donne pH = 2 ; ${H3O} = 10<sup>${M}5</sup> donne pH = 5.`,
-      solution: `À cause du signe − devant log : plus ${H3O} est grande, plus le pH est petit (10<sup>${M}2</sup> → pH = 2 ; 10<sup>${M}5</sup> → pH = 5).` }] };
+      bonne: plus ? 'p' : 'g', indice: `Compare : ${H3O} = 10<sup>${M}2</sup> donne pH = 2 ; ${H3O} = 10<sup>${M}5</sup> donne pH = 5.`,
+      solution: `À cause du signe − devant log : plus ${H3O} est grande, plus le pH est petit (10<sup>${M}2</sup> → pH = 2 ; 10<sup>${M}5</sup> → pH = 5).` }] };
   },
 ];
 
@@ -91,32 +91,32 @@ const G1 = [
 const G2 = [
   function pHpuissance() {
     const n = entre(1, 13);
-    return { theme: 'Calculer un pH', consigne: `Sans calculatrice : ${H3O} = 1,0 × 10<sup>${M}${n}</sup> ${UNITE}.`, parties: [{ type: 'nombre', label: 'pH =', valeur: n, tol: .051,
+    return { theme: 'Calculer un pH', consigne: `Sans calculatrice : ${H3O} = 1,0 × 10<sup>${M}${n}</sup> ${UNITE}.`, parties: [{ type: 'nombre', label: 'pH =', valeur: n, tol: .051,
       diag: v => diagPH(v, n, Math.pow(10, -n)), indice: `pH = ${M}log(10<sup>${M}${n}</sup>) et log(10<sup>a</sup>) = a.`,
       solution: `pH = ${M}log(1,0 × 10<sup>${M}${n}</sup> / 1) = ${M}(${M}${n}) = ${n},0` }] };
   },
   function pHcalc() {
     const c = concentration(), ph = pHde(c);
     return { theme: 'Calculer un pH', consigne: `${H3O} = ${sci(c, 2)} ${UNITE}. Donne le pH avec une décimale.`, parties: [{ type: 'nombre', label: 'pH =', valeur: ph, tol: .051,
-      diag: v => diagPH(v, ph, c), indice: `pH = ${M}log(${H3O} / c°) : tape ${M}log(${fmt(PH.decomposer(c, 2).m, 1)}×10^(${PH.decomposer(c, 2).e})).`,
+      diag: v => diagPH(v, ph, c), indice: `pH = ${M}log(${H3O} / c°) : tape ${M}log(${fmt(PH.decomposer(c, 2).m, 1)}×10^(${PH.decomposer(c, 2).e})).`,
       solution: `pH = ${M}log(${sci(c, 2)} / 1) = ${fmt(ph, 1)}` }] };
   },
   function mmol() {
     const k = hasard([2.5, 4.0, 6.3, 1.6, 3.2]), c = k * 1e-3, ph = pHde(c);
     return { theme: 'Calculer un pH', consigne: `${H3O} = ${fmt(k)} mmol·L<sup>−1</sup>. Donne le pH avec une décimale.`, parties: [{ type: 'nombre', label: 'pH =', valeur: ph, tol: .051,
-      diag: v => (Math.abs(v - pHde(k)) < .06 ? `Convertis d'abord en ${UNITE} : ${fmt(k)} mmol·L<sup>−1</sup> = ${fmt(k)} × 10<sup>${M}3</sup> ${UNITE}.` : diagPH(v, ph, c)),
-      indice: `1 mmol = 10<sup>${M}3</sup> mol.`, solution: `${fmt(k)} mmol·L<sup>−1</sup> = ${fmt(k)} × 10<sup>${M}3</sup> ${UNITE} ; pH = ${M}log(${fmt(k)} × 10<sup>${M}3</sup>) = ${fmt(ph, 1)}` }] };
+      diag: v => (Math.abs(v - pHde(k)) < .06 ? `Convertis d'abord en ${UNITE} : ${fmt(k)} mmol·L<sup>−1</sup> = ${fmt(k)} × 10<sup>${M}3</sup> ${UNITE}.` : diagPH(v, ph, c)),
+      indice: `1 mmol = 10<sup>${M}3</sup> mol.`, solution: `${fmt(k)} mmol·L<sup>−1</sup> = ${fmt(k)} × 10<sup>${M}3</sup> ${UNITE} ; pH = ${M}log(${fmt(k)} × 10<sup>${M}3</sup>) = ${fmt(ph, 1)}` }] };
   },
   function Hentier() {
     const n = entre(1, 13);
-    return { theme: `Calculer ${H3O}`, consigne: `Sans calculatrice : pH = ${n}. Calcule ${H3O}.`, parties: [{ type: 'sci', sansCalculatrice: true, label: `${H3O} =`, unite: UNITE, valeur: Math.pow(10, -n),
+    return { theme: `Calculer ${H3O}`, consigne: `Sans calculatrice : pH = ${n}. Calcule ${H3O}.`, parties: [{ type: 'sci', sansCalculatrice: true, label: `${H3O} =`, unite: UNITE, valeur: Math.pow(10, -n),
       diag: v => diagC(v, Math.pow(10, -n), n), indice: `${H3O} = c° × 10<sup>${M}pH</sup>.`,
       solution: `${H3O} = c° × 10<sup>${M}${n}</sup> = 1,0 × 10<sup>${M}${n}</sup> ${UNITE}` }] };
   },
   function Hcalc() {
     const ph = entre(10, 130) / 10, c = Math.pow(10, -ph);
     return { theme: `Calculer ${H3O}`, consigne: `pH = ${fmt(ph, 1)}. Calcule ${H3O} (deux chiffres significatifs).`, parties: [{ type: 'sci', label: `${H3O} =`, unite: UNITE, valeur: c,
-      diag: v => diagC(v, c, ph), indice: `${H3O} = c° × 10<sup>${M}pH</sup> : touche 10<sup>x</sup>, puis ${M}${fmt(ph, 1)}.`,
+      diag: v => diagC(v, c, ph), indice: `${H3O} = c° × 10<sup>${M}pH</sup> : touche 10<sup>x</sup>, puis ${M}${fmt(ph, 1)}.`,
       solution: `${H3O} = c° × 10<sup>${M}${fmt(ph, 1)}</sup> = ${sci(c, 2)} ${UNITE}` }] };
   },
   function plusAcide() {
@@ -124,17 +124,17 @@ const G2 = [
     const enPH = Math.random() < .5;
     const phs = melanger([2.3, 4.8, 7.0, 9.5, 11.2, 3.6]).slice(0, 3);
     const min = Math.min(...phs);
-    const opts = phs.map((x, i) => ({ id: String(x), label: `Solution ${'ABC'[i]} : ${enPH ? `pH = ${fmt(x, 1)}` : `${H3O} = ${sci(Math.pow(10, -x), 2)} ${UNITE}`}` }));
-    return { theme: 'pH et concentration', parties: [{ type: 'choix', q: 'Quelle solution contient le plus d\'ions oxonium H<sub>3</sub>O<sup>+</sup> (la plus acide) ?', colonne: true, melanger: false,
+    const opts = phs.map((x, i) => ({ id: String(x), label: `Solution ${'ABC'[i]} : ${enPH ? `pH = ${fmt(x, 1)}` : `${H3O} = ${sci(Math.pow(10, -x), 2)} ${UNITE}`}` }));
+    return { theme: 'pH et concentration', parties: [{ type: 'choix', q: 'Quelle solution contient le plus d\'ions oxonium H<sub>3</sub>O<sup>+</sup> (la plus acide) ?', colonne: true, melanger: false,
       options: opts, bonne: String(min),
       indice: enPH ? 'Plus le pH est petit, plus la concentration en ions oxonium est grande.' : 'Compare les exposants des puissances de 10.',
       solution: enPH ? `Le plus petit pH (${fmt(min, 1)}) correspond à la plus grande concentration en ions oxonium.` : `${sci(Math.pow(10, -min), 2)} ${UNITE} est la plus grande concentration (pH = ${fmt(min, 1)}).` }] };
   },
   function dilution() {
     const ph = entre(15, 50) / 10;
-    return { theme: 'Dilution', consigne: `On dilue 10 fois une solution acide de pH = ${fmt(ph, 1)} : ${H3O} est divisée par 10. Quel est le nouveau pH ?`, parties: [{ type: 'nombre', label: 'pH =', valeur: ph + 1, tol: .051,
+    return { theme: 'Dilution', consigne: `On dilue 10 fois une solution acide de pH = ${fmt(ph, 1)} : ${H3O} est divisée par 10. Quel est le nouveau pH ?`, parties: [{ type: 'nombre', label: 'pH =', valeur: ph + 1, tol: .051,
       diag: v => (Math.abs(v - (ph - 1)) < .06 ? 'Une solution moins concentrée en ions oxonium a un pH plus grand.' : null),
-      indice: `pH' = ${M}log(${H3O} / (10 c°)) : utilise log(a / b) = log a − log b.`,
+      indice: `pH' = ${M}log(${H3O} / (10 c°)) : utilise log(a / b) = log a − log b.`,
       solution: `pH' = ${M}log(${H3O} / (10 c°)) = ${M}[log(${H3O} / c°) − log 10] = pH + 1 = ${fmt(ph + 1, 1)}` }] };
   },
 ];
@@ -179,11 +179,11 @@ function tirage() {
 PH.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Définition du pH',
-  intro: `<p class="er-contexte">10 questions tirées au hasard : la définition du pH, des calculs de pH et de ${H3O} (garde ta <b>calculatrice</b> à portée de main), puis deux manipulations de la relation par glisser-déposer.</p>
-    <p class="er-petit" style="margin-top:8px">Glisser-déposer : glisse un outil (×(−1), 10<sup>x</sup>, log) sur un membre puis sur l'autre, la barre de fraction sur une case, une grandeur pour la déplacer (touche-la pour la supprimer) ; ⇄ inverse les deux membres.</p>`,
+  intro: `<p class="er-contexte">10 questions tirées au hasard : la définition du pH, des calculs de pH et de ${H3O} (garde ta <b>calculatrice</b> à portée de main), puis deux manipulations de la relation par glisser-déposer.</p>
+    <p class="er-petit" style="margin-top:8px">Glisser-déposer : glisse un outil (×(−1), 10<sup>x</sup>, log) sur un membre puis sur l'autre, la barre de fraction sur une case, une grandeur pour la déplacer (touche-la pour la supprimer) ; ⇄ inverse les deux membres.</p>`,
   questions: tirage,
   revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_3.html', label: 'Module 3 : exercices →' },
+  suite: { href: 'module_3.html', label: 'Module 3 : exercices →' },
 });
 PH.menu('module_2_questions');
 </script>

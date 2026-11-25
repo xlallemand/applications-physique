@@ -517,7 +517,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -556,8 +556,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -569,7 +569,7 @@
       const q = qs[idx];
       window.TT.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -589,7 +589,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -604,10 +604,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -741,7 +741,7 @@
         s += `<text x="${xC + 10}" y="${yy + 5}" class="tt-ech-val${fort ? ' fort' : ''}">${fmt(t)} °C</text>`;
         if (nom) s += `<text x="${(xK + xC) / 2}" y="${yy - 6}" text-anchor="middle" class="tt-ech-nom">${nom}</text>`;
       });
-      return `<svg viewBox="0 0 ${W} ${h}" width="${W}" height="${h}" role="img" aria-label="Échelles Kelvin et Celsius côte à côte : 0 K = −273 °C ; 273 K = 0 °C ; 373 K = 100 °C">${s}</svg>`;
+      return `<svg viewBox="0 0 ${W} ${h}" width="${W}" height="${h}" role="img" aria-label="Échelles Kelvin et Celsius côte à côte : 0 K = −273 °C ; 273 K = 0 °C ; 373 K = 100 °C">${s}</svg>`;
     });
   }
 
@@ -781,7 +781,7 @@
       const larg = large ? W : Math.min(W, 300), haut = Math.round(larg * vh / vw);
       const g = cases.map((c, k) => `<g transform="translate(${large ? k * 200 : 0},${large ? 0 : k * 196})">${c.s}` +
         `<text x="100" y="156" text-anchor="middle" class="tt-md-t">${c.t}</text>${c.d.map((l, i) => `<text x="100" y="${173 + i * 14}" text-anchor="middle" class="tt-md-d">${l}</text>`).join('')}</g>`).join('');
-      return `<svg viewBox="0 0 ${vw} ${vh}" width="${larg}" height="${haut}" role="img" aria-label="Les trois modes de transfert thermique : conduction dans une tige chauffée, convection de l'air au-dessus d'un radiateur, rayonnement du Soleil">${g}</svg>`;
+      return `<svg viewBox="0 0 ${vw} ${vh}" width="${larg}" height="${haut}" role="img" aria-label="Les trois modes de transfert thermique : conduction dans une tige chauffée, convection de l'air au-dessus d'un radiateur, rayonnement du Soleil">${g}</svg>`;
     }, 'tt-fig-modes');
   }
 
@@ -823,15 +823,15 @@
      négatif n'est pas faux pour autant : il va dans le sens contraire de celui où on le compte.
      compte : sens où l'élève a compté le flux (« de l'intérieur vers l'extérieur ») ;
      reel : sens réel du transfert (« de l'extérieur vers l'intérieur »). Remarques ajoutées à « Juste ! ». */
-  const noteFluxNeg = (compte, reel) => `Ton flux négatif est juste aussi : il est compté ${compte}, et le signe «&nbsp;−&nbsp;» indique qu'il va en réalité dans le sens contraire, ${reel}. En STI2D, on préfère le donner positif, ${reel}.`;
-  const noteDTNeg = (compte, reel) => `C'est juste aussi si tu comptes le flux ${compte} : ΔT et Φ sont alors négatifs, et le flux va en réalité ${reel}. En STI2D, on préfère ΔT = T<sub>chaud</sub> − T<sub>froid</sub>, positif.`;
+  const noteFluxNeg = (compte, reel) => `Ton flux négatif est juste aussi : il est compté ${compte}, et le signe «&nbsp;−&nbsp;» indique qu'il va en réalité dans le sens contraire, ${reel}. En STI2D, on préfère le donner positif, ${reel}.`;
+  const noteDTNeg = (compte, reel) => `C'est juste aussi si tu comptes le flux ${compte} : ΔT et Φ sont alors négatifs, et le flux va en réalité ${reel}. En STI2D, on préfère ΔT = T<sub>chaud</sub> − T<sub>froid</sub>, positif.`;
   function partieSens(o) {
     const [a, b] = o.cotes;
-    return { type: 'choix', q: o.q || 'Dans quel sens se fait le transfert thermique à travers la paroi ?', melanger: false, colonne: true,
+    return { type: 'choix', q: o.q || 'Dans quel sens se fait le transfert thermique à travers la paroi ?', melanger: false, colonne: true,
       options: [{ id: '1', label: `${de(a)} vers ${b}` }, { id: '2', label: `${de(b)} vers ${a}` }, { id: '0', label: 'il n\'y a pas de transfert à travers une paroi isolée' }],
       bonne: String(o.bon || 1),
       indices: { [o.bon === 2 ? '1' : '2']: 'Le transfert thermique va <b>toujours du chaud vers le froid</b>.', 0: 'Une paroi isolée ralentit le transfert thermique, elle ne l\'arrête jamais complètement.' },
-      solution: (o.solution || `<p>Le transfert thermique va du chaud vers le froid : ${de(o.bon === 2 ? b : a)} vers ${o.bon === 2 ? a : b}.</p>`) + (o.schema ? paroi(Object.assign({}, o.schema, { sens: o.bon || 1 })) : '') };
+      solution: (o.solution || `<p>Le transfert thermique va du chaud vers le froid : ${de(o.bon === 2 ? b : a)} vers ${o.bon === 2 ? a : b}.</p>`) + (o.schema ? paroi(Object.assign({}, o.schema, { sens: o.bon || 1 })) : '') };
   }
 
   /* ============================================================
@@ -849,22 +849,22 @@
   function schemaParoi(d, q) {
     const cases = [];
     d.couches.forEach((c, i) => {
-      cases.push({ id: 'e' + (i + 1), label: c.e, indice: `L'épaisseur de la couche « ${c.nom} » se place sous cette couche, avec « e<sub>${i + 1}</sub> ».` });
-      cases.push({ id: 'l' + (i + 1), label: c.lamLab || fmt(c.lam), indice: `La conductivité thermique de la couche « ${c.nom} » se place sous cette couche, avec « λ<sub>${i + 1}</sub> ».` });
+      cases.push({ id: 'e' + (i + 1), label: c.e, indice: `L'épaisseur de la couche « ${c.nom} » se place sous cette couche, avec « e<sub>${i + 1}</sub> ».` });
+      cases.push({ id: 'l' + (i + 1), label: c.lamLab || fmt(c.lam), indice: `La conductivité thermique de la couche « ${c.nom} » se place sous cette couche, avec « λ<sub>${i + 1}</sub> ».` });
     });
     d.cotes.forEach((c, k) => { if (c.T != null) cases.push({ id: 'T' + (k + 1), label: labT(c.T), indice: `${labT(c.T)} est la température du côté ${c.nom}.` }); });
-    cases.push({ id: 'S', label: d.Slab || labS(d.S), indice: 'La surface est la même pour toutes les couches : elle se place sous la paroi.' });
+    cases.push({ id: 'S', label: d.Slab || labS(d.S), indice: 'La surface est la même pour toutes les couches : elle se place sous la paroi.' });
     const etiquettes = cases.map(x => {
       const memes = cases.filter(y => y.label === x.label);
-      return { id: x.id, label: x.label, cible: memes.map(y => y.id), indice: memes.length > 1 ? `Il y a ${memes.length} cases pour « ${x.label} » : regarde l'énoncé.` : x.indice };
+      return { id: x.id, label: x.label, cible: memes.map(y => y.id), indice: memes.length > 1 ? `Il y a ${memes.length} cases pour « ${x.label} » : regarde l'énoncé.` : x.indice };
     }).concat((d.intrus || []).map((x, k) => ({ id: 'x' + k, label: x.label, cible: null, indice: x.indice })));
     const schema = paroi({
       couches: d.couches.map((c, i) => ({ nom: c.nom, motif: c.motif, e: slot('e' + (i + 1)), lam: slot('l' + (i + 1)), R: inc() })),
       cotes: d.cotes.map((c, k) => ({ nom: c.nom, T: c.T == null ? '' : slot('T' + (k + 1)) })), S: slot('S'), R: inc(), phi: d.cotes.some(c => c.T == null) ? '' : inc(),
     });
     return { type: 'schema', titrePalette: 'Données de l\'énoncé', schema, etiquettes,
-      q: q || 'Place les données de l\'énoncé sur le schéma de la paroi (les cases « ? » restées vides sont les inconnues).',
-      solution: `<p>${d.couches.map((c, i) => `${c.nom} : e<sub>${i + 1}</sub> = ${c.e}, λ<sub>${i + 1}</sub> = ${c.lamLab || fmt(c.lam)}`).join(' ; ')} ; S = ${d.Slab || labS(d.S)} pour toutes les couches.</p>` };
+      q: q || 'Place les données de l\'énoncé sur le schéma de la paroi (les cases « ? » restées vides sont les inconnues).',
+      solution: `<p>${d.couches.map((c, i) => `${c.nom} : e<sub>${i + 1}</sub> = ${c.e}, λ<sub>${i + 1}</sub> = ${c.lamLab || fmt(c.lam)}`).join(' ; ')} ; S = ${d.Slab || labS(d.S)} pour toutes les couches.</p>` };
   }
   function paroiRemplie(d, o) {
     o = o || {};
@@ -898,9 +898,9 @@
     k = 14 / Math.max(calc().phi, 1e-9);      // épaisseur de la flèche au départ : 14 px
     const d = el('div', 'tt-ex');
     const reglage = (cle, nom) => fixe.indexOf(cle === 'Ti' || cle === 'Te' ? 'T' : cle) !== -1 ? '' : `<div class="tt-ex-b"><span class="tt-ex-nom">${nom}</span>
-      <button type="button" class="tt-ex-pas" data-k="${cle}" data-p="-1" aria-label="${nom} : diminuer">−</button>
+      <button type="button" class="tt-ex-pas" data-k="${cle}" data-p="-1" aria-label="${nom} : diminuer">−</button>
       <output class="tt-ex-v" data-v="${cle}"></output>
-      <button type="button" class="tt-ex-pas" data-k="${cle}" data-p="1" aria-label="${nom} : augmenter">+</button></div>`;
+      <button type="button" class="tt-ex-pas" data-k="${cle}" data-p="1" aria-label="${nom} : augmenter">+</button></div>`;
     d.innerHTML = `<div class="tt-ex-fig"></div><div class="tt-ex-res" aria-live="polite"></div>
       <div class="tt-ex-cmd">${reglage('e', 'Épaisseur e')}${reglage('S', 'Surface S')}${reglage('Ti', 'Intérieur')}${reglage('Te', 'Extérieur')}</div>
       ${fixe.indexOf('mat') !== -1 ? '' : `<div class="tt-ex-mats" role="group" aria-label="Matériau de la paroi">${mats.map(m => `<button type="button" class="tt-ex-mat" data-m="${m}">${MATERIAUX[m].nom}<small>λ = ${fmt(MATERIAUX[m].lam)}</small></button>`).join('')}</div>`}`;
@@ -933,9 +933,9 @@
         const lp = Math.max(14, ww * 1.2), hp = Math.max(9, ww * .95 + 6);
         s += `<polygon points="${x2},${mid - hp} ${x2 + sg * lp},${mid} ${x2},${mid + hp}" class="tt-ex-pointe"/>`;
         s += `<text x="${chaudG ? 10 : W - 10}" y="${mid + Math.max(ww / 2, 8) + 18}" text-anchor="${chaudG ? 'start' : 'end'}" class="tt-ex-t2">Φ${trop ? ' (flèche limitée)' : ''}</text>`;
-      } else s += `<text x="${W / 2}" y="${mid + 5}" text-anchor="middle" class="tt-ex-t">mêmes températures : pas de transfert</text>`;
+      } else s += `<text x="${W / 2}" y="${mid + 5}" text-anchor="middle" class="tt-ex-t">mêmes températures : pas de transfert</text>`;
       s += mur;
-      figZ.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Paroi de ${MATERIAUX[et.mat].nom}, épaisseur ${fmt(Math.round(et.e * 100))} cm ; flux thermique ${chaudG ? 'de l\'intérieur vers l\'extérieur' : 'de l\'extérieur vers l\'intérieur'}">${s}</svg>`;
+      figZ.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Paroi de ${MATERIAUX[et.mat].nom}, épaisseur ${fmt(Math.round(et.e * 100))} cm ; flux thermique ${chaudG ? 'de l\'intérieur vers l\'extérieur' : 'de l\'extérieur vers l\'intérieur'}">${s}</svg>`;
       const v = (cle, t) => { const x = d.querySelector(`[data-v="${cle}"]`); if (x) x.innerHTML = t; };
       v('e', `${fmt(Math.round(et.e * 100))} cm`); v('S', `${fmt(et.S)} m<sup>2</sup>`); v('Ti', `${fmt(et.Ti)} °C`); v('Te', `${fmt(et.Te)} °C`);
       d.querySelectorAll('.tt-ex-mat').forEach(b => { const on = b.dataset.m === et.mat; b.classList.toggle('actif', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
@@ -990,11 +990,11 @@
   const PLAN = [
     { n: 1, titre: 'Température et modes de transfert', desc: 'Kelvin et degré Celsius, conduction, convection, rayonnement, sens du transfert', fiche: 'fiche_1',
       parties: [{ nom: 'Température et modes de transfert', cours: 'module_1_cours', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Flux thermique', desc: 'Le flux est une puissance : Φ = Q / Δt comme P = E / Δt ; Q = Φ × Δt comme E = P × Δt', fiche: 'fiche_2',
+    { n: 2, titre: 'Flux thermique', desc: 'Le flux est une puissance : Φ = Q / Δt comme P = E / Δt ; Q = Φ × Δt comme E = P × Δt', fiche: 'fiche_2',
       parties: [{ nom: 'Flux thermique', cours: 'module_2_cours', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Résistance thermique d\'une paroi', desc: 'Φ = ΔT / R<sub>th</sub> et R<sub>th</sub> = e / (λ × S)', fiche: 'fiche_3',
       parties: [{ nom: 'Résistance thermique d\'une paroi', cours: 'module_3_cours', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Parois composées', desc: 'Couches accolées : R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub>, double vitrage, isolation', fiche: 'fiche_4',
+    { n: 4, titre: 'Parois composées', desc: 'Couches accolées : R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub>, double vitrage, isolation', fiche: 'fiche_4',
       parties: [{ nom: 'Parois composées', cours: 'module_4_cours', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices du manuel', desc: 'Exercices 6 à 8 et 13 à 19 (p. 74-77), guidés pas à pas', exercices: 'module_5', exNom: 'Exercices 6 à 19', nbEx: 10 },
   ];

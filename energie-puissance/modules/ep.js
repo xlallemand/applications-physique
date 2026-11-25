@@ -507,7 +507,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -546,8 +546,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -559,7 +559,7 @@
       const q = qs[idx];
       window.EP.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -579,7 +579,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -594,10 +594,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -794,7 +794,7 @@
      ============================================================ */
   function partieAire(o) {
     const ut = o.ut || 's';
-    return { type: 'perso', aire: o, q: o.q || `Règle le début et la fin de l'intervalle : de t = ${fmt(o.de)} ${ut} à t = ${fmt(o.a)} ${ut}. L'aire sous la courbe se hachure.`,
+    return { type: 'perso', aire: o, q: o.q || `Règle le début et la fin de l'intervalle : de t = ${fmt(o.de)} ${ut} à t = ${fmt(o.a)} ${ut}. L'aire sous la courbe se hachure.`,
       solution: o.solution || `<p>Intervalle de t = ${fmt(o.de)} ${ut} à t = ${fmt(o.a)} ${ut}.</p>`, monter: (zone, api) => outilAire(zone, o, api) };
   }
   function outilAire(zone, o, api) {
@@ -806,7 +806,7 @@
       <button type="button" class="ep-aire-pas" data-b="${k}" data-s="-1" aria-label="${k === 1 ? 'Reculer le début' : 'Reculer la fin'}">◀</button>
       <output class="ep-aire-v" data-v="${k}"></output>
       <button type="button" class="ep-aire-pas" data-b="${k}" data-s="1" aria-label="${k === 1 ? 'Avancer le début' : 'Avancer la fin'}">▶</button></div>`;
-    d.innerHTML = `<div class="ep-aire-g"><svg role="img" aria-label="${g.aria || 'Graphique'} ; intervalle réglable"></svg></div>
+    d.innerHTML = `<div class="ep-aire-g"><svg role="img" aria-label="${g.aria || 'Graphique'} ; intervalle réglable"></svg></div>
       <p class="ep-aire-aide">Fais glisser les poignées <b>1</b> et <b>2</b>, ou utilise les flèches.</p>
       <div class="ep-aire-cmd">${bornesHTML(1)}${bornesHTML(2)}</div>`;
     zone.appendChild(d);
@@ -876,11 +876,11 @@
       const a = Math.min(t1, t2), b = Math.max(t1, t2);
       const okA = Math.abs(a - o.de) < 1e-9, okB = Math.abs(b - o.a) < 1e-9;
       if (okA && okB) { t1 = a; t2 = b; figer(); api.reussi(); return; }
-      if (a === b) { secouer(boite); api.message('Écarte les deux poignées : l\'intervalle est vide.'); return; }
+      if (a === b) { secouer(boite); api.message('Écarte les deux poignées : l\'intervalle est vide.'); return; }
       const msg = [];
       if (!okA) msg.push(`le <b>début</b> de l'intervalle doit être à t = ${fmt(o.de)} ${ut} (tu as mis ${fmt(a)} ${ut})`);
       if (!okB) msg.push(`la <b>fin</b> de l'intervalle doit être à t = ${fmt(o.a)} ${ut} (tu as mis ${fmt(b)} ${ut})`);
-      api.erreur(msg.join(' ; ').replace(/^l/, 'L') + '. Lis les dates sous l\'axe des temps.');
+      api.erreur(msg.join(' ; ').replace(/^l/, 'L') + '. Lis les dates sous l\'axe des temps.');
       secouer(boite);
     };
     return { montrer() { t1 = o.de; t2 = o.a; figer(); } };
@@ -902,7 +902,7 @@
     const gr = o.grandeur || 'Énergie';
     const z = (cle, nom, x) => `<div class="ep-cv-z ep-cv-${cle}"><p class="ep-cv-t">${gr} ${nom}</p>` +
       `${x && x.f ? `<div class="ep-cv-f">${x.f}</div>` : ''}${x && x.v ? `<div class="ep-cv-v">${x.v}</div>` : ''}</div>`;
-    return `<div class="ep-cv" role="group" aria-label="Schéma de conversion d'énergie : ${gr.toLowerCase()} apportée, ${o.appareil.replace(/<[^>]+>/g, '')}, ${gr.toLowerCase()} utile et ${gr.toLowerCase()} perdue">
+    return `<div class="ep-cv" role="group" aria-label="Schéma de conversion d'énergie : ${gr.toLowerCase()} apportée, ${o.appareil.replace(/<[^>]+>/g, '')}, ${gr.toLowerCase()} utile et ${gr.toLowerCase()} perdue">
       ${z('a', 'apportée', o.a)}
       <div class="ep-cv-fl ep-cv-fa" aria-hidden="true"></div>
       <div class="ep-cv-ap"><b>${o.appareil}</b>${o.eta ? `<div class="ep-cv-eta">${o.eta}</div>` : ''}</div>
@@ -943,7 +943,7 @@
       s += fleche(xd - 2, W - 6, y2, e2) + etiq(W - 6, y2 + e2 / 2 + 20, s2, 'end');
       s += `<rect x="${xg}" y="${cy - bh / 2}" width="${bw}" height="${bh}" rx="14" class="ep-d-app"/>`;
       lignes.forEach((l, i) => { s += `<text x="${cx}" y="${cy + 5 + (i - (lignes.length - 1) / 2) * 17}" text-anchor="middle" class="ep-d-nom">${l}</text>`; });
-      return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="ep-diag" role="img" aria-label="${o.aria || `Diagramme énergétique : ${o.entree.t} ${o.entree.v} vers ${o.appareil}, ${s1.t} ${s1.v}, ${s2.t} ${s2.v}`}">${s}</svg>`;
+      return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="ep-diag" role="img" aria-label="${o.aria || `Diagramme énergétique : ${o.entree.t} ${o.entree.v} vers ${o.appareil}, ${s1.t} ${s1.v}, ${s2.t} ${s2.v}`}">${s}</svg>`;
     }, 'ep-fig-diag');
   }
 
@@ -998,14 +998,14 @@
       const mx = (xs1 + xs2) / 2 - 16, my = (yh + yb) / 2 + 40;
       s += `<text x="${mx}" y="${my}" text-anchor="end" class="ep-s-v">${T ? '216' : '135'} m³/s</text>`;
       s += `<text x="${mx}" y="${my + 16}" text-anchor="end" class="ep-s-t2">${T ? 'l\'eau descend' : 'l\'eau remonte'}</text>`;
-      figZone.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="ep-s-svg" role="img" aria-label="Station de pompage en ${mode} : ${T ? 'l\'eau descend du bassin supérieur (1 590 m) vers le bassin inférieur (770 m) en traversant l\'usine, qui envoie de l\'électricité sur le réseau' : 'l\'usine prend de l\'électricité sur le réseau pour remonter l\'eau du bassin inférieur (770 m) vers le bassin supérieur (1 590 m)'}">${s}</svg>`;
+      figZone.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="ep-s-svg" role="img" aria-label="Station de pompage en ${mode} : ${T ? 'l\'eau descend du bassin supérieur (1 590 m) vers le bassin inférieur (770 m) en traversant l\'usine, qui envoie de l\'électricité sur le réseau' : 'l\'usine prend de l\'électricité sur le réseau pour remonter l\'eau du bassin inférieur (770 m) vers le bassin supérieur (1 590 m)'}">${s}</svg>`;
     }
     function changer(m) {
       mode = m;
       zone.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m));
       txt.innerHTML = m === 'turbinage'
-        ? '<b>Turbinage.</b> L\'eau descend du bassin supérieur vers le bassin inférieur (débit : 216 m³ par seconde). Elle fait tourner une <b>turbine</b> reliée à un <b>alternateur</b>, qui envoie de l\'énergie électrique sur le réseau.'
-        : '<b>Pompage.</b> Les 8 <b>pompes</b> (150 MW chacune) prennent de l\'énergie électrique sur le réseau pour remonter l\'eau du bassin inférieur vers le bassin supérieur (débit : 135 m³ par seconde).';
+        ? '<b>Turbinage.</b> L\'eau descend du bassin supérieur vers le bassin inférieur (débit : 216 m³ par seconde). Elle fait tourner une <b>turbine</b> reliée à un <b>alternateur</b>, qui envoie de l\'énergie électrique sur le réseau.'
+        : '<b>Pompage.</b> Les 8 <b>pompes</b> (150 MW chacune) prennent de l\'énergie électrique sur le réseau pour remonter l\'eau du bassin inférieur vers le bassin supérieur (débit : 135 m³ par seconde).';
       largeur = 0;
       dessiner();
       zone.dispatchEvent(new CustomEvent('ep-mode', { detail: m }));
@@ -1021,14 +1021,14 @@
      ============================================================ */
   const PLAN = [
     { n: 1, titre: 'Rendement et schéma de conversion', desc: 'Formes d\'énergie, schéma de conversion, rendement η = P<sub>u</sub> / P<sub>a</sub>', fiche: 'fiche_1',
-      parties: [{ nom: 'Rendement et schéma de conversion', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : la STEP' } }] },
-    { n: 2, titre: 'Puissance moyenne et instantanée', desc: 'P = E / Δt ; la puissance instantanée est la dérivée de l\'énergie', fiche: 'fiche_2',
+      parties: [{ nom: 'Rendement et schéma de conversion', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : la STEP' } }] },
+    { n: 2, titre: 'Puissance moyenne et instantanée', desc: 'P = E / Δt ; la puissance instantanée est la dérivée de l\'énergie', fiche: 'fiche_2',
       parties: [{ nom: 'Puissance moyenne et instantanée', cours: 'module_2_cours', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Calcul de l\'énergie', desc: 'E = P × Δt, aire sous la courbe P(t), autonomie', fiche: 'fiche_3',
       parties: [{ nom: 'Calcul de l\'énergie', cours: 'module_3_cours', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Exercices du manuel', desc: 'Les exercices 7 à 16 (p. 30 à 32), guidés pas à pas', exercices: 'module_4', exNom: 'Exercices 7 à 16', nbEx: 10 },
   ];
-  window.SOM.init({ nom: 'Chapitre 1 : Énergie et puissance', id: 'energie-puissance', cleEx: 'energie-puissance-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 1 : Énergie et puissance', id: 'energie-puissance', cleEx: 'energie-puissance-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

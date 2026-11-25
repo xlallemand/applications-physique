@@ -426,7 +426,7 @@
       const videsATort = inconnues ? slots.filter(s => !s.querySelector('.sc-chip') && !estInconnue(s)) : [];
       if (videsATort.length >= 2) {
         secouer(d.querySelector('.sc-palette'));
-        api.message(`Il reste ${videsATort.length} cases à remplir : seule la case de l'inconnue reste vide.`);
+        api.message(`Il reste ${videsATort.length} cases à remplir : seule la case de l'inconnue reste vide.`);
         return;
       }
       // étiquettes mal placées, puis case laissée vide à tort (ce n'est pas une inconnue)
@@ -442,8 +442,8 @@
         .concat(videsATort.map(s => (p.indicesCases && p.indicesCases[s.dataset.slot]) || '').filter(Boolean));
       const phr = [];
       if (fausses.length) phr.push(`${fausses.length > 1 ? `${fausses.length} étiquettes sont mal placées` : 'Une étiquette est mal placée'} (case rouge)`);
-      if (videsATort.length) phr.push('la case vide en rouge n\'est pas une inconnue : sa valeur est connue, place-la');
-      const txt = phr.join(' ; ');
+      if (videsATort.length) phr.push('la case vide en rouge n\'est pas une inconnue : sa valeur est connue, place-la');
+      const txt = phr.join(' ; ');
       api.erreur(txt.charAt(0).toUpperCase() + txt.slice(1) + '.' + (indices.length ? '<br>' + indices.map(t => '☛ ' + t).join('<br>') : ''));
       secouer(d.querySelector('.sf-sch') || d);
     };
@@ -564,7 +564,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || (note && typeof note === 'string')) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${typeof note === 'string' ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -599,8 +599,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -612,7 +612,7 @@
       const q = qs[idx];
       window.SF.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -632,7 +632,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -647,10 +647,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -747,7 +747,7 @@
       s += maison(350, 205, 120, 95, 55) + `<rect class="sf-porte" x="425" y="258" width="22" height="42"/>`;
       s += croix(90, yS, 'C', -24, -8) + croix(405, yM, 'M', 9, -6) + rv(o, 397, yM - 3, 300, 236);
       if (o.h !== false) s += ligne(137, yS, 528, yS, 'sf-niveau') + coteV(536, yS, yM, o.h || 'h', { de1: 528, de2: 412, cache: o.cartH });
-      return { W, H, svg: s, carts: { C: [150, 18], M: [168, 168], h: [392, 92] }, aria: 'Château d\'eau relié à une maison : point C à la surface de l\'eau du château, point M à l\'arrivée d\'eau de la maison, hauteur h entre les deux' };
+      return { W, H, svg: s, carts: { C: [150, 18], M: [168, 168], h: [392, 92] }, aria: 'Château d\'eau relié à une maison : point C à la surface de l\'eau du château, point M à l\'arrivée d\'eau de la maison, hauteur h entre les deux' };
     },
     // Maison et combles : A à l'arrivée d'eau (réducteur de pression), C dans les combles
     combles(o) {
@@ -760,7 +760,7 @@
       s += croix(250, yA, 'A', -4, -12) + croix(290, yC, 'C', 10, -6);
       s += rv(o, 300, yC, 390, 75) + rv(o, 258, yA, 390, 250);
       if (o.h !== false) s += coteV(140, yC, yA, o.h || 'h', { de1: 130, de2: 130, droite: true, cache: o.cartH }) + ligne(130, yC, 282, yC, 'sf-niveau');
-      return { W, H, svg: s, carts: { C: [392, 30], A: [392, 196], h: [8, 168] }, aria: 'Maison : point A à l\'arrivée d\'eau, après le réducteur de pression ; point C dans les combles, plus haut ; hauteur h entre les deux' };
+      return { W, H, svg: s, carts: { C: [392, 30], A: [392, 196], h: [8, 168] }, aria: 'Maison : point A à l\'arrivée d\'eau, après le réducteur de pression ; point C dans les combles, plus haut ; hauteur h entre les deux' };
     },
     // Piscine ou cuve : A à la surface libre, B au fond (ou à la profondeur o.yB, entre 0 et 1)
     piscine(o) {
@@ -774,7 +774,7 @@
       s += rv(o, 160, yS - 3, 212, 70) + rv(o, 160, yB - 2, 192, Math.min(yB, 260));
       if (o.h !== false) s += coteV(420, yS, yB, o.h || 'h', { de1: 405, de2: yB === yF ? 405 : 160, droite: true, cache: o.cartH });
       return { W, H, svg: s, carts: { A: [214, 4], B: [192, yB === yF ? 196 : Math.max(150, Math.min(220, yB - 50))], h: [432, Math.round((yS + yB) / 2 - 22)] },
-        aria: `${o.nomLiquide ? 'Bassin rempli de ' + o.nomLiquide : 'Piscine'} : point A à la surface libre, point B ${yB === yF ? 'au fond' : 'sous la surface'}, hauteur h entre les deux` };
+        aria: `${o.nomLiquide ? 'Bassin rempli de ' + o.nomLiquide : 'Piscine'} : point A à la surface libre, point B ${yB === yF ? 'au fond' : 'sous la surface'}, hauteur h entre les deux` };
     },
     // Réservoir avec deux liquides : S surface libre, I interface, F fond ; o.etape 1 (S–I) ou 2 (I–F)
     reservoir(o) {
@@ -784,8 +784,8 @@
       if (o.etape === 1) s += `<rect class="sf-actif" x="${x0 + 3}" y="${yS + 3}" width="${x1 - x0 - 6}" height="${yI - yS - 6}"/>`;
       if (o.etape === 2) s += `<rect class="sf-actif" x="${x0 + 3}" y="${yI + 3}" width="${x1 - x0 - 6}" height="${yF - yI - 6}"/>`;
       s += `<path class="sf-paroi" d="M${x0},28 V${yF + 2} H${x1} V28"/>`;
-      s += txt(260, 124, o.liq1 || 'huile : ρ<tspan dy="4" font-size="10">1</tspan><tspan dy="-4"> = 800 kg·m</tspan><tspan dy="-6" font-size="10">−3</tspan>', 'sf-t-liq', 'middle');
-      s += txt(260, 262, o.liq2 || 'eau : ρ<tspan dy="4" font-size="10">2</tspan><tspan dy="-4"> = 1 000 kg·m</tspan><tspan dy="-6" font-size="10">−3</tspan>', 'sf-t-liq', 'middle');
+      s += txt(260, 124, o.liq1 || 'huile : ρ<tspan dy="4" font-size="10">1</tspan><tspan dy="-4"> = 800 kg·m</tspan><tspan dy="-6" font-size="10">−3</tspan>', 'sf-t-liq', 'middle');
+      s += txt(260, 262, o.liq2 || 'eau : ρ<tspan dy="4" font-size="10">2</tspan><tspan dy="-4"> = 1 000 kg·m</tspan><tspan dy="-6" font-size="10">−3</tspan>', 'sf-t-liq', 'middle');
       s += croix(260, yS, 'S', 10, -8) + croix(260, yI, 'I', 10, -8) + croix(260, yF - 2, 'F', 10, -8);
       if (o.etape !== 2) s += rv(o, 272, yS, 388, 46);
       s += rv(o, 272, yI, 388, o.etape === 2 ? 150 : 165);
@@ -793,7 +793,7 @@
       s += coteV(125, yS, yI, o.h1 || 'h<tspan dy="4" font-size="10">1</tspan>', { de1: 115, de2: 115, cache: o.cartH && o.etape === 1 });
       s += coteV(125, yI, yF, o.h2 || 'h<tspan dy="4" font-size="10">2</tspan>', { de1: 115, de2: 115, cache: o.cartH && o.etape === 2 });
       return { W, H, svg: s, carts: { S: [390, 2], I: [390, o.etape === 2 ? 108 : 120], F: [390, 252], h: [2, o.etape === 2 ? 226 : 92] },
-        aria: 'Réservoir : huile au-dessus de l\'eau ; S à la surface libre, I à l\'interface entre les deux liquides, F au fond ; h₁ hauteur d\'huile, h₂ hauteur d\'eau' };
+        aria: 'Réservoir : huile au-dessus de l\'eau ; S à la surface libre, I à l\'interface entre les deux liquides, F au fond ; h₁ hauteur d\'huile, h₂ hauteur d\'eau' };
     },
     // Baromètre de Torricelli : A en haut de la colonne de mercure (vide au-dessus), B dans le tube au niveau de la cuve, C à la surface de la cuve
     barometre(o) {
@@ -807,7 +807,7 @@
       s += rv(o, 304, yA, 268, 64) + rv(o, 304, yB - 2, 268, 186);
       if (o.h !== false) s += coteV(352, yA, yB, o.h || 'h', { de1: 330, de2: 330, droite: true, cache: o.cartH });
       return { W, H, svg: s, carts: { A: [102, 18], B: [102, 128], C: [2, 150], h: [366, 142] },
-        aria: 'Baromètre de Torricelli : tube retourné dans une cuve de mercure ; vide en haut du tube ; A en haut de la colonne de mercure, B dans le tube au niveau de la surface de la cuve, C à la surface de la cuve ; h hauteur de la colonne' };
+        aria: 'Baromètre de Torricelli : tube retourné dans une cuve de mercure ; vide en haut du tube ; A en haut de la colonne de mercure, B dans le tube au niveau de la surface de la cuve, C à la surface de la cuve ; h hauteur de la colonne' };
     },
     // Chalet de l'exercice 20 : cuve (S surface libre, F fond) en haut de la pente, R rez-de-chaussée, E étage
     chalet(o) {
@@ -840,8 +840,8 @@
       s += fl(380, yP - 2, 380, yP - 98, 'sf-f') + txt(388, yP - 104, 'F<tspan dy="4" font-size="10">2</tspan>', 'sf-t-f');
       s += croix(110, yP + 12, 'A', 9, 22) + croix(380, yP + 12, 'B', 10, 22) + ligne(118, yP + 12, 372, yP + 12, 'sf-niveau');
       s += txt(215, yP + 6, 'même altitude', 'sf-t', 'middle');
-      s += txt(110, 280, o.s1 || 'petit piston : S<tspan dy="4" font-size="10">1</tspan>', 'sf-t', 'middle') + txt(380, 280, o.s2 || 'grand piston : S<tspan dy="4" font-size="10">2</tspan>', 'sf-t', 'middle');
-      return { W, H, svg: s, carts: {}, aria: 'Cric hydraulique : une force F₁ pousse le petit piston ; l\'huile transmet la pression jusqu\'au grand piston qui soulève la charge avec une force F₂ ; A et B à la même altitude' };
+      s += txt(110, 280, o.s1 || 'petit piston : S<tspan dy="4" font-size="10">1</tspan>', 'sf-t', 'middle') + txt(380, 280, o.s2 || 'grand piston : S<tspan dy="4" font-size="10">2</tspan>', 'sf-t', 'middle');
+      return { W, H, svg: s, carts: {}, aria: 'Cric hydraulique : une force F₁ pousse le petit piston ; l\'huile transmet la pression jusqu\'au grand piston qui soulève la charge avec une force F₂ ; A et B à la même altitude' };
     },
     // Molécules d'un gaz enfermé : agitation, chocs sur les parois, force pressante perpendiculaire à la paroi
     molecules() {
@@ -853,7 +853,7 @@
       });
       // chocs sur les parois : forces pressantes perpendiculaires
       [[510, 70, 550, 70], [510, 160, 550, 160], [180, 210, 180, 248], [360, 210, 360, 248], [50, 120, 10, 120], [270, 30, 270, -8]].forEach(([x1, y1, x2, y2]) => { s += fl(x1, y1, x2, y2, 'sf-f'); });
-      return { W, H: H + 40, svg: `<g transform="translate(0,14)">${s}</g>`, carts: {}, aria: 'Gaz enfermé dans un récipient : les molécules s\'agitent dans tous les sens ; leurs chocs sur les parois exercent des forces pressantes, perpendiculaires aux parois' };
+      return { W, H: H + 40, svg: `<g transform="translate(0,14)">${s}</g>`, carts: {}, aria: 'Gaz enfermé dans un récipient : les molécules s\'agitent dans tous les sens ; leurs chocs sur les parois exercent des forces pressantes, perpendiculaires aux parois' };
     },
     // Axe des pressions : 0 (vide), P_atm, P_abs ; P_rel = P_abs − P_atm
     axe(o) {
@@ -865,7 +865,7 @@
       s += fl(x0, 112, xp, 112, 'sf-f-abs', 9) + txt((x0 + xp) / 2, 104, 'pression absolue (par rapport au vide)', 'sf-t-a', 'middle');
       s += fl(xa, 148, xp, 148, 'sf-f', 9) + txt((xa + xp) / 2, 140, 'pression relative', 'sf-t-r', 'middle');
       s += ligne(xa, y + 34, xa, 152, 'sf-niveau') + ligne(xp, y + 34, xp, 152, 'sf-niveau') + ligne(x0, y + 34, x0, 116, 'sf-niveau');
-      return { W, H: H, svg: s, carts: {}, aria: 'Axe des pressions : 0 Pa dans le vide, puis la pression atmosphérique, puis la pression absolue du pneu ; la pression relative va de la pression atmosphérique à la pression absolue' };
+      return { W, H: H, svg: s, carts: {}, aria: 'Axe des pressions : 0 Pa dans le vide, puis la pression atmosphérique, puis la pression absolue du pneu ; la pression relative va de la pression atmosphérique à la pression absolue' };
     },
     // Vase de forme quelconque : A et B à la même altitude, C plus bas
     vase() {
@@ -873,9 +873,9 @@
       let s = `<path class="sf-eau" d="M60,${yS} H220 V100 H420 V${yS} H500 V230 H60 Z"/>${ligne(60, yS, 220, yS, 'sf-surface')}${ligne(420, yS, 500, yS, 'sf-surface')}`;
       s += `<path class="sf-paroi" d="M60,24 V232 H500 V24 M420,24 V98 H222 V24"/>`;
       s += croix(140, yAB, 'A', 10, -8) + croix(460, yAB, 'B', 10, -8) + croix(300, yC, 'C', 10, -8) + ligne(150, yAB, 450, yAB, 'sf-niveau');
-      s += txt(300, yAB - 6, 'même altitude : P<tspan dy="4" font-size="10">A</tspan><tspan dy="-4"> = P</tspan><tspan dy="4" font-size="10">B</tspan>', 'sf-t-a', 'middle');
-      s += txt(300, yC + 30, 'plus bas : P<tspan dy="4" font-size="10">C</tspan><tspan dy="-4"> &gt; P</tspan><tspan dy="4" font-size="10">A</tspan>', 'sf-t-a', 'middle');
-      return { W, H: H + 8, svg: s, carts: {}, aria: 'Récipient de forme quelconque rempli d\'eau : A et B à la même altitude ont la même pression ; C, plus bas, a une pression plus grande' };
+      s += txt(300, yAB - 6, 'même altitude : P<tspan dy="4" font-size="10">A</tspan><tspan dy="-4"> = P</tspan><tspan dy="4" font-size="10">B</tspan>', 'sf-t-a', 'middle');
+      s += txt(300, yC + 30, 'plus bas : P<tspan dy="4" font-size="10">C</tspan><tspan dy="-4"> &gt; P</tspan><tspan dy="4" font-size="10">A</tspan>', 'sf-t-a', 'middle');
+      return { W, H: H + 8, svg: s, carts: {}, aria: 'Récipient de forme quelconque rempli d\'eau : A et B à la même altitude ont la même pression ; C, plus bas, a une pression plus grande' };
     },
   };
 
@@ -944,7 +944,7 @@
       type: 'schema', q: o.q || 'Repère sur le schéma le <b>point haut</b> et le <b>point bas</b>, puis place les valeurs connues. Laisse vide la case de l\'inconnue.',
       schema: schemaHTML(o.type, Object.assign({ cartH: !!o.h }, o.dessin), carts),
       etiquettes: uniques, inconnues, indicesCases, solution: o.solution,
-      indiceInconnue: 'Cette valeur n\'est pas donnée par l\'énoncé : sa case reste vide (c\'est l\'inconnue).',
+      indiceInconnue: 'Cette valeur n\'est pas donnée par l\'énoncé : sa case reste vide (c\'est l\'inconnue).',
     };
   }
 
@@ -955,12 +955,12 @@
     const nom = { bas: Pb, haut: Ph, h: 'h' };
     const indices = {};
     Object.keys(F).forEach(k => {
-      if (k !== o.cherche) indices[k] = `Cette formule donne ${nom[k]}, que tu connais déjà : l'inconnue (la case vide du schéma) est ${nom[o.cherche]}.`;
+      if (k !== o.cherche) indices[k] = `Cette formule donne ${nom[k]}, que tu connais déjà : l'inconnue (la case vide du schéma) est ${nom[o.cherche]}.`;
     });
     return {
-      type: 'choix', q: o.q || 'Quelle formule utilises-tu pour calculer l\'inconnue ?', options: Object.keys(F).map(k => ({ id: k, label: F[k] })),
+      type: 'choix', q: o.q || 'Quelle formule utilises-tu pour calculer l\'inconnue ?', options: Object.keys(F).map(k => ({ id: k, label: F[k] })),
       bonne: o.cherche, melanger: false, colonne: true, indices,
-      solution: o.solution || `<p>L'inconnue est ${nom[o.cherche]} : ${F[o.cherche]}.</p>`,
+      solution: o.solution || `<p>L'inconnue est ${nom[o.cherche]} : ${F[o.cherche]}.</p>`,
     };
   }
 
@@ -971,28 +971,28 @@
     const pr = (a, b) => b !== 0 && proche(a, b, .02);
     return v => {
       if (o.cherche === 'bas') {
-        if (pr(v, rgh)) return `Tu as calculé ρ × g × h seulement : ajoute la pression du point haut${o.surface ? ' (P<sub>atm</sub> à la surface libre)' : ''}.`;
-        if (pr(v, o.Ph - rgh)) return 'Le point bas est le plus profond : sa pression est la plus grande. On <b>ajoute</b> ρ × g × h.';
+        if (pr(v, rgh)) return `Tu as calculé ρ × g × h seulement : ajoute la pression du point haut${o.surface ? ' (P<sub>atm</sub> à la surface libre)' : ''}.`;
+        if (pr(v, o.Ph - rgh)) return 'Le point bas est le plus profond : sa pression est la plus grande. On <b>ajoute</b> ρ × g × h.';
         if (pr(v, o.Ph + o.rho * o.h)) return 'Tu as oublié g dans ρ × g × h.';
-        if (o.hcm && pr(v, o.Ph + rgh * 100)) return 'h doit être en <b>mètres</b> : convertis les cm en m.';
-        if (o.bar && pr(v, o.Ph / 1e5 + rgh)) return 'Convertis d\'abord la pression en pascals : 1 bar = 10<sup>5</sup> Pa.';
-        if (pr(v, o.Ph)) return 'C\'est la pression du point haut : ajoute ρ × g × h.';
+        if (o.hcm && pr(v, o.Ph + rgh * 100)) return 'h doit être en <b>mètres</b> : convertis les cm en m.';
+        if (o.bar && pr(v, o.Ph / 1e5 + rgh)) return 'Convertis d\'abord la pression en pascals : 1 bar = 10<sup>5</sup> Pa.';
+        if (pr(v, o.Ph)) return 'C\'est la pression du point haut : ajoute ρ × g × h.';
         return `P<sub>bas</sub> = P<sub>haut</sub> + ρ × g × h, avec les pressions en Pa et h en m.`;
       }
       if (o.cherche === 'haut') {
-        if (pr(v, o.Pb + rgh)) return 'Le point haut est le moins profond : sa pression est plus petite. On <b>retire</b> ρ × g × h.';
-        if (pr(v, rgh)) return 'Tu as calculé ρ × g × h seulement : P<sub>haut</sub> = P<sub>bas</sub> − ρ × g × h.';
+        if (pr(v, o.Pb + rgh)) return 'Le point haut est le moins profond : sa pression est plus petite. On <b>retire</b> ρ × g × h.';
+        if (pr(v, rgh)) return 'Tu as calculé ρ × g × h seulement : P<sub>haut</sub> = P<sub>bas</sub> − ρ × g × h.';
         if (pr(v, o.Pb - o.rho * o.h)) return 'Tu as oublié g dans ρ × g × h.';
-        if (o.bar && (pr(v, o.Pb / 1e5 - rgh) || v < 0)) return 'Convertis d\'abord la pression en pascals : 1 bar = 10<sup>5</sup> Pa.';
-        if (pr(v, o.Pb)) return 'C\'est la pression du point bas : retire ρ × g × h.';
+        if (o.bar && (pr(v, o.Pb / 1e5 - rgh) || v < 0)) return 'Convertis d\'abord la pression en pascals : 1 bar = 10<sup>5</sup> Pa.';
+        if (pr(v, o.Pb)) return 'C\'est la pression du point bas : retire ρ × g × h.';
         return `P<sub>haut</sub> = P<sub>bas</sub> − ρ × g × h, avec les pressions en Pa et h en m.`;
       }
       const dP = o.Pb - o.Ph;
-      if (pr(v, o.Pb / (o.rho * o.g))) return 'Tu as oublié de retirer la pression du point haut : h = (P<sub>bas</sub> − P<sub>haut</sub>) / (ρ × g).';
+      if (pr(v, o.Pb / (o.rho * o.g))) return 'Tu as oublié de retirer la pression du point haut : h = (P<sub>bas</sub> − P<sub>haut</sub>) / (ρ × g).';
       if (pr(v, dP / o.rho)) return 'Tu as oublié g au dénominateur.';
       if (pr(v, dP / (o.rho * o.g) * 100)) return 'h est demandée en mètres (pas en cm).';
-      if (pr(v, (o.Pb + o.Ph) / (o.rho * o.g))) return 'On fait la <b>différence</b> des pressions : P<sub>bas</sub> − P<sub>haut</sub>.';
-      if (o.bar && pr(v, (o.Pb / 1e5 - o.Ph / 1e5) / (o.rho * o.g))) return 'Convertis d\'abord les pressions en pascals : 1 bar = 10<sup>5</sup> Pa.';
+      if (pr(v, (o.Pb + o.Ph) / (o.rho * o.g))) return 'On fait la <b>différence</b> des pressions : P<sub>bas</sub> − P<sub>haut</sub>.';
+      if (o.bar && pr(v, (o.Pb / 1e5 - o.Ph / 1e5) / (o.rho * o.g))) return 'Convertis d\'abord les pressions en pascals : 1 bar = 10<sup>5</sup> Pa.';
       return 'h = (P<sub>bas</sub> − P<sub>haut</sub>) / (ρ × g), avec les pressions en Pa.';
     };
   }
@@ -1036,7 +1036,7 @@
         <tr>${unites.map(u => `<th colspan="2">${nomS(u)}</th>`).join('')}</tr>
         <tr>${cells.map((c, k) => `<td><button type="button" class="sf-tabs-c${k % 2 ? ' fin-u' : ''}${k === finDe ? ' depart' : ''}" data-k="${k}" aria-label="Virgule après la ${k % 2 ? '2ᵉ' : '1ʳᵉ'} colonne des ${nomS(unites[k >> 1])}">${c}</button></td>`).join('')}</tr>
       </table></div>
-      <p class="sf-tabs-lect" aria-live="polite">Virgule de départ : après les ${nomS(o.de)} (trait pointillé). Touche la colonne après laquelle tu places la virgule pour avoir des ${nomS(o.vers)}.</p>`;
+      <p class="sf-tabs-lect" aria-live="polite">Virgule de départ : après les ${nomS(o.de)} (trait pointillé). Touche la colonne après laquelle tu places la virgule pour avoir des ${nomS(o.vers)}.</p>`;
     zone.appendChild(d);
     const bs = Array.from(d.querySelectorAll('.sf-tabs-c')), lect = d.querySelector('.sf-tabs-lect');
     const bVal = boutonValider(zone);
@@ -1067,7 +1067,7 @@
       rendre(true);
       bs.forEach(b => { b.disabled = true; });
       const ecart = finVers - finDe;
-      lect.innerHTML = `<b>${o.valeur} ${nomS(o.de)} = ${lireCellules(cells, finVers)} ${nomS(o.vers)}</b> : la virgule s'est déplacée de ${Math.abs(ecart)} colonne${Math.abs(ecart) > 1 ? 's' : ''} ${ecart < 0 ? 'vers la gauche' : 'vers la droite'}, soit × 10<sup>${String(ecart).replace('-', MOINS)}</sup>.`;
+      lect.innerHTML = `<b>${o.valeur} ${nomS(o.de)} = ${lireCellules(cells, finVers)} ${nomS(o.vers)}</b> : la virgule s'est déplacée de ${Math.abs(ecart)} colonne${Math.abs(ecart) > 1 ? 's' : ''} ${ecart < 0 ? 'vers la gauche' : 'vers la droite'}, soit × 10<sup>${String(ecart).replace('-', MOINS)}</sup>.`;
       bVal.fermer();
     }
     bVal.onclick = () => {
@@ -1075,8 +1075,8 @@
       if (choix < 0) { secouer(d); api.message('Touche d\'abord la colonne après laquelle tu places la virgule.'); return; }
       if (choix === finVers) { choix = finVers; terminer(); api.reussi(); return; }
       let ind;
-      if (choix % 2 === 0) ind = 'Une unité de surface occupe <b>deux colonnes</b> : la virgule se place après la 2ᵉ colonne de l\'unité voulue.';
-      else if (choix === finDe) ind = `La virgule est encore après les ${nomS(o.de)} : déplace-la jusqu'aux ${nomS(o.vers)}.`;
+      if (choix % 2 === 0) ind = 'Une unité de surface occupe <b>deux colonnes</b> : la virgule se place après la 2ᵉ colonne de l\'unité voulue.';
+      else if (choix === finDe) ind = `La virgule est encore après les ${nomS(o.de)} : déplace-la jusqu'aux ${nomS(o.vers)}.`;
       else if (choix === finDe + (finVers - finDe) / 2) ind = 'Tu as compté une colonne par unité, comme pour des longueurs. En surface, chaque unité occupe <b>deux colonnes</b>.';
       else ind = `La virgule se place après la colonne des <b>${nomS(o.vers)}</b>.`;
       api.erreur(ind);
@@ -1084,7 +1084,7 @@
     };
     return { montrer() { choix = finVers; terminer(); } };
   }
-  const partieSurfaces = o => ({ type: 'perso', q: o.q || `Convertis ${o.valeur} ${nomS(o.de)} en ${nomS(o.vers)} : place la virgule dans le tableau.`, solution: o.solution, o, monter: (zone, api) => surfaces(zone, o, api) });
+  const partieSurfaces = o => ({ type: 'perso', q: o.q || `Convertis ${o.valeur} ${nomS(o.de)} en ${nomS(o.vers)} : place la virgule dans le tableau.`, solution: o.solution, o, monter: (zone, api) => surfaces(zone, o, api) });
 
   /* ============================================================
      PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
@@ -1092,16 +1092,16 @@
   const PLAN = [
     { n: 1, titre: 'Pression et force pressante', desc: 'Origine de la pression, P = F / S, Pa, bar et hPa, surfaces en m²', fiche: 'fiche_1',
       parties: [{ nom: 'Pression et force pressante', cours: 'module_1_cours', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Pression absolue et pression relative', desc: 'Par rapport au vide ou à l\'air ambiant : P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub>', fiche: 'fiche_2',
+    { n: 2, titre: 'Pression absolue et pression relative', desc: 'Par rapport au vide ou à l\'air ambiant : P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub>', fiche: 'fiche_2',
       parties: [{ nom: 'Pression absolue et pression relative', cours: 'module_2_cours', questions: 'module_2_questions' }] },
-    { n: 3, titre: 'Principe fondamental de l\'hydrostatique', desc: 'P<sub>bas</sub> = P<sub>haut</sub> + ρ g h ; point haut et point bas repérés sur un schéma', fiche: 'fiche_3',
+    { n: 3, titre: 'Principe fondamental de l\'hydrostatique', desc: 'P<sub>bas</sub> = P<sub>haut</sub> + ρ g h ; point haut et point bas repérés sur un schéma', fiche: 'fiche_3',
       parties: [{ nom: 'Le principe', slug: 'principe', cours: 'module_3a_cours' },
         { nom: 'La méthode du schéma', slug: 'methode', cours: 'module_3b_cours', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Presse, cric hydraulique et baromètre', desc: 'Transmission de la pression, F₂ = P × S₂, baromètre de Torricelli', fiche: 'fiche_4',
       parties: [{ nom: 'Presse, cric et baromètre', cours: 'module_4_cours', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 7, 8, 11, 14, 21, 18, 15, 22 et 20 de la feuille, guidés pas à pas', exercices: 'module_5', exNom: 'Exercices de la feuille', nbEx: 9 },
   ];
-  window.SOM.init({ nom: 'Chapitre 9 : Statique des fluides', id: 'statique-fluides', cleEx: 'statique-fluides-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 9 : Statique des fluides', id: 'statique-fluides', cleEx: 'statique-fluides-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

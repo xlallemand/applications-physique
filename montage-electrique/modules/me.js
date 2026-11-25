@@ -19,10 +19,10 @@
   const PLAN = [
     { n: 1, titre: 'Simulateur de montage', desc: 'Prise en main, puis montages au choix', sousModules: true,
       parties: [{ nom: 'Prise en main du simulateur', entrainement: 'module_1a_manip', noms: { entrainement: 'Prise en main du simulateur' } },
-                { nom: 'Simulateur', simulation: 'module_1b_simulateur', noms: { simulation: 'Simulateur : montages au choix' } }] },
-    { n: 2, titre: 'Repérer la boucle principale et les dérivations', desc: 'Sur un schéma : boucle principale, nœuds et dérivations',
+                { nom: 'Simulateur', simulation: 'module_1b_simulateur', noms: { simulation: 'Simulateur : montages au choix' } }] },
+    { n: 2, titre: 'Repérer la boucle principale et les dérivations', desc: 'Sur un schéma : boucle principale, nœuds et dérivations',
       parties: [{ nom: 'Repérer sur un schéma', entrainement: 'module_2_manip', noms: { entrainement: 'Repérer sur un schéma' } }] },
-    { n: 3, titre: 'Brancher un multimètre ou un oscilloscope', desc: 'Voltmètre et ampèremètre : branchement, calibre, mesure ; oscilloscope : voies et masse', sousModules: true,
+    { n: 3, titre: 'Brancher un multimètre ou un oscilloscope', desc: 'Voltmètre et ampèremètre : branchement, calibre, mesure ; oscilloscope : voies et masse', sousModules: true,
       parties: [{ nom: 'Brancher un multimètre', entrainement: 'module_3_manip', noms: { entrainement: 'Brancher et régler un multimètre' } },
                 { nom: 'Brancher un oscilloscope', entrainement: 'module_3b_oscilloscope', noms: { entrainement: 'Brancher un oscilloscope' } }] },
   ];
@@ -31,9 +31,9 @@
   const ind = n => MONTAGE.indice(n);
   // liens vers les autres modules, ajoutés aux explications du poste de montage
   const LIENS = {
-    reperer: { href: 'module_2_manip.html', texte: 'Revoir : repérer la boucle principale (module 2)' },
-    multimetre: { href: 'module_3_manip.html', texte: 'Revoir : brancher un multimètre (module 3)' },
-    oscilloscope: { href: 'module_3b_oscilloscope.html', texte: 'Revoir : brancher un oscilloscope (module 3)' },
+    reperer: { href: 'module_2_manip.html', texte: 'Revoir : repérer la boucle principale (module 2)' },
+    multimetre: { href: 'module_3_manip.html', texte: 'Revoir : brancher un multimètre (module 3)' },
+    oscilloscope: { href: 'module_3b_oscilloscope.html', texte: 'Revoir : brancher un oscilloscope (module 3)' },
   };
 
   /* ============================================================
@@ -234,14 +234,14 @@
       ['nc', 'Y1.a>b', 'nm'], ['n3', 'Y2.a>b', 'nm']),
   };
 
-  const RAPPEL_A = '<b>L\'ampèremètre se branche en série</b> : on débranche un fil et il prend sa place, le courant doit le traverser. Bornes <b>10A et COM</b> (calibre 10 A), puis <b>mA</b> si l\'intensité est petite. L\'indication est positive quand le courant sort par COM.';
-  const RAPPEL_V = '<b>Le voltmètre se branche en dérivation</b>, sur les bornes du dipôle, sans modifier le circuit : bornes <b>V et COM</b>. Il indique une tension positive si sa borne COM est reliée du côté de la borne − du générateur.';
-  const RAPPEL_OSC = '<b>L\'oscilloscope se branche en dérivation</b>, comme un voltmètre, sans débrancher aucun fil. Chaque voie a sa fiche : borne <b>rouge</b> au point où arrive la flèche de la voie (CH1 ou CH2) sur le schéma, borne <b>noire</b> au point marqué du symbole de masse. Les deux bornes noires sont reliées dans l\'appareil : elles vont au même point du circuit.';
-  const RAPPEL_CAL = '<b>Calibre</b> : on commence par le plus grand, puis on choisit le plus petit calibre qui reste plus grand que la valeur mesurée. « 1 » à gauche de l\'écran : la valeur dépasse le calibre.';
+  const RAPPEL_A = '<b>L\'ampèremètre se branche en série</b> : on débranche un fil et il prend sa place, le courant doit le traverser. Bornes <b>10A et COM</b> (calibre 10 A), puis <b>mA</b> si l\'intensité est petite. L\'indication est positive quand le courant sort par COM.';
+  const RAPPEL_V = '<b>Le voltmètre se branche en dérivation</b>, sur les bornes du dipôle, sans modifier le circuit : bornes <b>V et COM</b>. Il indique une tension positive si sa borne COM est reliée du côté de la borne − du générateur.';
+  const RAPPEL_OSC = '<b>L\'oscilloscope se branche en dérivation</b>, comme un voltmètre, sans débrancher aucun fil. Chaque voie a sa fiche : borne <b>rouge</b> au point où arrive la flèche de la voie (CH1 ou CH2) sur le schéma, borne <b>noire</b> au point marqué du symbole de masse. Les deux bornes noires sont reliées dans l\'appareil : elles vont au même point du circuit.';
+  const RAPPEL_CAL = '<b>Calibre</b> : on commence par le plus grand, puis on choisit le plus petit calibre qui reste plus grand que la valeur mesurée. « 1 » à gauche de l\'écran : la valeur dépasse le calibre.';
 
   // en-tête d'une page de manipulation : titre, rappel ⓘ, numéro
   const tete = (titre, num, rappel) => `<div class="me-sit-tete"><h3 class="me-sit-titre">${titre}${rappel ? BULLE.info(rappel, 'Rappel') : ''}</h3>${num ? `<span class="me-sit-num">${num}</span>` : ''}</div>`;
-  const bravo = t => `<div class="callout-success er-retour"><p><b class="er-ok">Bravo !</b> ${t}</p></div>`;
+  const bravo = t => `<div class="callout-success er-retour"><p><b class="er-ok">Bravo !</b> ${t}</p></div>`;
   const defiler = el => setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
 
   /* ============================================================
@@ -255,9 +255,9 @@
           <a class="btn-primary" style="text-decoration:none" href="module_1b_simulateur.html">Simulateur →</a></div>`;
       ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), S.lrv(), {
         boucle: true, com: true, liens: LIENS,
-        textes: { boucleOk: 'Juste ! C\'est une boucle principale : elle part du générateur et y revient. Ici, deux boucles conviennent : celle de la lampe ou celle de la résistance ; jamais celle du voltmètre. Ta boucle reste surlignée pendant le montage.' },
+        textes: { boucleOk: 'Juste ! C\'est une boucle principale : elle part du générateur et y revient. Ici, deux boucles conviennent : celle de la lampe ou celle de la résistance ; jamais celle du voltmètre. Ta boucle reste surlignée pendant le montage.' },
         onFin() {
-          zone.querySelector('.me-bilan').innerHTML = bravo('Le montage est conforme au schéma : la boucle principale d\'abord, du générateur au générateur, puis les dérivations, une par une. Passe au simulateur pour réaliser d\'autres montages.');
+          zone.querySelector('.me-bilan').innerHTML = bravo('Le montage est conforme au schéma : la boucle principale d\'abord, du générateur au générateur, puis les dérivations, une par une. Passe au simulateur pour réaliser d\'autres montages.');
           SOM.marquer({ fait: true });
           defiler(zone.querySelector('.me-bilan'));
         },
@@ -340,7 +340,7 @@
      MODULE 2 : REPÉRER LA BOUCLE PRINCIPALE ET LES DÉRIVATIONS (sur un schéma)
      ============================================================ */
   const LECTURES = [
-    { titre: 'Circuit en série : générateur et lampe', circuit: S.gl },
+    { titre: 'Circuit en série : générateur et lampe', circuit: S.gl },
     { titre: 'Circuit en série avec interrupteur et ampèremètre', circuit: S.gkal },
     { titre: 'Une dérivation', circuit: () => S.kxy({ x: ['L1', 'lampe', L1], y: ['L2', 'lampe', L2] }) },
     { titre: 'Deux dérivations', circuit: S.croise },
@@ -375,7 +375,7 @@
         <div class="me-lire"><div class="me-lire-schema"></div><div class="mt-consigne me-lire-cons" aria-live="polite"></div></div>
         <ol class="mt-deroule"></ol><div class="me-bilan"></div>
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-          <button type="button" class="btn-primary" data-a="suite" disabled>${k < LECTURES.length - 1 ? 'Schéma suivant →' : 'Module 3 : brancher un multimètre →'}</button></div>`;
+          <button type="button" class="btn-primary" data-a="suite" disabled>${k < LECTURES.length - 1 ? 'Schéma suivant →' : 'Module 3 : brancher un multimètre →'}</button></div>`;
       const zs = zone.querySelector('.me-lire-schema');
       zs.style.setProperty('--ratio', (c.vb[c.vb.length - 2] / c.vb[c.vb.length - 1]).toFixed(3));
       // éléments qu'on peut toucher : les nœuds seulement à l'étape où on les cherche
@@ -390,11 +390,11 @@
           if (i >= 0) st.choisis.splice(i, 1); else st.choisis.push(t.id);
         } else if (st.etape === 'noeuds') {
           if (t.type === 'noeud') { if (!st.touches.includes(t.id)) st.touches.push(t.id); if (st.touches.length === c.noeuds.length) suite(); }
-          else if (t.type === 'croisement') st.diag = 'Ici les deux fils se croisent sans se toucher : il n\'y a pas de point noir, ce n\'est pas un nœud.';
-          else st.diag = 'Touche les nœuds : les points noirs où le courant se partage.';
+          else if (t.type === 'croisement') st.diag = 'Ici les deux fils se croisent sans se toucher : il n\'y a pas de point noir, ce n\'est pas un nœud.';
+          else st.diag = 'Touche les nœuds : les points noirs où le courant se partage.';
         } else if (st.etape === 'derivs') {
           if (t.type === 'noeud' || t.type === 'croisement') { st.diag = 'Touche un fil ou un dipôle de la dérivation.'; maj(); return; }
-          if (st.boucle.includes(t.id)) { st.diag = 'Cet élément fait partie de la boucle principale : une dérivation est une branche hors de cette boucle.'; maj(); return; }
+          if (st.boucle.includes(t.id)) { st.diag = 'Cet élément fait partie de la boucle principale : une dérivation est une branche hors de cette boucle.'; maj(); return; }
           branche(c, t.id, st.boucle).forEach(x => { if (!st.derivs.includes(x)) st.derivs.push(x); });
           if (horsBoucle().every(id => st.derivs.includes(id))) suite();
         }
@@ -410,9 +410,9 @@
       function fin() {
         faits.add(k);
         const nd = new Set(horsBoucle().map(id => branche(c, id, st.boucle).sort().join())).size;
-        zone.querySelector('.me-bilan').innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">Bravo !</b> ${c.noeuds.length
-          ? `La boucle principale part du générateur et y revient ; le schéma a ${c.noeuds.length} nœuds et ${nd} dérivation${nd > 1 ? 's' : ''}. Au montage, on fera d'abord la boucle, puis les dérivations une par une.`
-          : 'Pas de nœud : tout le circuit est la boucle principale, c\'est un circuit en série.'}</p></div>`;
+        zone.querySelector('.me-bilan').innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">Bravo !</b> ${c.noeuds.length
+          ? `La boucle principale part du générateur et y revient ; le schéma a ${c.noeuds.length} nœuds et ${nd} dérivation${nd > 1 ? 's' : ''}. Au montage, on fera d'abord la boucle, puis les dérivations une par une.`
+          : 'Pas de nœud : tout le circuit est la boucle principale, c\'est un circuit en série.'}</p></div>`;
         zone.querySelector('[data-a="suite"]').disabled = false;
         if (faits.size === LECTURES.length) SOM.marquer({ fait: true });
       }
@@ -420,10 +420,10 @@
         vs.maj({ libre: libre(), choisis: st.etape === 'boucle' ? st.choisis : [], boucle: st.boucle, touches: st.touches, derivs: st.derivs, cerne: st.cerne });
         const cons = zone.querySelector('.me-lire-cons');
         let h = '';
-        if (st.etape === 'boucle') h = '<p>1. Surligne la <b>boucle principale</b>, celle qui contient le générateur : touche ses fils et ses dipôles (toucher à nouveau enlève), puis « Vérifier ».</p><div class="mt-cons-actions"><button type="button" class="btn-small" data-a="verifier">Vérifier</button></div>';
-        else if (st.etape === 'noeuds') h = `<p>2. Touche les <b>nœuds</b> : les points où le courant se partage (${st.touches.length} touché${st.touches.length > 1 ? 's' : ''}).</p><div class="mt-cons-actions"><button type="button" class="btn-small" data-a="aucun">Il n'y a aucun nœud</button></div>`;
-        else if (st.etape === 'derivs') h = '<p>3. Touche les <b>dérivations</b> : les branches hors de la boucle principale.</p>';
-        else h = '<p class="mt-ok"><b>Juste !</b> Le schéma est lu.</p>';
+        if (st.etape === 'boucle') h = '<p>1. Surligne la <b>boucle principale</b>, celle qui contient le générateur : touche ses fils et ses dipôles (toucher à nouveau enlève), puis « Vérifier ».</p><div class="mt-cons-actions"><button type="button" class="btn-small" data-a="verifier">Vérifier</button></div>';
+        else if (st.etape === 'noeuds') h = `<p>2. Touche les <b>nœuds</b> : les points où le courant se partage (${st.touches.length} touché${st.touches.length > 1 ? 's' : ''}).</p><div class="mt-cons-actions"><button type="button" class="btn-small" data-a="aucun">Il n'y a aucun nœud</button></div>`;
+        else if (st.etape === 'derivs') h = '<p>3. Touche les <b>dérivations</b> : les branches hors de la boucle principale.</p>';
+        else h = '<p class="mt-ok"><b>Juste !</b> Le schéma est lu.</p>';
         if (st.ok) h += `<div class="callout-success mt-diag">${st.ok}</div>`;
         if (st.diag) h += `<div class="callout-danger mt-diag"><b>Ce n'est pas ça.</b> ${st.diag}</div>`;
         cons.innerHTML = h;
@@ -431,18 +431,18 @@
         if (bv) bv.onclick = () => {
           const r = MONTAGE.verifierBoucle(c, st.choisis);
           if (!r.ok) { st.diag = r.diag; st.cerne = r.cerne || null; maj(); return; }
-          st.boucle = r.choisis; st.ok = 'Juste ! C\'est la boucle principale : elle part du générateur et y revient.';
+          st.boucle = r.choisis; st.ok = 'Juste ! C\'est la boucle principale : elle part du générateur et y revient.';
           suite(); maj();
         };
         const ba = cons.querySelector('[data-a="aucun"]');
         if (ba) ba.onclick = () => {
           st.diag = null; st.ok = null;
-          if (c.noeuds.length) st.diag = 'Regarde bien : le schéma a des points noirs, où le courant se partage.';
-          else { st.ok = 'Juste : aucun point noir, le courant ne se partage nulle part.'; suite(); }
+          if (c.noeuds.length) st.diag = 'Regarde bien : le schéma a des points noirs, où le courant se partage.';
+          else { st.ok = 'Juste : aucun point noir, le courant ne se partage nulle part.'; suite(); }
           maj();
         };
         const ol = zone.querySelector('.mt-deroule'), ordre = ['boucle', 'noeuds', 'derivs', 'fin'], i = ordre.indexOf(st.etape);
-        ol.innerHTML = ['Surligne la boucle principale.', 'Touche les nœuds (ou « Il n\'y a aucun nœud »).', 'Touche les dérivations.']
+        ol.innerHTML = ['Surligne la boucle principale.', 'Touche les nœuds (ou « Il n\'y a aucun nœud »).', 'Touche les dérivations.']
           .map((t, j) => `<li class="${j < i ? 'fait' : j === i ? 'ici' : 'avenir'}">${t}</li>`).join('');
       }
       zone.querySelector('[data-a="re"]').onclick = afficher;
@@ -461,15 +461,15 @@
      ============================================================ */
   const MESURES = [
     { titre: 'Tension aux bornes d\'une lampe', circuit: S.glV, mesurer: ['V'], rappel: RAPPEL_V,
-      bilan: 'Le voltmètre est en dérivation : le circuit n\'a pas été modifié, la lampe a brillé tout le temps.' },
+      bilan: 'Le voltmètre est en dérivation : le circuit n\'a pas été modifié, la lampe a brillé tout le temps.' },
     { titre: 'Intensité du courant dans une lampe', circuit: S.gal, mesurer: ['A'], rappel: RAPPEL_A,
-      bilan: 'Fil débranché, la lampe s\'est éteinte : l\'ampèremètre referme le circuit, le courant le traverse.' },
+      bilan: 'Fil débranché, la lampe s\'est éteinte : l\'ampèremètre referme le circuit, le courant le traverse.' },
     { titre: 'Tension aux bornes d\'une résistance', circuit: () => S.serie({ V: ['100'] }), mesurer: ['V2'], rappel: RAPPEL_V,
-      bilan: 'Le calibre 2 V est le plus petit qui reste plus grand que la tension : il donne la lecture la plus précise.' },
+      bilan: 'Le calibre 2 V est le plus petit qui reste plus grand que la tension : il donne la lecture la plus précise.' },
     { titre: 'Intensité dans une branche en dérivation', circuit: () => S.derivation({ A: [2] }), mesurer: ['A2'], rappel: RAPPEL_A,
-      bilan: 'L\'ampèremètre est dans la branche de la résistance de 390 Ω : il mesure le courant de cette branche seulement.' },
+      bilan: 'L\'ampèremètre est dans la branche de la résistance de 390 Ω : il mesure le courant de cette branche seulement.' },
     { titre: 'Intensité et tension pour une résistance', circuit: () => S.ohm(8), mesurer: ['A', 'V'], rappel: RAPPEL_A + '<br><br>' + RAPPEL_V,
-      bilan: 'L\'ampèremètre est en série, le voltmètre en dérivation : on mesure l\'intensité du courant qui traverse la résistance et la tension à ses bornes.' },
+      bilan: 'L\'ampèremètre est en série, le voltmètre en dérivation : on mesure l\'intensité du courant qui traverse la résistance et la tension à ses bornes.' },
   ];
 
   function multimetre(zone) {
@@ -485,7 +485,7 @@
       ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), c, {
         mode: 'mesurer', mesurer: s.mesurer, com: true,
         onFin(b) {
-          const l = Object.keys(b.mesures).map(id => `${ind(c.dipoles.find(d => d.id === id).mesure)} = ${b.mesures[id]}`).join(' ; ');
+          const l = Object.keys(b.mesures).map(id => `${ind(c.dipoles.find(d => d.id === id).mesure)} = ${b.mesures[id]}`).join(' ; ');
           zone.querySelector('.me-bilan').innerHTML = bravo(`${l}. ${s.bilan}`);
           zone.querySelector('[data-a="suite"]').disabled = false;
           faits.add(k);
@@ -508,13 +508,13 @@
      ============================================================ */
   const OSCILLOS = [
     { titre: 'Tension aux bornes du générateur', circuit: () => S.oscL(), mesurer: ['Y1'],
-      bilan: `La voie CH1 mesure la tension entre la borne + du générateur et la masse, reliée à sa borne − : c'est U<sub>G</sub>, la tension aux bornes du générateur.` },
+      bilan: `La voie CH1 mesure la tension entre la borne + du générateur et la masse, reliée à sa borne − : c'est U<sub>G</sub>, la tension aux bornes du générateur.` },
     { titre: 'Tension aux bornes d\'une résistance', circuit: () => S.oscRR(), mesurer: ['Y1'],
-      bilan: `La masse est reliée à la borne − du générateur : la voie CH1 mesure U<sub>100</sub>, la tension aux bornes de la résistance de 100 Ω.` },
+      bilan: `La masse est reliée à la borne − du générateur : la voie CH1 mesure U<sub>100</sub>, la tension aux bornes de la résistance de 100 Ω.` },
     { titre: 'Deux tensions à la fois', circuit: () => S.oscRR({ deux: true }), mesurer: ['Y1', 'Y2'],
-      bilan: `Les deux bornes noires sont au même point, la masse : CH1 mesure U<sub>G</sub>, la tension aux bornes du générateur, et CH2 mesure U<sub>100</sub>, la tension aux bornes de la résistance de 100 Ω.` },
+      bilan: `Les deux bornes noires sont au même point, la masse : CH1 mesure U<sub>G</sub>, la tension aux bornes du générateur, et CH2 mesure U<sub>100</sub>, la tension aux bornes de la résistance de 100 Ω.` },
     { titre: 'Une DEL et sa résistance de protection', circuit: () => S.oscDR(), mesurer: ['Y1', 'Y2'],
-      bilan: `Les deux bornes noires sont au même point, la masse : CH1 mesure U<sub>G</sub>, la tension aux bornes du générateur, et CH2 mesure U<sub>DEL</sub>, la tension aux bornes de la DEL.` },
+      bilan: `Les deux bornes noires sont au même point, la masse : CH1 mesure U<sub>G</sub>, la tension aux bornes du générateur, et CH2 mesure U<sub>DEL</sub>, la tension aux bornes de la DEL.` },
   ];
 
   function oscilloscope(zone) {

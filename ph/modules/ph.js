@@ -74,18 +74,18 @@
      ============================================================ */
   // pH attendu ph, valeur proposée v, concentration c (mol/L) qui a servi au calcul
   function diagPH(v, ph, c) {
-    if (Math.abs(v + ph) < .06 && Math.abs(ph) > .06) return `Attention au signe : pH = ${MOINS}log(${H3O}/c°). Le log d'un nombre plus petit que 1 est négatif, le signe ${MOINS} rend le pH positif.`;
-    if (c && Math.abs(v - (-Math.log(c))) < .06) return 'Tu as utilisé la touche <b>ln</b> : le pH se calcule avec <b>log</b>, le logarithme décimal.';
+    if (Math.abs(v + ph) < .06 && Math.abs(ph) > .06) return `Attention au signe : pH = ${MOINS}log(${H3O}/c°). Le log d'un nombre plus petit que 1 est négatif, le signe ${MOINS} rend le pH positif.`;
+    if (c && Math.abs(v - (-Math.log(c))) < .06) return 'Tu as utilisé la touche <b>ln</b> : le pH se calcule avec <b>log</b>, le logarithme décimal.';
     if (Math.abs(v - Math.round(ph)) < 1e-9 && Math.abs(ph - Math.round(ph)) > .05) return 'Donne le pH avec <b>une décimale</b> (au dixième près).';
     return null;
   }
   // concentration attendue c (mol/L), valeur proposée v, pH qui a servi au calcul
   function diagC(v, c, ph) {
-    if (ph != null && proche(v, Math.pow(10, ph), .03)) return `L'exposant doit être <b>négatif</b> : ${H3O} = c° × 10<sup>${MOINS}pH</sup>.`;
-    if (ph != null && (Math.abs(v - ph) < .01 || Math.abs(v + ph) < .01)) return `Tu as écrit le pH : la concentration se calcule avec la fonction 10<sup>x</sup> : ${H3O} = c° × 10<sup>${MOINS}pH</sup>.`;
-    if (ph != null && proche(v, Math.exp(-ph), .03)) return 'Tu as utilisé la touche <b>e<sup>x</sup></b> : il faut la touche <b>10<sup>x</sup></b>.';
+    if (ph != null && proche(v, Math.pow(10, ph), .03)) return `L'exposant doit être <b>négatif</b> : ${H3O} = c° × 10<sup>${MOINS}pH</sup>.`;
+    if (ph != null && (Math.abs(v - ph) < .01 || Math.abs(v + ph) < .01)) return `Tu as écrit le pH : la concentration se calcule avec la fonction 10<sup>x</sup> : ${H3O} = c° × 10<sup>${MOINS}pH</sup>.`;
+    if (ph != null && proche(v, Math.exp(-ph), .03)) return 'Tu as utilisé la touche <b>e<sup>x</sup></b> : il faut la touche <b>10<sup>x</sup></b>.';
     const r = v / c, k = Math.round(Math.log10(r));
-    if (k !== 0 && proche(r, Math.pow(10, k), .03)) return 'Le nombre devant la puissance de 10 est juste, mais pas l\'exposant : vérifie la puissance de 10.';
+    if (k !== 0 && proche(r, Math.pow(10, k), .03)) return 'Le nombre devant la puissance de 10 est juste, mais pas l\'exposant : vérifie la puissance de 10.';
     return null;
   }
 
@@ -250,7 +250,7 @@
       const r = s.valeur();
       if (r.err) {
         secouer(d);
-        const calc = p.sansCalculatrice ? '' : ' Utilise la calculatrice : elle donne le résultat en écriture scientifique (par exemple 3,2E−3 signifie 3,2 × 10<sup>−3</sup>).';
+        const calc = p.sansCalculatrice ? '' : ' Utilise la calculatrice : elle donne le résultat en écriture scientifique (par exemple 3,2E−3 signifie 3,2 × 10<sup>−3</sup>).';
         api.message((r.err === 'mantisse' ? 'Écris le nombre devant la puissance de 10.' : 'Écris l\'exposant de la puissance de 10 (un nombre entier, avec le bouton ± s\'il est négatif).') + calc);
         return;
       }
@@ -391,7 +391,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b></p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -430,8 +430,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · 10 questions de difficulté croissante, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · 10 questions de difficulté croissante, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -444,7 +444,7 @@
       const q = qs[idx];
       window.PH.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -462,7 +462,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -477,10 +477,10 @@
     function fin() {
       const max = qs.length * 2, pct = Math.round(score / max * 100);
       SOM.marquer({ note: Math.round(score / max * 20 * 2) / 2 });     // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${score} / ${max}</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>

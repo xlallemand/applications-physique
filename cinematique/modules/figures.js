@@ -52,7 +52,7 @@
     const e = Math.hypot(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]) || 1, vx = (pts[1][0] - pts[0][0]) / e, vy = (pts[1][1] - pts[0][1]) / e;
     const lx = pts[0][0] - vx * 26, ly = pts[0][1] - vy * 18;
     s += V.texte(lx, ly + 4, 'départ', 11, C.encre3, Math.abs(vx) > .5 ? (vx > 0 ? 'end' : 'start') : 'middle', 600);
-    return svg(310, HAUTEUR[o.forme], s, 'Chronophotographie : positions successives à intervalles de temps égaux', o.cls);
+    return svg(310, HAUTEUR[o.forme], s, 'Chronophotographie : positions successives à intervalles de temps égaux', o.cls);
   }
 
   /* ---------- Les trois référentiels ---------- */
@@ -96,8 +96,8 @@
     for (let i = 0; i < n; i++) b += point(xs[i], ys[i], 4.5, C.encre, i === 0);
     if (n > 1) b += V.fleche(xs[k] - 26, 205, xs[k] + 26, 205, C.encre3, 2, 8);
     return `<div class="cin-deux">
-      <div><p>Référentiel lié au train</p>${svg(180, 200, a, 'Dans le train : la balle tombe en ligne droite')}</div>
-      <div><p>Référentiel terrestre (lié à la vache)</p>${svg(220, 212, b, 'Depuis le sol : la balle décrit une parabole')}</div></div>`;
+      <div><p>Référentiel lié au train</p>${svg(180, 200, a, 'Dans le train : la balle tombe en ligne droite')}</div>
+      <div><p>Référentiel terrestre (lié à la vache)</p>${svg(220, 212, b, 'Depuis le sol : la balle décrit une parabole')}</div></div>`;
   }
 
   /* ---------- Valve d'une roue de vélo ---------- */
@@ -157,13 +157,13 @@
     const [x, y] = trigoCoord(V, ang, axe, quad), pr = (a, b) => Math.abs(Math.abs(a) - Math.abs(b)) < .06 + .01 * Math.abs(b);
     const cos = V * Math.cos(ang * Math.PI / 180), sin = V * Math.sin(ang * Math.PI / 180);
     const adjX = axe === 'x';
-    if (pr(v[0], x) && pr(v[1], y)) return 'Les longueurs sont justes, mais pas les signes : regarde dans quel sens pointe le vecteur (vers la gauche : x négatif ; vers le bas : y négatif).';
-    if (pr(v[0], y) && pr(v[1], x)) return `Tu as inversé cos et sin. L'angle α est mesuré à partir de l'axe des ${axe} : le côté adjacent à α est sur l'axe des ${axe}, c'est lui qui vaut V × cos α.`;
+    if (pr(v[0], x) && pr(v[1], y)) return 'Les longueurs sont justes, mais pas les signes : regarde dans quel sens pointe le vecteur (vers la gauche : x négatif ; vers le bas : y négatif).';
+    if (pr(v[0], y) && pr(v[1], x)) return `Tu as inversé cos et sin. L'angle α est mesuré à partir de l'axe des ${axe} : le côté adjacent à α est sur l'axe des ${axe}, c'est lui qui vaut V × cos α.`;
     const rc = V * Math.cos(ang), rs = V * Math.sin(ang);
-    if ((pr(v[0], rc) || pr(v[0], rs)) && (pr(v[1], rc) || pr(v[1], rs))) return 'Ta calculatrice est en mode radians : passe-la en mode <b>degrés</b>.';
-    if (Math.abs(v[0]) > V + .1 || Math.abs(v[1]) > V + .1) return 'Une coordonnée ne peut pas être plus grande que le module du vecteur : multiplie V par cos α ou sin α (ils sont plus petits que 1).';
-    if (pr(adjX ? v[0] : v[1], cos) && !pr(adjX ? v[1] : v[0], sin)) return `Le côté adjacent est juste ; le côté opposé vaut V × sin α.`;
-    if (pr(adjX ? v[1] : v[0], sin) && !pr(adjX ? v[0] : v[1], cos)) return `Le côté opposé est juste ; le côté adjacent vaut V × cos α.`;
+    if ((pr(v[0], rc) || pr(v[0], rs)) && (pr(v[1], rc) || pr(v[1], rs))) return 'Ta calculatrice est en mode radians : passe-la en mode <b>degrés</b>.';
+    if (Math.abs(v[0]) > V + .1 || Math.abs(v[1]) > V + .1) return 'Une coordonnée ne peut pas être plus grande que le module du vecteur : multiplie V par cos α ou sin α (ils sont plus petits que 1).';
+    if (pr(adjX ? v[0] : v[1], cos) && !pr(adjX ? v[1] : v[0], sin)) return `Le côté adjacent est juste ; le côté opposé vaut V × sin α.`;
+    if (pr(adjX ? v[1] : v[0], sin) && !pr(adjX ? v[0] : v[1], cos)) return `Le côté opposé est juste ; le côté adjacent vaut V × cos α.`;
     return null;
   }
   function trigo(o) {
@@ -208,7 +208,7 @@
       }
     }
     const unite = (o.unite || '').replace(/<sup>[−-]1<\/sup>/g, '⁻¹').replace(/<sup>[−-]2<\/sup>/g, '⁻²').replace(/<[^>]+>/g, '');
-    if (o.legende !== false) s += V.texte(10, H - 8, `${o.nomV || o.nom.replace('_', '')} = ${o.Vtxt || window.CIN.fmt(o.V)}${unite ? ' ' + unite : ''} ; α = ${o.ang}°`, 13, C.encre, 'start');
+    if (o.legende !== false) s += V.texte(10, H - 8, `${o.nomV || o.nom.replace('_', '')} = ${o.Vtxt || window.CIN.fmt(o.V)}${unite ? ' ' + unite : ''} ; α = ${o.ang}°`, 13, C.encre, 'start');
     return svg(W, H, s, 'Vecteur partant de O, angle α avec un axe');
   }
 
@@ -274,8 +274,8 @@
       }
       s += `<circle cx="${px}" cy="${py}" r="5.5" fill="${C.encre}"/>` + V.texte(px + 10, py + 18, 'M', 14, C.encre, 'start');
       f.innerHTML = G.svg(s, 'Trajectoire du point M, vecteur position' + (opts.vitesse ? ' et vecteur vitesse' : ''));
-      if (l) l.innerHTML = `t = ${fmt(t, 1)} s : x = ${fmt(x, 1)} m ; y = ${fmt(y, 1)} m ; ${V.nomHTML('OM')} = ${fmt(x, 1)} ${I} + ${fmt(y, 1)} ${J}` +
-        (opts.vitesse ? `<br><span style="color:#dc2626">v<sub>x</sub> = ${fmt(VX(t), 1)} ${MS} ; v<sub>y</sub> = ${fmt(VY(t), 1)} ${MS}</span>` : '');
+      if (l) l.innerHTML = `t = ${fmt(t, 1)} s : x = ${fmt(x, 1)} m ; y = ${fmt(y, 1)} m ; ${V.nomHTML('OM')} = ${fmt(x, 1)} ${I} + ${fmt(y, 1)} ${J}` +
+        (opts.vitesse ? `<br><span style="color:#dc2626">v<sub>x</sub> = ${fmt(VX(t), 1)} ${MS} ; v<sub>y</sub> = ${fmt(VY(t), 1)} ${MS}</span>` : '');
     }
     if (cur) cur.addEventListener('input', maj);
     maj();
@@ -312,7 +312,7 @@
       [A, B, Cc].forEach(p => { s += V.fleche(p[0], p[1], p[0] + u[0] * 30, p[1] + u[1] * 30, '#dc2626', 2.6, 9); });
       [D, E].forEach(p => { const L = Math.hypot(cx - p[0], cy - p[1]); s += V.fleche(p[0], p[1], p[0] + (cx - p[0]) / L * 34, p[1] + (cy - p[1]) / L * 34, '#dc2626', 2.6, 9); });
     }
-    return svg(400, 226, s, 'Piste de saut à ski : partie rectiligne puis portion de cercle');
+    return svg(400, 226, s, 'Piste de saut à ski : partie rectiligne puis portion de cercle');
   }
 
   // exercice 12 : trajectoire, vecteur vitesse (rouge) et accélération (vert)

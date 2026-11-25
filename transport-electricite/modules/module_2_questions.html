@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : questions sur le transformateur — Chapitre 4 : Transport et distribution de l'électricité</title>
+<title>Module 2 : questions sur le transformateur — Chapitre 4 : Transport et distribution de l'électricité</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="te.css">
@@ -41,18 +41,18 @@ function typeT() {
     () => { const [a, b] = hasard([[200, 1000], [1000, 50], [500, 2000], [1200, 300]]); return [`a ${N1} = ${fmt(a)} spires et ${N2} = ${fmt(b)} spires`, b > a, `${N2} ${b > a ? '&gt;' : '&lt;'} ${N1}`]; },
     () => { const m = hasard([0.05, 0.1, 0.5, 2, 4, 20]); return [`a un rapport de transformation m = ${fmt(m)}`, m > 1, `m ${m > 1 ? '&gt;' : '&lt;'} 1`]; },
   ])();
-  return { theme: 'Élévateur ou abaisseur', parties: [fq.choix(`Un transformateur ${cas[0]}. C'est un :`, ELEV, cas[1] ? 'elev' : 'abai', { melanger: false,
-    indice: 'Compare la sortie (indice 2) à l\'entrée (indice 1), ou m à 1.', solution: `${cas[2]} : c'est un ${cas[1] ? 'élévateur' : 'abaisseur'} de tension.` })] };
+  return { theme: 'Élévateur ou abaisseur', parties: [fq.choix(`Un transformateur ${cas[0]}. C'est un :`, ELEV, cas[1] ? 'elev' : 'abai', { melanger: false,
+    indice: 'Compare la sortie (indice 2) à l\'entrée (indice 1), ou m à 1.', solution: `${cas[2]} : c'est un ${cas[1] ? 'élévateur' : 'abaisseur'} de tension.` })] };
 }
 
 /* ---------- Groupe 2 : les trois relations ---------- */
 const G2 = [
-  () => QCM('Les trois relations', 'Quelle écriture du rapport de transformation est juste ?', TROIS, [`m = ${rap(N2, N1)} = ${rap(U2, U1)} = ${rap(I2, I1)}`, `m = ${rap(N1, N2)} = ${rap(U1, U2)} = ${rap(I1, I2)}`, `m = ${rap(N1, N2)} = ${rap(U2, U1)} = ${rap(I2, I1)}`],
-    `${TROIS} : la relation des intensités est « à l'envers ».`, 'Pour les spires et les tensions, l\'indice 2 est en haut ; pour les intensités, c\'est l\'indice 1.', { colonne: true }),
-  () => QCM('Les trois relations', `Un transformateur élève la tension (m &gt; 1). Du primaire au secondaire, l'intensité :`, 'diminue (elle est divisée par m)', ['augmente (elle est multipliée par m)', 'ne change pas', 'est multipliée par m<sup>2</sup>'],
-    'Ce que le transformateur gagne en tension, il le perd en intensité : ' + I2 + ' = ' + I1 + ' / m.', `${U1} × ${I1} = ${U2} × ${I2} : la puissance se conserve.`),
-  () => QCM('Les trois relations', `Pour un transformateur parfait, la relation ${U1} × ${I1} = ${U2} × ${I2} signifie que :`, 'la puissance est la même au primaire et au secondaire', ['la tension est la même des deux côtés', 'l\'intensité est la même des deux côtés', 'le transformateur crée de l\'énergie'],
-    'U × I est la puissance : un transformateur parfait transmet toute la puissance, sans en créer. C\'est pour cela que l\'intensité varie en sens inverse de la tension.', 'Que représente le produit U × I ?'),
+  () => QCM('Les trois relations', 'Quelle écriture du rapport de transformation est juste ?', TROIS, [`m = ${rap(N2, N1)} = ${rap(U2, U1)} = ${rap(I2, I1)}`, `m = ${rap(N1, N2)} = ${rap(U1, U2)} = ${rap(I1, I2)}`, `m = ${rap(N1, N2)} = ${rap(U2, U1)} = ${rap(I2, I1)}`],
+    `${TROIS} : la relation des intensités est « à l'envers ».`, 'Pour les spires et les tensions, l\'indice 2 est en haut ; pour les intensités, c\'est l\'indice 1.', { colonne: true }),
+  () => QCM('Les trois relations', `Un transformateur élève la tension (m &gt; 1). Du primaire au secondaire, l'intensité :`, 'diminue (elle est divisée par m)', ['augmente (elle est multipliée par m)', 'ne change pas', 'est multipliée par m<sup>2</sup>'],
+    'Ce que le transformateur gagne en tension, il le perd en intensité : ' + I2 + ' = ' + I1 + ' / m.', `${U1} × ${I1} = ${U2} × ${I2} : la puissance se conserve.`),
+  () => QCM('Les trois relations', `Pour un transformateur parfait, la relation ${U1} × ${I1} = ${U2} × ${I2} signifie que :`, 'la puissance est la même au primaire et au secondaire', ['la tension est la même des deux côtés', 'l\'intensité est la même des deux côtés', 'le transformateur crée de l\'énergie'],
+    'U × I est la puissance : un transformateur parfait transmet toute la puissance, sans en créer. C\'est pour cela que l\'intensité varie en sens inverse de la tension.', 'Que représente le produit U × I ?'),
 ];
 
 /* ---------- Groupe 3 : calculs avec m ---------- */
@@ -60,7 +60,7 @@ const G3 = [
   function mTensions() {
     const [a, b] = hasard([[230, 23], [230, 46], [20000, 400000], [10000, 400000], [400000, 20000], [12, 48], [230, 11.5]]);
     return { theme: 'Calculer avec m', enonce: `<p>Un transformateur reçoit ${U1} = ${unite(a, 'V')} et fournit ${U2} = ${unite(b, 'V')}.</p>`,
-      parties: [fq.nombre('Calcule le rapport de transformation m.', 'm =', b / a, '', { diag: v => proche(v, a / b) ? `Tu as calculé ${U1} / ${U2}. On divise la sortie par l'entrée : m = ${U2} / ${U1}.` : `m = ${U2} / ${U1}.`,
+      parties: [fq.nombre('Calcule le rapport de transformation m.', 'm =', b / a, '', { diag: v => proche(v, a / b) ? `Tu as calculé ${U1} / ${U2}. On divise la sortie par l'entrée : m = ${U2} / ${U1}.` : `m = ${U2} / ${U1}.`,
         solution: calc(`m = ${rap(U2, U1)} = ${rap(unite(b, 'V'), unite(a, 'V'))} = ${c(fmt(b / a))}`) })] };
   },
   function tensionSortie() {
@@ -68,7 +68,7 @@ const G3 = [
     const m = n2 / n1, u2 = m * u1;
     return { theme: 'Calculer avec m', enonce: `<p>Un transformateur a ${N1} = ${fmt(n1)} spires et ${N2} = ${fmt(n2)} spires. Il est alimenté sous ${U1} = ${u1} V.</p>`,
       parties: [fq.nombre(`Calcule la tension de sortie ${U2}.`, `${U2} =`, u2, 'V', { diag: v => proche(v, u1 / m) ? `Tu as divisé par m. ${U2} = m × ${U1}, avec m = ${N2} / ${N1}.` : `Calcule m = ${N2} / ${N1}, puis ${U2} = m × ${U1}.`,
-        solution: calc(`m = ${rap(fmt(n2), fmt(n1))} = ${fmt(m)} ; ${U2} = m × ${U1} = ${fmt(m)} × ${u1} = ${c(fmt(u2) + ' V')}`) })] };
+        solution: calc(`m = ${rap(fmt(n2), fmt(n1))} = ${fmt(m)} ; ${U2} = m × ${U1} = ${fmt(m)} × ${u1} = ${c(fmt(u2) + ' V')}`) })] };
   },
   function spires() {
     const m = hasard([0.05, 0.1, 0.2, 4, 5, 20]), n1 = hasard([200, 500, 1000]), n2 = m * n1;
@@ -81,13 +81,13 @@ const G3 = [
   function intensiteSortie() {
     const m = hasard([0.1, 0.2, 0.5, 2, 4, 5, 20]), i1 = hasard([1, 2, 4, 10]), i2 = i1 / m;
     return { theme: 'Calculer avec m', enonce: `<p>Un transformateur de rapport m = ${fmt(m)} (${m > 1 ? 'élévateur' : 'abaisseur'}) est parcouru au primaire par ${I1} = ${fmt(i1)} A.</p>`,
-      parties: [fq.nombre(`Calcule l'intensité ${I2} au secondaire.`, `${I2} =`, i2, 'A', { diag: v => proche(v, i1 * m) ? `La relation des intensités est à l'envers : m = ${I1} / ${I2}, donc ${I2} = ${I1} / m.` : `m = ${I1} / ${I2}, donc ${I2} = ${I1} / m.`,
-        solution: calc(`m = ${rap(I1, I2)} donc ${I2} = ${rap(I1, 'm')} = ${rap(fmt(i1), fmt(m))} = ${c(fmt(i2) + ' A')}`) + `<p>${m > 1 ? 'La tension est élevée : l\'intensité diminue.' : 'La tension est abaissée : l\'intensité augmente.'}</p>` })] };
+      parties: [fq.nombre(`Calcule l'intensité ${I2} au secondaire.`, `${I2} =`, i2, 'A', { diag: v => proche(v, i1 * m) ? `La relation des intensités est à l'envers : m = ${I1} / ${I2}, donc ${I2} = ${I1} / m.` : `m = ${I1} / ${I2}, donc ${I2} = ${I1} / m.`,
+        solution: calc(`m = ${rap(I1, I2)} donc ${I2} = ${rap(I1, 'm')} = ${rap(fmt(i1), fmt(m))} = ${c(fmt(i2) + ' A')}`) + `<p>${m > 1 ? 'La tension est élevée : l\'intensité diminue.' : 'La tension est abaissée : l\'intensité augmente.'}</p>` })] };
   },
   function intensiteEntree() {
     const m = hasard([0.05, 0.1, 0.2, 0.5]), i2 = hasard([2, 4, 5, 10, 20]), i1 = m * i2;
     return { theme: 'Calculer avec m', enonce: `<p>Un transformateur abaisseur de rapport m = ${fmt(m)} alimente un appareil parcouru par ${I2} = ${fmt(i2)} A.</p>`,
-      parties: [fq.nombre(`Calcule l'intensité ${I1} au primaire.`, `${I1} =`, i1, 'A', { diag: v => proche(v, i2 / m) ? `La relation des intensités est à l'envers : m = ${I1} / ${I2}, donc ${I1} = m × ${I2}.` : `${I1} = m × ${I2}.`,
+      parties: [fq.nombre(`Calcule l'intensité ${I1} au primaire.`, `${I1} =`, i1, 'A', { diag: v => proche(v, i2 / m) ? `La relation des intensités est à l'envers : m = ${I1} / ${I2}, donc ${I1} = m × ${I2}.` : `${I1} = m × ${I2}.`,
         solution: calc(`m = ${rap(I1, I2)} donc ${I1} = m × ${I2} = ${fmt(m)} × ${fmt(i2)} = ${c(fmt(i1) + ' A')}`) })] };
   },
 ];
@@ -104,30 +104,30 @@ const G4 = [
     const m = u2 / u1, i1 = P / u1, i2 = i1 / m;
     return schemaQ('Schéma, puis calculs', `<p>À la sortie d'une centrale, un transformateur fait passer la tension de ${unite(u1, 'V')} à ${unite(u2, 'V')}. La puissance à son entrée est ${unite(P, 'W')}.</p>`,
       { U1: '#U1', I1: '?', P1: '#P', U2: '#U2', I2: '?', P2: '?', m: '?' },
-      [etiq('a', unite(u1, 'V'), 'U1', 'La tension d\'entrée est au primaire.'), etiq('b', unite(u2, 'V'), 'U2', 'La tension de sortie est au secondaire.'), etiq('c', unite(P, 'W'), 'P', 'La puissance est donnée à l\'entrée : elle se place avec ' + U1 + ' et ' + I1 + '.')],
+      [etiq('a', unite(u1, 'V'), 'U1', 'La tension d\'entrée est au primaire.'), etiq('b', unite(u2, 'V'), 'U2', 'La tension de sortie est au secondaire.'), etiq('c', unite(P, 'W'), 'P', 'La puissance est donnée à l\'entrée : elle se place avec ' + U1 + ' et ' + I1 + '.')],
       [F(['U1', 'U2'], 'm'),
        fq.nombre('Calcule m.', 'm =', m, '', { diag: v => proche(v, 1 / m) ? `m = ${U2} / ${U1}.` : `m = ${U2} / ${U1}.`, solution: calc(`m = ${rap(fmt(u2), fmt(u1))} = ${c(fmt(m))}`) }),
        fq.nombre(`Calcule l'intensité d'entrée ${I1} (P = ${U1} × ${I1}).`, `${I1} =`, i1, 'A', { diag: v => proche(v, i1 / 1000) || proche(v, i1 * 1000) ? 'Exprime la puissance en watts et U en volts.' : `${I1} = P / ${U1}.`, solution: calc(`${I1} = ${rap('P', U1)} = ${rap(fmt(P), fmt(u1))} = ${c(fmt(i1) + ' A')}`) }),
        F(['U1', 'U2', 'I1', 'm'], 'I2'),
-       fq.nombre(`Calcule l'intensité de sortie ${I2} (3 chiffres significatifs).`, `${I2} =`, i2, 'A', { rel: .01, diag: v => proche(v, i1 * m) ? `Relation à l'envers : ${I2} = ${I1} / m.` : `m = ${I1} / ${I2}, donc ${I2} = ${I1} / m.`, solution: calc(`${I2} = ${rap(I1, 'm')} = ${rap(fmt(i1), fmt(m))} = ${c(TE.cs(i2, 3) + ' A')}`) + `<p>(ou avec la même puissance P au secondaire : ${I2} = P / ${U2}.)</p>` })]);
+       fq.nombre(`Calcule l'intensité de sortie ${I2} (3 chiffres significatifs).`, `${I2} =`, i2, 'A', { rel: .01, diag: v => proche(v, i1 * m) ? `Relation à l'envers : ${I2} = ${I1} / m.` : `m = ${I1} / ${I2}, donc ${I2} = ${I1} / m.`, solution: calc(`${I2} = ${rap(I1, 'm')} = ${rap(fmt(i1), fmt(m))} = ${c(TE.cs(i2, 3) + ' A')}`) + `<p>(ou avec la même puissance P au secondaire : ${I2} = P / ${U2}.)</p>` })]);
   },
   function chargeur() {
     const [u2, m] = hasard([[11.5, 0.05], [23, 0.1], [46, 0.2], [115, 0.5]]), i2 = hasard([2, 4, 5, 10]), n1 = hasard([500, 1000, 2000]);
     const n2 = m * n1, i1 = m * i2;
-    return schemaQ('Schéma, puis calculs', `<p>Un transformateur est branché sur le secteur (230 V) et alimente un appareil sous ${fmt(u2)} V. Son primaire comporte ${fmt(n1)} spires ; l'appareil est parcouru par un courant de ${fmt(i2)} A.</p>`,
+    return schemaQ('Schéma, puis calculs', `<p>Un transformateur est branché sur le secteur (230 V) et alimente un appareil sous ${fmt(u2)} V. Son primaire comporte ${fmt(n1)} spires ; l'appareil est parcouru par un courant de ${fmt(i2)} A.</p>`,
       { U1: '#U1', I1: '?', P1: '?', N1: '#N1', U2: '#U2', I2: '#I2', P2: '?', N2: '?', m: '?' },
-      [etiq('a', '230 V', 'U1', 'Le secteur est la source : côté primaire.'), etiq('b', fmt(u2) + ' V', 'U2', 'L\'appareil est alimenté par le secondaire.'), etiq('c', fmt(n1) + ' spires', 'N1', 'Les spires données sont celles du primaire.'), etiq('d', fmt(i2) + ' A', 'I2', 'Le courant dans l\'appareil est celui du secondaire.')],
+      [etiq('a', '230 V', 'U1', 'Le secteur est la source : côté primaire.'), etiq('b', fmt(u2) + ' V', 'U2', 'L\'appareil est alimenté par le secondaire.'), etiq('c', fmt(n1) + ' spires', 'N1', 'Les spires données sont celles du primaire.'), etiq('d', fmt(i2) + ' A', 'I2', 'Le courant dans l\'appareil est celui du secondaire.')],
       [F(['U1', 'U2', 'N1', 'I2'], 'm'),
        fq.nombre('Calcule m.', 'm =', m, '', { diag: v => proche(v, 1 / m) ? `m = ${U2} / ${U1} (sortie sur entrée).` : `m = ${U2} / ${U1}.`, solution: calc(`m = ${rap(fmt(u2), '230')} = ${c(fmt(m))}`) }),
        F(['U1', 'U2', 'N1', 'I2', 'm'], 'N2'),
        fq.nombre(`Calcule ${N2}.`, `${N2} =`, n2, 'spires', { diag: v => proche(v, n1 / m) ? `${N2} = m × ${N1}.` : `m = ${N2} / ${N1}, donc ${N2} = m × ${N1}.`, solution: calc(`${N2} = m × ${N1} = ${fmt(m)} × ${fmt(n1)} = ${c(fmt(n2) + ' spires')}`) }),
        F(['U1', 'U2', 'N1', 'I2', 'm'], 'I1'),
-       fq.nombre(`Calcule ${I1}.`, `${I1} =`, i1, 'A', { diag: v => proche(v, i2 / m) ? `Relation à l'envers : m = ${I1} / ${I2}, donc ${I1} = m × ${I2}.` : `${I1} = m × ${I2}.`, solution: calc(`${I1} = m × ${I2} = ${fmt(m)} × ${fmt(i2)} = ${c(fmt(i1) + ' A')}`) })]);
+       fq.nombre(`Calcule ${I1}.`, `${I1} =`, i1, 'A', { diag: v => proche(v, i2 / m) ? `Relation à l'envers : m = ${I1} / ${I2}, donc ${I1} = m × ${I2}.` : `${I1} = m × ${I2}.`, solution: calc(`${I1} = m × ${I2} = ${fmt(m)} × ${fmt(i2)} = ${c(fmt(i1) + ' A')}`) })]);
   },
   function labo() {
     const u1 = hasard([6, 12]), [n1, n2] = hasard([[100, 500], [200, 1000], [100, 1000], [200, 1200]]), i1 = hasard([1.2, 3, 6, 12]);
     const m = n2 / n1, u2 = m * u1, i2 = i1 / m;
-    return schemaQ('Schéma, puis calculs', `<p>Au laboratoire, on alimente sous ${u1} V la bobine de ${fmt(n1)} spires d'un transformateur ; l'autre bobine a ${fmt(n2)} spires. L'ampèremètre du primaire indique ${fmt(i1)} A.</p>`,
+    return schemaQ('Schéma, puis calculs', `<p>Au laboratoire, on alimente sous ${u1} V la bobine de ${fmt(n1)} spires d'un transformateur ; l'autre bobine a ${fmt(n2)} spires. L'ampèremètre du primaire indique ${fmt(i1)} A.</p>`,
       { U1: '#U1', I1: '#I1', P1: '?', N1: '#N1', U2: '?', I2: '?', P2: '?', N2: '#N2', m: '?' },
       [etiq('a', u1 + ' V', 'U1', 'La bobine alimentée est le primaire.'), etiq('b', fmt(n1) + ' spires', 'N1', 'La bobine alimentée est le primaire.'), etiq('c', fmt(n2) + ' spires', 'N2', 'L\'autre bobine est le secondaire.'), etiq('d', fmt(i1) + ' A', 'I1', 'L\'ampèremètre est au primaire.')],
       [F(['U1', 'I1', 'N1', 'N2'], 'm'),
@@ -135,11 +135,11 @@ const G4 = [
        F(['U1', 'I1', 'N1', 'N2', 'm'], 'U2'),
        fq.nombre(`Calcule ${U2}.`, `${U2} =`, u2, 'V', { diag: v => proche(v, u1 / m) ? `${U2} = m × ${U1}.` : `${U2} = m × ${U1}.`, solution: calc(`${U2} = m × ${U1} = ${fmt(m)} × ${u1} = ${c(fmt(u2) + ' V')}`) }),
        F(['U1', 'I1', 'N1', 'N2', 'm', 'U2'], 'I2'),
-       fq.nombre(`Calcule ${I2}.`, `${I2} =`, i2, 'A', { diag: v => proche(v, i1 * m) ? `Relation à l'envers : ${I2} = ${I1} / m.` : `${I2} = ${I1} / m.`, solution: calc(`${I2} = ${rap(I1, 'm')} = ${rap(fmt(i1), fmt(m))} = ${c(fmt(i2) + ' A')}`) })]);
+       fq.nombre(`Calcule ${I2}.`, `${I2} =`, i2, 'A', { diag: v => proche(v, i1 * m) ? `Relation à l'envers : ${I2} = ${I1} / m.` : `${I2} = ${I1} / m.`, solution: calc(`${I2} = ${rap(I1, 'm')} = ${rap(fmt(i1), fmt(m))} = ${c(fmt(i2) + ' A')}`) })]);
   },
   function plaque() {
     const [u2, m] = hasard([[46, 0.2], [23, 0.1], [115, 0.5], [11.5, 0.05]]), n2 = hasard([60, 120, 150, 300]), n1 = n2 / m;
-    return schemaQ('Schéma, puis calculs', `<p>La plaque signalétique d'un transformateur monophasé indique : « Tension au primaire : 230 V ; tension au secondaire : ${fmt(u2)} V ». Le secondaire possède ${n2} spires.</p>`,
+    return schemaQ('Schéma, puis calculs', `<p>La plaque signalétique d'un transformateur monophasé indique : « Tension au primaire : 230 V ; tension au secondaire : ${fmt(u2)} V ». Le secondaire possède ${n2} spires.</p>`,
       { U1: '#U1', I1: '?', P1: '?', N1: '?', U2: '#U2', I2: '?', P2: '?', N2: '#N2', m: '?' },
       [etiq('a', '230 V', 'U1', 'La tension au primaire.'), etiq('b', fmt(u2) + ' V', 'U2', 'La tension au secondaire.'), etiq('c', n2 + ' spires', 'N2', 'Les spires données sont celles du secondaire.')],
       [F(['U1', 'U2', 'N2'], 'm'),
@@ -151,13 +151,13 @@ const G4 = [
 
 /* ---------- Groupe 5 : intérêt pour le transport ---------- */
 const G5 = [
-  () => QCM('Transport et distribution de l\'électricité', 'À la sortie d\'une centrale électrique, on place un transformateur :', 'élévateur, pour diminuer l\'intensité et les pertes dans les lignes', ['abaisseur, pour diminuer l\'intensité', 'élévateur, pour augmenter l\'intensité', 'abaisseur, pour diminuer les pertes'],
-    'Le transformateur élévateur augmente la tension et divise l\'intensité par m : les pertes R × I<sup>2</sup> sont divisées par m<sup>2</sup>.', 'Que devient l\'intensité quand la tension augmente ?'),
-  () => QCM('Transport et distribution de l\'électricité', 'Près des habitations, un transformateur abaisse la tension de 20 kV à 230 V. Pourquoi ?', 'pour que la tension soit adaptée aux appareils et sans danger excessif', ['pour diminuer les pertes dans les lignes', 'pour augmenter la puissance disponible', 'pour transformer le courant alternatif en continu'],
-    'Les appareils domestiques fonctionnent sous 230 V : on abaisse la tension juste avant de distribuer l\'électricité.', 'Les appareils de la maison fonctionnent sous 230 V.'),
+  () => QCM('Transport et distribution de l\'électricité', 'À la sortie d\'une centrale électrique, on place un transformateur :', 'élévateur, pour diminuer l\'intensité et les pertes dans les lignes', ['abaisseur, pour diminuer l\'intensité', 'élévateur, pour augmenter l\'intensité', 'abaisseur, pour diminuer les pertes'],
+    'Le transformateur élévateur augmente la tension et divise l\'intensité par m : les pertes R × I<sup>2</sup> sont divisées par m<sup>2</sup>.', 'Que devient l\'intensité quand la tension augmente ?'),
+  () => QCM('Transport et distribution de l\'électricité', 'Près des habitations, un transformateur abaisse la tension de 20 kV à 230 V. Pourquoi ?', 'pour que la tension soit adaptée aux appareils et sans danger excessif', ['pour diminuer les pertes dans les lignes', 'pour augmenter la puissance disponible', 'pour transformer le courant alternatif en continu'],
+    'Les appareils domestiques fonctionnent sous 230 V : on abaisse la tension juste avant de distribuer l\'électricité.', 'Les appareils de la maison fonctionnent sous 230 V.'),
   function pertesM() {
     const m = hasard([10, 20, 40]);
-    return QCM('Transport et distribution de l\'électricité', `Un transformateur élévateur de rapport m = ${m} est placé à la sortie d'une centrale. Par rapport à un transport sans transformateur, les pertes par effet Joule dans la ligne sont :`, `divisées par ${m * m}`, [`divisées par ${m}`, `multipliées par ${m}`, `divisées par ${2 * m}`],
+    return QCM('Transport et distribution de l\'électricité', `Un transformateur élévateur de rapport m = ${m} est placé à la sortie d'une centrale. Par rapport à un transport sans transformateur, les pertes par effet Joule dans la ligne sont :`, `divisées par ${m * m}`, [`divisées par ${m}`, `multipliées par ${m}`, `divisées par ${2 * m}`],
       `L'intensité est divisée par m = ${m}, les pertes (R × I<sup>2</sup>) par ${m}<sup>2</sup> = ${m * m}.`, 'Intensité ÷ m, et les pertes dépendent de I<sup>2</sup>.');
   },
 ];
@@ -170,20 +170,20 @@ function reperer() {
   const et = (k, u) => ({ titre: 'partie ' + k, u: sub('u', k), lignes: [SCH.l('', SCH.slot('p' + k)), SCH.l(sub('U', k) + ' =', SCH.v(unite(u, 'V')))] });
   return { theme: 'Production, transport, distribution', enonce: '<p>Voici une chaîne d\'alimentation électrique, de la centrale jusqu\'à une maison.</p>',
     parties: [{ type: 'schema', q: 'Place le nom de chaque partie du réseau.', titrePalette: 'Noms à placer',
-      schema: SCH.chaine({ etages: [et(1, u1), et(2, u2), et(3, u3)], transfos: [{ nom: sub('T', 1) }, { nom: sub('T', 2) }], charge: { nom: 'maison' }, aria: 'Chaîne : partie 1, transformateur T1, partie 2, transformateur T2, partie 3, maison' }),
+      schema: SCH.chaine({ etages: [et(1, u1), et(2, u2), et(3, u3)], transfos: [{ nom: sub('T', 1) }, { nom: sub('T', 2) }], charge: { nom: 'maison' }, aria: 'Chaîne : partie 1, transformateur T1, partie 2, transformateur T2, partie 3, maison' }),
       etiquettes: [
-        etiq('p', 'production', 'p1', `La centrale <b>produit</b> l'électricité, sous ${unite(u1, 'V')} : c'est le début de la chaîne.`),
+        etiq('p', 'production', 'p1', `La centrale <b>produit</b> l'électricité, sous ${unite(u1, 'V')} : c'est le début de la chaîne.`),
         etiq('t', 'transport', 'p2', `La très haute tension (${unite(u2, 'V')}) sert à <b>transporter</b> l'électricité sur de longues distances, entre T<sub>1</sub> et T<sub>2</sub>.`),
         etiq('d', 'distribution', 'p3', `Après l'abaisseur T<sub>2</sub>, on <b>distribue</b> l'électricité aux utilisateurs, sous ${unite(u3, 'V')}.`)],
-      solution: `<p>Partie 1 : <b>production</b> (centrale, ${unite(u1, 'V')}) ; partie 2 : <b>transport</b> (très haute tension, ${unite(u2, 'V')}) ; partie 3 : <b>distribution</b> (${unite(u3, 'V')}, vers les utilisateurs).</p>` }] };
+      solution: `<p>Partie 1 : <b>production</b> (centrale, ${unite(u1, 'V')}) ; partie 2 : <b>transport</b> (très haute tension, ${unite(u2, 'V')}) ; partie 3 : <b>distribution</b> (${unite(u3, 'V')}, vers les utilisateurs).</p>` }] };
 }
 // une situation à classer
 const SITUATIONS = [
-  { q: 'Une ligne à 400 kV relie une centrale à une grande ville située à 200 km. Elle fait partie :', bonne: 'tr', sol: 'Elle amène l\'électricité sur une longue distance, sous très haute tension : c\'est le <b>transport</b>.' },
-  { q: 'L\'alternateur d\'une centrale hydraulique fournit une tension de 15 kV. On est dans la partie :', bonne: 'prod', sol: 'L\'alternateur de la centrale fabrique l\'électricité : c\'est la <b>production</b>.' },
-  { q: 'Le câble enterré sous le trottoir qui alimente les maisons d\'une rue sous 230 V fait partie :', bonne: 'dist', sol: 'Il amène l\'électricité jusqu\'aux utilisateurs, sous basse tension : c\'est la <b>distribution</b>.' },
-  { q: 'Les pylônes à très haute tension qui traversent la campagne portent les lignes de la partie :', bonne: 'tr', sol: 'La très haute tension sert au <b>transport</b> de l\'électricité sur de longues distances.' },
-  { q: 'Dans une éolienne, la génératrice produit une tension de 690 V. On est dans la partie :', bonne: 'prod', sol: 'La génératrice de l\'éolienne fabrique l\'électricité : c\'est la <b>production</b>.' },
+  { q: 'Une ligne à 400 kV relie une centrale à une grande ville située à 200 km. Elle fait partie :', bonne: 'tr', sol: 'Elle amène l\'électricité sur une longue distance, sous très haute tension : c\'est le <b>transport</b>.' },
+  { q: 'L\'alternateur d\'une centrale hydraulique fournit une tension de 15 kV. On est dans la partie :', bonne: 'prod', sol: 'L\'alternateur de la centrale fabrique l\'électricité : c\'est la <b>production</b>.' },
+  { q: 'Le câble enterré sous le trottoir qui alimente les maisons d\'une rue sous 230 V fait partie :', bonne: 'dist', sol: 'Il amène l\'électricité jusqu\'aux utilisateurs, sous basse tension : c\'est la <b>distribution</b>.' },
+  { q: 'Les pylônes à très haute tension qui traversent la campagne portent les lignes de la partie :', bonne: 'tr', sol: 'La très haute tension sert au <b>transport</b> de l\'électricité sur de longues distances.' },
+  { q: 'Dans une éolienne, la génératrice produit une tension de 690 V. On est dans la partie :', bonne: 'prod', sol: 'La génératrice de l\'éolienne fabrique l\'électricité : c\'est la <b>production</b>.' },
 ];
 const DIAG_PARTIES = { prod: 'La production, c\'est là où l\'électricité est fabriquée (centrale, alternateur).', tr: 'Le transport se fait sous très haute tension, sur de longues distances, entre la centrale et les villes.', dist: 'La distribution amène l\'électricité jusqu\'aux utilisateurs, sous basse tension (230 V).' };
 function situation() {
@@ -201,10 +201,10 @@ function tirage() {
 TE.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Le transformateur',
-  intro: '<p class="er-contexte">12 questions tirées au hasard : élévateur ou abaisseur, les trois relations, calculs avec le rapport de transformation, <b>schémas à compléter</b> avec les valeurs d\'un énoncé (puis choix de la formule à utiliser), intérêt pour le transport, <b>production, transport et distribution</b>. Garde ta calculatrice à portée de main.</p>',
+  intro: '<p class="er-contexte">12 questions tirées au hasard : élévateur ou abaisseur, les trois relations, calculs avec le rapport de transformation, <b>schémas à compléter</b> avec les valeurs d\'un énoncé (puis choix de la formule à utiliser), intérêt pour le transport, <b>production, transport et distribution</b>. Garde ta calculatrice à portée de main.</p>',
   questions: tirage, nombre: 12,
   revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_3_cours.html', label: 'Module 3 : risque électrique →' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : risque électrique →' },
 });
 TE.menu('module_2_questions');
 </script>

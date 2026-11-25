@@ -175,8 +175,8 @@
       if (C.g === U.g && egal(v * C.f, p.valeur * U.f, p.tol)) { fermer(); api.reussi(); return; }
       if (C.g !== U.g) {
         api.erreur(egal(v, p.valeur, p.tol)
-          ? `Le nombre est juste, mais pas l'unité : ${GRANDEURS[U.g]} s'exprime en <b>${U.t}</b>${U.g === 'm' ? ' (ou en kg)' : U.g === 'E' ? ' (ou en kJ)' : ''}.`
-          : `Vérifie l'unité : on cherche ${GRANDEURS[U.g]}.${p.indice ? ' ' + p.indice : ''}`);
+          ? `Le nombre est juste, mais pas l'unité : ${GRANDEURS[U.g]} s'exprime en <b>${U.t}</b>${U.g === 'm' ? ' (ou en kg)' : U.g === 'E' ? ' (ou en kJ)' : ''}.`
+          : `Vérifie l'unité : on cherche ${GRANDEURS[U.g]}.${p.indice ? ' ' + p.indice : ''}`);
         return;
       }
       api.erreur((p.diag && p.diag(v * C.f / U.f)) || p.indice || 'Vérifie ton calcul.');
@@ -230,12 +230,12 @@
     dessiner();
     bVal.onclick = () => {
       if (api.fini()) return;
-      if (slots.includes(null)) { secouer(eq); api.message('Complète les trois cases : touche une espèce pour la placer, touche une case pour la vider.'); return; }
+      if (slots.includes(null)) { secouer(eq); api.message('Complète les trois cases : touche une espèce pour la placer, touche une case pour la vider.'); return; }
       const ok = slots[0] === 'O2' && [slots[1], slots[2]].sort().join() === 'CO2,H2O';
       if (ok) { fermer(); api.reussi(); return; }
       api.erreur(slots[0] !== 'O2'
         ? 'Un combustible brûle toujours en réagissant avec le <b>dioxygène de l\'air</b>.'
-        : 'Une combustion complète produit toujours les deux mêmes espèces : du <b>dioxyde de carbone</b> et de l\'<b>eau</b>.');
+        : 'Une combustion complète produit toujours les deux mêmes espèces : du <b>dioxyde de carbone</b> et de l\'<b>eau</b>.');
     };
     function fermer() { fige = true; dessiner(); bVal.disabled = true; chips.forEach(c => { c.b.disabled = true; }); }
     return { montrer() { slots[0] = 'O2'; slots[1] = 'CO2'; slots[2] = 'H2O'; fermer(); } };
@@ -245,16 +245,16 @@
   const pgcd = (a, b) => (b ? pgcd(b, a % b) : a);
   function indiceCombustion(f, c) {
     const v = ER.verifier([f, 'O2'], ['CO2', 'H2O'], c);
-    if (v.equilibree) return `La réaction est équilibrée, mais avec des nombres trop grands : divise tous les nombres stœchiométriques par ${c.reduce(pgcd)}.`;
+    if (v.equilibree) return `La réaction est équilibrée, mais avec des nombres trop grands : divise tous les nombres stœchiométriques par ${c.reduce(pgcd)}.`;
     const B = e => v.bilan.find(x => x.el === e);
     const C = B('C'), H = B('H'), O = B('O');
-    if (C.r !== C.p) return `Commence par le <b>carbone C</b> : ${C.r} atome${C.r > 1 ? 's' : ''} dans les réactifs, ${C.p} dans les produits. Règle le nombre devant ${fH('CO2')}.`;
-    if (H.r !== H.p) return `Carbone : c'est bon. Ensuite l'<b>hydrogène H</b> : ${H.r} atomes dans les réactifs, ${H.p} dans les produits. Règle le nombre devant ${fH('H2O')}.`;
+    if (C.r !== C.p) return `Commence par le <b>carbone C</b> : ${C.r} atome${C.r > 1 ? 's' : ''} dans les réactifs, ${C.p} dans les produits. Règle le nombre devant ${fH('CO2')}.`;
+    if (H.r !== H.p) return `Carbone : c'est bon. Ensuite l'<b>hydrogène H</b> : ${H.r} atomes dans les réactifs, ${H.p} dans les produits. Règle le nombre devant ${fH('H2O')}.`;
     const apport = O.r - 2 * c[1], besoin = (O.p - apport) / 2;
     if (!Number.isInteger(besoin)) {
-      return `Carbone et hydrogène : c'est bon. Pour l'<b>oxygène O</b>, il faudrait ${fmt(besoin)} ${fH('O2')} : c'est impossible, on ne coupe pas une molécule en deux. <b>Multiplie tous les nombres stœchiométriques par 2</b>, puis termine par ${fH('O2')}.`;
+      return `Carbone et hydrogène : c'est bon. Pour l'<b>oxygène O</b>, il faudrait ${fmt(besoin)} ${fH('O2')} : c'est impossible, on ne coupe pas une molécule en deux. <b>Multiplie tous les nombres stœchiométriques par 2</b>, puis termine par ${fH('O2')}.`;
     }
-    return `Carbone et hydrogène : c'est bon. Termine par l'<b>oxygène O</b> : ${O.p} atomes dans les produits${apport ? `, dont ${apport} apporté${apport > 1 ? 's' : ''} par le combustible` : ''}. Règle le nombre devant ${fH('O2')}.`;
+    return `Carbone et hydrogène : c'est bon. Termine par l'<b>oxygène O</b> : ${O.p} atomes dans les produits${apport ? `, dont ${apport} apporté${apport > 1 ? 's' : ''} par le combustible` : ''}. Règle le nombre devant ${fH('O2')}.`;
   }
 
   // Équilibrer une combustion : p.comb, p.comptes (nombre d'atomes affiché),
@@ -305,11 +305,11 @@
       if (api.fini()) return;
       const va = lire(a.value), vn = lireEntier(n.value);
       if (isNaN(va)) { secouer(d); api.message('Écris le nombre devant la puissance de 10 (avec une virgule si besoin).'); return; }
-      if (isNaN(vn)) { secouer(d); api.message('Écris l\'exposant de la puissance de 10 : un nombre entier (touche ± pour le signe −).'); return; }
+      if (isNaN(vn)) { secouer(d); api.message('Écris l\'exposant de la puissance de 10 : un nombre entier (touche ± pour le signe −).'); return; }
       const v = va * Math.pow(10, vn);
       if (egal(v, p.valeur, p.tol)) { fermer(); api.reussi(); return; }
       secouer(d);
-      if (vn && egal(va * Math.pow(10, -vn), p.valeur, p.tol)) { api.erreur('Le nombre est juste, mais vérifie le <b>signe de l\'exposant</b> : touche ± pour le changer.'); return; }
+      if (vn && egal(va * Math.pow(10, -vn), p.valeur, p.tol)) { api.erreur('Le nombre est juste, mais vérifie le <b>signe de l\'exposant</b> : touche ± pour le changer.'); return; }
       api.erreur((p.diag && p.diag(v)) || p.indice || 'Vérifie ton calcul.');
     }
     bVal.onclick = valider;
@@ -510,11 +510,11 @@
         if (ex) {
           // exercice : la correction détaillée (formule, grandeur isolée, application numérique)
           ret.innerHTML = sol || vue
-            ? `<div class="${vue ? 'callout' : 'callout-success'} er-retour co-correction"><p><b class="${vue ? '' : 'er-ok'}">${vue ? 'Correction' : erreursIci ? 'C\'est juste.' : 'Juste !'}</b></p>${sol ? `<div>${sol}</div>` : ''}</div>`
+            ? `<div class="${vue ? 'callout' : 'callout-success'} er-retour co-correction"><p><b class="${vue ? '' : 'er-ok'}">${vue ? 'Correction' : erreursIci ? 'C\'est juste.' : 'Juste !'}</b></p>${sol ? `<div>${sol}</div>` : ''}</div>`
             : '<p class="co-ok">✓ Juste</p>';
         } else {
           ret.innerHTML = p.solution || vue
-            ? `<div class="${vue ? 'callout' : 'callout-success'} er-retour">${vue ? '<p><b>Réponse.</b></p>' : '<p><b class="er-ok">Juste !</b></p>'}${p.solution ? `<p>${p.solution}</p>` : ''}</div>`
+            ? `<div class="${vue ? 'callout' : 'callout-success'} er-retour">${vue ? '<p><b>Réponse.</b></p>' : '<p><b class="er-ok">Juste !</b></p>'}${p.solution ? `<p>${p.solution}</p>` : ''}</div>`
             : '<p class="co-ok">✓ Juste</p>';
         }
         k++;
@@ -538,8 +538,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.bareme || `${nombre} questions de difficulté croissante${nombre === 10 ? ', notées sur 20' : ''}`} :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches une réponse${nombre === 10 ? '' : ` ;</li><li>à la fin, le total est <b>ramené sur 20</b>`}.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.bareme || `${nombre} questions de difficulté croissante${nombre === 10 ? ', notées sur 20' : ''}`} :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches une réponse${nombre === 10 ? '' : ` ;</li><li>à la fin, le total est <b>ramené sur 20</b>`}.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">${opts.commencer || 'Commencer →'}</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -551,7 +551,7 @@
       const q = qs[idx];
       window.CO.question = q;               // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">${opts.etiquette || 'Question'} ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">${opts.etiquette || 'Question'} ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         ${opts.contexte ? `<div class="er-card co-contexte">${opts.contexte(q, idx)}</div>` : ''}
         <div class="er-card co-question">
@@ -570,7 +570,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, tout est juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'Une réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, tout est juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'Une réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour co-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -585,10 +585,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 40) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser.' : 'Continue à t\'entraîner : relis bien les corrections.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.finTitre || 'Série terminée !'}</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser.' : 'Continue à t\'entraîner : relis bien les corrections.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.finTitre || 'Série terminée !'}</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${String(note).replace('.', ',')} / 20</div><p class="er-score-pct">${max === 20 ? '' : `${String(score).replace('.', ',')} points sur ${max} · `}${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">${opts.recapNom || 'Q'}${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">${opts.recommencer || '↺ Recommencer avec d\'autres questions'}</button>
@@ -606,24 +606,24 @@
       parties: [{ nom: 'La méthode', cours: 'module_1' }] },
     { n: 2, titre: 'Équilibrer une combustion', desc: 'Rappel sur l\'équilibrage, méthode C, H puis O, entraînement noté', fiche: 'fiche_2',
       parties: [{ nom: 'Équilibrer une combustion', cours: 'module_2_cours', entrainement: 'module_2' }] },
-    { n: 3, titre: 'Masse, quantité de matière, masse molaire', desc: 'n = m / M, masse molaire d\'une molécule ; avec un volume, m = ρ × V et n = c × V', fiche: 'fiche_3',
+    { n: 3, titre: 'Masse, quantité de matière, masse molaire', desc: 'n = m / M, masse molaire d\'une molécule ; avec un volume, m = ρ × V et n = c × V', fiche: 'fiche_3',
       // deux sous-modules de cours (avec une masse, avec un volume), puis les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Avec une masse', slug: 'masse', cours: 'module_3a_cours', noms: { cours: 'Cours : avec une masse' } },
-        { nom: 'Avec un volume', slug: 'volume', cours: 'module_3b_cours', noms: { cours: 'Cours : avec un volume' } },
+        { nom: 'Avec une masse', slug: 'masse', cours: 'module_3a_cours', noms: { cours: 'Cours : avec une masse' } },
+        { nom: 'Avec un volume', slug: 'volume', cours: 'module_3b_cours', noms: { cours: 'Cours : avec un volume' } },
         { nom: 'Masse et quantité de matière', questions: 'module_3' }] },
     { n: 4, titre: 'Les relations stœchiométriques', desc: 'Quantités consommées et formées, proportionnelles aux nombres stœchiométriques', fiche: 'fiche_4',
       parties: [{ nom: 'Relations stœchiométriques', cours: 'module_4_cours', questions: 'module_4' }] },
     { n: 5, titre: 'L\'énergie libérée', desc: 'Pouvoir calorifique, E = PC × m', fiche: 'fiche_5',
       parties: [{ nom: 'L\'énergie libérée', cours: 'module_5_cours', questions: 'module_5' }] },
     { n: 6, titre: 'L\'exemple du cours, pas à pas', desc: 'L\'exercice type résolu étape par étape, un deuxième exemple, puis des exercices complets d\'entraînement',
-      parties: [{ nom: 'L\'exemple du cours', exemple: 'module_6', entrainement: 'module_6_entrainement', noms: { entrainement: 'Entraînement : exercices complets' } }] },
+      parties: [{ nom: 'L\'exemple du cours', exemple: 'module_6', entrainement: 'module_6_entrainement', noms: { entrainement: 'Entraînement : exercices complets' } }] },
     { n: 7, titre: 'Exercices du chapitre', desc: 'Les exercices de la feuille, avec leur numéro, et deux extraits de sujets de bac',
       exercices: 'module_7', exNom: 'Exercices 1 à 4, 15, 16, 21 et bac', nbEx: 9 },
   ];
   // (co.js est chargé après er.js : cette configuration remplace la sienne)
-  window.SOM.init({ nom: 'Chapitre 14 : Combustions', id: 'combustions', cleEx: 'combustions-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 14 : Combustions', id: 'combustions', cleEx: 'combustions-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
 
@@ -717,7 +717,7 @@
       h += `<div class="co-sch-c co-sch-e" style="grid-column:1 / -1;grid-row:${r}"><span class="co-sch-e-t">Énergie · ${v.formuleE || 'E = PC × m'}</span>
         <span class="co-sch-e-l">${v.E.map(([nom, x]) => `<span>${nom} = ${contenu(x)}</span>`).join('')}</span></div>`;
     }
-    return `<div class="co-schema co-schema-donnees" role="group" aria-label="Schéma de la méthode : une colonne par espèce de l'équation">${h}</div>`;
+    return `<div class="co-schema co-schema-donnees" role="group" aria-label="Schéma de la méthode : une colonne par espèce de l'équation">${h}</div>`;
   }
 
   window.CO = {

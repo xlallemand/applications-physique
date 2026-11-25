@@ -525,7 +525,7 @@
           <span class="son-mode" role="group" aria-label="Choix de la fréquence">
             <button type="button" class="son-pill" data-mode="clavier" aria-pressed="true">Clavier</button>
             <button type="button" class="son-pill" data-mode="libre" aria-pressed="false">Fréquence libre</button></span></div>
-        <div class="son-clavier-defile" data-a="clav"><div class="son-clavier" role="group" aria-label="Clavier de do 3 à ré 5 : touche une note pour la jouer">
+        <div class="son-clavier-defile" data-a="clav"><div class="son-clavier" role="group" aria-label="Clavier de do 3 à ré 5 : touche une note pour la jouer">
           ${NOTES.filter(n => !n.diese).map(n => `<button type="button" class="son-blanche" data-note="${n.id}" aria-pressed="false" aria-label="${n.texte}, ${n.f} hertz"><span class="son-n">${n.nom}</span><span class="son-f">${n.f}</span></button>`).join('')}
           ${NOTES.map((n, k) => (n.diese ? `<button type="button" class="son-noire" data-note="${n.id}" aria-pressed="false" aria-label="${n.texte}, ${n.f} hertz" style="left:calc(${NOTES.slice(0, k).filter(x => !x.diese).length} * var(--son-touche) - var(--son-noire) / 2)"></button>` : '')).join('')}
         </div></div>
@@ -667,7 +667,7 @@
     s += '<g data-a="cd"></g>';
     s += `<text class="son-txt" x="40" y="186" text-anchor="middle">haut-parleur</text><text class="son-txt" x="566" y="186" text-anchor="middle">oreille</text>`;
     s += `<line class="son-sens" x1="250" y1="176" x2="360" y2="176"/><path class="son-sens-p" d="M368,176 l-9,-4.5 v9 z"/><text class="son-txt" x="305" y="194" text-anchor="middle">sens de propagation</text>`;
-    racine.innerHTML = `<svg class="son-air-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points d'air entre un haut-parleur et une oreille : chaque point oscille autour de sa position, les zones de compression et de dilatation avancent vers l'oreille">${s}</svg>
+    racine.innerHTML = `<svg class="son-air-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points d'air entre un haut-parleur et une oreille : chaque point oscille autour de sa position, les zones de compression et de dilatation avancent vers l'oreille">${s}</svg>
       <div class="son-air-l">
         <button type="button" class="btn-secondary" data-a="anim"${reduit() ? ' hidden' : ''}>⏸ Pause</button>
         <button type="button" class="btn-secondary" data-a="pas">Pas à pas ▸</button>
