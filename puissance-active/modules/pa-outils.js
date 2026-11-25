@@ -179,7 +179,7 @@
       </div>`;
     const dyn = zone.querySelector('[data-c="dyn"]'), txt = zone.querySelector('[data-c="txt"]');
     const range = zone.querySelector('input'), bAnim = zone.querySelector('[data-c="anim"]');
-    const NOMS = { 0: ['0', ''], 50: ['π/2', 'un quart de tour'], 100: ['π', 'un demi-tour'], 150: ['3π/2', 'trois quarts de tour'], 200: ['2π', 'un tour complet : le point revient à son point de départ, la courbe reprend la même valeur'] };
+    const NOMS = { 0: ['0', ''], 50: ['π/2', 'un quart de tour'], 100: ['π', 'un demi-tour'], 150: ['3π/2', 'trois quarts de tour'], 200: ['2π', 'un tour complet : le point revient à son point de départ, la courbe reprend la même valeur'] };
     const FR = { 0: '0', 50: 'T/4', 100: 'T/2', 150: '3T/4', 200: 'T' };
     function dessiner() {
       const k = +range.value, t = k / 10, th = 2 * Math.PI * t / T;
@@ -197,8 +197,8 @@
         <circle cx="${px(t).toFixed(1)}" cy="${my.toFixed(1)}" r="7" class="pa-c-point"/>`;
       const nom = NOMS[k];
       txt.innerHTML = nom
-        ? `t = ${FR[k]}${k ? ` = ${fmt(t)} ms` : ''} → angle parcouru : <b>${nom[0]} rad</b>${nom[1] ? ` (${nom[1]})` : ''}`
-        : `t = ${fmt(t, 1)} ms → angle parcouru : <b>${fmt(th, 2)} rad</b>`;
+        ? `t = ${FR[k]}${k ? ` = ${fmt(t)} ms` : ''} → angle parcouru : <b>${nom[0]} rad</b>${nom[1] ? ` (${nom[1]})` : ''}`
+        : `t = ${fmt(t, 1)} ms → angle parcouru : <b>${fmt(th, 2)} rad</b>`;
     }
     let anim = null;
     function arreter() { cancelAnimationFrame(anim); anim = null; bAnim.textContent = '▶'; }
@@ -251,7 +251,7 @@
   const SCHEMA_COURS = {
     A: '<p class="sc-t">Puissance apparente</p><p class="sc-f">S = U<sub>eff</sub> × I<sub>eff</sub></p>',
     B: '<p class="sc-t">Puissance active</p><p class="sc-f">P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ</p>',
-    K: '<p class="sc-k">Facteur de puissance : <span>k = cos φ = P / S</span></p>',
+    K: '<p class="sc-k">Facteur de puissance : <span>k = cos φ = P / S</span></p>',
     D: '<p class="sc-t">Puissance utile</p><p class="sc-f">P<sub>u</sub> = η × P</p>',
     E: '<p class="sc-t">Puissance perdue</p><p class="sc-f">P<sub>perdue</sub> = P − P<sub>u</sub></p>',
   };
@@ -271,9 +271,9 @@
   // étiquettes : les puissances et le facteur de puissance, à placer sur le schéma
   const ETIQ_NOMS = [
     { id: 'S', label: 'Puissance apparente S', cible: 'A', indice: 'La puissance apparente S = U<sub>eff</sub> × I<sub>eff</sub> est du côté du réseau, avant le compteur.' },
-    { id: 'P', label: 'Puissance active P', cible: 'B', indice: 'La puissance active P est celle que reçoit l\'appareil : entre le compteur et l\'appareil.' },
+    { id: 'P', label: 'Puissance active P', cible: 'B', indice: 'La puissance active P est celle que reçoit l\'appareil : entre le compteur et l\'appareil.' },
     { id: 'k', label: 'Facteur de puissance k', cible: 'K', indice: 'Le facteur de puissance k = P / S se place avec la puissance active, entre le compteur et l\'appareil.' },
-    { id: 'Pu', label: 'Puissance utile P<sub>u</sub>', cible: 'D', indice: 'La puissance utile sort de l\'appareil : c\'est ce qu\'on attend de lui.' },
+    { id: 'Pu', label: 'Puissance utile P<sub>u</sub>', cible: 'D', indice: 'La puissance utile sort de l\'appareil : c\'est ce qu\'on attend de lui.' },
     { id: 'Pp', label: 'Puissance perdue P<sub>perdue</sub>', cible: 'E', indice: 'La puissance perdue sort aussi de l\'appareil, à côté de la puissance utile.' },
   ];
   // étiquettes : les relations de chaque puissance
@@ -387,23 +387,23 @@
       const T = lire(sansUnite(ch.T.value)), dt = lire(sansUnite(ch.dt.value)), phi = lire(sansUnite(ch.phi.value));
       if ([T, dt, phi].some(v => isNaN(v))) {
         secouer(d.querySelector('.pa-mesure-calc'));
-        api.message('Complète les trois cases : T et Δt mesurés à la règle (en cm), puis φ (en rad).');
+        api.message('Complète les trois cases : T et Δt mesurés à la règle (en cm), puis φ (en rad).');
         return;
       }
       const err = [];
       // période : une seule, entre deux sommets voisins de la même courbe
       const okT = Math.abs(T * 10 - Tmm) <= TOL;
       if (!okT) {
-        if (Math.abs(T * 10 - 2 * Tmm) <= 2 * TOL) err.push('T : tu as mesuré <b>deux</b> périodes. Mesure une seule période (ou divise ta mesure par 2).');
-        else if (Math.abs(T * 10 - Tmm / 2) <= TOL) err.push('T : tu as mesuré une <b>demi</b>-période. Il faut aller d\'un sommet au sommet <b>suivant</b> de la même courbe.');
-        else err.push('T : place le 0 de la règle sur un sommet d\'une courbe et le curseur sur le sommet suivant de la <b>même</b> courbe.');
+        if (Math.abs(T * 10 - 2 * Tmm) <= 2 * TOL) err.push('T : tu as mesuré <b>deux</b> périodes. Mesure une seule période (ou divise ta mesure par 2).');
+        else if (Math.abs(T * 10 - Tmm / 2) <= TOL) err.push('T : tu as mesuré une <b>demi</b>-période. Il faut aller d\'un sommet au sommet <b>suivant</b> de la même courbe.');
+        else err.push('T : place le 0 de la règle sur un sommet d\'une courbe et le curseur sur le sommet suivant de la <b>même</b> courbe.');
       }
       // décalage : entre deux sommets voisins (un de chaque courbe)
       const okDt = Math.abs(dt * 10 - dmm) <= TOL;
       if (!okDt) {
-        if (Math.abs(dt * 10 - (Tmm - dmm)) <= TOL) err.push('Δt : tu as pris deux sommets trop éloignés. Prends un sommet de i et le sommet de u <b>le plus proche</b>.');
-        else if (Math.abs(dt * 10 - Tmm) <= TOL) err.push('Δt : tu as mesuré une période. Δt est le décalage entre un sommet de i et le sommet de u le plus proche.');
-        else err.push('Δt : place le 0 de la règle sur un sommet de i et le curseur sur le sommet de u le plus proche (ou l\'inverse).');
+        if (Math.abs(dt * 10 - (Tmm - dmm)) <= TOL) err.push('Δt : tu as pris deux sommets trop éloignés. Prends un sommet de i et le sommet de u <b>le plus proche</b>.');
+        else if (Math.abs(dt * 10 - Tmm) <= TOL) err.push('Δt : tu as mesuré une période. Δt est le décalage entre un sommet de i et le sommet de u le plus proche.');
+        else err.push('Δt : place le 0 de la règle sur un sommet de i et le curseur sur le sommet de u le plus proche (ou l\'inverse).');
       }
       marquer('T', okT); marquer('dt', okDt);
       // φ : calculé avec les mesures de l'élève (ou les valeurs exactes)
@@ -412,12 +412,12 @@
         const phiE = 2 * Math.PI * dt / T;
         okPhi = Math.abs(phi - phiE) <= .02 || Math.abs(phi - phiVrai) <= .02;
         if (!okPhi) {
-          if (Math.abs(phi - 360 * dt / T) < 1) err.push('φ : tu as calculé un angle en <b>degrés</b>. En radians, une période correspond à <b>2π</b> rad : φ = 2π × Δt / T.');
-          else if (Math.abs(phi - dt / T) < .01) err.push('φ : tu as oublié de multiplier par 2π : φ = 2π × Δt / T.');
-          else if (Math.abs(phi - 2 * Math.PI * T / dt) < .1) err.push('φ : tu as inversé T et Δt. Le produit en croix donne φ = 2π × Δt / T.');
-          else if (Math.abs(phi - Math.PI * dt / T) < .02) err.push('φ : une période correspond à <b>2π</b> rad, pas à π : φ = 2π × Δt / T.');
-          else if (Math.abs(phi - phiE) < .07 && decimales(ch.phi.value) < 2) err.push(`φ : arrondis au centième (deux chiffres après la virgule) : 2π × ${fmt(dt)} / ${fmt(T)} ≈ ${fmt(phiE, 2)}.`);
-          else err.push(`φ : avec tes mesures, calcule φ = 2π × Δt / T = 2π × ${fmt(dt)} / ${fmt(T)}.`);
+          if (Math.abs(phi - 360 * dt / T) < 1) err.push('φ : tu as calculé un angle en <b>degrés</b>. En radians, une période correspond à <b>2π</b> rad : φ = 2π × Δt / T.');
+          else if (Math.abs(phi - dt / T) < .01) err.push('φ : tu as oublié de multiplier par 2π : φ = 2π × Δt / T.');
+          else if (Math.abs(phi - 2 * Math.PI * T / dt) < .1) err.push('φ : tu as inversé T et Δt. Le produit en croix donne φ = 2π × Δt / T.');
+          else if (Math.abs(phi - Math.PI * dt / T) < .02) err.push('φ : une période correspond à <b>2π</b> rad, pas à π : φ = 2π × Δt / T.');
+          else if (Math.abs(phi - phiE) < .07 && decimales(ch.phi.value) < 2) err.push(`φ : arrondis au centième (deux chiffres après la virgule) : 2π × ${fmt(dt)} / ${fmt(T)} ≈ ${fmt(phiE, 2)}.`);
+          else err.push(`φ : avec tes mesures, calcule φ = 2π × Δt / T = 2π × ${fmt(dt)} / ${fmt(T)}.`);
         }
       }
       marquer('phi', okPhi);
@@ -439,7 +439,7 @@
         Object.keys(ch).forEach(k => { ch[k].readOnly = true; marquer(k, true); });
         bVal.fermer();
         regle.detruire();
-        d.querySelector('[data-x="correction"]').innerHTML = `<p class="pa-correction-t">Les mesures à la règle :</p>
+        d.querySelector('[data-x="correction"]').innerHTML = `<p class="pa-correction-t">Les mesures à la règle :</p>
           <div class="pa-correction-figs"><div>${figPhi(o, { regles: ['T'] })}<p>Période T (entre deux sommets de u)</p></div>
           <div>${figPhi(o, { regles: ['dt'] })}<p>Décalage Δt (entre deux sommets voisins)</p></div></div>`;
       },
@@ -448,7 +448,7 @@
   // texte de la correction d'une mesure (solution de la partie)
   function solutionPhi(o) {
     const R = LG.repere(defPhi(o)), Tc = Math.round(o.T * R.mmX) / 10, dc = Math.round(Math.abs(o.dt) * R.mmX) / 10;
-    return `<p>T ≈ ${fmt(Tc, 1)} cm et Δt ≈ ${fmt(dc, 1)} cm (à 1 ou 2 mm près), donc :</p>
+    return `<p>T ≈ ${fmt(Tc, 1)} cm et Δt ≈ ${fmt(dc, 1)} cm (à 1 ou 2 mm près), donc :</p>
       <p class="ph-calc">φ = 2π × Δt / T ≈ 2π × ${fmt(dc, 1)} / ${fmt(Tc, 1)} ≈ <span class="c">${fmt(2 * Math.PI * dc / Tc, 2)} rad</span></p>`;
   }
 

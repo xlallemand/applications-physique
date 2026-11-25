@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 : questions sur l'activité — Chapitre 12 : Radioactivité</title>
+<title>Module 3 : questions sur l'activité — Chapitre 12 : Radioactivité</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="rad.css">
@@ -38,7 +38,7 @@ function qMinute() {
   const A = N / 60;
   return { theme: 'Désintégrations par minute', enonce: `<p>Un compteur mesure ${ecrit(N)} désintégrations par minute.</p>`,
     parties: [partieA('Exprime l\'activité en becquerels.', A, {
-      diag: v => (pr(v, N * 60) ? 'Une minute dure 60 s : on divise par 60.' : pr(v, N) ? 'Le becquerel compte les désintégrations par seconde : divise par 60.' : 'A = nombre par minute / 60.'),
+      diag: v => (pr(v, N * 60) ? 'Une minute dure 60 s : on divise par 60.' : pr(v, N) ? 'Le becquerel compte les désintégrations par seconde : divise par 60.' : 'A = nombre par minute / 60.'),
       solution: calc(`A = ${fr(ecrit(N), '60')} = ${c_(A >= 1e4 ? sci(A, 2) + ' Bq' : fmt(A) + ' Bq')}`) })] };
 }
 // désintégrations pendant une durée → Bq
@@ -47,7 +47,7 @@ function qDuree() {
   const A = N / s;
   return { theme: 'Désintégrations pendant une durée', enonce: `<p>Un échantillon subit ${ecrit(N)} désintégrations en ${d} ${unite}.</p>`,
     parties: [partieA('Calcule son activité en becquerels.', A, {
-      diag: v => (pr(v, N / d) && s !== d ? `La durée doit être en secondes : ${d} ${unite} = ${fmt(s)} s.` : pr(v, N * s) ? 'On divise le nombre de désintégrations par la durée.' : pr(v, N) ? 'Ramène à une seconde : divise par la durée en secondes.' : `A = N / Δt avec Δt = ${fmt(s)} s.`),
+      diag: v => (pr(v, N / d) && s !== d ? `La durée doit être en secondes : ${d} ${unite} = ${fmt(s)} s.` : pr(v, N * s) ? 'On divise le nombre de désintégrations par la durée.' : pr(v, N) ? 'Ramène à une seconde : divise par la durée en secondes.' : `A = N / Δt avec Δt = ${fmt(s)} s.`),
       solution: (s !== d ? calc(`Δt = ${d} ${unite} = ${fmt(s)} s`) : '') + calc(`A = ${fr(ecrit(N), fmt(s))} = ${c_((A >= 1e4 ? sci(A, 2) : fmt(A)) + ' Bq')}`) })] };
 }
 // préfixe → Bq
@@ -59,7 +59,7 @@ function qPrefixe() {
     parties: [fq.sci('Exprime-la en becquerels.', 'A =', A, 'Bq', { cs: 3, rel: .005,
       diag: v => {
         const e = Math.round(Math.log10(v / a));
-        return Object.keys(PREF).some(k => PREF[k][0] === e) ? `${p} (${PREF[p][1]}) vaut 10<sup>${PREF[p][0]}</sup>.` : pr(v, a / Math.pow(10, PREF[p][0])) ? 'Un multiple est plus grand que l\'unité : on multiplie.' : `1 ${p}Bq = 10<sup>${PREF[p][0]}</sup> Bq.`;
+        return Object.keys(PREF).some(k => PREF[k][0] === e) ? `${p} (${PREF[p][1]}) vaut 10<sup>${PREF[p][0]}</sup>.` : pr(v, a / Math.pow(10, PREF[p][0])) ? 'Un multiple est plus grand que l\'unité : on multiplie.' : `1 ${p}Bq = 10<sup>${PREF[p][0]}</sup> Bq.`;
       },
       solution: calc(`${fmt(a)} ${p}Bq = ${fmt(a)} × 10<sup>${PREF[p][0]}</sup> Bq = ${c_(sci(A, 3) + ' Bq')}`) })] };
 }
@@ -69,20 +69,20 @@ function qVersPrefixe() {
   const r = v / Math.pow(10, PREF[p][0]);
   return { theme: 'Préfixes', enonce: `<p>Une source a une activité de ${ecrit(v)} Bq.</p>`,
     parties: [fq.nombre(`Exprime-la en ${p}Bq.`, 'A =', r, `${p}Bq`, { rel: .005, signe: false,
-      diag: x => (pr(x, v * Math.pow(10, PREF[p][0])) ? `Il faut 10<sup>${PREF[p][0]}</sup> Bq pour faire 1 ${p}Bq : on divise.` : `1 ${p}Bq = 10<sup>${PREF[p][0]}</sup> Bq : divise par 10<sup>${PREF[p][0]}</sup>.`),
+      diag: x => (pr(x, v * Math.pow(10, PREF[p][0])) ? `Il faut 10<sup>${PREF[p][0]}</sup> Bq pour faire 1 ${p}Bq : on divise.` : `1 ${p}Bq = 10<sup>${PREF[p][0]}</sup> Bq : divise par 10<sup>${PREF[p][0]}</sup>.`),
       solution: calc(`A = ${fr(ecrit(v), '10<sup>' + PREF[p][0] + '</sup>')} = ${c_(fmt(r) + ' ' + p + 'Bq')}`) })] };
 }
 // définition et unité
 function qDef() {
   return hasard([
-    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une activité de 1 Bq correspond à :', colonne: true,
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une activité de 1 Bq correspond à :', colonne: true,
       options: [o('ok', 'une désintégration par seconde'), o('min', 'une désintégration par minute'), o('noyau', 'un noyau radioactif')], bonne: 'ok',
       indices: { min: 'Le becquerel compte par seconde.', noyau: 'L\'activité compte des désintégrations par unité de temps.' },
       solution: '<p>1 Bq = 1 désintégration par seconde.</p>' }] },
-    { theme: 'Définition', parties: [{ type: 'choix', q: 'L\'activité A d\'un échantillon est :', colonne: true,
-      options: [o('ok', 'l\'opposé de la dérivée du nombre de noyaux restants : A = −dN/dt'), o('der', 'la dérivée du nombre de noyaux restants : A = dN/dt'), o('n', 'le nombre de noyaux restants N')], bonne: 'ok',
-      indices: { der: 'N diminue : sa dérivée est négative. L\'activité, elle, est positive.', n: 'L\'activité compte des désintégrations par seconde, pas des noyaux.' },
-      solution: '<p>A = −dN/dt = −N′ : l\'opposé de la dérivée de N par rapport au temps.</p>' }] },
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'L\'activité A d\'un échantillon est :', colonne: true,
+      options: [o('ok', 'l\'opposé de la dérivée du nombre de noyaux restants : A = −dN/dt'), o('der', 'la dérivée du nombre de noyaux restants : A = dN/dt'), o('n', 'le nombre de noyaux restants N')], bonne: 'ok',
+      indices: { der: 'N diminue : sa dérivée est négative. L\'activité, elle, est positive.', n: 'L\'activité compte des désintégrations par seconde, pas des noyaux.' },
+      solution: '<p>A = −dN/dt = −N′ : l\'opposé de la dérivée de N par rapport au temps.</p>' }] },
   ]);
 }
 // A = −dN/dt sur un court intervalle
@@ -90,8 +90,8 @@ function qDerivee() {
   const [dN, dt] = hasard([[1500, 5], [900, 3], [2400, 4], [700, 2], [3000, 10]]);
   const A = dN / dt;
   return { theme: 'A = −dN/dt', enonce: `<p>En ${dt} secondes, le nombre de noyaux restants d'un échantillon diminue de ${fmt(dN)}.</p>`,
-    parties: [fq.nombre('Quelle est son activité ?', 'A ≈', A, 'Bq', { rel: .01,
-      diag: v => (pr(v, -A) ? 'L\'activité est positive : A = −N′ et N′ est négatif.' : pr(v, dN) ? `Ces désintégrations ont lieu en ${dt} s : ramène à une seconde.` : pr(v, dN * dt) ? 'On divise par la durée.' : `A ≈ ${fmt(dN)} / ${dt}.`),
+    parties: [fq.nombre('Quelle est son activité ?', 'A ≈', A, 'Bq', { rel: .01,
+      diag: v => (pr(v, -A) ? 'L\'activité est positive : A = −N′ et N′ est négatif.' : pr(v, dN) ? `Ces désintégrations ont lieu en ${dt} s : ramène à une seconde.` : pr(v, dN * dt) ? 'On divise par la durée.' : `A ≈ ${fmt(dN)} / ${dt}.`),
       solution: calc(`N′ ≈ ${fr('−' + fmt(dN), fmt(dt))} = −${fmt(A)} noyaux par seconde, donc A = −N′ ≈ ${c_(fmt(A) + ' Bq')}`) })] };
 }
 
@@ -102,10 +102,10 @@ function tirage() {
 RAD.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Activité d\'un échantillon',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : exprimer une activité en becquerels (par minute, pendant une durée, avec un préfixe), définition et A = −dN/dt.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : exprimer une activité en becquerels (par minute, pendant une durée, avec un préfixe), définition et A = −dN/dt.</p>',
   questions: tirage,
   revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_4a_cours.html', label: 'Module 4 : demi-vie →' },
+  suite: { href: 'module_4a_cours.html', label: 'Module 4 : demi-vie →' },
 });
 RAD.menu('module_3_questions');
 </script>
