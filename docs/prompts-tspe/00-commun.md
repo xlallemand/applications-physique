@@ -31,7 +31,7 @@ Ces prompts découlent des cours du professeur (dépôt `Cours-TSpe`), de `compe
    - `cinematique/` : référence de la charte (moteur de questions `modules/cin.js`, exercices `exercices.js` + `module_6.html`) ;
    - `combustions/` : moteur de cours commun `COURS`, sous-modules de cours, exercices par étapes ;
    - `principe-dynamique/` et `energie-cinetique/` : modules découpés en sous-modules (`sousModules: true`), simulations et ateliers ;
-   - **`atome-ions/`** (pages `module_1_simulation` et `module_3_simulation`, fonctions `cadreSim` et `defis` de `modules/at.js`, styles `.at-sim*` et `.at-defis*` de `at.css`) : **modèle des pages de simulation et de manipulation** (un seul écran, défis « À essayer », §5 ; sans son bilan « ✍ Complète ton cours ») ; `double-periodicite/` : bouton plein écran commun ;
+   - **`atome-ions/`** (pages `module_1_simulation` et `module_3_simulation`, fonctions `cadreSim` et `defis` de `modules/at.js`, styles `.at-sim*` et `.at-defis*` de `at.css`) : **modèle des pages de simulation et de manipulation** (un seul écran, défis « À essayer », §5) ; `double-periodicite/` : bouton plein écran commun ;
    - `nomenclature/` : application de Terminale spécialité déjà faite selon ces prompts (`chapitre-02.md`).
 3. Les applications déjà en ligne que le chapitre cite (la section « Liens » du prompt les nomme) : lis leur `PLAN` et ce qu'il faut pour faire le lien ou réutiliser un outil, sans refaire leur contenu.
 4. Pour un outil partagé, lis seulement son bloc d'en-tête (rôle, API, options).
@@ -58,7 +58,7 @@ Règle du professeur pour **toute page de simulation, d'animation ou de manipula
 - **Bouton plein écran commun** (`assets/plein-ecran.js`, `PLEIN`, charte §4 « Page de manipulation »).
 - **Manipulation libre** : chaque paramètre se règle à tout moment, rien n'est verrouillé par une étape ; les grandeurs utiles s'affichent en continu ; ce que l'élève doit trouver se masque par une option (« Montrées / À trouver »).
 - **Situations avec questions** : les étapes que décrit un prompt deviennent des **défis « À essayer »** (pastilles numérotées, bouton « Essayer » qui prépare la situation sans la résoudre), cochés tout seuls dès que l'état du simulateur les réalise, **dans n'importe quel ordre** ; les questions d'une situation (QCM, valeur à lire, phrase à compléter) s'affichent dans le panneau. Les parties d'une activité sont des onglets accessibles à tout moment.
-- **Pas de bilan « ✍ Complète ton cours »** (décision du professeur), même si `atome-ions/` ou `docs/prompts-2nde/` en ont un ; page marquée faite quand tous les défis sont réussis.
+- Bilan « ✍ Complète ton cours » ouvrable à tout moment depuis le panneau ; page marquée faite quand tous les défis sont réussis ou à l'affichage du bilan.
 - Animations : Lecture / Pause, vitesse (× 0,5, × 1, × 2), « ↺ Recommencer », « Pas à pas » quand c'est utile ; `prefers-reduced-motion: reduce` : pas d'animation automatique, avance par étapes.
 - Tout glisser a son complément au doigt fin (boutons fléchés 58 × 50 px, ou « toucher l'objet puis la cible ») ; rien ne dépend du survol ; cibles de 44 px au moins.
 - Vérification : `document.documentElement.scrollHeight <= innerHeight` à 1280 × 720, 1280 × 650 et 390 × 844, dans chaque état (début, défis en cours, tous réussis, messages affichés), et aucun bloc dont le contenu dépasse.
@@ -152,7 +152,6 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 
 - Les prompts résument les cours ; les sessions lisent elles-mêmes énoncés et corrections des exercices.
 - Modules situés dans une autre application : pages ↗ du sommaire, comptées dans l'avancement (§6).
-- Pas de bilan « ✍ Complète ton cours » dans les simulations.
 - TP : non intégrés. Flashcards : plus tard, à part.
 - Simulateurs : pages du chapitre, sauf les applications à part demandées : bilan des forces, travail d'une force (remplace le simulateur de `energie-cinetique/`), gaz parfait, modèle de l'œil, et `decroissance-radioactive/` mise à jour sur place.
 - `ph/` : recopiée dans « Transformations acide-base », retirée du portail puis **supprimée** (chapitre 4). Avant, `outils-communs.md` retire toute dépendance : `acides-bases/` et `radioactivite/` passent de `ph/modules/eq.js` à `EQ`, `puissance-active/` reçoit sa propre copie du moteur `ph/modules/ph.js`.
