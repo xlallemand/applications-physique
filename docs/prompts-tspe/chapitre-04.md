@@ -6,7 +6,7 @@ Lis d'abord `docs/prompts-tspe/00-commun.md` (sources, charte, structure, outils
 
 - Dossier `transformations-acide-base/`, nom « Transformations acide-base », `data-matiere="chimie"`, préfixe `tab`, espace de noms `TAB`.
 - Portail : `desc: "Acides et bases de Brönsted, couples, échange du proton H⁺, logarithme et pH."` ; `mots` : Brönsted, proton, H+, ion oxonium, H3O+, ion hydroxyde, HO-, couple acide/base, demi-équation, amphotère, ampholyte, électronégativité, polarisation, acide carboxylique, carboxylate, amine, ammonium, ammoniac, acide carbonique, hydrogénocarbonate, autoprotolyse, log, logarithme, 10^x…
-- Dessin d'en-tête : celui de `ph/` (regarde `data-dessin` de `ph/index.html`).
+- Dessin d'en-tête : celui de `ph/` (regarde `data-dessin` de `ph/index.html` avant de supprimer le dossier).
 - **Prérequis** : `outils-communs.md` exécuté (éditeur d'équations `EQ`, `assets/equations.js`). Sinon, crée `EQ` comme il le décrit.
 - **Cette application reprend l'application `ph/`** (consigne du professeur, §3).
 
@@ -99,11 +99,13 @@ Cours : définition, méthodes 1 et 2, exemples corrigés, autoprotolyse. Série
 - ex. 11 à 18 et les exercices supplémentaires : **repris de `ph/modules/exercices.js`** (17 exercices), avec `EQ` à la place de `PH.Editeur` ;
 - même numérotation que la feuille ; les exercices supplémentaires de `ph/` gardent leur titre.
 
-## Retrait de `ph/` du portail (décision du professeur)
+## Retrait du portail et suppression de `ph/` (décision du professeur)
 
-- Supprime l'entrée `ph` de `APPS` (`index.html`) et de `AVANCEMENT` (`assets/avancement.js`) ; relance `python3 docs/outils/index-recherche.py`. **Ne supprime pas le dossier `ph/`** : `puissance-active/` charge encore `ph/modules/ph.js` et `ph.css`.
+- Supprime l'entrée `ph` de `APPS` (`index.html`) et de `AVANCEMENT` (`assets/avancement.js`) ; relance `python3 docs/outils/index-recherche.py`.
 - Liens qui pointaient vers `ph/` : `acides-bases/modules/module_3b_cours.html` et `radioactivite/modules/module_5b_cours.html` (« Application pH ») et tout autre lien trouvé par `grep -rn "ph/index.html\|ph/modules/module_" --include=*.html --include=*.js .` : fais-les pointer vers les pages équivalentes de cette application.
 - La progression `ph-progression` n'est pas reprise (décision du professeur) ; signale-le dans le compte rendu.
+- **Supprime le dossier `ph/`** (`git rm -r ph`) une fois les modules recopiés et les liens repointés, si plus rien n'en dépend : `grep -rn "\.\./ph/\|\bph/modules/\|\bph/index" --include=*.html --include=*.js --include=*.css --include=*.py . | grep -v "^./ph/"` ne doit rien renvoyer (`puissance-active/` a sa propre copie du moteur depuis `outils-communs.md` ; si elle charge encore `ph/modules/ph.js`, fais d'abord cette étape de `outils-communs.md`).
+- Mets à jour les mentions de `ph/` dans la documentation vivante : `docs/charte-applications.md` (moteurs propres, exemple de `PLAN` en pages séparées : prends une application existante équivalente), commentaires de `assets/sommaire.js` et `assets/cours.js` qui la citent en exemple. Ne touche pas aux documents historiques (`docs/remarques-github.html`, `docs/prompts-sti2d/`).
 
 ## Liens vers d'autres applications
 
@@ -112,5 +114,6 @@ Cours : définition, méthodes 1 et 2, exemples corrigés, autoprotolyse. Série
 ## Vérifications propres
 
 - Manipulation du proton : chaque onglet, chaque type d'erreur de charge et de H (le bon diagnostic), au doigt et à la souris, un écran.
-- Modules repris de `ph/` : mêmes questions et mêmes résultats que dans `ph/` (compare quelques fabriques), éditeur `EQ` partout, aucune page ne charge `ph/modules/eq.js`.
+- Modules repris de `ph/` : mêmes questions et mêmes résultats que dans `ph/` (compare quelques fabriques), éditeur `EQ` partout.
+- Dossier `ph/` supprimé, le `grep` ci-dessus ne renvoie rien, portail et applications liées ouverts sans lien cassé.
 - Portail : `ph` absent, « Transformations acide-base » présent ; recherche « pH » trouve les modules de cette application.

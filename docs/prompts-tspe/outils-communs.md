@@ -25,7 +25,11 @@ Consigne du professeur : pour manipuler les équations (pH, Ka, pKa, log, ln, ex
   - `radioactivite/modules/module_5b_cours.html` (STI2D, calcul de t avec ln).
 
   Même déroulé pédagogique (démonstration puis « À toi »), avec `EQ.demo` et `EQ.partie`. Leurs liens vers `ph/modules/module_2_cours.html` restent pour l'instant (le chapitre 4 les fera pointer vers « Transformations acide-base »).
-- `puissance-active/` ne charge pas `eq.js` : elle charge le moteur de cours et de questions `ph/modules/ph.js` et `ph.css`. **N'y touche pas** (`ph/` reste dans le dépôt ; seule son entrée du portail sera retirée par le chapitre 4). Dis-le dans le compte rendu.
+- **Rends `puissance-active/` indépendante de `ph/`** (le professeur veut supprimer `ph/` ; le chapitre 4 le fera) : elle ne charge pas `eq.js` mais le moteur de cours et de questions `ph/modules/ph.js` et `ph.css` (`PH.Cours`, `PH.aToi`, `PH.serie`, `PH.question`, `PH.PARTIES`, `PH.cs`).
+  - Copie ces deux fichiers dans `puissance-active/modules/pa-moteur.js` et `pa-moteur.css`, **sans rien changer à leur fonctionnement** (même espace de noms `PH`, mêmes classes `ph-…`) ; retire seulement la partie `'equation'` (elle dépend de `PH.Editeur` de `eq.js` ; vérifie d'abord que `puissance-active/` ne s'en sert pas : `grep -rn "'equation'" puissance-active/`) ; en-tête des fichiers : d'où ils viennent et pourquoi.
+  - Fais pointer les pages qui chargent `../../ph/modules/ph.js` et `ph.css` (`module_3_cours`, `module_3_questions`, `module_4_cours`, `module_4_exercices`, `fiche_3`, `fiche_4`) vers ces copies ; mets à jour le commentaire d'en-tête de `pa-outils.js`.
+  - Mentions à mettre à jour : `docs/charte-applications.md` (§ cours par étapes : moteur `PH` de `puissance-active/` dans `puissance-active/modules/pa-moteur.js`), `docs/prompt-icone-calculatrice.md` (liste des moteurs), commentaire de `assets/cours.js` (exemple `PH.demo` de `ph/modules/eq.js` → `EQ.demo` de `assets/equations.js`).
+  - Vérification : chaque page de `puissance-active/` identique avant et après (captures comparées, questions validées, progression conservée) ; `grep -rn "ph/modules/ph\.\(js\|css\)" --include=*.html --include=*.js . | grep -v "^./ph/"` ne renvoie rien.
 - `ph/modules/eq.js` reste en place (l'application `ph/` s'en sert encore) ; plus aucune autre page ne le charge (`grep -rl "ph/modules/eq.js" --include=*.html .` ne renvoie que `ph/`).
 
 ## 2. Pages externes ↗ dans le `PLAN` (`00-commun.md` §6)

@@ -95,7 +95,7 @@ Le premier prompt qui a besoin d'un outil le crée (comme le décrit le prompt q
 
 | Outil | Fichiers | État | Créé ou étendu par | Utilisé par |
 |---|---|---|---|---|
-| `EQ` : éditeur d'équations à tuiles (celui de `equations-physique-mobile`) | `assets/equations.js`, `assets/equations.css` | à créer | `outils-communs.md` | 04, 10, 11, 14, 16, 17 ; `acides-bases/`, `radioactivite/`, `puissance-active/` (à la place de `ph/modules/eq.js`) |
+| `EQ` : éditeur d'équations à tuiles (celui de `equations-physique-mobile`) | `assets/equations.js`, `assets/equations.css` | à créer | `outils-communs.md` | 04, 10, 11, 14, 16, 17 ; `acides-bases/`, `radioactivite/` (à la place de `ph/modules/eq.js`) |
 | Pages externes ↗ du `PLAN` | `assets/sommaire.js`, `assets/avancement.js`, `docs/outils/index-recherche.py` | à créer | `outils-communs.md` | tous les chapitres qui ont un module dans une autre application |
 | `DILUTION` : manipulation de dilution (pipette, fiole, schéma des deux solutions) | `assets/dilution.js`, `assets/dilution.css` (sur `PAILLASSE` et `ETAPES`) | à créer | `chapitre-01.md` ou `docs/prompts-2nde/10-solutions.md`, le premier exécuté | 01, 06 ; 2nde `solutions/` |
 | `PAILLASSE` : verrerie dessinée et gestes | `assets/paillasse.js`, `assets/paillasse.css` | à créer | `docs/prompts-2nde/10-solutions.md` (ou 01 s'il passe avant) | 01, 21 ; 2nde 10, 11, 12 |
@@ -122,7 +122,7 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 | `chapitre-01.md` | Rappels de chimie | `rappels-chimie/` | | à faire | | crée `DILUTION` (et `PAILLASSE`) s'ils n'existent pas |
 | `chapitre-02.md` | Nomenclature | `nomenclature/` | | fait | 01/11/2026 | |
 | `chapitre-03.md` | Méthodes physiques d'analyse | `analyse-physique/` | | à faire | | |
-| `chapitre-04.md` | Transformations acide-base | `transformations-acide-base/` | | à faire | | reprend `ph/` (retiré du portail) |
+| `chapitre-04.md` | Transformations acide-base | `transformations-acide-base/` | | à faire | | reprend `ph/` puis supprime le dossier |
 | — | Cinématique | `cinematique/` | | fait | | déjà en ligne, aucun prompt |
 | `chapitre-06.md` | Titrages | `titrages/` | | à faire | | liens ↗ vers `titrage-ph/`, `titrage-conductimetrique/` |
 | `bilan-forces.md` | Bilan des forces | `bilan-forces/` | 07 | à faire | | 2de, 1re, Tle |
@@ -154,7 +154,7 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 - Modules situés dans une autre application : pages ↗ du sommaire, comptées dans l'avancement (§6).
 - TP : non intégrés. Flashcards : plus tard, à part.
 - Simulateurs : pages du chapitre, sauf les applications à part demandées : bilan des forces, travail d'une force (remplace le simulateur de `energie-cinetique/`), gaz parfait, modèle de l'œil, et `decroissance-radioactive/` mise à jour sur place.
-- `ph/` : recopiée dans « Transformations acide-base » puis retirée du portail ; plus aucune application ne doit dépendre de `ph/modules/eq.js` (`outils-communs.md`).
+- `ph/` : recopiée dans « Transformations acide-base », retirée du portail puis **supprimée** (chapitre 4). Avant, `outils-communs.md` retire toute dépendance : `acides-bases/` et `radioactivite/` passent de `ph/modules/eq.js` à `EQ`, `puissance-active/` reçoit sa propre copie du moteur `ph/modules/ph.js`.
 - Dilution (chapitre 1) et synthèse (chapitre 21) : outils partagés avec les applications de 2nde (`solutions/`, `synthese/`), créés par la première session qui en a besoin ; les prompts de 2nde le disent aussi.
 
 ## 12. Avant de livrer
