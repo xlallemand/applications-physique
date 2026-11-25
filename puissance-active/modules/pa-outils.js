@@ -2,7 +2,7 @@
    Outils des modules 3 et 4 de « Puissance active »
 
    Les cours par étapes et les questions notées utilisent le moteur
-   de l'application « pH » (ph/modules/ph.js : PH.Cours, PH.aToi,
+   pa-moteur.js (copie de celui de l'application « pH » : PH.Cours, PH.aToi,
    PH.serie, PH.question) ; la règle et les graphiques utilisent le
    moteur de l'application « Lecture graphique »
    (lecture-graphique/modules/lgtools.js : LG.figure, LG.bacASable).

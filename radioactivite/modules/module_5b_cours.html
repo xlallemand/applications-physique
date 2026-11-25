@@ -6,14 +6,14 @@
 <title>Module 5 : isoler t avec ln — Chapitre 12 : Radioactivité</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
-<link rel="stylesheet" href="../../ph/modules/ph.css">
 <link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/equations.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="rad.js"></script>
-<script src="../../ph/modules/eq.js"></script>
+<script src="../../assets/equations.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
 <body>
@@ -31,10 +31,9 @@
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    Même dispositif que le cours du module 2 de l'application « pH »
-   (étapes 4 et 5) : démonstration étape par étape (PH.demo), puis
-   l'élève refait la manipulation dans l'éditeur d'équation par
-   glisser-déposer (PH.Editeur de ph/modules/eq.js, avec les outils
-   eˣ et ln).
+   (étapes 4 et 5) : démonstration étape par étape (EQ.demo), puis
+   l'élève refait la manipulation dans l'éditeur d'équation commun
+   (EQ de assets/equations.js, avec les outils eˣ et ln).
    1. ln, fonction réciproque de eˣ (comme log et 10ˣ)
    2. N₀ e^(−λt) = N  ⇒  e^(−λt) = N/N₀  ⇒  −λt = ln(N/N₀)  ⇒  t = ln(N/N₀)/(−λ)
    3. La même manipulation avec A₀ e^(−λt) = A
@@ -42,37 +41,26 @@
 const { exemple } = COURS;
 const { o, fmt } = RAD;
 const M = RAD.MOINS;
-const { T, S, P, F, FN } = PH.EQ;
-
-// « Afficher tout le cours » : la démonstration PH.demo se déplie avec le moteur de cours commun
-PH.vivant = COURS.vivant;
-PH.oublier = COURS.oublier;
-Object.defineProperty(PH, 'tout', { get: () => COURS.tout, configurable: true });
-
-// grandeurs (N ou A), constante radioactive et date
-const grandeurs = s => ({ x: T(s, s), x0: T(s + '0', `${s}<sub>0</sub>`), l: T('l', 'λ'), t: T('t', 't') });
-const G = { N: grandeurs('N'), A: grandeurs('A') };
-const expo = g => FN('exp', P(S(g.l, g.t), true));                  // e^(−λt)
-const frac = g => F(S(g.x), S(g.x0));                                // N / N₀
+// grandeurs (N ou A) en écriture compacte de EQ : x, x0, λ (l) et t ; « Afficher tout
+// le cours » déplie la démonstration EQ.demo avec le moteur de cours commun
+const G = { N: { x: 'N', x0: 'N<sub>0</sub>', l: 'λ', t: 't' }, A: { x: 'A', x0: 'A<sub>0</sub>', l: 'λ', t: 't' } };
 // valeurs de test : N₀, λ et t varient, N s'en déduit
-function valeurs(s) {
-  return () => {
-    const x0 = 100 + Math.random() * 9900, l = .01 + Math.random() * .5, t = 1 + Math.random() * 20;
-    return { [s + '0']: x0, l, t, [s]: x0 * Math.exp(-l * t) };
-  };
+function valeurs() {
+  const x0 = 100 + Math.random() * 9900, l = .01 + Math.random() * .5, t = 1 + Math.random() * 20;
+  return { x0, l, t, x: x0 * Math.exp(-l * t) };
 }
 // étapes de la démonstration (comme le cours : N₀ e^(−λt) = N → t = ln(N/N₀) / (−λ))
 function etapesDemo(s) {
-  const g = G[s], n0 = `${s}<sub>0</sub>`;
+  const n0 = `${s}<sub>0</sub>`;
   return [
-    { L: P([S(g.x0), expo(g)]), R: P(S(g.x)) },
-    { op: `÷ ${n0}`, L: P([expo(g)]), R: P([frac(g)]), texte: `On divise les deux membres par ${n0} : ${n0}, qui multipliait e<sup>${M}λt</sup>, passe de l'autre côté en divisant.` },
-    { op: 'ln', L: P([FN('ln', P([expo(g)]))]), R: P([FN('ln', P([frac(g)]))]), texte: 'On applique aux deux membres la fonction ln, réciproque de e<sup>x</sup>.' },
-    { centre: 'car ln(e<sup>a</sup>) = a', L: P(S(g.l, g.t), true), R: P([FN('ln', P([frac(g)]))]), texte: 'ln annule e<sup>x</sup>.' },
-    { op: `÷ (${M}λ)`, L: P(S(g.t)), R: P([F(P([FN('ln', P([frac(g)]))]), P(S(g.l), true))]), final: true, texte: `On divise les deux membres par (${M}λ) : ${M}λ, qui multipliait t, passe de l'autre côté en divisant.` },
+    { eq: 'x0 exp(- l t) = x' },
+    { op: `÷ ${n0}`, eq: 'exp(- l t) = [x|x0]', texte: `On divise les deux membres par ${n0} : ${n0}, qui multipliait e<sup>${M}λt</sup>, passe de l'autre côté en divisant.` },
+    { op: 'ln', eq: 'ln(exp(- l t)) = ln([x|x0])', texte: 'On applique aux deux membres la fonction ln, réciproque de e<sup>x</sup>.' },
+    { centre: 'car ln(e<sup>a</sup>) = a', eq: '- l t = ln([x|x0])', texte: 'ln annule e<sup>x</sup>.' },
+    { op: `÷ (${M}λ)`, eq: 't = [ln([x|x0])|- l]', final: true, texte: `On divise les deux membres par (${M}λ) : ${M}λ, qui multipliait t, passe de l'autre côté en divisant.` },
   ];
 }
-const MODE_EMPLOI = `<p class="eq-consigne"><b>Comment faire :</b> glisse un outil (×(−1), e<sup>x</sup>, ln) sur <b>un membre</b> de l'équation, puis sur l'autre membre : une opération se fait toujours des deux côtés. Glisse la barre de fraction ··· / ··· sur une case pour créer une fraction. Glisse une grandeur pour la déplacer, touche-la pour la supprimer. Un dénominateur se glisse de l'autre côté du signe =. ⇄ inverse les deux membres. Après chaque étape : « Vérifier l'étape ».</p>`;
+const MODE_EMPLOI = `<p class="eq-consigne"><b>Comment faire :</b> glisse un outil (×(−1), e<sup>x</sup>, ln) de la réserve sur <b>un membre</b> de l'équation, puis sur l'autre membre : une opération se fait toujours des deux côtés. Glisse la barre de fraction ··· / ··· sur une case pour créer une fraction. Glisse une grandeur pour la déplacer ; touche-la puis touche sa croix ✕ pour l'effacer. Un dénominateur se glisse de l'autre côté du signe =. ⇄ inverse les deux membres, ↶ annule la dernière action. Après chaque étape : « Vérifier l'étape ».</p>`;
 const GAGNER = '<p class="eq-consigne"><b>Pour gagner du temps</b>, tu peux faire plusieurs manipulations à la suite, puis cliquer une seule fois sur « Vérifier l\'étape ».</p>';
 const LIEN_PH = `<div class="ph-lien-app"><p>La même méthode avec log et 10<sup>x</sup> : la définition du pH.</p>
   <span class="er-actions" style="margin:0"><a class="btn-small" href="../../ph/modules/module_2_cours.html" target="_blank" rel="noopener">pH : isoler [H<sub>3</sub>O<sup>+</sup>] ↗</a>
@@ -80,26 +68,16 @@ const LIEN_PH = `<div class="ph-lien-app"><p>La même méthode avec log et 10<su
 
 // éditeur d'équation : partie 'perso' d'un « À toi » (réussi quand t est isolé)
 function partieEditeur(s) {
-  const g = G[s], n0 = `${s}<sub>0</sub>`;
-  return { type: 'perso', solution: `t = ${M}ln(${s}/${n0}) / λ, c'est la même chose que t = ln(${s}/${n0}) / (${M}λ).`,
-    monter(zone, api) {
-      const d = document.createElement('div');
-      zone.appendChild(d);
-      const ed = new PH.Editeur(d, {
-        tuiles: [g.x, g.x0, g.l, g.t], cible: 't', outils: ['neg', 'exp', 'ln', 'frac'], valeurs: valeurs(s),
-        gauche: () => P([S(g.x0), expo(g)]), droite: () => P(S(g.x)),
-        aides: [
-          `${n0} multiplie e<sup>${M}λt</sup> : glisse-le de l'autre côté, il divisera. Glisse d'abord la barre de fraction sur ${s}, puis ${n0} dans le dénominateur.`,
-          'Applique ln, la réciproque de e<sup>x</sup>, aux deux membres : glisse l\'outil ln sur le membre de gauche, puis sur celui de droite.',
-          'λ multiplie t : glisse la barre de fraction sur le membre de droite, puis glisse λ dans le dénominateur.',
-          'Il reste un signe − devant t : glisse l\'outil ×(−1) sur les deux membres.',
-        ],
-        solution: etapesDemo(s),
-        onErreur: () => api.compterErreur(),
-        onResolu: () => api.reussi(),
-      });
-      return { montrer() { ed.montrerSolution(); } };
-    } };
+  const n0 = `${s}<sub>0</sub>`;
+  return EQ.partie(EQ.exercice({
+    eq: 'x0 exp(- l t) = x', g: G[s], cible: 't', valeurs, outils: ['exp', 'ln'],
+    aides: [
+      `${n0} multiplie e<sup>${M}λt</sup> : glisse-le de l'autre côté, il divisera. Glisse d'abord la barre de fraction sur ${s}, puis ${n0} dans le dénominateur.`,
+      'Applique ln, la réciproque de e<sup>x</sup>, aux deux membres : glisse l\'outil ln sur le membre de gauche, puis sur celui de droite.',
+      'λ multiplie t : glisse la barre de fraction sur le membre de droite, puis glisse λ dans le dénominateur.',
+      'Il reste un signe − devant t : glisse l\'outil ×(−1) sur les deux membres.',
+    ],
+  }), { solution: `t = ${M}ln(${s}/${n0}) / λ, c'est la même chose que t = ln(${s}/${n0}) / (${M}λ).`, etapes: etapesDemo(s), g: G[s] });
 }
 
 /* ---------- 1. ln, réciproque de eˣ ---------- */
@@ -130,8 +108,8 @@ function etape2(c) {
   c.ajouter(carte, `<div class="cours-bloc"><p>On connaît N<sub>0</sub>, λ et N : il faut isoler t, avec <b>la même opération sur les deux membres</b> à chaque étape.</p></div>
     <p class="er-consigne">Suis la démonstration, étape par étape.</p>`);
   const zone = c.ajouter(carte, '');
-  PH.demo(zone, {
-    etapes: etapesDemo('N'),
+  EQ.demo(zone, {
+    etapes: etapesDemo('N'), g: G.N,
     onFini: () => {
       c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Pour calculer t quand on connaît N :</b></p>
           <p class="crs-formule">t = ${RAD.fr('ln(N / N<sub>0</sub>)', `${M}λ`)}</p></div>

@@ -13,7 +13,9 @@
        dragOverClass: 'drag-over',       // classe ajoutée à la zone survolée (optionnel)
        onDrop: (item, zone, evt) => { ... },  // zone est null si déposé hors zone valide
        onCancel: (item) => { ... },       // geste interrompu (pointercancel), sans dépôt
-       fantome: (item) => el              // facultatif : élément à copier pour le fantôme (par défaut, item)
+       fantome: (item) => el,             // facultatif : élément à copier pour le fantôme (par défaut, item)
+       racine: el                         // facultatif : élément où chercher les zones (plusieurs éditeurs
+                                          // dans la page : le défilement automatique suit le sien)
      });
 
    Pendant le glisser, un "fantôme" (clone de l'élément) suit le
@@ -47,6 +49,7 @@
     const onStart = options.onStart;
     const onCancel = options.onCancel;
     const fantome = options.fantome;
+    const racine = options.racine || document;
 
     let ghost = null;
     let currentZone = null;
@@ -142,7 +145,7 @@
       // defile (ex. un outil pris dans la palette, a cote de l'equation) :
       // a defaut, on repere le conteneur qui defile via une zone de depot
       // valide, forcement a l'interieur de cette meme zone
-      scrollContainer = findHScrollAncestor(item) || findHScrollAncestor(document.querySelector(zoneSelector));
+      scrollContainer = findHScrollAncestor(item) || findHScrollAncestor(racine.querySelector(zoneSelector));
       scrollRAF = requestAnimationFrame(autoScrollTick);
       if (onStart) onStart(item);
       e.preventDefault();

@@ -44,7 +44,7 @@ En cas de doute, regarder les valeurs que l'application tire au hasard : si une 
 ## 5. Méthode
 
 1. Lister les applications : `APPS` dans `index.html` (champ `dossier`).
-2. Pour chacune, repérer les champs de saisie numériques : `grep -rn "type: 'nombre'\|type: 'sci'\|type: 'champs'\|inputmode=\"decimal\"" <dossier>/` (moteurs : `assets/cours.js`, `cinematique/modules/cin.js`, `ph/modules/ph.js`, `transport-electricite/modules/te.js`, moteurs propres à chaque application).
+2. Pour chacune, repérer les champs de saisie numériques : `grep -rn "type: 'nombre'\|type: 'sci'\|type: 'champs'\|inputmode=\"decimal\"" <dossier>/` (moteurs : `assets/cours.js`, `cinematique/modules/cin.js`, `ph/modules/ph.js`, `puissance-active/modules/pa-moteur.js` (copie du précédent), `transport-electricite/modules/te.js`, moteurs propres à chaque application).
 3. Si l'application utilise un moteur commun, ajouter l'option `calc` **une fois** dans le moteur (rendu après l'unité), puis la mettre sur les parties concernées.
 4. Décider champ par champ avec le §4, sans toucher au contenu scientifique, aux diagnostics ni à la présentation du reste.
 5. Ne modifier que l'ajout de l'icône.

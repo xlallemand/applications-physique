@@ -40,7 +40,7 @@
               où aucune erreur n'est validée, comme une réaction réglée en direct).
 
    Outil propre à l'application qui doit se déplier avec « Afficher tout le cours »
-   (par ex. la démonstration étape par étape PH.demo de ph/modules/eq.js) :
+   (par ex. la démonstration étape par étape EQ.demo de assets/equations.js) :
      COURS.vivant(obj) l'inscrit (obj.deplier() sera appelé), COURS.oublier(obj) le retire.
    ============================================================ */
 (function () {

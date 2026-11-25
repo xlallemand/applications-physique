@@ -1,0 +1,408 @@
+/* ============================================================
+   Éditeur d'équations partagé (objet EQ, assets/equations.js) : styles
+   Origine : equations-physique-mobile/modules/editeur.css (mise en page de
+   l'éditeur, ed-*), tuiles.css (visuel des tuiles, de la réserve, du fantôme)
+   et le dessin de la racine carrée de fiches.css, dans cet ordre (même rendu
+   que dans l'application mobile) ; puis la démonstration étape par étape (eqd-*).
+   Couleurs : variables de assets/theme.css.
+   ============================================================ */
+
+/* ══════════ éditeur (editeur.css) ══════════ */
+.frac-wrap-static { display:inline-flex; flex-direction:column; align-items:center; margin:0 6px; vertical-align:middle; }
+.frac-num-static, .frac-den-static { padding:0 6px; }
+.frac-line-static { width:100%; height:2px; background:var(--ink); border-radius:2px; }
+.eq-tile-static { font-weight:700; color:var(--ink); margin:0 4px; }
+
+.eq-row { display:flex; align-items:center; justify-content:center; justify-content:safe center; flex-wrap:nowrap; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
+.eq-row::-webkit-scrollbar { height:4px; }
+.eq-side { display:flex; align-items:center; flex-shrink:0; }
+.eq-sign { font-size:1.8rem; font-weight:800; color:var(--ink); margin:0 16px; flex-shrink:0; }
+.eq-line-static { display:flex; align-items:center; justify-content:center; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+@media (max-width:480px) {
+    .eq-tile, .eq-tile-frozen { font-size:.85rem; padding:7px 10px; }
+    .eq-tile { min-height:36px; }
+    .eq-sign { font-size:1.4rem; margin:0 8px; }
+    .eq-tile-static { font-size:.9rem; }
+    .flip-btn { width:36px; height:36px; font-size:1rem; margin-left:8px; }
+}
+
+.slot-simple {
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
+    min-width:70px; min-height:56px; padding:8px 12px; position:relative;
+    border:2px dashed var(--ink-3); border-radius:10px; background:var(--sheet); transition:all .2s;
+}
+.slot-simple.drag-over { background:var(--cle-bg); }
+.slot-placeholder { color:var(--ink-3); font-weight:700; font-size:1.1rem; }
+
+.eq-tile {
+    display:inline-flex; align-items:center; gap:6px; position:relative;
+    background:var(--paper-2); border:2px solid var(--line-strong); border-radius:8px;
+    padding:9px 13px; min-height:40px; font-weight:700; color:var(--ink); cursor:grab; touch-action:none;
+}
+.eq-tile.dragging { opacity:.4; }
+.eq-tile.tile-highlight { background:var(--cle-bg); border-color:var(--accent); color:var(--accent-ink); }
+.eq-tile.drag-over { border-color:var(--accent); box-shadow:none; }
+.mult-sign { display:inline-block; font-weight:800; color:var(--ink-3); margin:0 3px; font-size:1rem; flex-shrink:0; }
+.tile-del {
+    width:16px; height:16px; border-radius:50%; background:var(--ink); color:var(--sheet);
+    font-size:10px; line-height:16px; text-align:center; cursor:pointer;
+}
+
+/* gap : suffisamment large pour qu'un exposant (^2, ^3) au numerateur ou
+   au denominateur, qui s'aligne en haut de son propre bloc, ne finisse
+   pas colle contre le trait de fraction juste a cote */
+.frac-wrap { display:inline-flex; flex-direction:column; align-items:center; gap:13px; position:relative; margin:0 8px; flex-shrink:0; }
+.frac-num-wrap, .frac-den-wrap { position:relative; }
+.frac-den-wrap.den-draggable { cursor:grab; touch-action:none; border-radius:8px; }
+.frac-den-wrap.den-draggable:hover { background:var(--cle-bg); }
+.frac-den-wrap.dragging { opacity:.4; }
+.frac-line { width:100%; height:3px; background:var(--ink); border-radius:2px; }
+.frac-del {
+    position:absolute; top:-9px; right:-9px; width:20px; height:20px; border-radius:50%;
+    background:var(--ink); color:var(--sheet); font-size:11px; line-height:16px; text-align:center;
+    cursor:pointer; border:2px solid var(--sheet); z-index:1;
+}
+
+.flip-btn {
+    width:44px; height:44px; border-radius:50%; background:var(--paper); border:2px solid var(--line-strong);
+    color:var(--ink); font-size:1.3rem; font-weight:800; margin-left:12px; flex-shrink:0;
+}
+.flip-btn:hover { background:var(--paper-2); }
+
+.eq-tile-frozen { display:inline-flex; align-items:center; background:var(--paper-2); border:2px solid var(--line-strong); border-radius:8px; padding:6px 10px; font-weight:700; color:var(--ink-2); margin:0 3px; }
+.step-row { border-bottom:1px dashed var(--line); }
+
+.palette-tile {
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:56px; min-height:44px; padding:8px 14px;
+    background:var(--paper); border:2px solid var(--line-strong); border-radius:10px;
+    font-weight:700; color:var(--ink); cursor:grab; touch-action:none; user-select:none;
+}
+.palette-tile.dragging { opacity:.4; }
+.palette-frac { display:inline-flex; flex-direction:column; align-items:center; padding:6px 12px; }
+.palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:var(--ink); }
+.palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:var(--ink); }
+.palette-tile.func-tool { background:var(--paper-2); border-color:var(--accent); color:var(--ink); }
+
+.insert-zone {
+    width:34px; min-height:56px; border:2px dashed var(--ink-3); border-radius:8px;
+    opacity:0; transition:opacity .15s; flex-shrink:0;
+}
+.insert-zone.drag-over { background:var(--paper-2); border-color:var(--accent); opacity:1; }
+body.dnd-active .insert-zone { opacity:.55; }
+
+.sum-wrap { display:inline-flex; align-items:center; gap:2px; flex-shrink:0; }
+.sum-parens { font-size:1.5rem; font-weight:800; color:var(--ink-3); }
+.paren-wrap { display:inline-flex; align-items:center; }
+.paren-bracket { font-weight:800; color:var(--ink-3); font-size:1.3rem; display:inline-block; line-height:1; }
+.paren-content { display:inline-flex; align-items:center; }
+.sum-term { display:inline-flex; align-items:center; gap:4px; border-radius:10px; padding:2px; touch-action:none; }
+.sum-term.term-draggable { cursor:grab; }
+.sum-term.term-draggable:hover { background:var(--cle-bg); }
+.sum-term.dragging { opacity:.4; }
+.sum-zero { font-weight:800; color:var(--ink); font-size:1.2rem; padding:0 6px; }
+.sum-sign { font-weight:800; color:var(--ink); font-size:1.2rem; display:inline-block; }
+.sum-sign.sum-sign-drag { cursor:grab; touch-action:none; border-radius:8px; padding:2px 5px; }
+.sum-sign.sum-sign-drag:hover { background:var(--cle-bg); }
+.sum-sign.sum-sign-drag.dragging { opacity:.4; }
+@keyframes signFlip {
+    0%   { transform:rotateY(-170deg) scale(1.8); color:var(--accent); background:var(--cle-bg); }
+    55%  { transform:rotateY(-90deg) scale(1.8); color:var(--accent); background:var(--cle-bg); }
+    100% { transform:rotateY(0deg) scale(1); background:transparent; }
+}
+.sum-sign.just-flipped { animation: signFlip 1.3s ease; border-radius:6px; display:inline-block; }
+/* le fantome d'un signe qui disparait completement (voir
+   flashVanishingSign) monte et s'estompe en tournant, plutot que de
+   rester immobile a une position figee : la ligne d'equation etant
+   centree, un changement de cote fait bouger tout ce qui suit le signe
+   "=" et une position figee finit facilement collee contre un element
+   qui n'a rien a voir (le terme qui vient d'arriver, le bouton ⇄...) */
+@keyframes signVanish {
+    0%   { transform:translateY(0) rotateY(-170deg) scale(1.8); color:var(--accent); background:var(--cle-bg); opacity:1; }
+    55%  { transform:translateY(-6px) rotateY(-90deg) scale(1.6); color:var(--accent); background:var(--cle-bg); opacity:1; }
+    100% { transform:translateY(-28px) rotateY(0deg) scale(.8); background:transparent; opacity:0; }
+}
+.sign-vanish-ghost { animation: signVanish 1.3s ease forwards; border-radius:6px; }
+/* meme si le signe n'est pas affiche (premier terme positif implicite),
+   le terme entier doit clignoter pour signaler le changement de signe */
+@keyframes termFlash {
+    0%   { background:var(--cle-bg); box-shadow:0 0 0 3px var(--cle-line); }
+    100% { background:transparent; box-shadow:0 0 0 3px transparent; }
+}
+.sum-term.term-flash, .sum-wrap.term-flash, .eq-side.term-flash { animation: termFlash 1.3s ease; border-radius:10px; }
+.sumterm-dragging .eq-side[data-path="left"], .sumterm-dragging .eq-side[data-path="right"],
+.fracden-dragging .eq-side[data-path="left"], .fracden-dragging .eq-side[data-path="right"] {
+    outline: 3px dashed var(--accent); outline-offset: 5px; border-radius: 10px;
+    background: var(--paper); padding: 10px 20px;
+}
+.sumterm-dragging .eq-side.drag-over, .fracden-dragging .eq-side.drag-over { background: var(--cle-bg); border-radius: 10px; }
+.eq-side.sumterm-source { outline:none !important; background:none !important; }
+
+/* ── Fonctions et leur réciproque ── */
+.func-wrap { display:inline-flex; align-items:center; margin:0 6px; }
+.func-name { font-weight:800; color:var(--ink); margin-right:2px; }
+.func-exp { font-weight:800; color:var(--ink); font-size:.75em; margin-left:1px; align-self:flex-start; }
+.pow-base { font-weight:800; color:var(--ink); font-size:1.15em; }
+/* exposant de 10 et de e : en petit, en haut à droite (son bas au niveau du haut de la base) */
+.func-wrap.pow-wrap { align-items:flex-end; }
+.pow-base { line-height:1; padding-bottom:.1em; }
+.func-exp-inner { font-size:.72em; display:inline-flex; align-items:center; margin:0 0 1.15em 1px; }
+.func-exp-inner .slot-simple { min-height:30px; padding:3px 6px; }
+.eq-line-static .func-exp-inner, .step-row .func-exp-inner { margin-bottom:.95em; }
+/* fraction dans une fonction (log, ln, racine…) */
+.frac-wrap.frac-fonction { gap:6px; margin:0 4px; }
+.func-name { margin-right:1px; }
+/* le signe d'une somme (ex. le "-" de e^(-λt)) est en temps normal a une
+   taille fixe en rem, adaptee au contexte habituel des equations ; place
+   ici dans un exposant deja reduit a .72em, cette taille absolue le fait
+   ressortir bien plus gros que le reste (λ×t), qui lui suit correctement
+   la reduction — on la rend donc relative a ce contexte */
+.func-exp-inner .sum-sign { font-size:1em; }
+/* tuile a l'interieur d'une fonction : meme apparence qu'une tuile normale
+   (pas de gris "desactive"), mais non manipulable tant que la fonction
+   n'est pas retiree */
+.eq-tile-locked {
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--paper-2); border:2px solid var(--line-strong); border-radius:8px;
+    padding:9px 13px; min-height:40px; font-weight:700; color:var(--ink); margin:0 3px;
+}
+/* padding-top : un exposant (^2, ^3) a l'interieur, aligne en haut de son
+   propre bloc, ne doit pas finir colle contre le toit de la racine */
+.sqrt-inner { padding-top:9px; }
+/* racine cubique : meme dessin que la racine carree (crochet + trait),
+   avec un petit "3" en indice au-dessus du crochet */
+.cbrt-index { position:absolute; left:-6px; top:0; font-size:.65em; font-weight:800; color:var(--ink); line-height:1.4; }
+.inline-frac { display:inline-flex; align-items:center; gap:3px; }
+.inline-frac-slash { font-weight:800; color:var(--ink); margin:0 1px; }
+
+/* ── mise en page de l'éditeur (modules/editeur.js) ── */
+.ed { margin-top:14px; }
+.ed-tete { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:6px; }
+.ed-titre { font-size:.78rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); }
+.ed-tete-b { display:flex; gap:8px; }
+/* étapes validées : équation de départ puis étapes justes, alignées sur le signe = */
+.ed-hist { display:grid; grid-template-columns:1fr auto 1fr auto; align-items:center; column-gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.ed-ligne { display:contents; }
+.ed-ligne > * { padding:6px 0; border-bottom:1px dashed var(--paper-3); }
+.ed-g { display:flex; justify-content:flex-end; align-items:center; }
+.ed-d { display:flex; justify-content:flex-start; align-items:center; }
+.ed-hist .eq-sign { font-size:1.3rem; margin:0 6px; text-align:center; }
+.ed-coche { color:var(--success); font-weight:800; min-width:1.2em; }
+.ed-ligne0 > * { color:var(--ink-2); }
+.ed-ligne:not(.ed-ligne0) > :empty { min-width:1.2em; }
+/* l'équation à manipuler */
+.ed-aide-t { margin:12px 0 8px; font-size:.92rem; color:var(--ink-2); text-align:center; }
+.ed-zone { min-height:110px; padding:18px 10px; border:1.5px dashed var(--cle-line); border-radius:16px; background:var(--paper); }
+/* cadre de résolution : grandeur à isoler en haut à gauche */
+.ed-cadre { position:relative; }
+.ed-cadre .ed-zone { padding-top:34px; }
+.ed-isoler { position:absolute; top:8px; left:12px; z-index:1; font-size:.85rem; color:var(--ink-2); pointer-events:none; }
+.ed-isoler b { color:var(--accent); font-size:1.05rem; }
+.ed-zone.drag-over { background:var(--paper-2); border-color:var(--accent); }
+.ed-pal-t { margin:14px 0 6px; font-size:.78rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); }
+.ed-palette { display:flex; flex-wrap:wrap; gap:10px; padding:12px; border:1px solid var(--line); border-radius:16px; background:var(--paper); }
+.ed-verif { display:flex; justify-content:center; margin-top:14px; }
+/* « Un coup de pouce ? » (exercice.aides) à côté de « Vérifier l'étape » */
+.ed-verif:has(.ed-pouce) { flex-wrap:wrap; align-items:center; gap:10px; }
+.ed-retour { margin-top:10px; }
+.ed-retour .callout { margin:0; }
+/* fonction qui multiplie d'autres facteurs : elle se déplace en bloc */
+.func-bloc { display:inline-flex; align-items:center; border-radius:12px; padding:2px; cursor:grab; touch-action:none; }
+@media (hover:hover) { .func-bloc:hover { background:var(--cle-bg); } }
+.func-bloc.dragging { opacity:.3; }
+/* distance algébrique (OA) : trait au-dessus */
+.barre { text-decoration:overline; }
+@media (max-width:480px) {
+  .ed-zone { padding:14px 6px; }
+  .ed-palette { padding:10px; gap:8px; }
+}
+
+/* ══════════ tuiles (tuiles.css) ══════════ */
+/* ── tuile : étiquette blanche en léger relief, cible tactile de 46 px ── */
+.eq-tile {
+    justify-content:center; gap:0; box-sizing:border-box;
+    min-width:46px; min-height:46px; padding:4px 13px;
+    background:var(--sheet); border:1.5px solid var(--line-strong); border-bottom-width:4px; border-radius:12px;
+    font-size:1.15em; line-height:1; color:var(--ink); box-shadow:none;
+    user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;
+    transition:border-color .15s, background .15s, transform .15s, opacity .15s;
+}
+@media (hover:hover) { .eq-tile:hover { border-color:var(--accent); } }
+.eq-tile:focus-visible, .slot-simple:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.eq-tile.dragging { opacity:.3; }
+/* grandeur à déplacer, mise en évidence */
+.eq-tile.tile-highlight { background:var(--cle-bg); border-color:var(--accent); color:var(--accent-ink); box-shadow:none; }
+/* tuile survolée quand elle sert de zone de dépôt */
+.eq-tile.drag-over { border-color:var(--accent); background:var(--cle-bg); box-shadow:none; }
+/* tuile figée (équation affichée, historique) ou dans une fonction : même étiquette blanche
+   que les autres, jamais grisée */
+.eq-tile-frozen, .eq-tile-locked {
+    display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;
+    min-width:46px; min-height:46px; padding:4px 13px; margin:0 3px;
+    background:var(--sheet); border:1.5px solid var(--line-strong); border-bottom-width:4px; border-radius:12px;
+    font-size:1.15em; font-weight:700; line-height:1; color:var(--ink); white-space:nowrap;
+    user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;
+}
+/* terme qu'on ne peut pas déplacer : on peut l'attraper, il tremble et le message s'affiche */
+[data-ept-bloque] { cursor:grab; }
+.ept-refus { animation:ept-refus .35s ease-in-out; border-color:var(--danger) !important; }
+@keyframes ept-refus { 20%, 60% { transform:translateX(-4px); } 40%, 80% { transform:translateX(4px); } }
+/* tuile dans un exposant : plus petite */
+.func-exp-inner .eq-tile, .func-exp-inner .eq-tile-locked { min-width:28px; min-height:28px; padding:2px 7px; border-bottom-width:3px; border-radius:9px; font-size:1em; }
+
+/* les anciennes croix rouges : remplacées par la sélection (tuiles.js) */
+.tile-del, .frac-del { display:none !important; }
+
+/* signe × entre deux tuiles : plus lisible */
+.mult-sign { color:var(--ink-2); font-weight:700; }
+
+/* grandeurs en italique ; indices et exposants droits */
+.ept-i { font-style:italic; margin-right:.04em; }
+.eq-tile sub, .eq-tile sup, .palette-tile sub, .palette-tile sup { font-style:normal; }
+
+/* ── case où l'on dépose : discrète au repos, en couleur pendant un glisser ── */
+.slot-simple {
+    gap:4px; min-width:58px; min-height:58px; padding:5px;
+    border:1.5px dashed var(--paper-3); border-radius:14px; background:transparent;
+    transition:border-color .15s, background .15s;
+}
+body.dnd-active .slot-simple { border-color:var(--accent); }
+.slot-simple.drag-over { background:var(--cle-bg); border-style:solid; border-color:var(--accent); }
+.func-exp-inner .slot-simple { min-width:40px; }
+
+/* ── réserve (palette) ── */
+.palette-tile {
+    box-sizing:border-box; min-width:46px; min-height:46px;
+    background:var(--sheet); border:1.5px solid var(--line-strong); border-bottom-width:4px; border-radius:12px;
+    font-size:1.15em; line-height:1;
+    -webkit-tap-highlight-color:transparent;
+}
+.palette-tile.dragging { opacity:.3; }
+/* outils (opérations appliquées à l'équation : fraction, parenthèses, ×(−1), fonctions)
+   distincts des grandeurs : pastille teintée, bord en pointillés, sans relief, séparés des grandeurs */
+.palette-tile.func-tool, .palette-tile.palette-frac {
+    border-radius:999px; border:1.5px dashed var(--accent); border-bottom-width:1.5px;
+    background:var(--cle-bg); color:var(--accent-ink); font-weight:800; padding-left:16px; padding-right:16px;
+}
+.palette-tile.palette-frac .dots { color:var(--accent-ink); }
+.palette-tile.palette-frac .frac-line { background:var(--accent-ink); }
+.palette-tile:not(.func-tool):not(.palette-frac) + .func-tool,
+.palette-tile:not(.func-tool):not(.palette-frac) + .palette-frac,
+:is(.func-tool, .palette-frac) + .palette-tile:not(.func-tool):not(.palette-frac) { position:relative; margin-left:14px; }
+.palette-tile:not(.func-tool):not(.palette-frac) + .func-tool::before,
+.palette-tile:not(.func-tool):not(.palette-frac) + .palette-frac::before,
+:is(.func-tool, .palette-frac) + .palette-tile:not(.func-tool):not(.palette-frac)::before {
+    content:''; position:absolute; left:-15px; top:4px; bottom:4px; border-left:1.5px solid var(--line-strong);
+}
+/* outil fonction réciproque : ce qu'il annule, écrit dessous */
+.palette-tile.func-tool.avec-note { flex-direction:column; gap:3px; border-radius:16px; padding-top:6px; padding-bottom:6px; }
+.outil-note { display:block; font-size:.62rem; font-weight:700; line-height:1.15; color:var(--accent-ink); white-space:nowrap; }
+/* pendant le glisser d'une tuile de l'équation : la réserve accepte de la reprendre */
+.ept-reserve-active { outline:2px dashed var(--ink-3); outline-offset:3px; }
+.ept-reserve-survol { outline:2px solid var(--ink); background:var(--paper-2) !important; }
+
+/* ── fantôme qui suit le doigt : incliné, avec ombre (seule ombre permise) ── */
+.drag-ghost {
+    pointer-events:none; opacity:1 !important;
+    transform:rotate(-4deg) scale(1.06);
+    box-shadow:0 10px 24px color-mix(in srgb, var(--ink) 22%, transparent);
+    transition:transform .15s, background .15s, border-color .15s;
+}
+.eq-tile.drag-ghost, .palette-tile.drag-ghost { border-color:var(--accent); }
+.drag-ghost .ept-croix { display:none; }
+/* au-dessus de la réserve : la tuile sera effacée */
+.drag-ghost.ept-efface { transform:scale(.92); background:var(--paper-2); border-color:var(--ink-2); border-style:dashed; }
+.drag-ghost.ept-efface > * { opacity:.45; text-decoration:line-through; }
+.drag-ghost.ept-efface::after {
+    content:'✕ Lâche pour effacer'; position:absolute; top:calc(100% + 10px); left:50%; transform:translateX(-50%);
+    white-space:nowrap; font:700 .78rem/1 var(--font-sans); color:var(--sheet); background:var(--ink);
+    border-radius:999px; padding:6px 12px;
+}
+/* retour en place d'un élément lâché hors de toute case */
+.drag-ghost.ept-retour { transition:left .2s ease-out, top .2s ease-out, transform .2s; transform:none; box-shadow:none; z-index:1000; }
+.ept-attente { opacity:.3; }
+
+/* ── élément qui arrive, élément qui s'efface ── */
+.eq-tile.ept-arrive { animation:ept-arrive .45s ease-out; }
+@keyframes ept-arrive { from { background:var(--cle-bg); border-color:var(--accent); transform:scale(1.15); } }
+.eq-tile.ept-part { opacity:0; transform:scale(.5); }
+
+/* ── sélection : la croix noire (le rouge reste réservé au faux) ── */
+.eq-tile.ept-sel { border-color:var(--ink); transform:translateY(-2px); }
+.eq-tile.ept-sel:focus-visible { outline:none; }
+.slot-simple.ept-sel { position:relative; border-color:var(--ink); border-style:solid; }
+.slot-simple[tabindex] { cursor:pointer; }
+.ept-croix {
+    position:absolute; top:-14px; right:-14px; width:28px; height:28px; padding:0;
+    display:grid; place-items:center; border-radius:50%; border:2px solid var(--sheet);
+    background:var(--ink); color:var(--sheet); font:800 .8rem/1 var(--font-sans); font-style:normal;
+    cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; z-index:3;
+    animation:ept-pop .15s ease-out;
+}
+.ept-croix::before { content:''; position:absolute; inset:-8px; border-radius:50%; }  /* cible tactile élargie */
+@keyframes ept-pop { from { transform:scale(.3); opacity:0; } }
+
+/* ── bouton « ↶ Annuler » ── */
+.ep-barre { gap:8px; }
+.ep-annuler:disabled { opacity:.4; cursor:default; }
+
+@media (max-width:480px) {
+    .eq-tile { font-size:1em; min-width:40px; min-height:42px; padding:3px 10px; }
+    .palette-tile { font-size:1em; min-width:42px; min-height:42px; }
+    .slot-simple { min-width:50px; min-height:52px; padding:4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .eq-tile, .slot-simple, .drag-ghost, .ept-croix { transition:none !important; animation:none !important; }
+}
+
+/* ── racine carrée : crochet relié au trait qui couvre tout ce qui est dessous ──
+   Le crochet (SVG) prend la hauteur du contenu ; son sommet est au milieu du trait.
+   Repère retourné (scaleY(-1)) : y = 0 en bas, 100 % au niveau du trait. */
+.sqrt-wrap { --rac-ep: 3px; --rac-l: 15px; position: relative; display: inline-flex; align-items: stretch; vertical-align: middle; margin: 0 4px; padding-left: var(--rac-l); flex-shrink: 0; color: var(--ink); }
+.sqrt-hook { position: absolute; left: 0; top: calc(var(--rac-ep) / 2); bottom: 0; width: var(--rac-l); height: calc(100% - var(--rac-ep) / 2); overflow: visible; transform: scaleY(-1); }
+.sqrt-hook line { stroke: currentColor; stroke-width: var(--rac-ep); stroke-linecap: round; }
+.sqrt-inner { display: inline-flex; align-items: center; border-top: var(--rac-ep) solid currentColor; padding: 4px 5px 0 3px; color: var(--ink); }
+
+/* ── démonstration étape par étape (EQ.demo) : lignes alignées sur le signe = ── */
+.eqd { margin: 10px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.eqd-grille { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; row-gap: 2px; font-size: 1.15rem; min-width: min-content; max-width: 680px; margin: 0 auto; }
+.eqd-l { display: contents; }
+.eqd-l > span { display: flex; align-items: center; padding: 6px 0; }
+.eqd-g { justify-content: flex-end; }
+.eqd-d { justify-content: flex-start; }
+.eqd-eq { font-size: 1.5rem; font-weight: 800; padding: 0 12px !important; }
+.eqd .eq-side { flex-shrink: 0; }
+.eqd-final > span { background: var(--cle-bg); align-self: stretch; }
+.eqd-final .eqd-g { border-radius: 14px 0 0 14px; padding-left: 12px !important; }
+.eqd-final .eqd-d { border-radius: 0 14px 14px 0; padding-right: 12px !important; }
+.eqd-op { display: contents; }
+.eqd-op > span { display: flex; align-items: center; gap: 6px; color: var(--accent); font-size: 1rem; }
+.eqd-op-g { justify-content: flex-end; }
+.eqd-op-d { justify-content: flex-start; }
+.eqd-op b { font-weight: 800; white-space: nowrap; }
+.eqd-svg { width: 34px; height: 28px; flex-shrink: 0; }
+.eqd-svg-d { transform: scaleX(-1); }
+.eqd-centre, .eqd-texte { grid-column: 1 / -1; text-align: center; }
+.eqd-centre { color: var(--accent); font-weight: 800; font-size: .95rem; padding: 2px 0; }
+.eqd-texte { font-size: .92rem; color: var(--ink-2); line-height: 1.45; padding: 0 0 6px; }
+.eqd-new { animation: eqd-apparait .35s ease; }
+@keyframes eqd-apparait { from { opacity: 0; transform: translateY(6px); } }
+.eqd-actions { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.eqd-actions:empty { display: none; }
+/* correction affichée sous un éditeur figé */
+.ed-correction { margin-top: 10px; }
+@media (max-width: 640px) {
+  .eqd-grille { display: flex; flex-direction: column; align-items: center; font-size: 1rem; min-width: 0; }
+  .eqd-l { display: flex; align-items: center; justify-content: center; max-width: 100%; }
+  .eqd-l > span { padding: 4px 0; }
+  .eqd-final { background: var(--cle-bg); border-radius: 14px; padding: 0 12px; }
+  .eqd-final > span { background: none; }
+  .eqd-final .eqd-g, .eqd-final .eqd-d { padding-left: 0 !important; padding-right: 0 !important; }
+  .eqd-op { display: flex; justify-content: center; gap: 28px; }
+  .eqd-op > span:nth-child(2) { display: none; }
+  .eqd-op > span { font-size: .9rem; }
+  .eqd-svg { width: 26px; height: 22px; }
+  .eqd-eq { font-size: 1.2rem; padding: 0 7px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .eqd-new { animation: none; } }

@@ -143,7 +143,7 @@ Toute page de simulation ou de manipulation (et toute nouvelle page de ce type) 
 
 ### Cours
 
-Cours **par étapes**, écrit avec le **moteur de cours commun** `assets/cours.js` (objet `COURS`, styles `assets/cours.css`, classes préfixées `crs-`) ; seules `cinematique/` (moteur `CIN`), `transport-electricite/` (`TE`), `ph/` et `puissance-active/` (`PH`) gardent leur propre moteur, de même présentation.
+Cours **par étapes**, écrit avec le **moteur de cours commun** `assets/cours.js` (objet `COURS`, styles `assets/cours.css`, classes préfixées `crs-`) ; seules `cinematique/` (moteur `CIN`), `transport-electricite/` (`TE`), `ph/` (`PH`) et `puissance-active/` (`PH`, copie dans `puissance-active/modules/pa-moteur.js`) gardent leur propre moteur, de même présentation.
 
 ```js
 const cours = new COURS.Cours(zone, [etape1, etape2, aRetenir], { cle });   // cle : clé du PLAN (application en une seule page)

@@ -6,14 +6,14 @@
 <title>Module 3 : du pH à [H3O+] — Chapitre 16 : Acides et bases</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
-<link rel="stylesheet" href="../../ph/modules/ph.css">
 <link rel="stylesheet" href="ab.css">
+<link rel="stylesheet" href="../../assets/equations.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="ab.js"></script>
-<script src="../../ph/modules/eq.js"></script>
+<script src="../../assets/equations.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
 <body>
@@ -31,10 +31,10 @@
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    Même méthode que le cours du module 2 de l'application « pH »
-   (démonstration PH.demo, puis éditeur d'équation PH.Editeur de
-   ph/modules/eq.js, outils ×(−1), 10ˣ et log), mais sans c° :
+   (démonstration EQ.demo, puis éditeur d'équation commun EQ de
+   assets/equations.js, outils ×(−1), 10ˣ et log), mais sans c° :
    pH = −log([H₃O⁺]) ⇔ [H₃O⁺] = 10^(−pH). Les tuiles de l'éditeur sont
-   seulement pH et [H₃O⁺] (aucune modification de eq.js).
+   seulement pH et [H₃O⁺].
    1. 10ˣ, réciproque de log
    2. Isoler [H₃O⁺] (démonstration, puis éditeur)
    3. Calculer [H₃O⁺] (exemples du cours : pH 3 → 10⁻³ ; 8 → 10⁻⁸ ;
@@ -42,16 +42,9 @@
    ============================================================ */
 const { hasard, exemple } = COURS;
 const { fmt, sci, CH, H3O, UNITE, Hde, diagH } = AB;
-const { T, S, P, FN } = PH.EQ;
-
-// « Afficher tout le cours » : la démonstration PH.demo se déplie avec le moteur de cours commun
-PH.vivant = COURS.vivant;
-PH.oublier = COURS.oublier;
-Object.defineProperty(PH, 'tout', { get: () => COURS.tout, configurable: true });
-
-// grandeurs de la relation (sans c°)
-const tH = T('c', CH), tp = T('pH', 'pH');
-const logH = () => FN('log', P(S(tH)));
+// grandeurs de la relation (sans c°), en écriture compacte de EQ ; « Afficher tout
+// le cours » déplie la démonstration EQ.demo avec le moteur de cours commun
+const G = { pH: 'pH', c: '<span class="eq-droit">' + CH + '</span>' };   // espèce chimique : en caractères droits
 // valeurs de test : [H3O+] varie, le pH s'en déduit
 function valeurs() {
   const c = Math.pow(10, -1 - Math.random() * 11);
@@ -59,37 +52,27 @@ function valeurs() {
 }
 // étapes de la démonstration : du pH vers [H3O+]
 const DEMO = [
-  { L: P(S(tp)), R: P(logH(), true) },
-  { op: '×(−1)', L: P(S(tp), true), R: P(logH()), texte: 'On multiplie les deux membres par (−1) : le signe − devant log disparaît.' },
-  { centre: '⇄', L: P(logH()), R: P(S(tp), true), texte: 'On inverse le sens de l\'égalité, pour avoir log à gauche.' },
-  { op: '10<sup>x</sup>', L: P(FN('p10', P(logH()))), R: P(FN('p10', P(S(tp), true))), texte: 'On applique aux deux membres la fonction 10<sup>x</sup>, réciproque de log.' },
-  { centre: 'car 10<sup>log a</sup> = a', L: P(S(tH)), R: P(FN('p10', P(S(tp), true))), final: true, texte: '10<sup>x</sup> annule log : il reste ' + CH + ' seul.' },
+  { eq: 'pH = - log(c)' },
+  { op: '×(−1)', eq: '- pH = log(c)', texte: 'On multiplie les deux membres par (−1) : le signe − devant log disparaît.' },
+  { centre: '⇄', eq: 'log(c) = - pH', texte: 'On inverse le sens de l\'égalité, pour avoir log à gauche.' },
+  { op: '10<sup>x</sup>', eq: 'p10(log(c)) = p10(- pH)', texte: 'On applique aux deux membres la fonction 10<sup>x</sup>, réciproque de log.' },
+  { centre: 'car 10<sup>log a</sup> = a', eq: 'c = p10(- pH)', final: true, texte: '10<sup>x</sup> annule log : il reste ' + CH + ' seul.' },
 ];
-const MODE_EMPLOI = `<p class="eq-consigne"><b>Comment faire :</b> glisse un outil (×(−1), 10<sup>x</sup>, log) sur <b>un membre</b> de l'équation, puis sur l'autre membre : une opération se fait toujours des deux côtés. Glisse une grandeur pour la déplacer, touche-la pour la supprimer. ⇄ inverse les deux membres. Après chaque étape : « Vérifier l'étape ».</p>`;
+const MODE_EMPLOI = `<p class="eq-consigne"><b>Comment faire :</b> glisse un outil (×(−1), 10<sup>x</sup>, log) de la réserve sur <b>un membre</b> de l'équation, puis sur l'autre membre : une opération se fait toujours des deux côtés. Glisse une grandeur pour la déplacer ; touche-la puis touche sa croix ✕ pour l'effacer. ⇄ inverse les deux membres, ↶ annule la dernière action. Après chaque étape : « Vérifier l'étape ».</p>`;
 const GAGNER = '<p class="eq-consigne"><b>Pour gagner du temps</b>, tu peux faire plusieurs manipulations à la suite, puis cliquer une seule fois sur « Vérifier l\'étape ».</p>';
 const LIEN_PH = `<div class="ph-lien-app"><p>Pour aller plus loin : la définition complète du pH, avec la concentration standard c°.</p>
   <a class="btn-small" href="../../ph/modules/module_2_cours.html" target="_blank" rel="noopener">Application pH ↗</a></div>`;
 
 // éditeur d'équation : partie « perso » d'un « À toi » (réussie quand [H3O+] est isolée)
 function partieEditeur() {
-  return { type: 'perso', solution: `${CH} = 10<sup>−pH</sup>`,
-    monter(zone, api) {
-      const d = document.createElement('div');
-      zone.appendChild(d);
-      const ed = new PH.Editeur(d, {
-        tuiles: [tp, tH], cible: 'c', cibleNom: CH, valeurs,
-        gauche: () => P(S(tp)), droite: () => P(logH(), true),
-        aides: [
-          'Commence par enlever le signe − devant log : glisse l\'outil ×(−1) sur le membre de gauche, puis sur celui de droite, et vérifie l\'étape.',
-          'Applique aux deux membres la fonction réciproque de log : glisse l\'outil 10<sup>x</sup> à gauche, puis à droite.',
-          `Inverse le sens de l'équation avec ⇄ pour avoir ${CH} à gauche.`,
-        ],
-        solution: DEMO,
-        onErreur: () => api.compterErreur(),
-        onResolu: () => api.reussi(),
-      });
-      return { montrer() { ed.montrerSolution(); } };
-    } };
+  return EQ.partie(EQ.exercice({
+    eq: 'pH = - log(c)', g: G, cible: 'c', valeurs, outils: ['log', 'pow10'],
+    aides: [
+      'Commence par enlever le signe − devant log : glisse l\'outil ×(−1) sur le membre de gauche, puis sur celui de droite, et vérifie l\'étape.',
+      'Applique aux deux membres la fonction réciproque de log : glisse l\'outil 10<sup>x</sup> à gauche, puis à droite.',
+      `Inverse le sens de l'équation avec ⇄ pour avoir ${CH} à gauche.`,
+    ],
+  }), { solution: `${CH} = 10<sup>−pH</sup>`, etapes: DEMO, g: G });
 }
 
 /* ---------- 1. 10ˣ, réciproque de log ---------- */
@@ -121,8 +104,8 @@ function etape2(c) {
     </div>
     <p class="er-consigne">Suis la démonstration, étape par étape.</p>`);
   const zone = c.ajouter(carte, '');
-  PH.demo(zone, {
-    etapes: DEMO,
+  EQ.demo(zone, {
+    etapes: DEMO, g: G,
     onFini: () => {
       c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Les deux formules :</b></p>
           <p class="crs-formule">pH = −log(${CH}) &nbsp;⇔&nbsp; ${CH} = 10<sup>−pH</sup></p></div>
