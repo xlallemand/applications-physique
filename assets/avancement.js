@@ -18,12 +18,17 @@
      ex      : somme des nbEx du PLAN (absent s'il n'y en a pas)
      strict  : décompte de CIN et TE (moteurs propres) : une série (…_questions)
                compte quand elle a une note, une autre page quand elle est terminée
+   Page externe ↗ du PLAN (module situé dans une autre application, charte §5) :
+     '↗<app>/<page>' dans pages, à sa place dans l'ordre du plan
+     (ex. '↗double-periodicite/index', '↗pile/module_1_pile') ; elle compte avec
+     l'état de l'autre application : faite si <app>-progression a cette page
+     terminée ou notée ('index' : dès que <app>-progression existe).
    À METTRE À JOUR quand le PLAN d'une application change.
    Une application absente de la liste (simulation sans plan :
    décroissance radioactive) n'affiche pas d'avancement.
 
    Progression lue dans le navigateur (jamais écrite) :
-     localStorage <dossier>-progression = { pages: { <page>: { fait, note } } }
+     localStorage <dossier>-progression = { pages: { <page>: { fait, note } } }   (et <app>-progression des pages ↗)
      localStorage <dossier>-exercices   = { <id>: { pts, max } }
 
    API (objet AV) :
@@ -166,6 +171,16 @@
     } catch (e) { return {}; }
   }
 
+  // page externe ↗ '<app>/<page>' : état lu dans la progression de l'autre application (même règle que assets/sommaire.js)
+  function externeFaite(ref) {
+    const k = ref.indexOf('/'), app = ref.slice(0, k), page = ref.slice(k + 1);
+    let existe = false;
+    try { existe = localStorage.getItem(app + '-progression') != null; } catch (e) { /* stockage indisponible */ }
+    if (page === 'index') return existe;
+    const e = (lire(app + '-progression').pages || {})[page] || {};
+    return !!e.fait || e.note != null;
+  }
+
   // { fait, total } d'une application, null si elle n'a pas d'avancement
   function avancement(dossier) {
     const a = Object.prototype.hasOwnProperty.call(AVANCEMENT, dossier) ? AVANCEMENT[dossier] : null;
@@ -173,6 +188,7 @@
     const pages = lire(dossier + '-progression').pages || {};
     // une page est faite quand elle est terminée ou qu'elle a une note (strict : selon le type de page)
     const faite = p => {
+      if (p[0] === '↗') return externeFaite(p.slice(1));
       const e = pages[p] || {};
       if (a.strict) return /_questions$/.test(p) ? e.note != null : !!e.fait;
       return !!e.fait || e.note != null;

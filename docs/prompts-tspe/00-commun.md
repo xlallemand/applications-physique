@@ -95,8 +95,8 @@ Le premier prompt qui a besoin d'un outil le crée (comme le décrit le prompt q
 
 | Outil | Fichiers | État | Créé ou étendu par | Utilisé par |
 |---|---|---|---|---|
-| `EQ` : éditeur d'équations à tuiles (celui de `equations-physique-mobile`) | `assets/equations.js`, `assets/equations.css` | à créer | `outils-communs.md` | 04, 10, 11, 14, 16, 17 ; `acides-bases/`, `radioactivite/` (à la place de `ph/modules/eq.js`) |
-| Pages externes ↗ du `PLAN` | `assets/sommaire.js`, `assets/avancement.js`, `docs/outils/index-recherche.py` | à créer | `outils-communs.md` | tous les chapitres qui ont un module dans une autre application |
+| `EQ` : éditeur d'équations à tuiles (celui de `equations-physique-mobile`) | `assets/equations.js`, `assets/equations.css` | existe | `outils-communs.md` | 04, 10, 11, 14, 16, 17 ; `acides-bases/`, `radioactivite/` (à la place de `ph/modules/eq.js`) |
+| Pages externes ↗ du `PLAN` | `assets/sommaire.js`, `assets/avancement.js`, `docs/outils/index-recherche.py` | existe | `outils-communs.md` | tous les chapitres qui ont un module dans une autre application |
 | `DILUTION` : manipulation de dilution (pipette, fiole, schéma des deux solutions) | `assets/dilution.js`, `assets/dilution.css` (sur `PAILLASSE` et `ETAPES`) | à créer | `chapitre-01.md` ou `docs/prompts-2nde/10-solutions.md`, le premier exécuté | 01, 06 ; 2nde `solutions/` |
 | `PAILLASSE` : verrerie dessinée et gestes | `assets/paillasse.js`, `assets/paillasse.css` | à créer | `docs/prompts-2nde/10-solutions.md` (ou 01 s'il passe avant) | 01, 21 ; 2nde 10, 11, 12 |
 | `SYNTHESE` : montage à reflux, ampoule à décanter (modes 2de et Tle) | `assets/synthese.js`, `assets/synthese.css` (sur `PAILLASSE` et `ETAPES`) | à créer | `chapitre-21.md` ou `docs/prompts-2nde/12-synthese.md`, le premier exécuté | 21 ; 2nde `synthese/` |
@@ -118,7 +118,7 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 
 | Prompt | Application (nom) | Dossier | Avant | État | Date | Remarques |
 |---|---|---|---|---|---|---|
-| `outils-communs.md` | Éditeur d'équations partagé, pages externes ↗ | `assets/` | tous | à faire | | |
+| `outils-communs.md` | Éditeur d'équations partagé, pages externes ↗ | `assets/` | tous | fait | 25/11/2026 | `equations-physique-mobile/` charge `EQ` ; `acides-bases/`, `radioactivite/` migrées ; `puissance-active/modules/pa-moteur.js` ; page ↗ : `appNom` facultatif (nom de l'autre application, en petit) |
 | `chapitre-01.md` | Rappels de chimie | `rappels-chimie/` | | à faire | | crée `DILUTION` (et `PAILLASSE`) s'ils n'existent pas |
 | `chapitre-02.md` | Nomenclature | `nomenclature/` | | fait | 01/11/2026 | |
 | `chapitre-03.md` | Méthodes physiques d'analyse | `analyse-physique/` | | à faire | | |
