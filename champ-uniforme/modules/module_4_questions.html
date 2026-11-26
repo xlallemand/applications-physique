@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 4 : 10 questions.
+   Vitesse de sortie (q = e ou −e), tension nécessaire, influence de L,
+   nombre d'étages, polarité au bon moment (proton, électron),
+   accélération et durée dans un condensateur, applications.
+   ============================================================ */
+const { o, fq, fmt, cs, sci, hasard, melanger, V, MS, MS2, VM, fr, E_CH, M_P, M_E } = CU;
+const sciP = (q, label, valeur, unite, opts) => Object.assign({ type: 'sci', q, label, valeur, unite, cs: 2, rel: .03, calc: true }, opts);
+const PART = [['un proton', M_P, '1,67 × 10<sup>−27</sup>', 1], ['un électron', M_E, '9,11 × 10<sup>−31</sup>', -1]];
+
+function vSortie() {
+  const p = hasard(PART), U = hasard([200, 1000, 4.0e3, 1.5e4]), v = Math.sqrt(2 * E_CH * U / p[1]);
+  return { theme: 'Vitesse de sortie', enonce: `<p>${p[0][0].toUpperCase() + p[0].slice(1)} (m = ${p[2]} kg) part du repos et traverse un condensateur soumis à U = ${fmt(U)} V.</p>`,
+    parties: [sciP('Vitesse de sortie :', 'v =', v, MS, { diag: x => (Math.abs(x / (v * v) - 1) < .05 ? 'Il manque la racine.' : Math.abs(x / (v / Math.SQRT2) - 1) < .05 ? 'Il manque le 2 : √(2qU / m).' : 'v = √(2eU / m) : on prend la valeur e de la charge.'),
+      solution: `<p>v = √(2 × 1,60 × 10<sup>−19</sup> × ${fmt(U)} / ${p[2]}) = ${sci(v, 2)} ${MS}</p>` })] };
+}
+function tension() {
+  const p = hasard(PART), v = p[3] > 0 ? hasard([1.0e6, 4.0e6]) : hasard([1.0e7, 3.0e7]), U = p[1] * v * v / (2 * E_CH);
+  return { theme: 'Tension nécessaire', parties: [sciP(`Quelle tension faut-il pour accélérer ${p[0]} (m = ${p[2]} kg) du repos jusqu'à ${sci(v, 1)} ${MS} ?`, 'U =', U, 'V',
+    { diag: x => (Math.abs(x / (2 * U) - 1) < .05 ? 'U = m v² / (2e) : n\'oublie pas le 2.' : 'De v² = 2eU / m, on tire U = m v² / (2e).'), solution: `<p>U = m v<sup>2</sup> / (2e) = ${sci(U, 2)} V</p>` })] };
+}
+function largeur() {
+  return { theme: 'Influence de la largeur', parties: [fq.choix('À tension égale, on remplace un condensateur de 2 cm de large par un condensateur de 10 cm. La vitesse de sortie d\'un proton :', [o('ok', 'est la même'), o('p', 'est 5 fois plus grande'), o('m', 'est 5 fois plus petite')], 'ok',
+    { melanger: false, indices: { p: 'E est 5 fois plus petit, sur une distance 5 fois plus grande.', m: 'v = √(2qU / m) ne dépend pas de L.' }, solution: '<p>v<sub>sortie</sub> = √(2qU / m) : L n\'intervient pas.</p>' })] };
+}
+function etages() {
+  const U = hasard([1.0e4, 2.0e4, 5.0e4]), vise = hasard([5.0e6, 8.0e6, 1.0e7]), n = Math.ceil(M_P * vise * vise / (2 * E_CH * U));
+  return { theme: 'Nombre d\'étages', enonce: `<p>Accélérateur linéaire : chaque étage est soumis à U = ${fmt(U / 1000)} kV. On veut amener un proton (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg), parti du repos, à au moins ${sci(vise, 1)} ${MS}. On rappelle v<sub>n</sub> = √(2neU / m<sub>p</sub>).</p>`,
+    parties: [fq.nombre('Nombre minimal d\'étages :', 'n =', n, '', { tol: 1e-9, signe: false, calc: true, dec: 0,
+      diag: x => (Math.abs(x - M_P * vise * vise / (2 * E_CH * U)) < 1 && x < n ? 'Avec ce nombre, la vitesse n\'est pas tout à fait atteinte : arrondis à l\'entier supérieur.' : 'n = m<sub>p</sub> v<sup>2</sup> / (2eU), arrondi à l\'entier supérieur.'),
+      solution: `<p>n ≥ m<sub>p</sub> v<sup>2</sup> / (2eU) = ${cs(M_P * vise * vise / (2 * E_CH * U), 3)}, donc n = ${n}.</p>` })] };
+}
+function polarite() {
+  const p = hasard([['un proton', 1], ['un électron', -1]]);
+  return { theme: 'Polarité', enonce: `<p>Dans un accélérateur linéaire, ${p[0]} vient de traverser le condensateur C<sub>1</sub> et entre dans C<sub>2</sub>, vers la droite.</p>`,
+    parties: [fq.choix('a) Que doit-on faire au moment où il change de condensateur ?', [o('ok', 'inverser la polarité du générateur'), o('rien', 'ne rien changer'), o('couper', 'couper le générateur')], 'ok',
+      { melanger: false, colonne: true, indices: { rien: 'Le champ de C<sub>2</sub> serait opposé à celui de C<sub>1</sub> : il serait freiné.', couper: 'Sans champ, il ne serait plus accéléré.' }, solution: '<p>On inverse la polarité, pour que le champ dans C<sub>2</sub> l\'accélère.</p>' }),
+    fq.choix(`b) Dans C<sub>2</sub>, ${V('E')} doit alors être dirigé :`, [o('d', 'vers la droite'), o('g', 'vers la gauche')], p[1] > 0 ? 'd' : 'g',
+      { melanger: false, indice: p[1] > 0 ? 'Charge positive : la force a le sens de ' + V('E') + '.' : 'Charge négative : la force est opposée à ' + V('E') + '.', solution: `<p>${p[1] > 0 ? 'Proton : ' + V('E') + ' dans le sens du mouvement.' : 'Électron : ' + V('E') + ' opposé au mouvement, pour que −e' + V('E') + ' soit vers la droite.'}</p>` })] };
+}
+function duree() {
+  const U = hasard([1.0e3, 5.0e3]), L = hasard([2.0, 5.0]), E = U / (L / 100), a = E_CH * E / M_P, t = Math.sqrt(2 * (L / 100) / a);
+  return { theme: 'Durée de la traversée', enonce: `<p>Un proton part du repos dans un condensateur de largeur L = ${fmt(L)} cm soumis à U = ${fmt(U)} V (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg).</p>`,
+    parties: [sciP('a) Accélération du proton :', 'a =', a, MS2, { diag: () => 'E = U / L (L en m), puis a = eE / m<sub>p</sub>.', solution: `<p>E = ${fmt(U)} / ${fmt(L / 100)} = ${sci(E, 2)} ${VM} ; a = eE / m<sub>p</sub> = ${sci(a, 2)} ${MS2}</p>` }),
+      sciP('b) Durée de la traversée, t = √(2L / a) :', 't =', t, 's', { diag: () => 'x(t) = ½ a t² = L donne t = √(2L / a), L en m.', solution: `<p>t = √(2 × ${fmt(L / 100)} / ${sci(a, 2)}) = ${sci(t, 2)} s</p>` })] };
+}
+function application() {
+  return { theme: 'Applications', parties: [fq.choix('Au CERN, avant d\'être injectés dans les grands anneaux, les protons sont :', [o('ok', 'accélérés dans des accélérateurs linéaires'), o('d', 'déviés par un seul condensateur'), o('r', 'ralentis')], 'ok',
+    { melanger: false, colonne: true, indices: { d: 'Il faut d\'abord leur donner de la vitesse.', r: 'Il s\'agit de les accélérer.' }, solution: '<p>Les accélérateurs linéaires sont la première étape de la chaîne d\'accélération.</p>' })] };
+}
+function independance() {
+  return { theme: 'Vitesse de sortie', parties: [fq.choix('La vitesse de sortie d\'un accélérateur linéaire dépend :', [o('ok', 'de la tension, de la charge et de la masse de la particule'), o('l', 'de la largeur des condensateurs'), o('t', 'seulement de la tension')], 'ok',
+    { melanger: false, colonne: true, indices: { l: 'v = √(2nqU / m) : pas de L.', t: 'Un électron et un proton n\'ont pas la même vitesse avec la même tension.' }, solution: '<p>v<sub>n</sub> = √(2nqU / m).</p>' })] };
+}
+
+CU.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Accélérateurs de particules',
+  intro: '<p class="er-contexte">10 questions : vitesse de sortie, tension nécessaire, nombre d\'étages, polarité au bon moment, applications.</p>',
+  questions: () => melanger([vSortie(), vSortie(), tension(), largeur(), etages(), polarite(), duree(), application(), independance(), tension()]),
+  revoir: { href: 'module_4a_cours.html', label: 'Revoir les cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+});
+CU.menu('module_4_questions');
+</script>
+</body>
+</html>

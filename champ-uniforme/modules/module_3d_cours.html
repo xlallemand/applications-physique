@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : déviation d'une particule — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 4 / 4</span>
+    <h2 class="er-titre">Déviation d'une particule chargée</h2>
+    <p class="er-contexte">Selon le <b>signe de sa charge</b>, la particule est déviée vers une armature ou vers l'autre. À la sortie du condensateur, on calcule sa <b>déviation</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. q > 0 : parabole vers l'armature − ; q < 0 : vers l'armature +
+   2. Point de sortie (x = ℓ, longueur des armatures), mouvement ultérieur
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { V, fmt, cs, sci, fr, MS, VM, CALC, condo, E_CH, M_E } = CU;
+const o = (id, label) => ({ id, label });
+
+/* ---------- 1. Le sens de la déviation ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Le sens de la déviation');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cu-figs2">${condo({ haut: '+', q: 1, ang: 35, aria: 'q positive : la parabole est tournée vers l\'armature négative' })}${condo({ haut: '+', q: -1, ang: 35, aria: 'q négative : la trajectoire part vers l\'armature positive' })}</div>
+      <div class="cle"><p><b>q > 0</b> : ${V('a')} a le sens de ${V('E')}, la parabole est tournée vers l'armature <b>−</b>. <b>q < 0</b> : la particule est déviée vers l'armature <b>+</b>.</p>
+        <p>Inverser la tension U (ou le signe de la charge) inverse le sens de la déviation.</p></div>
+    </div>
+    ${exemple('<p>Un faisceau d\'électrons passe entre deux armatures horizontales, celle du haut étant positive : il est dévié vers le haut.</p>')}`);
+  const haut = hasard(['+', '−']), q = hasard([1, -1]);
+  c.aToi(carte, [
+    { enonce: condo({ haut, q, traj: false, aria: `Particule ${q > 0 ? 'positive' : 'négative'} entrant entre les armatures ; l'armature du haut est ${haut === '+' ? 'positive' : 'négative'}` }),
+      parties: [{ type: 'choix', q: `Vers où cette particule (${q > 0 ? 'positive' : 'négative'}) est-elle déviée ?`, colonne: false, melanger: false, options: [o('h', 'vers le haut'), o('b', 'vers le bas'), o('n', 'elle n\'est pas déviée')],
+        bonne: (q > 0) === (haut === '+') ? 'b' : 'h', indices: { n: 'Elle subit la force q' + V('E') + ', perpendiculaire aux armatures.' }, indice: 'Charge positive : attirée par l\'armature − ; négative : par l\'armature +.',
+        solution: `<p>${q > 0 ? 'Charge positive, attirée par l\'armature −' : 'Charge négative, attirée par l\'armature +'}, qui est ${(q > 0) === (haut === '+') ? 'en bas' : 'en haut'}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le point de sortie ---------- */
+function etape2(c) {
+  const carte = c.carte('2. La déviation à la sortie');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Un électron entre en O avec ${V('v', '0')} parallèle aux armatures (α = 0), de longueur ℓ. Avec E vers le bas : z(x) = ${fr('eE', '2m v<sub>0</sub><sup>2</sup>')} x<sup>2</sup>.</p>
+      <div class="cle"><p>La particule sort au point S d'abscisse x<sub>S</sub> = ℓ (si elle ne touche pas une armature avant) :</p>
+        <p class="crs-formule">z<sub>S</sub> = ${fr('eE ℓ<sup>2</sup>', '2m v<sub>0</sub><sup>2</sup>')}</p>
+        <p>Ensuite, elle n'est plus soumise à aucune force (poids négligé) : d'après le principe d'inertie, son mouvement est <b>rectiligne uniforme</b>.</p></div>
+    </div>
+    ${exemple(`<p>v<sub>0</sub> = 2,0 × 10<sup>7</sup> ${MS}, E = 1,0 × 10<sup>4</sup> ${VM}, ℓ = 5,0 cm, m<sub>e</sub> = 9,11 × 10<sup>−31</sup> kg :</p>
+      <p class="crs-calc">z<sub>S</sub> = ${fr('1,60 × 10<sup>−19</sup> × 1,0 × 10<sup>4</sup> × (5,0 × 10<sup>−2</sup>)<sup>2</sup>', '2 × 9,11 × 10<sup>−31</sup> × (2,0 × 10<sup>7</sup>)<sup>2</sup>')} = <span class="c">5,5 × 10<sup>−3</sup> m = 5,5 mm</span></p>`)}`);
+  const v0 = hasard([2.5e7, 3.0e7, 4.0e7]), E = hasard([1.5e4, 2.0e4]), l = hasard([4.0, 6.0]), z = E_CH * E * Math.pow(l / 100, 2) / (2 * M_E * v0 * v0);
+  c.aToi(carte, [
+    { titre: 'Calcule la déviation', enonce: `<p>Électron : v<sub>0</sub> = ${sci(v0, 2)} ${MS}, E = ${sci(E, 2)} ${VM}, armatures de longueur ℓ = ${fmt(l)} cm.</p>`,
+      parties: [{ type: 'nombre', q: 'Déviation z<sub>S</sub> à la sortie, en millimètres (2 chiffres significatifs) :', label: 'z<sub>S</sub> =', valeur: z * 1000, rel: .03, unite: 'mm' + CALC, signe: false,
+        diag: v => (Math.abs(v / (z * 1000) - 2) < .05 ? 'Il y a un 2 au dénominateur.' : Math.abs(v / (z * 1e7) - 1) < .05 ? 'Convertis ℓ en mètres avant le calcul.' : 'z<sub>S</sub> = eEℓ² / (2 m v<sub>0</sub>²), puis conversion en mm.'),
+        solution: `<p>z<sub>S</sub> = 1,60 × 10<sup>−19</sup> × ${sci(E, 2)} × (${fmt(l / 100)})<sup>2</sup> / (2 × 9,11 × 10<sup>−31</sup> × (${sci(v0, 2)})<sup>2</sup>) = ${cs(z * 1000, 2)} mm</p>` },
+      { type: 'choix', q: 'Après la sortie du condensateur, le mouvement de l\'électron est :', colonne: false, melanger: false, options: [o('ok', 'rectiligne uniforme'), o('p', 'toujours parabolique'), o('arret', 'il s\'arrête')], bonne: 'ok',
+        indices: { p: 'Hors du condensateur, il n\'y a plus de champ électrique.', arret: 'Aucune force ne le freine : principe d\'inertie.' }, solution: '<p>Plus de force (poids négligé) : principe d\'inertie, mouvement rectiligne uniforme.</p>' }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>q > 0 : déviation vers l'armature − ; q < 0 : vers l'armature +.</p></div>
+    <div class="cle"><p>Sortie en x = ℓ : z<sub>S</sub> = |q| E ℓ<sup>2</sup> / (2 m v<sub>0</sub><sup>2</sup>) (pour v<sub>0</sub> parallèle aux armatures) ; ensuite, mouvement rectiligne uniforme.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_simulation.html">Simulateur : déviation dans un condensateur →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_questions.html">Questions du module 3</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#deviation">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+CU.menu('module_3d_cours');
+</script>
+</body>
+</html>

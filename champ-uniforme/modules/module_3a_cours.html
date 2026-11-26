@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : champ électrique et condensateur plan — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 4</span>
+    <h2 class="er-titre">Champ électrique et condensateur plan</h2>
+    <p class="er-contexte">Une particule de charge q placée dans un <b>champ électrique</b> <span class="vec-nom">E</span> subit la force q<span class="vec-nom">E</span>. Entre les armatures d'un <b>condensateur plan</b>, le champ est uniforme : <b>E = U / L</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Force électrique F⃗ = q E⃗ ; q remplacé par e (proton) ou −e (électron)
+   2. Condensateur plan : champ uniforme, de la plaque + vers la plaque −,
+      E = U / L ; sens de la flèche de U (vers la borne +, inverse de E⃗)
+   3. Qui est attiré par quelle armature ?
+   ============================================================ */
+const { exemple, hasard, melanger } = COURS;
+const { V, fmt, cs, sci, fr, MS, VM, CALC, condo, E_CH } = CU;
+const o = (id, label) => ({ id, label });
+
+/* ---------- 1. La force électrique ---------- */
+function etape1(c) {
+  const carte = c.carte('1. La force électrique');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Force électrique.</b> Une particule de charge q placée en un point où règne le champ électrique ${V('E')} subit :</p>
+        <p class="crs-formule">${V('F', 'él')} = q ${V('E')}</p>
+        <p>F<sub>él</sub> en newtons (N), q en coulombs (C), E en N·C<sup>−1</sup> (ou ${VM}, la même unité).</p></div>
+      <p>Si q > 0, ${V('F', 'él')} a le <b>même sens</b> que ${V('E')} ; si q < 0, le <b>sens opposé</b>. Dans les calculs, on <b>remplace q par e</b> pour un proton et <b>par −e</b> pour un électron (e = 1,60 × 10<sup>−19</sup> C, charge élémentaire).</p>
+      <p>Une charge ponctuelle q crée elle-même un champ, de valeur E = k |q| / d<sup>2</sup> à la distance d (loi de Coulomb : F = k |q q<sub>0</sub>| / d<sup>2</sup>) : ce champ n'est pas uniforme.</p>
+    </div>
+    ${exemple(`<p>Un électron dans un champ E = 2,0 × 10<sup>3</sup> ${VM} : q = −e, donc ${V('F', 'él')} = −e ${V('E')} est de sens opposé à ${V('E')}, de valeur</p>
+      <p class="crs-calc">F<sub>él</sub> = e × E = 1,60 × 10<sup>−19</sup> × 2,0 × 10<sup>3</sup> = <span class="c">3,2 × 10<sup>−16</sup> N</span></p>`)}`);
+  const E = hasard([1.5e3, 5.0e3, 2.0e4, 3.0e5]), F = E_CH * E;
+  c.aToi(carte, [
+    { titre: 'Valeur de la force', parties: [{ type: 'sci', q: `Un proton est placé dans un champ E = ${sci(E, 2)} ${VM}. Valeur de la force électrique (2 chiffres significatifs) :`, label: 'F<sub>él</sub> =', valeur: F, cs: 2, unite: 'N' + CALC,
+      diag: v => (Math.abs(v / (E / E_CH) - 1) < .05 ? 'On multiplie : F = e × E.' : 'F<sub>él</sub> = e × E, avec e = 1,60 × 10<sup>−19</sup> C.'), solution: `<p>F<sub>él</sub> = 1,60 × 10<sup>−19</sup> × ${sci(E, 2)} = ${sci(F, 2)} N</p>` }] },
+    { titre: 'Sens', parties: [{ type: 'choix', q: `Pour un électron, ${V('F', 'él')} est :`, colonne: true, melanger: false,
+      options: [o('ok', `de sens opposé à ${V('E')}, car q = −e < 0`), o('meme', `de même sens que ${V('E')}`), o('perp', `perpendiculaire à ${V('E')}`)], bonne: 'ok',
+      indices: { meme: 'C\'est le cas d\'une charge positive (proton).', perp: V('F', 'él') + ' = q ' + V('E') + ' : même direction que ' + V('E') + '.' },
+      solution: `<p>${V('F', 'él')} = −e ${V('E')} : même direction, sens opposé.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le condensateur plan ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Le condensateur plan');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Un condensateur plan est formé de deux plaques métalliques parallèles (les <b>armatures</b>), distantes de L, entre lesquelles on applique une tension U.</p>
+      ${condo({ haut: '+' })}
+      <div class="cle"><p><b class="cle-titre">Champ entre les armatures.</b> Il est <b>uniforme</b>, perpendiculaire aux armatures, orienté de l'armature <b>+</b> vers l'armature <b>−</b>, de valeur</p>
+        <p class="crs-formule">E = ${fr('U', 'L')}</p><p>E en ${VM}, U en volts (V), L en mètres (m).</p></div>
+      <div class="cle"><p><b class="cle-titre">Sens de la flèche de U.</b> La flèche de la tension pointe vers la borne <b>+</b> : elle est donc dans le <b>sens inverse</b> de ${V('E')}.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">U = 600 V, L = 6,0 cm = 6,0 × 10<sup>−2</sup> m : E = ${fr('600', '6,0 × 10<sup>−2</sup>')} = <span class="c">1,0 × 10<sup>4</sup> ${VM}</span></p>`)}`);
+  const U = hasard([200, 400, 1000, 1500]), L = hasard([2.0, 4.0, 5.0, 8.0]), E = U / (L / 100), haut = hasard(['+', '−']);
+  c.aToi(carte, [
+    { titre: 'Valeur du champ', parties: [{ type: 'sci', q: `U = ${fmt(U)} V, armatures distantes de L = ${fmt(L)} cm. Valeur de E (2 chiffres significatifs) :`, label: 'E =', valeur: E, cs: 2, unite: VM + CALC,
+      diag: v => (Math.abs(v / (U / L) - 1) < .05 ? 'Convertis L en mètres : ' + fmt(L) + ' cm = ' + fmt(L / 100) + ' m.' : Math.abs(v / (U * L / 100) - 1) < .05 ? 'E = U / L : on divise.' : 'E = U / L, avec L en mètres.'),
+      solution: `<p>E = ${fmt(U)} / ${fmt(L / 100)} = ${sci(E, 2)} ${VM}</p>` }] },
+    { titre: 'Sens du champ', enonce: condo({ haut, E: false, U: false, aria: `Condensateur dont l'armature du haut est chargée ${haut === '+' ? 'positivement' : 'négativement'}` }),
+      parties: [{ type: 'choix', q: `Comment est orienté ${V('E')} entre ces armatures ?`, colonne: false, melanger: false, options: [o('h', 'vers le haut'), o('b', 'vers le bas')], bonne: haut === '+' ? 'b' : 'h',
+        indice: V('E') + ' va de l\'armature + vers l\'armature −.', solution: `<p>De l'armature + (${haut === '+' ? 'en haut' : 'en bas'}) vers l'armature − : ${haut === '+' ? 'vers le bas' : 'vers le haut'}.</p>` },
+      { type: 'choix', q: 'Et la flèche de la tension U ?', colonne: false, melanger: false, options: [o('h', 'vers le haut'), o('b', 'vers le bas')], bonne: haut === '+' ? 'h' : 'b',
+        indice: 'La flèche de U pointe vers la borne + : sens inverse de ' + V('E') + '.', solution: `<p>Vers l'armature + : ${haut === '+' ? 'vers le haut' : 'vers le bas'}, sens inverse de ${V('E')}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Attraction par les armatures ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Vers quelle armature ?');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Une charge <b>positive</b> subit une force dans le sens de ${V('E')} : elle est attirée par l'armature <b>−</b>. Une charge <b>négative</b> est attirée par l'armature <b>+</b>.</p></div>
+      <div class="cu-figs2">${condo({ haut: '+', q: 1, traj: false, a: 'F', aria: 'Proton entre les armatures : la force électrique est dirigée vers l\'armature négative' })}${condo({ haut: '+', q: -1, traj: false, a: 'F', aria: 'Électron entre les armatures : la force électrique est dirigée vers l\'armature positive' })}</div>
+    </div>
+    ${exemple('<p>Dans un tube de télévision à écran cathodique, les électrons sont déviés vers l\'armature chargée positivement.</p>')}`);
+  const q = hasard([['un proton', 1], ['un électron', -1], ['un ion Cl<sup>−</sup>', -1], ['une particule α (He<sup>2+</sup>)', 1]]);
+  c.aToi(carte, [
+    { parties: [{ type: 'choix', q: `Vers quelle armature ${q[0]} est-il attiré ?`, colonne: false, melanger: false, options: [o('p', 'l\'armature +'), o('m', 'l\'armature −')], bonne: q[1] > 0 ? 'm' : 'p',
+      indice: 'Des charges de signes contraires s\'attirent.', solution: `<p>Charge ${q[1] > 0 ? 'positive : attirée par l\'armature −' : 'négative : attirée par l\'armature +'}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>${V('F', 'él')} = q ${V('E')} ; q = e (proton) ou −e (électron), e = 1,60 × 10<sup>−19</sup> C.</p></div>
+    <div class="cle"><p>Condensateur plan : champ uniforme, de la plaque + vers la plaque −, E = U / L (${VM}, V, m) ; la flèche de U pointe vers la plaque +.</p></div>
+    <div class="cle"><p>Une charge positive est attirée par l'armature −, une charge négative par l'armature +.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : poids et force électrique →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#condensateur">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+CU.menu('module_3a_cours');
+</script>
+</body>
+</html>

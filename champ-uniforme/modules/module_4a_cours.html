@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : accélération dans un condensateur — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 1 / 2</span>
+    <h2 class="er-titre">Accélération dans un condensateur</h2>
+    <p class="er-contexte">Une particule chargée lâchée sans vitesse près d'une armature est <b>accélérée en ligne droite</b> vers l'autre. À savoir refaire : la démonstration de la <b>vitesse de sortie</b> v = √(2qU / m).</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Démonstration : aₓ = qE/m, vₓ = (qE/m) t, x = (qE/2m) t²,
+      t_sortie = √(2mL/(qE)), v_sortie = √(2qU/m) (ne dépend pas de L)
+   2. Tension nécessaire pour une vitesse donnée ; électron (q = −e) :
+      polarité inversée
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { V, fmt, cs, sci, sys, fr, rac, MS, MS2, VM, CALC, E_CH, M_P, M_E, svg, fl, nom, txt, COUL, ENCRE, ENCRE2 } = CU;
+const o = (id, label) => ({ id, label });
+const t2 = 't<sup>2</sup>';
+
+// condensateur aux armatures verticales : la particule part de O (armature +) vers l'armature −
+function figAcc() {
+  let s = '';
+  [[70, '+'], [250, '−']].forEach(([x, sg]) => {
+    s += `<rect x="${x - 3}" y="20" width="6" height="56" rx="2" fill="#ebe8e1" stroke="${ENCRE2}"/><rect x="${x - 3}" y="96" width="6" height="56" rx="2" fill="#ebe8e1" stroke="${ENCRE2}"/>`;
+    for (let y = 34; y < 150; y += 34) if (Math.abs(y - 86) > 14) s += txt(x + (sg === '+' ? -14 : 14), y + 4, sg, { g: 800, c: ENCRE, t: 14, a: 'middle' });
+  });
+  s += fl(70, 86, 300, 86, ENCRE, { ep: 1.2, lt: 7 }) + txt(300, 78, 'x', { g: 800, c: ENCRE, t: 12, a: 'end' }) + txt(60, 104, 'O', { g: 800, c: ENCRE, t: 12, a: 'end' });
+  s += fl(120, 40, 200, 40, COUL.E, { ep: 2.2 }) + nom(160, 30, 'E', '', COUL.E);
+  s += `<circle cx="70" cy="86" r="5" fill="#fff" stroke="${ENCRE}" stroke-width="1.6"/>` + fl(80, 120, 130, 120, COUL.F, { ep: 2.2 }) + nom(105, 140, 'F', 'él', COUL.F, { t: 13 });
+  s += `<line x1="70" y1="164" x2="250" y2="164" stroke="${ENCRE2}"/><line x1="70" y1="158" x2="70" y2="170" stroke="${ENCRE2}"/><line x1="250" y1="158" x2="250" y2="170" stroke="${ENCRE2}"/>` + txt(160, 180, 'L', { g: 800, c: ENCRE, t: 12, a: 'middle' });
+  return svg(320, 188, s, 'Condensateur aux armatures verticales distantes de L : la particule positive part de O, sur l\'armature +, et la force électrique la pousse vers l\'armature −, dans le sens du champ');
+}
+
+/* ---------- 1. La démonstration ---------- */
+function etape1(c) {
+  const carte = c.carte('1. La vitesse de sortie');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une particule de charge q > 0 est placée en O, sans vitesse initiale, dans un condensateur plan de largeur L. Elle subit ${V('F', 'él')} = q ${V('E')} (poids négligeable), suivant l'axe x : sa trajectoire est une droite.</p>
+      ${figAcc()}
+      <p>Dans le référentiel terrestre supposé galiléen, d'après la deuxième loi de Newton : m ${V('a')} = q ${V('E')}, soit a<sub>x</sub> = ${fr('qE', 'm')}. En intégrant (v<sub>x</sub>(0) = 0, x(0) = 0) :</p>
+      <p class="crs-formule">${sys(`v<sub>x</sub>(t) = ${fr('qE', 'm')} t`, `x(t) = ${fr('qE', '2m')} ${t2}`)}</p>
+      <p>Sortie : x(t<sub>sortie</sub>) = L ⟺ t<sub>sortie</sub> = ${rac(fr('2mL', 'qE'))}, puis v<sub>sortie</sub> = ${fr('qE', 'm')} ${rac(fr('2mL', 'qE'))} = ${rac(fr('2qEL', 'm'))}, et E = ${fr('U', 'L')} :</p>
+      <div class="cle"><p class="crs-formule">v<sub>sortie</sub> = ${rac(fr('2qU', 'm'))}</p>
+        <p>La vitesse de sortie dépend de la <b>tension U</b>, de la <b>charge</b> et de la <b>masse</b> de la particule ; elle <b>ne dépend pas de la largeur L</b> du condensateur.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">Proton, U = 10 kV : v = ${rac(fr('2 × 1,60 × 10<sup>−19</sup> × 1,0 × 10<sup>4</sup>', '1,67 × 10<sup>−27</sup>'))} = <span class="c">1,4 × 10<sup>6</sup> ${MS}</span></p>`)}`);
+  const U = hasard([100, 500, 2000, 5000]), v = Math.sqrt(2 * E_CH * U / M_E);
+  c.aToi(carte, [
+    { titre: 'Un électron', parties: [{ type: 'sci', q: `Un électron (m<sub>e</sub> = 9,11 × 10<sup>−31</sup> kg) est accéléré sans vitesse initiale par une tension U = ${fmt(U)} V. Vitesse de sortie (2 chiffres significatifs) :`, label: 'v =', valeur: v, cs: 2, unite: MS + CALC,
+      diag: x => (Math.abs(x / (v * v) - 1) < .05 ? 'N\'oublie pas la racine carrée.' : Math.abs(x / (v / Math.SQRT2) - 1) < .05 ? 'Il manque le 2 : v = √(2eU / m).' : 'v = √(2eU / m<sub>e</sub>) : on prend la valeur de la charge, e.'),
+      solution: `<p>v = √(2 × 1,60 × 10<sup>−19</sup> × ${fmt(U)} / 9,11 × 10<sup>−31</sup>) = ${sci(v, 2)} ${MS}</p>` }] },
+    { titre: 'Et la largeur ?', parties: [{ type: 'choix', q: 'On double la distance L entre les armatures, à tension U égale. La vitesse de sortie :', colonne: false, melanger: false,
+      options: [o('ok', 'ne change pas'), o('d', 'double'), o('m', 'est divisée par 2')], bonne: 'ok',
+      indices: { d: 'E = U / L est divisé par 2, mais la particule est accélérée sur une distance deux fois plus grande.', m: 'v = √(2qU / m) : L n\'y figure pas.' }, solution: '<p>v<sub>sortie</sub> = √(2qU / m) ne dépend pas de L.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Tension nécessaire, polarité ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Quelle tension, dans quel sens ?');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour atteindre une vitesse v, on isole U : v<sup>2</sup> = 2qU / m ⟺ <b>U = m v<sup>2</sup> / (2q)</b>.</p>
+      <div class="cle"><p>La particule doit partir de l'armature qui la <b>repousse</b> : armature <b>+</b> pour une charge positive (proton, ion positif), armature <b>−</b> pour un électron. Pour accélérer un électron, on <b>inverse la polarité</b> par rapport au proton.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">Proton à v = 1,0 × 10<sup>6</sup> ${MS} : U = ${fr('1,67 × 10<sup>−27</sup> × (1,0 × 10<sup>6</sup>)<sup>2</sup>', '2 × 1,60 × 10<sup>−19</sup>')} = <span class="c">5,2 × 10<sup>3</sup> V</span></p>`)}`);
+  const v = hasard([2.0e6, 3.0e6, 5.0e5]), U = M_P * v * v / (2 * E_CH);
+  c.aToi(carte, [
+    { titre: 'La tension', parties: [{ type: 'sci', q: `Quelle tension faut-il pour accélérer un proton, sans vitesse initiale, jusqu'à ${sci(v, 1)} ${MS} ? (2 chiffres significatifs)`, label: 'U =', valeur: U, cs: 2, unite: 'V' + CALC,
+      diag: x => (Math.abs(x / (2 * U) - 1) < .05 ? 'U = m v² / (2q) : divise aussi par 2.' : 'U = m<sub>p</sub> v<sup>2</sup> / (2e).'), solution: `<p>U = 1,67 × 10<sup>−27</sup> × (${sci(v, 1)})<sup>2</sup> / (2 × 1,60 × 10<sup>−19</sup>) = ${sci(U, 2)} V</p>` }] },
+    { titre: 'Polarité', parties: [{ type: 'choix', q: 'Un électron est lâché sans vitesse près d\'une armature. Pour qu\'il soit accéléré vers l\'autre, cette armature de départ doit être :', colonne: false, melanger: false,
+      options: [o('m', 'négative'), o('p', 'positive')], bonne: 'm', indice: 'L\'électron est attiré par l\'armature + : elle doit être en face.', solution: '<p>Départ près de l\'armature −, qui le repousse vers l\'armature +.</p>' }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Particule partant au repos : a<sub>x</sub> = qE / m, v<sub>x</sub> = (qE / m) t, x = (qE / 2m) ${t2}, t<sub>sortie</sub> = √(2mL / (qE)).</p></div>
+    <div class="cle"><p><b>v<sub>sortie</sub> = √(2qU / m)</b> : dépend de U, q et m, pas de L (à savoir redémontrer).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4b_cours.html">Cours : accélérateur linéaire et applications →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#acceleration">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+CU.menu('module_4a_cours');
+</script>
+</body>
+</html>

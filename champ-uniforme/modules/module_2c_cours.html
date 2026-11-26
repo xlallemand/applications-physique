@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : vitesse initiale quelconque — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 3 / 4</span>
+    <h2 class="er-titre">Vitesse initiale quelconque</h2>
+    <p class="er-contexte">Cas général : <span class="vec-nom">v</span><sub>0</sub> fait un angle <b>α</b> avec l'horizontale. On projette <span class="vec-nom">v</span><sub>0</sub> sur les axes (<b>cos</b> et <b>sin</b>), on établit les équations horaires, puis l'équation de la trajectoire.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Coordonnées de v⃗₀ (v₀ = 5,0 m·s⁻¹, α = 40°)
+   2. Équations horaires (h = 2,0 m)
+   3. Équation de la trajectoire
+   ============================================================ */
+const { exemple, hasard, melanger } = COURS;
+const { V, fmt, cs, sys, fr, col, MS, MS2, CALC, figTir, svg, fl, nom, txt, COUL, ENCRE, ENCRE2, ENCRE3 } = CU;
+const o = (id, label) => ({ id, label });
+const t2 = 't<sup>2</sup>';
+const G = 9.81, rad = d => d * Math.PI / 180;
+
+// triangle des coordonnées de v⃗₀ (figure du cours)
+function triangle() {
+  const x0 = 40, y0 = 130, L = 150, a = rad(40), x1 = x0 + L * Math.cos(a), y1 = y0 - L * Math.sin(a);
+  let s = `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="${ENCRE3}" stroke-dasharray="4 3"/><line x1="${x1}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${ENCRE3}" stroke-dasharray="4 3"/>`;
+  s += fl(x0, y0, x1, y1, COUL.v, { ep: 2.6 }) + nom((x0 + x1) / 2 - 16, (y0 + y1) / 2 - 8, 'v', '0', COUL.v);
+  s += `<path d="M${x0 + 32},${y0} A32,32 0 0 0 ${x0 + 32 * Math.cos(a)},${y0 - 32 * Math.sin(a)}" fill="none" stroke="${ENCRE2}"/>` + txt(x0 + 38, y0 - 8, 'α', { t: 13, g: 700 });
+  s += txt((x0 + x1) / 2, y0 + 18, 'v<tspan dy="3" font-size="9">0x</tspan><tspan dy="-3"> = v</tspan><tspan dy="3" font-size="9">0</tspan><tspan dy="-3"> cos α</tspan>', { t: 12, g: 700, c: ENCRE, a: 'middle' });
+  s += txt(x1 + 8, (y0 + y1) / 2 + 4, 'v<tspan dy="3" font-size="9">0y</tspan><tspan dy="-3"> = v</tspan><tspan dy="3" font-size="9">0</tspan><tspan dy="-3"> sin α</tspan>', { t: 12, g: 700, c: ENCRE });
+  return svg(310, 150, s, 'Le vecteur vitesse initiale est l\'hypoténuse d\'un triangle rectangle : v0x = v0 cos α (côté adjacent, horizontal), v0y = v0 sin α (côté opposé, vertical)');
+}
+
+/* ---------- 1. Coordonnées de v⃗₀ ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Les coordonnées de la vitesse initiale');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>${V('v', '0')} est l'hypoténuse d'un triangle rectangle : sa projection sur l'axe horizontal est le côté <b>adjacent</b> à α, sa projection sur l'axe vertical le côté <b>opposé</b>.</p>
+      ${triangle()}
+      <div class="cle"><p class="crs-formule">${V('v', '0')} ${col('v<sub>0x</sub> = v<sub>0</sub> cos α', 'v<sub>0y</sub> = v<sub>0</sub> sin α')}</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">v<sub>0</sub> = 5,0 ${MS}, α = 40° : v<sub>0x</sub> = 5,0 × cos 40° = <span class="c">3,8 ${MS}</span> ; v<sub>0y</sub> = 5,0 × sin 40° = <span class="c">3,2 ${MS}</span></p>
+      <p>Calculatrice en mode <b>degrés</b>.</p>`)}`);
+  const v0 = hasard([8.0, 10, 12, 15, 20]), al = hasard([25, 30, 50, 60, 70]), vx = v0 * Math.cos(rad(al)), vy = v0 * Math.sin(rad(al));
+  c.aToi(carte, [
+    { titre: 'Projeter', enonce: `<p>Un ballon est lancé à v<sub>0</sub> = ${fmt(v0)} ${MS}, avec un angle α = ${al}° au-dessus de l'horizontale.</p>`,
+      parties: [{ type: 'champs', ligne: true, q: 'Coordonnées de ' + V('v', '0') + ' (3 chiffres significatifs) :', champs: [{ label: 'v<sub>0x</sub> =', valeur: vx, rel: .01, unite: MS + CALC }, { label: 'v<sub>0y</sub> =', valeur: vy, rel: .01, unite: MS + CALC }],
+        diag: v => (Math.abs(v[0] - vy) < .02 * vy && Math.abs(v[1] - vx) < .02 * vx ? 'Coordonnées échangées : sur l\'axe horizontal, côté adjacent à α, c\'est le cosinus.' : Math.abs(v[0] - v0 * Math.cos(al)) < .05 * v0 ? 'Ta calculatrice est en radians : passe-la en degrés.' : 'v<sub>0x</sub> = v<sub>0</sub> cos α et v<sub>0y</sub> = v<sub>0</sub> sin α.'),
+        solution: `<p>v<sub>0x</sub> = ${fmt(v0)} × cos ${al}° = ${cs(vx, 3)} ${MS} ; v<sub>0y</sub> = ${fmt(v0)} × sin ${al}° = ${cs(vy, 3)} ${MS}</p>` }] },
+    { titre: 'Cas particuliers', parties: [{ type: 'choix', q: 'Si α = 0° (lancer horizontal), que valent les coordonnées de ' + V('v', '0') + ' ?', colonne: false, melanger: false,
+      options: [o('ok', col('v<sub>0</sub>', '0')), o('inv', col('0', 'v<sub>0</sub>')), o('z', col('0', '0'))], bonne: 'ok',
+      indices: { inv: 'cos 0° = 1 et sin 0° = 0.', z: 'La balle est lancée : v<sub>0</sub> n\'est pas nulle.' }, solution: '<p>cos 0° = 1, sin 0° = 0 : on retrouve le lancer horizontal.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Équations horaires ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Équations horaires');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Ballon lancé d'une hauteur h avec ${V('v', '0')} faisant l'angle α avec l'horizontale (axe x horizontal, axe y vertical vers le haut, origine au sol).</p>
+      ${figTir({ h: 2, v0: 5, alpha: 40, aria: 'Lancer depuis la hauteur h avec un angle alpha : la trajectoire monte puis redescend' })}
+      <p>a<sub>x</sub> = 0 et a<sub>y</sub> = −g. En intégrant : v<sub>x</sub>(t) = C<sub>1</sub> et v<sub>y</sub>(t) = −g t + C<sub>2</sub>, avec, à t = 0, C<sub>1</sub> = v<sub>0</sub> cos α et C<sub>2</sub> = v<sub>0</sub> sin α. En intégrant encore, avec C<sub>3</sub> = x(0) = 0 et C<sub>4</sub> = y(0) = h :</p>
+      <div class="cle"><p class="crs-formule">${sys('v<sub>x</sub>(t) = v<sub>0</sub> cos α', 'v<sub>y</sub>(t) = −g t + v<sub>0</sub> sin α')} &nbsp; ${sys('x(t) = (v<sub>0</sub> cos α) t', `y(t) = −${fr('1', '2')} g ${t2} + (v<sub>0</sub> sin α) t + h`)}</p></div>
+    </div>
+    ${exemple(`<p>v<sub>0</sub> = 5,0 ${MS}, α = 40°, h = 2,0 m : x(t) = 3,83 t ; y(t) = −4,905 ${t2} + 3,21 t + 2,0.</p>`)}`);
+  const v0 = hasard([10, 12, 15]), al = hasard([30, 45, 60]), h = hasard([0, 1.5, 2.0]);
+  const vy = v0 * Math.sin(rad(al));
+  c.aToi(carte, [
+    { titre: 'Choisir', parties: [{ type: 'choix', q: 'Quelle est l\'expression de y(t) ?', colonne: true, melanger: false,
+      options: melanger([o('ok', `y(t) = −${fr('1', '2')} g ${t2} + (v<sub>0</sub> sin α) t + h`), o('cos', `y(t) = −${fr('1', '2')} g ${t2} + (v<sub>0</sub> cos α) t + h`), o('h', `y(t) = −${fr('1', '2')} g ${t2} + (v<sub>0</sub> sin α) t`), o('g', `y(t) = −g ${t2} + (v<sub>0</sub> sin α) t + h`)]), bonne: 'ok',
+      indices: { cos: 'Sur l\'axe vertical, la vitesse initiale est v<sub>0</sub> sin α.', h: 'Le lancer part de la hauteur h : y(0) = h.', g: 'Primitive de −g t : −½ g t².' },
+      solution: '<p>y(t) = −½ g t² + (v<sub>0</sub> sin α) t + h.</p>' }] },
+    { titre: 'Avec les valeurs', enonce: `<p>v<sub>0</sub> = ${fmt(v0)} ${MS}, α = ${al}°, h = ${fmt(h)} m, g = 9,81 ${MS2}.</p>`,
+      parties: [{ type: 'champs', ligne: true, q: `Complète y(t) = a ${t2} + b t + c (3 chiffres significatifs) :`, champs: [{ label: 'a =', valeur: -G / 2, rel: .003 }, { label: 'b =', valeur: vy, rel: .01, unite: CALC }, { label: 'c =', valeur: h, tol: 1e-9, signe: false }],
+        diag: v => (Math.abs(v[0] - G / 2) < .01 ? 'a est négatif : −½ g.' : Math.abs(v[1] - v0 * Math.cos(rad(al))) < .02 * v0 ? 'b = v<sub>0</sub> sin α (pas cos).' : 'a = −½ g ; b = v<sub>0</sub> sin α ; c = h.'),
+        solution: `<p>y(t) = −4,905 ${t2} + ${cs(vy, 3)} t${h ? ' + ' + fmt(h) : ''}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Équation de la trajectoire ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Équation de la trajectoire');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>On élimine t : x = (v<sub>0</sub> cos α) t donne t = ${fr('x', 'v<sub>0</sub> cos α')}, que l'on remplace dans y(t) :</p>
+      <p class="crs-calc">y = −${fr('1', '2')} g ${fr('x<sup>2</sup>', '(v<sub>0</sub> cos α)<sup>2</sup>')} + v<sub>0</sub> sin α × ${fr('x', 'v<sub>0</sub> cos α')} + h &nbsp; et &nbsp; ${fr('sin α', 'cos α')} = tan α</p>
+      <div class="cle"><p class="crs-formule">y = −${fr('g', '2 (v<sub>0</sub> cos α)<sup>2</sup>')} x<sup>2</sup> + (tan α) x + h</p><p>C'est l'équation d'une <b>parabole</b> (tournée vers le bas).</p></div>
+    </div>
+    ${exemple(`<p>v<sub>0</sub> = 5,0 ${MS}, α = 40°, h = 2,0 m : y = −${fr('9,81', '2 × (5,0 × cos 40°)<sup>2</sup>')} x<sup>2</sup> + (tan 40°) x + 2,0, soit <span class="c">y = −0,334 x<sup>2</sup> + 0,839 x + 2,0</span>.</p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Repérer l\'erreur', parties: [{ type: 'choix', q: 'Un élève écrit y = −g x<sup>2</sup> / (2 v<sub>0</sub><sup>2</sup>) + (tan α) x + h. Quelle est son erreur ?', colonne: true, melanger: false,
+      options: [o('ok', 'Il manque cos<sup>2</sup> α au dénominateur.'), o('tan', 'Il faut sin α à la place de tan α.'), o('h', 'Il ne faut pas de h.')], bonne: 'ok',
+      indices: { tan: 'v<sub>0</sub> sin α × x / (v<sub>0</sub> cos α) = (tan α) x : le tan est juste.', h: 'y(0) = h : le lancer part de la hauteur h.' },
+      solution: '<p>On remplace t par x / (v<sub>0</sub> cos α) : au carré, cela donne (v<sub>0</sub> cos α)<sup>2</sup>.</p>' }] },
+    { titre: 'Vérifier', parties: [{ type: 'choix', q: 'Que retrouve-t-on avec α = 0 ?', colonne: true, melanger: false,
+      options: [o('ok', 'y = −g x<sup>2</sup> / (2 v<sub>0</sub><sup>2</sup>) + h, la trajectoire du lancer horizontal'), o('d', 'une droite'), o('z', 'y = h')], bonne: 'ok',
+      indices: { d: 'Le terme en x² ne disparaît pas.', z: 'Seul le terme (tan α) x s\'annule.' }, solution: '<p>cos 0 = 1 et tan 0 = 0.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>${V('v', '0')} : v<sub>0x</sub> = v<sub>0</sub> cos α, v<sub>0y</sub> = v<sub>0</sub> sin α.</p></div>
+    <div class="cle"><p>x(t) = (v<sub>0</sub> cos α) t ; y(t) = −½ g ${t2} + (v<sub>0</sub> sin α) t + h.</p></div>
+    <div class="cle"><p>y = −g x<sup>2</sup> / (2 (v<sub>0</sub> cos α)<sup>2</sup>) + (tan α) x + h : parabole.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2d_cours.html">Cours : exploiter les équations →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#quelconque">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+CU.menu('module_2c_cours');
+</script>
+</body>
+</html>

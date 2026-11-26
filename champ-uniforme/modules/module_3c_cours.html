@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : équations du mouvement — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 3 / 4</span>
+    <h2 class="er-titre">Équations du mouvement d'une particule chargée</h2>
+    <p class="er-contexte">Même démarche que pour la chute libre : seule la force électrique agit, donc <span class="vec-nom">a</span> = q<span class="vec-nom">E</span> / m est constante. Les équations sont celles de la chute libre, avec <b>g remplacé par qE / m</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Accélération a⃗ = q E⃗ / m (deuxième loi, poids négligé)
+   2. Équations horaires (E⃗ vertical vers le bas, entrée en O avec v⃗₀
+      faisant l'angle α), q remplacé par e ou −e
+   3. Équation de la trajectoire, analogie avec la chute libre
+   ============================================================ */
+const { exemple, hasard, melanger } = COURS;
+const { V, fmt, sci, sys, fr, col, MS, MS2, VM, CALC, condo, E_CH, M_P, M_E } = CU;
+const o = (id, label) => ({ id, label });
+const t2 = 't<sup>2</sup>';
+
+/* ---------- 1. L'accélération ---------- */
+function etape1(c) {
+  const carte = c.carte('1. L\'accélération de la particule');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Système : la particule de masse m et de charge q. Bilan des forces : ${V('F', 'él')} = q ${V('E')} (poids négligé). Dans le référentiel terrestre supposé galiléen, d'après la deuxième loi de Newton pour la particule de masse constante :</p>
+      <div class="cle"><p class="crs-formule">m ${V('a')} = q ${V('E')} &nbsp;donc&nbsp; ${V('a')} = ${fr(`q ${V('E')}`, 'm')}</p>
+        <p>${V('E')} est uniforme : l'accélération est <b>constante</b>, comme ${V('g')} en chute libre. Proton : ${V('a')} = e ${V('E')} / m ; électron : ${V('a')} = −e ${V('E')} / m.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">Électron, E = 1,0 × 10<sup>4</sup> ${VM} : a = ${fr('e E', 'm<sub>e</sub>')} = ${fr('1,60 × 10<sup>−19</sup> × 1,0 × 10<sup>4</sup>', '9,11 × 10<sup>−31</sup>')} = <span class="c">1,8 × 10<sup>15</sup> ${MS2}</span></p>
+      <p>Cent mille milliards de fois g : c'est pourquoi la trajectoire est très courbée sur quelques centimètres.</p>`)}`);
+  const E = hasard([2.0e3, 5.0e3, 4.0e4]), a = E_CH * E / M_P;
+  c.aToi(carte, [
+    { titre: 'Un proton', parties: [{ type: 'sci', q: `Accélération d'un proton (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg) dans un champ E = ${sci(E, 2)} ${VM} (2 chiffres significatifs) :`, label: 'a =', valeur: a, cs: 2, unite: MS2 + CALC,
+      diag: v => (Math.abs(v / (E_CH * E) - 1) < .05 ? 'Tu as calculé la force : divise par la masse.' : Math.abs(v / (E_CH * E * M_P) - 1) < .05 ? 'a = eE / m : on divise par m.' : 'a = e E / m<sub>p</sub>.'),
+      solution: `<p>a = 1,60 × 10<sup>−19</sup> × ${sci(E, 2)} / 1,67 × 10<sup>−27</sup> = ${sci(a, 2)} ${MS2}</p>` }] },
+    { titre: 'Sens', parties: [{ type: 'choix', q: `Pour un électron, ${V('a')} est :`, colonne: false, melanger: false, options: [o('ok', `de sens opposé à ${V('E')}`), o('m', `de même sens que ${V('E')}`), o('n', 'nulle')], bonne: 'ok',
+      indices: { m: 'q = −e est négative.', n: 'La force électrique n\'est pas compensée.' }, solution: `<p>${V('a')} = −e ${V('E')} / m.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Équations horaires ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Équations horaires');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>La particule entre en O avec ${V('v', '0')} faisant l'angle α avec l'axe x (parallèle aux armatures). L'armature du haut est +, donc ${V('E')} = ${col('0', '−E')} (axe z vers le haut) et ${V('a')} = ${col('0', `−${fr('qE', 'm')}`)}.</p>
+      ${condo({ haut: '+', q: 1, ang: 30, aria: 'Particule positive entrant en O avec une vitesse inclinée : elle est déviée vers l\'armature négative du bas' })}
+      <p>On intègre deux fois, avec ${V('v')}(0) = ${col('v<sub>0</sub> cos α', 'v<sub>0</sub> sin α')} et ${V('OM')}(0) = ${V('0')} :</p>
+      <div class="cle"><p class="crs-formule">${sys('v<sub>x</sub>(t) = v<sub>0</sub> cos α', `v<sub>z</sub>(t) = −${fr('qE', 'm')} t + v<sub>0</sub> sin α`)} &nbsp; ${sys('x(t) = (v<sub>0</sub> cos α) t', `z(t) = −${fr('qE', '2m')} ${t2} + (v<sub>0</sub> sin α) t`)}</p>
+        <p>Proton : on remplace q par e ; électron : par −e, et z(t) = +${fr('eE', '2m')} ${t2} + (v<sub>0</sub> sin α) t.</p></div>
+    </div>
+    ${exemple(`<p>Électron entrant avec ${V('v', '0')} horizontale (α = 0), E = 1,0 × 10<sup>4</sup> ${VM} vers le bas : x(t) = v<sub>0</sub> t et z(t) = +${fr('eE', '2m<sub>e</sub>')} ${t2} : il monte, vers l'armature +.</p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Pour un proton', parties: [{ type: 'choix', q: `Un proton entre en O avec ${V('v', '0')} horizontale ; ${V('E')} est vertical vers le bas. Expression de z(t) :`, colonne: false, melanger: false,
+      options: melanger([o('ok', `z(t) = −${fr('eE', '2m')} ${t2}`), o('p', `z(t) = ${fr('eE', '2m')} ${t2}`), o('g', `z(t) = −${fr('1', '2')} g ${t2}`), o('t', `z(t) = −${fr('eE', 'm')} t`)]), bonne: 'ok',
+      indices: { p: 'Proton : q = +e, la force est vers le bas comme ' + V('E') + '.', g: 'Le poids est négligé : g est remplacé par eE / m.', t: 'C\'est v<sub>z</sub>(t) : intègre encore.' },
+      solution: `<p>a<sub>z</sub> = −eE / m, v<sub>z</sub>(0) = 0, z(0) = 0 : z(t) = −${fr('eE', '2m')} ${t2}.</p>` }] },
+    { titre: 'Pour un électron', parties: [{ type: 'choix', q: 'Même situation avec un électron. v<sub>z</sub>(t) =', colonne: false, melanger: false,
+      options: [o('ok', `+${fr('eE', 'm')} t`), o('m', `−${fr('eE', 'm')} t`), o('z', '0')], bonne: 'ok',
+      indices: { m: 'q = −e : −(−e)E / m = +eE / m.', z: 'La force électrique est verticale : v<sub>z</sub> varie.' }, solution: '<p>a<sub>z</sub> = −qE / m = +eE / m, donc v<sub>z</sub>(t) = eE t / m.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Trajectoire et analogie ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Trajectoire : l\'analogie avec la chute libre');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>En éliminant t comme pour la chute libre :</p>
+      <div class="cle"><p class="crs-formule">z = −${fr('qE', '2m (v<sub>0</sub> cos α)<sup>2</sup>')} x<sup>2</sup> + (tan α) x</p><p>C'est une <b>parabole</b>. Tout se passe comme en chute libre, avec g remplacé par qE / m.</p></div>
+      <div class="crs-defile"><table class="crs-tab"><thead><tr><th>Chute libre</th><th>Particule chargée</th></tr></thead>
+        <tbody><tr><td>${V('P')} = m ${V('g')}</td><td>${V('F', 'él')} = q ${V('E')}</td></tr><tr><td>${V('a')} = ${V('g')}</td><td>${V('a')} = q ${V('E')} / m</td></tr><tr><td>−½ g ${t2}</td><td>−(qE / 2m) ${t2}</td></tr></tbody></table></div>
+    </div>`);
+  c.aToi(carte, [
+    { parties: [{ type: 'choix', q: 'Pourquoi la trajectoire d\'une particule chargée entre les armatures est-elle une parabole, comme en chute libre ?', colonne: true, melanger: false,
+      options: [o('ok', 'Parce que son accélération est constante (champ uniforme), comme ' + V('g') + '.'), o('p', 'Parce qu\'elle est soumise à son poids.'), o('v', 'Parce que sa vitesse est constante.')], bonne: 'ok',
+      indices: { p: 'Le poids est négligé.', v: 'Sa vitesse varie : elle est accélérée.' }, solution: '<p>' + V('a') + ' constante et non colinéaire à ' + V('v', '0') + ' : parabole.</p>' }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>${V('a')} = q ${V('E')} / m (poids négligé), constante.</p></div>
+    <div class="cle"><p>x(t) = (v<sub>0</sub> cos α) t ; z(t) = −(qE / 2m) ${t2} + (v<sub>0</sub> sin α) t : les équations de la chute libre avec g remplacé par qE / m ; q = e ou −e.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3d_cours.html">Cours : déviation d'une particule →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#equations">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+CU.menu('module_3c_cours');
+</script>
+</body>
+</html>

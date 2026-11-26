@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : poids et force électrique — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 4</span>
+    <h2 class="er-titre">Poids et force électrique</h2>
+    <p class="er-contexte">Pour une particule chargée (proton, électron), on compare le <b>poids</b> et la <b>force électrique</b> : le poids est <b>négligeable</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Comparaison pour un proton dans E = 1 V·m⁻¹ (exemple du cours),
+      rapport F / P, conclusion : poids négligeable
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { V, fmt, sci, fr, VM, CALC, E_CH, M_P, M_E } = CU;
+const o = (id, label) => ({ id, label });
+const G = 9.81;
+
+function etape1(c) {
+  const carte = c.carte('1. Comparer le poids et la force électrique');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>On calcule les deux valeurs, puis leur <b>rapport</b> : si une force est plus de 100 fois plus faible que l'autre, on peut la négliger.</p>
+      <div class="cle"><p>Pour une particule chargée (proton, électron, ion) dans un condensateur, même avec un champ faible, la force électrique est des milliards de fois plus grande que le poids : <b>on néglige le poids</b>. Le système n'est alors soumis qu'à ${V('F', 'él')} = q ${V('E')}.</p></div>
+    </div>
+    ${exemple(`<p>Proton (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg, q = e = 1,60 × 10<sup>−19</sup> C) dans un champ E = 1 ${VM}, g = 9,81 N·kg<sup>−1</sup> :</p>
+      <p class="crs-calc">P = m<sub>p</sub> g = 1,67 × 10<sup>−27</sup> × 9,81 = 1,64 × 10<sup>−26</sup> N &nbsp;;&nbsp; F<sub>él</sub> = e E = 1,60 × 10<sup>−19</sup> × 1 = 1,60 × 10<sup>−19</sup> N</p>
+      <p class="crs-calc">${fr('F<sub>él</sub>', 'P')} = ${fr('1,60 × 10<sup>−19</sup>', '1,64 × 10<sup>−26</sup>')} ≈ <span class="c">1 × 10<sup>7</sup></span> : le poids est dix millions de fois plus faible, il est négligeable.</p>`)}`);
+  const E = hasard([1.0e3, 1.0e4, 5.0e4]), P = M_E * G, F = E_CH * E;
+  c.aToi(carte, [
+    { titre: 'Le poids d\'un électron', parties: [{ type: 'sci', q: `Masse d'un électron : m<sub>e</sub> = 9,11 × 10<sup>−31</sup> kg. Valeur de son poids (3 chiffres significatifs) :`, label: 'P =', valeur: P, cs: 3, rel: .01, unite: 'N' + CALC,
+      diag: () => 'P = m<sub>e</sub> × g.', solution: `<p>P = 9,11 × 10<sup>−31</sup> × 9,81 = ${sci(P, 3)} N</p>` }] },
+    { titre: 'La force électrique', parties: [{ type: 'sci', q: `Cet électron est dans un champ E = ${sci(E, 2)} ${VM}. Valeur de la force électrique (3 chiffres significatifs) :`, label: 'F<sub>él</sub> =', valeur: F, cs: 3, rel: .01, unite: 'N' + CALC,
+      diag: () => 'F<sub>él</sub> = e × E (valeur : on prend e, positif).', solution: `<p>F<sub>él</sub> = 1,60 × 10<sup>−19</sup> × ${sci(E, 2)} = ${sci(F, 3)} N</p>` }] },
+    { titre: 'Conclure', parties: [{ type: 'choix', q: `Le rapport F<sub>él</sub> / P vaut environ ${sci(F / P, 1)}. Que conclure ?`, colonne: true, melanger: false,
+      options: [o('ok', 'Le poids est négligeable devant la force électrique.'), o('f', 'La force électrique est négligeable devant le poids.'), o('c', 'Les deux forces se compensent.')], bonne: 'ok',
+      indices: { f: 'C\'est l\'inverse : F<sub>él</sub> est bien plus grande.', c: 'Elles n\'ont pas la même valeur.' }, solution: '<p>F<sub>él</sub> est des milliards de fois plus grande que P : on néglige le poids.</p>' }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Pour une particule chargée dans un champ électrique, le poids est négligeable devant la force électrique : on calcule F<sub>él</sub> / P pour le justifier.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3c_cours.html">Cours : équations du mouvement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#poids">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+CU.menu('module_3b_cours');
+</script>
+</body>
+</html>

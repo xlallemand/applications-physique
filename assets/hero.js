@@ -14,6 +14,8 @@
      puissance  tension et intensité déphasées, puissance instantanée
      transport  pylônes et lignes à haute tension, tension sinusoïdale
      cinematique  chronophotographies (positions successives) et vecteurs vitesse
+     parabole   tirs paraboliques dans le champ de pesanteur (vecteurs vitesse, g⃗ vers le bas) et condensateur plan
+                dévié par un faisceau de particules (mouvement dans un champ uniforme)
      wagon      wagon tiré sur des rails par des cordes à différents angles (travail d'une force)
      rotation   engrenages, arcs de cercle et sens de rotation (mouvements de rotation)
      fluides    château d'eau et niveaux, hauteur h, forces pressantes sur les parois (statique des fluides)
@@ -561,6 +563,46 @@
       fleche(xm, ym, 60 * Math.sin(a0), -60 * Math.cos(a0), .6);
       fleche(xm, ym, -r * .5 * Math.cos(a0), -r * .5 * Math.sin(a0), .45);
       ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(cx, cy, 3, 0, 7); ctx.fill();
+    },
+
+    // Tirs paraboliques depuis un même point (angles différents, g vers le bas) et,
+    // à droite, un condensateur plan qui dévie un faisceau de particules
+    parabole(ctx, w, h, c) {
+      const p = 26;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, 0, y, w, y); }
+      function fleche(x, y, dx, dy, a) {
+        const L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, t = 10;
+        ctx.globalAlpha = a; ctx.lineWidth = 2.5; trait(ctx, x, y, x + dx - ux * 4, y + dy - uy * 4);
+        ctx.beginPath(); ctx.moveTo(x + dx, y + dy);
+        ctx.lineTo(x + dx - ux * t - uy * t * .45, y + dy - uy * t + ux * t * .45);
+        ctx.lineTo(x + dx - ux * t + uy * t * .45, y + dy - uy * t - ux * t * .45); ctx.closePath(); ctx.fill();
+      }
+      // sol et point de lancer
+      const x0 = w * .6, y0 = h * .9;
+      ctx.globalAlpha = .35; ctx.lineWidth = 2; trait(ctx, w * .55, y0 + 2, w, y0 + 2);
+      // portée R pour 45° (g = 1 en unités du dessin, v² = R) ; hauteur maximale R sin²α / 2
+      const R = Math.min(w * .36, (h * .5) / .41);
+      [[25, .3], [45, .55], [65, .38]].forEach(([deg, a]) => {
+        const r = deg * Math.PI / 180, v = Math.sqrt(R), vx = v * Math.cos(r), vy = v * Math.sin(r), T = 2 * vy;
+        ctx.globalAlpha = a; ctx.lineWidth = 2; ctx.setLineDash([7, 5]);
+        ctx.beginPath();
+        for (let k = 0; k <= 60; k++) { const t = T * k / 60, x = x0 + vx * t, y = y0 - (vy * t - t * t / 2); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        ctx.stroke(); ctx.setLineDash([]);
+        if (deg === 45) fleche(x0, y0, vx * 3, -vy * 3, .6);
+      });
+      // vecteur g
+      fleche(w * .93, h * .5, 0, 60, .45);
+      // condensateur plan et faisceau dévié
+      const cx = w * .74, cy = h * .26, L = Math.min(220, w * .2), e = Math.min(46, h * .12);
+      ctx.globalAlpha = .45; ctx.lineWidth = 5; trait(ctx, cx, cy - e, cx + L, cy - e); trait(ctx, cx, cy + e, cx + L, cy + e);
+      ctx.font = `700 16px ${police()}`;
+      for (let k = 0; k < 4; k++) { ctx.globalAlpha = .5; ctx.fillText('+', cx + 18 + k * L / 4, cy - e - 10); ctx.fillText('−', cx + 18 + k * L / 4, cy + e + 22); }
+      ctx.lineWidth = 2; ctx.globalAlpha = .5; ctx.beginPath();
+      for (let x = 0; x <= L * 1.4; x += 4) { const y = x <= L ? -.55 * e * (x / L) * (x / L) : -.55 * e - 1.1 * e * (x - L) / L; x ? ctx.lineTo(cx - 60 + 60 + x, cy + y) : ctx.moveTo(cx - 60, cy); }
+      ctx.stroke();
+      fleche(cx + L * .82, cy - e * .45, 0, e * .8, .4);
     },
 
     // Wagon sur des rails, tiré par des cordes à différents angles (forces et angle α),
