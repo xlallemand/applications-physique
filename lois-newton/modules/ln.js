@@ -146,7 +146,8 @@
       `<g stroke="${ENCRE}" stroke-width="3" stroke-linecap="round" fill="none"><circle cx="118" cy="52" r="13" fill="#fff"/><line x1="122" y1="65" x2="132" y2="112"/>` +
       `<line x1="126" y1="80" x2="196" y2="88"/><line x1="128" y1="84" x2="196" y2="98"/><line x1="132" y1="112" x2="112" y2="168"/><line x1="132" y1="112" x2="150" y2="168"/></g>`;
     s += fl(196, 93, 262, 93, cP) + nom(240, 82, 'F', 'personne/mur', cP, { t: 14 });
-    s += fl(186, 120, 120, 120, cM) + nom(150, 140, 'F', 'mur/personne', cM, { t: 14 });
+    // la force du mur sur la personne part du même point de contact
+    s += fl(196, 93, 130, 93, cM, { ep: 3 }) + nom(158, 124, 'F', 'mur/personne', cM, { t: 14 });
     s += txt(209, 186, 'mur', { a: 'middle' }) + txt(70, 186, 'personne', { a: 'middle' });
     return svg(320, 196, s, 'Une personne pousse un mur : la force de la personne sur le mur et la force du mur sur la personne ont la même direction, des sens opposés et la même valeur');
   }
