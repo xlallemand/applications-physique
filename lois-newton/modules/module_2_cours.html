@@ -31,12 +31,13 @@
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    1. Troisième loi (actions réciproques) : F⃗A/B = −F⃗B/A ; personne
       qui pousse un mur, Terre et Lune (LN.mur, LN.terreLune).
+      « À toi » : la main pousse une porte (figPaire, figBilanPorte).
    2. Référentiel galiléen : principe d'inertie vérifié ; héliocentrique,
       géocentrique (quelques jours), terrestre (quelques minutes) ; un
       référentiel qui tourne, ralentit ou accélère n'est pas galiléen.
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
-const { V, mur, terreLune } = LN;
+const { V, mur, terreLune, fl, nom, svg, txt, ENCRE, ENCRE2 } = LN;
 const o = (id, label) => ({ id, label });
 const FAB = V('F', 'A/B'), FBA = V('F', 'B/A');
 
@@ -46,6 +47,49 @@ const PAIRES = [
   ['Un aimant attire un clou avec une force de valeur', 'N', 0.40, 'Quelle est la valeur de la force exercée par le clou sur l\'aimant ?', 'F<sub>clou/aimant</sub>'],
   ['Un nageur pousse le mur de la piscine avec une force de valeur', 'N', 350, 'Quelle est la valeur de la force exercée par le mur sur le nageur ?', 'F<sub>mur/nageur</sub>'],
 ];
+/* ---------- La main pousse une porte (« À toi » 3) ---------- */
+const C_MAIN = '#c2255c', C_PORTE = '#1971c2', C_P = '#2f9e44', C_R = '#e8590c';
+// bras tendu qui arrive au point de contact (xc, yc)
+const bras = (xc, yc) => `<line x1="70" y1="${yc - 12}" x2="${xc - 10}" y2="${yc}" stroke="${ENCRE}" stroke-width="3" stroke-linecap="round"/>` +
+  `<ellipse cx="${xc - 7}" cy="${yc}" rx="8" ry="6" fill="#f6dccb" stroke="${ENCRE}" stroke-width="2"/>`;
+// porte vue de profil (panneau vertical)
+const porte = x => `<rect x="${x}" y="22" width="12" height="150" fill="#e9d8b8" stroke="${ENCRE2}" stroke-width="1.5"/>`;
+// contour en tirets d'un système
+const contourPorte = x => `<rect x="${x - 4}" y="14" width="20" height="166" rx="6" fill="none" stroke="${C_PORTE}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+const sol = `<line x1="20" y1="172" x2="300" y2="172" stroke="${ENCRE}" stroke-width="2"/>`;
+// figure 1 : la paire de forces réciproques, sur deux systèmes différents
+function figPaire() {
+  const xc = 200, yc = 110;
+  let s = sol + porte(xc) + bras(xc, yc) + contourPorte(xc);
+  s += `<ellipse cx="${xc - 8}" cy="${yc}" rx="18" ry="14" fill="none" stroke="${C_MAIN}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  s += fl(xc, yc, xc + 70, yc, C_PORTE, { ep: 3 }) + nom(xc + 64, yc - 14, 'F', 'main/porte', C_PORTE, { t: 14 });
+  s += fl(xc, yc, xc - 70, yc, C_MAIN, { ep: 3 }) + nom(xc - 50, yc + 34, 'F', 'porte/main', C_MAIN, { t: 14 });
+  s += txt(xc + 6, 194, 'système : la porte', { a: 'middle', c: C_PORTE }) + txt(xc - 78, 76, 'système : la main', { a: 'middle', c: C_MAIN });
+  return svg(320, 200, s, 'La force de la main sur la porte s\'exerce sur la porte ; la force de la porte sur la main s\'exerce sur la main : même valeur, sens opposés, deux systèmes différents');
+}
+// figure 2 : bilan des forces qui s'exercent sur le seul système porte
+function figBilanPorte() {
+  const x = 150, xg = x + 6, yg = 97, yc = 120;
+  let s = sol + porte(x) + contourPorte(x);
+  s += fl(xg, yg, xg, yg + 62, C_P, { ep: 3 }) + nom(xg - 22, yg + 52, 'P', '', C_P, { t: 14 });
+  s += fl(xg, yg, xg, yg - 62, C_R, { ep: 3 }) + nom(xg + 26, yg - 46, 'R', '', C_R, { t: 14 }) + txt(xg + 18, yg - 28, '(gonds)', { c: C_R, t: 11 });
+  s += `<circle cx="${xg}" cy="${yg}" r="3" fill="${ENCRE}"/>` + txt(xg - 10, yg + 4, 'G', { a: 'end', t: 11 });
+  s += fl(x, yc, x + 76, yc, C_PORTE, { ep: 3 }) + nom(x + 62, yc - 12, 'F', 'main/porte', C_PORTE, { t: 14 });
+  s += txt(x + 6, 194, 'système : la porte', { a: 'middle', c: C_PORTE });
+  return svg(320, 200, s, 'Forces qui s\'exercent sur la porte : le poids vers le bas, la force des gonds vers le haut qui le compense, et la force de la main, horizontale, que rien ne compense');
+}
+const SOL_PORTE = `<p><b>Les deux forces ont la même valeur</b> : c'est la troisième loi de Newton. Elle s'applique toujours, que les objets bougent ou non.</p>
+  <p>On a envie de répondre « supérieure », puisque c'est la main qui fait bouger la porte. C'est faux. En physique, il faut <b>appliquer les règles</b> (bilan des forces, lois de Newton) même quand elles semblent contredire l'intuition : si on ne les respecte pas, on se trompe. Le mouvement de la porte a une <b>autre explication</b>.</p>
+  <p><b>L'erreur : raisonner sur deux systèmes à la fois.</b> ${V('F', 'main/porte')} s'exerce sur la <b>porte</b> ; ${V('F', 'porte/main')} s'exerce sur la <b>main</b>. Elles agissent sur deux systèmes différents : elles ne se compensent pas, et les comparer ne dit rien du mouvement de la porte. « Les forces se compensent, donc le système est immobile ou en mouvement rectiligne uniforme » ne vaut que pour des forces qui s'exercent sur le <b>même système</b>.</p>
+  ${figPaire()}
+  <p><b>Le bon raisonnement : un seul système, la porte.</b> On fait le bilan des forces qui s'exercent sur elle :</p>
+  <ul><li>son poids ${V('P')}, vertical, vers le bas ;</li>
+    <li>la force ${V('R')} exercée par les gonds, qui compense le poids ;</li>
+    <li>la force ${V('F', 'main/porte')} exercée par la main, horizontale.</li></ul>
+  ${figBilanPorte()}
+  <p>Aucune force ne compense ${V('F', 'main/porte')} : les forces qui s'exercent sur la porte <b>ne se compensent pas</b>. D'après le principe d'inertie (module 3), la porte ne peut donc pas rester immobile : elle se met en mouvement.</p>
+  <p>${V('F', 'porte/main')} n'apparaît pas dans ce bilan : elle s'exerce sur la main, pas sur la porte.</p>`;
+
 function etape1(c_) {
   const carte = c_.carte('1. Troisième loi de Newton : actions réciproques');
   c_.ajouter(carte, `<div class="cours-bloc">
@@ -62,6 +106,12 @@ function etape1(c_) {
     { titre: 'Se compensent-elles ?', enonce: `<p>Le mur exerce sur la personne une force opposée à celle que la personne exerce sur le mur.</p>`,
       parties: [{ type: 'choix', q: 'Ces deux forces se compensent-elles ?', options: [o('non', 'non : elles s\'appliquent sur deux objets différents'), o('oui', 'oui : elles sont opposées')], bonne: 'non', melanger: false, colonne: true,
         indices: { oui: 'Des forces se compensent quand elles s\'exercent sur le <b>même</b> système. Ici, l\'une s\'exerce sur le mur, l\'autre sur la personne.' }, solution: '<p>Elles s\'appliquent sur deux objets différents (le mur et la personne) : elles ne se compensent pas.</p>' }] },
+    { titre: 'Pousser une porte', enonce: `<p>On pousse une porte avec la main pour l'ouvrir.</p>`,
+      parties: [{ type: 'choix', q: `La force que la main exerce sur la porte est-elle inférieure, supérieure ou égale à la force que la porte exerce sur la main ?`,
+        options: [o('inf', 'inférieure'), o('sup', 'supérieure'), o('egale', 'égale')], bonne: 'egale', melanger: false,
+        indices: { sup: 'C\'est l\'intuition : « la main fait bouger la porte, donc elle pousse plus fort ». Que dit la troisième loi de Newton sur les valeurs des deux forces ?',
+          inf: 'Que dit la troisième loi de Newton sur les valeurs des deux forces ?' },
+        solution: SOL_PORTE }] },
   ]);
   return carte;
 }
