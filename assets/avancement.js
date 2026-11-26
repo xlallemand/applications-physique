@@ -76,7 +76,7 @@
       'module_3_questions', 'module_4a_cours', 'module_4b_cours', 'module_4c_cours', 'module_4d_cours',
       'module_4_questions'] },
     'energie-cinetique': { ex: 2, pages: [
-      'module_1_simulation', 'module_1_cours', 'module_1_questions', 'module_2_simulation',
+      'module_1_simulation', 'module_1_cours', 'module_1_questions', '↗travail-force/index',
       'module_2a_cours', 'module_2b_cours', 'module_2c_cours', 'module_2d_cours', 'module_2_questions',
       'module_3a_cours', 'module_3b_cours', 'module_3c_cours', 'module_3d_cours', 'module_3_questions',
       'module_4a_cours', 'module_4b_cours', 'module_4c_cours', 'module_4d_cours', 'module_4e_cours',

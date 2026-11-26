@@ -63,6 +63,7 @@ NBSP = ' '
 EXCEPTIONS = {
     'decroissance-radioactive': 'simulateur',
     'double-periodicite': 'simulateur',
+    'travail-force': 'simulateur',
     'banc-optique': 'simulateur',
     'montage-electrique/module_1a_manip': 'simulateur',       # prise en main du simulateur de montage
     'periode-frequence/module_2_manip': 'atelier',            # mesurer T et calculer f
