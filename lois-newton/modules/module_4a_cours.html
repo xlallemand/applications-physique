@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : énoncé de la deuxième loi — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 1 / 5</span>
+    <h2 class="er-titre">Énoncé de la deuxième loi de Newton</h2>
+    <p class="er-contexte">Quand les forces ne se compensent pas, leur résultante est liée à l'<b>accélération</b> du système par sa <b>masse</b> : Σ <span class="vec-nom">F</span><sub>ext</sub> = m <span class="vec-nom">a</span>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Énoncé de la deuxième loi de Newton (phrase du cours), unités ;
+      cas particulier : le principe d'inertie (a⃗ = 0⃗).
+   « À toi » : Σ F = m × a ; a = Σ F / m avec une masse en grammes.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { V, SFX, NUL, CALC } = LN;
+const { fmt } = BF;
+const o = (id, label) => ({ id, label });
+const MS2 = 'm·s<sup>−2</sup>';
+
+// [système, m (kg), a (m·s⁻²)] : Σ F = m a
+const PRODUITS = [['une voiture', 1200, 2.5], ['un cycliste et son vélo', 75, 1.2], ['un palet', 0.50, 4.0], ['un camion', 8000, 0.50]];
+// [système, m (g), Σ F (N)] : a = Σ F / m
+const QUOTIENTS = [['une balle', 250, 2.0], ['un mobile', 500, 3.0], ['une petite voiture', 200, 0.50]];
+function etape1(c_) {
+  const carte = c_.carte('1. La deuxième loi de Newton');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans un référentiel galiléen, la résultante des forces extérieures qui s'appliquent à un système de masse constante est égale au produit de sa masse et de son accélération :</p>
+      <div class="cle"><p><b class="cle-titre">Deuxième loi de Newton.</b> Dans un référentiel galiléen, pour un système de masse constante,</p>
+        <p class="crs-formule">${SFX} = m ${V('a')}</p>
+        <p>avec ${SFX} la résultante des forces extérieures sur le système (F en N), m la masse du système (en kg), ${V('a')} l'accélération du système (a en ${MS2}).</p></div>
+      <div class="cle"><p><b class="cle-titre">Cas particulier : somme des forces nulle.</b> Le principe d'inertie (première loi) est un cas particulier de la deuxième loi : une accélération nulle correspond à un vecteur vitesse constant, donc à un mouvement rectiligne uniforme ou à l'immobilité.</p></div>
+    </div>
+    ${exemple(`<p>Un chariot de masse m<sub>chariot</sub> = 2,0 kg a une accélération de 3,0 ${MS2}. La résultante des forces qui s'exercent sur lui vaut :</p>
+      <p class="crs-calc">Σ F<sub>ext</sub> = m<sub>chariot</sub> × a<sub>chariot</sub> = 2,0 kg × 3,0 ${MS2} = <span class="c">6,0 N</span></p>
+      <p>Unités : 1 N = 1 kg·${MS2}.</p>`)}`);
+  const p = hasard(PRODUITS), q = hasard(QUOTIENTS), F = p[1] * p[2], a = q[2] / (q[1] / 1000);
+  c_.aToi(carte, [
+    { titre: 'La résultante', enonce: `<p>${p[0][0].toUpperCase() + p[0].slice(1)}, de masse ${fmt(p[1])} kg, a une accélération de ${fmt(p[2])} ${MS2}.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la valeur de la résultante des forces Σ F<sub>ext</sub>.', label: 'Σ F<sub>ext</sub> =', valeur: F, rel: .01, unite: 'N' + CALC, signe: false,
+        diag: v => (Math.abs(v - p[1] / p[2]) < 1e-6 * p[1] ? 'Tu as divisé : Σ F<sub>ext</sub> = m × a.' : 'Σ F<sub>ext</sub> = m × a, avec m en kg et a en m·s<sup>−2</sup>.'),
+        solution: `<p class="crs-calc">Σ F<sub>ext</sub> = m × a = ${fmt(p[1])} × ${fmt(p[2])} = <span class="c">${fmt(F)} N</span></p>` }] },
+    { titre: 'L\'accélération', enonce: `<p>La résultante des forces qui s'exercent sur ${q[0]} de masse ${fmt(q[1])} g vaut ${fmt(q[2])} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la valeur de son accélération.', label: 'a =', valeur: a, rel: .01, unite: MS2 + CALC, signe: false,
+        diag: v => (Math.abs(v - q[2] / q[1]) < 1e-9 + 1e-3 * q[2] / q[1] ? 'Convertis d\'abord la masse en kilogrammes.' : Math.abs(v - q[2] * q[1] / 1000) < 1e-6 ? 'a = Σ F<sub>ext</sub> / m : on divise par la masse.' : 'a = Σ F<sub>ext</sub> / m, avec m en kg.'),
+        solution: `<p class="crs-calc">m = ${fmt(q[1])} g = ${fmt(q[1] / 1000)} kg ; a = Σ F<sub>ext</sub> / m = ${fmt(q[2])} / ${fmt(q[1] / 1000)} = <span class="c">${fmt(a)} ${MS2}</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Dans un référentiel galiléen, pour un système de masse constante : <b>${SFX} = m ${V('a')}</b> (N, kg, ${MS2}). Si ${V('a')} = ${NUL} : principe d'inertie.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4b_cours.html">Cours : résultante connaissant le mouvement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#enonce">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+BF.menu('module_4a_cours');
+</script>
+</body>
+</html>

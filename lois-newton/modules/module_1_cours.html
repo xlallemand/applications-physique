@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : bilan des forces en résumé — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+<script src="../../bilan-forces/modules/situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Bilan des forces en résumé</h2>
+    <p class="er-contexte">Avant d'appliquer les lois de Newton, on fait toujours le <b>bilan des forces</b> qui s'exercent sur le <b>système</b>. Voici l'essentiel ; pour t'entraîner, l'<b>atelier de l'application « Bilan des forces »</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js), volontairement très court
+   (consigne du professeur) : le résumé du bilan des forces en une étape
+   (une notion par encadré .cle), l'exemple du skieur avec frottements
+   (R⃗ = R⃗ₙ + f⃗), puis deux bilans à faire (BF.bilan, situations de
+   bilan-forces/modules/situations.js). Le reste est dans l'atelier de
+   l'application « Bilan des forces » (page externe ↗ du plan).
+   ============================================================ */
+const { exemple } = COURS;
+const { nomV, sceneRemplie, diagrammeDe, infoForces, bilan, SITUATIONS: S } = BF;
+const LIEN = '<div class="ph-lien-app"><p>Pour t\'entraîner sur toutes les situations : l\'atelier de l\'application « Bilan des forces ».</p><a class="btn-small" href="../../bilan-forces/modules/module_6_simulation.html" target="_blank" rel="noopener">Atelier : bilan des forces ↗</a></div>';
+
+/* ---------- 1. Le bilan des forces en résumé ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le bilan des forces en résumé');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Système et centre de masse.</b> Le <b>système</b> est l'objet étudié ; tout le reste est le milieu extérieur. On le modélise souvent par un point, son <b>centre de masse G</b> (au centre d'un solide homogène et symétrique).</p></div>
+      <div class="cle"><p><b class="cle-titre">Vecteur force.</b> Une action mécanique se modélise par une force : un vecteur avec un <b>point d'application</b>, une <b>direction</b>, un <b>sens</b> et une <b>valeur</b> (en newtons, N).</p></div>
+      <div class="cle"><p><b class="cle-titre">Forces à distance, forces de contact.</b> À distance : le poids ${nomV('P')} (vertical, vers le bas, appliqué en G), les forces électrique et magnétique. De contact : <b>chaque objet qui touche</b> le système exerce une force (réaction du support, tension d'un fil, force de l'air, poussée d'Archimède…).</p></div>
+      ${infoForces()}
+      <div class="cle"><p><b class="cle-titre">Diagramme objet-action.</b> Le système au centre, les actions à distance (pointillés), puis chaque objet qui le touche (trait plein) : une flèche du diagramme = une force. On n'en oublie pas, on n'en invente pas.</p></div>
+      <div class="cle"><p><b class="cle-titre">Frottements.</b> La réaction d'un support se décompose : ${nomV('R')} = ${nomV('RN')} + ${nomV('f')}. ${nomV('RN')} est perpendiculaire au support ; les frottements ${nomV('f')} sont parallèles au support, opposés au glissement. Sans frottements, ${nomV('R')} est perpendiculaire au support.</p></div>
+    </div>
+    ${exemple(`<p>Un skieur descend une piste en prenant de la vitesse (action de l'air négligée) : la Terre (à distance) et la neige (contact) agissent sur lui. La réaction de la neige ${nomV('R')} (en noir) est la somme de ${nomV('RN')} et des frottements ${nomV('f')}.</p>
+      <div class="bf-noms-figs"><div class="bf-do-cadre">${diagrammeDe(S.skieur)}</div><div class="bf-sc-cadre">${sceneRemplie(S.skieur, { reaction: true })}</div></div>`)}
+    ${LIEN}`);
+  c_.aToi(carte, [Object.assign({ titre: 'Le skieur sans frottements' }, bilan(S.skieurSans, { jusqua: 'noms' })),
+    Object.assign({ titre: 'La brique qui glisse' }, bilan(S.glisse, { jusqua: 'noms' }))]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Bilan des forces : on choisit le <b>système</b>, on fait le <b>diagramme objet-action</b> (actions à distance, puis chaque objet qui touche), puis on dessine chaque force (point d'application, direction, sens). Avec frottements : ${nomV('R')} = ${nomV('RN')} + ${nomV('f')}.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="../../bilan-forces/modules/module_6_simulation.html" target="_blank" rel="noopener">Atelier : bilan des forces ↗</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : troisième loi →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+BF.menu('module_1_cours');
+</script>
+</body>
+</html>

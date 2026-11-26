@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../cinematique/modules/vecteurs.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 2 : 10 questions.
+   Forces réciproques : valeur, caractéristiques (même direction, sens
+   opposés, même valeur, points d'application sur deux objets différents),
+   point d'application, objet lourd et objet léger, écriture vectorielle,
+   tracé de F⃗B/A dans un quadrillage (LN.partieReciproque).
+   Référentiel galiléen : définition, choix selon le mouvement et la durée,
+   galiléen ou non selon le mouvement du référentiel.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, entre } = BF;
+const { V, partieReciproque } = LN;
+const FAB = V('F', 'A/B'), FBA = V('F', 'B/A');
+
+// valeur de la force réciproque
+const PAIRES = [['La Terre attire un satellite', 'le satellite sur la Terre', 'F<sub>satellite/Terre</sub>', [800, 1200, 1500, 2300], 'N'],
+  ['Une raquette frappe une balle de tennis', 'la balle sur la raquette', 'F<sub>balle/raquette</sub>', [120, 150, 240, 300], 'N'],
+  ['Un aimant attire un clou', 'le clou sur l\'aimant', 'F<sub>clou/aimant</sub>', [0.2, 0.35, 0.5, 0.8], 'N'],
+  ['Un camion pousse une voiture en panne', 'la voiture sur le camion', 'F<sub>voiture/camion</sub>', [900, 1500, 2400], 'N']];
+function valeur() {
+  const p = hasard(PAIRES), v = hasard(p[3]);
+  return { theme: 'Troisième loi', enonce: `<p>${p[0]} avec une force de valeur ${fmt(v)} ${p[4]}.</p>`,
+    parties: [fq.nombre(`Quelle est la valeur de la force exercée par ${p[1]} ?`, `${p[2]} =`, v, p[4], { signe: false,
+      diag: x => (x === 0 ? 'Les deux forces ne se compensent pas : elles ont la même valeur, mais s\'appliquent sur deux objets différents.' : 'D\'après la troisième loi de Newton, les deux forces ont la <b>même valeur</b>.'),
+      solution: `<p>D'après la troisième loi de Newton, les deux forces ont la même valeur : ${fmt(v)} ${p[4]}.</p>` })] };
+}
+function caracteristiques() {
+  return { theme: 'Troisième loi', parties: [fq.choix(`Les forces ${FAB} et ${FBA} ont :`, [o('ok', 'la même direction, des sens opposés, la même valeur'), o('sens', 'la même direction, le même sens, la même valeur'),
+    o('val', 'la même direction, des sens opposés, des valeurs différentes'), o('dir', 'des directions différentes')], 'ok',
+  { indices: { sens: `${FAB} = −${FBA} : le signe moins inverse le sens.`, val: 'Les deux forces ont toujours la même valeur, quels que soient les objets.', dir: 'Les deux forces sont portées par la même droite.' },
+    solution: `<p>${FAB} = −${FBA} : même direction, sens opposés, même valeur.</p>` })] };
+}
+const POINTS = [['La Terre attire une pomme.', 'la force exercée par la pomme sur la Terre', 'terre', [o('terre', 'sur la Terre'), o('pomme', 'sur la pomme'), o('deux', 'sur les deux à la fois')],
+  'La force exercée par la pomme <b>sur la Terre</b> s\'applique sur la Terre (au centre de la Terre).'],
+  ['Un footballeur frappe le ballon avec son pied.', 'la force exercée par le ballon sur le pied', 'pied', [o('pied', 'sur le pied'), o('ballon', 'sur le ballon'), o('deux', 'sur les deux à la fois')],
+  'La force exercée par le ballon <b>sur le pied</b> s\'applique sur le pied : le footballeur la sent.'],
+  ['Une personne s\'appuie contre un mur.', 'la force exercée par le mur sur la personne', 'personne', [o('personne', 'sur la personne'), o('mur', 'sur le mur'), o('deux', 'sur les deux à la fois')],
+  'La force exercée par le mur <b>sur la personne</b> s\'applique sur la personne (sur ses mains).']];
+function point() {
+  const p = hasard(POINTS);
+  return { theme: 'Point d\'application', enonce: `<p>${p[0]}</p>`, parties: [fq.choix(`Sur quel objet s'applique ${p[1]} ?`, p[3], p[2],
+    { melanger: false, indice: 'La force exercée par X sur Y s\'applique sur Y : c\'est Y qui la subit.', solution: `<p>${p[4]} Les deux forces réciproques s'appliquent sur deux objets différents.</p>` })] };
+}
+const LOURDS = [['Un camion percute une petite voiture.', 'la force exercée par le camion sur la voiture', 'celle exercée par la voiture sur le camion'],
+  ['La Terre attire la Lune.', 'la force exercée par la Terre sur la Lune', 'celle exercée par la Lune sur la Terre'],
+  ['Un adulte et un enfant, sur des patins, se poussent l\'un l\'autre.', 'la force exercée par l\'adulte sur l\'enfant', 'celle exercée par l\'enfant sur l\'adulte']];
+function lourd() {
+  const p = hasard(LOURDS);
+  return { theme: 'Troisième loi', enonce: `<p>${p[0]}</p>`, parties: [fq.choix(`Comparer ${p[1]} et ${p[2]}.`, [o('egal', 'elles ont la même valeur'), o('plus', 'la première est plus grande'), o('moins', 'la première est plus petite')], 'egal',
+    { melanger: false, indices: { plus: 'Même si un objet est plus lourd, les deux forces réciproques ont la même valeur. C\'est l\'effet (le changement de vitesse) qui est plus grand sur l\'objet léger.', moins: 'Les deux forces réciproques ont toujours la même valeur.' },
+      solution: '<p>D\'après la troisième loi de Newton, elles ont la même valeur. L\'objet le plus léger voit sa vitesse changer davantage (deuxième loi, module 4).</p>' })] };
+}
+function vectoriel() {
+  return { theme: 'Troisième loi', parties: [fq.choix(`Quelle relation traduit la troisième loi de Newton ?`, [o('ok', `${FAB} = −${FBA}`), o('eg', `${FAB} = ${FBA}`), o('nul', `${FAB} + ${FBA} = ${V('0')} sur le système B`), o('val', `F<sub>A/B</sub> = −F<sub>B/A</sub> (valeurs)`)], 'ok',
+    { indices: { eg: 'Les deux vecteurs sont de sens opposés.', nul: 'Les deux forces ne s\'appliquent pas sur le même système : elles ne se compensent pas sur B.', val: 'Une valeur est toujours positive : c\'est entre les <b>vecteurs</b> qu\'il y a un signe moins.' },
+      solution: `<p>${FAB} = −${FBA} : relation entre vecteurs ; les valeurs, elles, sont égales.</p>` })] };
+}
+// tracer F⃗B/A dans le quadrillage (A à gauche, B à droite ; F⃗A/B appliquée en B)
+const TRACES = [[[3, 0], 'la personne (A)', 'le mur (B)'], [[2, 1], 'le pied (A)', 'le ballon (B)'], [[-2, 0], 'l\'aimant (A)', 'le clou (B)'], [[1, -2], 'la raquette (A)', 'la balle (B)'], [[0, 2], 'la table (A)', 'le livre (B)']];
+function trace() {
+  const t = hasard(TRACES), A = [-2, 0], B = [2, 0];
+  return { theme: 'Tracer la force réciproque', enonce: `<p>${t[1].replace(' (A)', '')} (A) exerce sur ${t[2].replace(' (B)', '')} (B) la force ${FAB}, tracée depuis B (1 carreau = 1 N).</p>`,
+    parties: [partieReciproque({ fab: t[0], A, B, nA: t[1], nB: t[2], solution: `<p>${FBA} = −${FAB} : même direction, sens opposé, même longueur ; elle s'applique sur A.</p>` })] };
+}
+// référentiel galiléen
+const ETUDES = [['la chute d\'une balle pendant 2 s', 'terrestre', 'Moins de quelques minutes : le référentiel terrestre convient.'], ['le décollage d\'un avion (1 min)', 'terrestre', 'Moins de quelques minutes : le référentiel terrestre convient.'],
+  ['le mouvement d\'un satellite autour de la Terre pendant 3 h', 'geocentrique', 'Mouvement autour de la Terre, moins de quelques jours : le référentiel géocentrique.'],
+  ['la Lune autour de la Terre pendant 2 jours', 'geocentrique', 'Mouvement autour de la Terre, moins de quelques jours : le référentiel géocentrique.'],
+  ['le mouvement de Jupiter autour du Soleil pendant 12 ans', 'helio', 'Mouvement autour du Soleil, longue durée : le référentiel héliocentrique.'],
+  ['une comète qui s\'approche du Soleil pendant 6 mois', 'helio', 'Mouvement autour du Soleil, longue durée : le référentiel héliocentrique.']];
+function referentiel() {
+  const e = hasard(ETUDES);
+  return { theme: 'Référentiel galiléen', enonce: `<p>On étudie ${e[0]}.</p>`, parties: [fq.choix('Quel référentiel galiléen choisir ?', [o('terrestre', 'terrestre'), o('geocentrique', 'géocentrique'), o('helio', 'héliocentrique')], e[1],
+    { melanger: false, indices: { terrestre: 'Le référentiel terrestre n\'est galiléen que pour une étude de quelques minutes au plus.', geocentrique: 'Le référentiel géocentrique convient pour un mouvement autour de la Terre, sur quelques jours au plus.', helio: 'Le référentiel héliocentrique sert pour un mouvement autour du Soleil.' }, solution: `<p>${e[2]}</p>` })] };
+}
+const MOUVEMENTS = [['un manège qui tourne', 'non', 'Il tourne par rapport au sol.'], ['une voiture qui freine', 'non', 'Elle ralentit par rapport au sol.'], ['un bus qui démarre', 'non', 'Il accélère par rapport au sol.'],
+  ['un train qui roule en ligne droite à vitesse constante', 'oui', 'Translation rectiligne uniforme par rapport au sol : galiléen.'], ['un ascenseur qui monte à vitesse constante', 'oui', 'Translation rectiligne uniforme par rapport au sol : galiléen.'],
+  ['une voiture qui prend un virage à vitesse constante', 'non', 'Elle tourne : la direction de sa vitesse change.']];
+function galileen(m) {
+  return { theme: 'Référentiel galiléen', enonce: `<p>On étudie un mouvement court (quelques secondes) dans le référentiel d'${m[0]}.</p>`, parties: [fq.choix('Ce référentiel est-il galiléen ?', [o('oui', 'oui'), o('non', 'non')], m[1],
+    { melanger: false, indice: 'Un référentiel qui tourne, ralentit ou accélère par rapport au référentiel terrestre n\'est pas galiléen.', solution: `<p>${m[2]}</p>` })] };
+}
+function definition() {
+  return { theme: 'Référentiel galiléen', parties: [fq.choix('Un référentiel galiléen est un référentiel dans lequel :', [o('ok', 'le principe d\'inertie est vérifié'), o('immo', 'tous les objets sont immobiles'), o('terre', 'la Terre est immobile'), o('force', 'aucune force ne s\'exerce')], 'ok',
+    { indices: { immo: 'Les objets peuvent bouger dans un référentiel galiléen.', terre: 'Le référentiel héliocentrique est galiléen, et la Terre y tourne.', force: 'Des forces s\'exercent dans tous les référentiels.' }, solution: '<p>Un référentiel galiléen est un référentiel dans lequel le principe d\'inertie est vérifié.</p>' })] };
+}
+
+BF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Troisième loi et référentiel galiléen',
+  intro: '<p class="er-contexte">10 questions : forces réciproques (valeur, caractéristiques, point d\'application, tracé), choix d\'un référentiel galiléen, référentiel galiléen ou non.</p>',
+  questions: () => {
+    const m = melanger(MOUVEMENTS);
+    return melanger([valeur(), caracteristiques(), point(), lourd(), vectoriel(), trace(), referentiel(), galileen(m[0]), galileen(m[1]), definition()]);
+  },
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : principe d\'inertie →' },
+});
+BF.menu('module_2_questions');
+</script>
+</body>
+</html>

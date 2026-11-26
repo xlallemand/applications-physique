@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : accélération connaissant les forces — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 3 / 5</span>
+    <h2 class="er-titre">Accélération connaissant les forces</h2>
+    <p class="er-contexte">On fait le <b>bilan des forces</b>, on calcule leur <b>résultante</b>, puis la deuxième loi de Newton donne l'<b>accélération</b> : c'est la situation la plus intéressante.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Méthode en cinq points (cours) ; exemple du palet (m = 500 g,
+      F = 5,0 N, f = 1,0 N : Σ F = 4,0 N, a = 8,0 m·s⁻²).
+      Erreur du cours corrigée : « puis la position (car la vitesse est
+      la dérivée de la position) ».
+   « À toi » : Σ F = F − f, puis a = Σ F / m.
+   ============================================================ */
+const { hasard, exemple } = COURS;
+const { V, SFX, NUL, CALC, fl, nom, svg, txt } = LN;
+const { fmt, COUL } = BF;
+const MS2 = 'm·s<sup>−2</sup>';
+const METHODE = `<ol class="ln-methode"><li>Définir le système étudié.</li><li>Définir le référentiel d'étude et vérifier qu'il est galiléen.</li><li>Faire un schéma de la situation.</li><li>Faire un bilan des forces et calculer la résultante des forces.</li>
+  <li>« Dans le référentiel … supposé galiléen, d'après la deuxième loi de Newton pour le système de masse constante, m ${V('a')} = ${SFX} ».</li></ol>`;
+// schéma du palet poussé sur la glace : R⃗N, P⃗, F⃗ et f⃗
+const PALET = svg(330, 150, `<line x1="20" y1="100" x2="310" y2="100" stroke="#16181d" stroke-width="2"/><text x="24" y="118" font-size="11" fill="#55585f" font-family="Hanken Grotesk, Arial, sans-serif">glace</text>` +
+  `<rect x="140" y="76" width="56" height="24" rx="4" fill="#ebe7f8" stroke="#5a3fc4" stroke-width="2"/>` +
+  fl(168, 88, 168, 40, COUL.RN) + nom(184, 50, 'R', 'N', COUL.RN) + fl(168, 88, 168, 136, COUL.P) + nom(184, 140, 'P', '', COUL.P) +
+  fl(196, 88, 296, 88, COUL.F) + nom(270, 78, 'F', '', COUL.F) + fl(150, 100, 126, 100, COUL.f) + nom(132, 90, 'f', '', COUL.f) +
+  fl(230, 30, 290, 30, '#8d8f94', { ep: 1.6, lt: 8 }) + txt(236, 24, 'mouvement', { t: 11 }), 'Schéma du palet poussé sur la glace : réaction normale vers le haut, poids vers le bas, force de poussée vers la droite, frottements vers la gauche');
+
+// [système, m (kg), F (N), f (N)]
+const DONNEES = [['une caisse', 20, 80, 30], ['une luge', 12, 30, 6.0], ['un palet', 0.40, 3.0, 1.0], ['un chariot', 50, 120, 45]];
+function etape1(c_) {
+  const carte = c_.carte('1. Déterminer l\'accélération connaissant la résultante des forces');
+  c_.ajouter(carte, `<div class="cours-bloc"><div class="cle"><p><b class="cle-titre">Méthode.</b></p>${METHODE}</div>
+      <p>Cette situation est la plus intéressante. Une fois que l'on a exprimé l'accélération, on pourra en déduire la vitesse (car l'accélération est la dérivée de la vitesse), puis la position (car la vitesse est la dérivée de la position), et ainsi prévoir le mouvement du système.</p></div>
+    ${exemple(`<p>On pousse un palet de masse m = 500 g sur la glace avec une force horizontale F = 5,0 N constante. La force de frottement du palet sur la glace a une intensité constante f = 1,0 N. Déterminer l'accélération du palet.</p>
+      <ul class="er-liste"><li>Système : {palet}, dans le référentiel terrestre supposé galiléen.</li><li>Bilan des forces : ${V('R', 'N')}, ${V('P')}, ${V('F')} et ${V('f')}.</li></ul>${PALET}
+      <p class="crs-calc">${SFX} = ${V('R', 'N')} + ${V('P')} + ${V('F')} + ${V('f')} avec ${V('R', 'N')} + ${V('P')} = ${NUL} ; Σ F<sub>ext</sub> = F − f = 5,0 − 1,0 = <span class="c">4,0 N</span></p>
+      <p>Dans le référentiel terrestre supposé galiléen, d'après la deuxième loi de Newton pour le palet de masse constante, ${SFX} = m ${V('a')}, donc m × a = Σ F<sub>ext</sub> :</p>
+      <p class="crs-calc">a<sub>palet</sub> = Σ F<sub>ext</sub> / m<sub>palet</sub> = 4,0 / (500 × 10<sup>−3</sup>) = <span class="c">8,0 ${MS2}</span></p>`)}`);
+  const d = hasard(DONNEES), S = d[2] - d[3], a = S / d[1];
+  c_.aToi(carte, [{ titre: 'Poussée et frottements', enonce: `<p>On pousse ${d[0]} de masse ${fmt(d[1])} kg sur un sol horizontal avec une force horizontale constante F = ${fmt(d[2])} N. Les frottements valent f = ${fmt(d[3])} N ; le poids et la réaction normale du sol se compensent (référentiel terrestre supposé galiléen).</p>`,
+    parties: [
+      { type: 'nombre', q: 'a) Calcule la valeur de la résultante des forces.', label: 'Σ F<sub>ext</sub> =', valeur: S, rel: .005, unite: 'N', signe: false,
+        diag: x => (Math.abs(x - (d[2] + d[3])) < 1e-9 ? 'Les frottements sont opposés au mouvement : on soustrait leur valeur.' : 'Σ F<sub>ext</sub> = F − f (le poids et la réaction se compensent).'), solution: `<p class="crs-calc">Σ F<sub>ext</sub> = F − f = ${fmt(d[2])} − ${fmt(d[3])} = <span class="c">${fmt(S)} N</span></p>` },
+      { type: 'nombre', q: 'b) Déduis-en son accélération.', label: 'a =', valeur: a, rel: .01, unite: MS2 + CALC, signe: false,
+        diag: x => (Math.abs(x - d[2] / d[1]) < 1e-9 ? 'Utilise la résultante, pas seulement la force de poussée.' : Math.abs(x - S * d[1]) < 1e-6 ? 'a = Σ F<sub>ext</sub> / m : on divise.' : 'D\'après la deuxième loi de Newton, a = Σ F<sub>ext</sub> / m.'),
+        solution: `<p>D'après la deuxième loi de Newton, m × a = Σ F<sub>ext</sub> :</p><p class="crs-calc">a = Σ F<sub>ext</sub> / m = ${fmt(S)} / ${fmt(d[1])} = <span class="c">${fmt(a)} ${MS2}</span></p>` }] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Système, référentiel galiléen, schéma, <b>bilan des forces et résultante</b>, puis la deuxième loi : a = Σ F<sub>ext</sub> / m. De l'accélération on déduit la vitesse, puis la position.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4d_cours.html">Cours : sens et direction de la résultante →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#acceleration">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+BF.menu('module_4c_cours');
+</script>
+</body>
+</html>

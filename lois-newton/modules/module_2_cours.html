@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : troisième loi et référentiel galiléen — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Troisième loi et référentiel galiléen</h2>
+    <p class="er-contexte">Deux objets en interaction exercent l'un sur l'autre des forces <b>opposées</b> : c'est la <b>troisième loi de Newton</b>. Puis le <b>référentiel galiléen</b>, celui dans lequel les lois de Newton s'appliquent.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Troisième loi (actions réciproques) : F⃗A/B = −F⃗B/A ; personne
+      qui pousse un mur, Terre et Lune (LN.mur, LN.terreLune).
+   2. Référentiel galiléen : principe d'inertie vérifié ; héliocentrique,
+      géocentrique (quelques jours), terrestre (quelques minutes) ; un
+      référentiel qui tourne, ralentit ou accélère n'est pas galiléen.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { V, mur, terreLune } = LN;
+const o = (id, label) => ({ id, label });
+const FAB = V('F', 'A/B'), FBA = V('F', 'B/A');
+
+/* ---------- 1. Troisième loi de Newton ---------- */
+const PAIRES = [
+  ['La Terre attire une pomme avec une force de valeur', 'N', 1.5, 'Quelle est la valeur de la force exercée par la pomme sur la Terre ?', 'F<sub>pomme/Terre</sub>'],
+  ['Un aimant attire un clou avec une force de valeur', 'N', 0.40, 'Quelle est la valeur de la force exercée par le clou sur l\'aimant ?', 'F<sub>clou/aimant</sub>'],
+  ['Un nageur pousse le mur de la piscine avec une force de valeur', 'N', 350, 'Quelle est la valeur de la force exercée par le mur sur le nageur ?', 'F<sub>mur/nageur</sub>'],
+];
+function etape1(c_) {
+  const carte = c_.carte('1. Troisième loi de Newton : actions réciproques');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Troisième loi de Newton.</b> Si un objet A exerce sur un objet B une force ${FAB}, alors B exerce sur A une force ${FBA} telle que :</p>
+        <p class="crs-formule">${FAB} = −${FBA}</p>
+        <p>Les deux forces ont la <b>même direction</b>, des <b>sens opposés</b> et la <b>même valeur</b>. Elles s'appliquent sur <b>deux objets différents</b> : elles ne se compensent donc jamais.</p></div>
+    </div>
+    ${exemple(`<p>Une personne pousse un mur : le mur la repousse, avec une force de même valeur, de sens opposé.</p>${mur()}
+      <p>La Terre attire la Lune, et la Lune attire la Terre avec une force de même valeur (2,0 × 10<sup>20</sup> N), même si la Terre est bien plus lourde.</p>${terreLune()}`)}`);
+  const p = hasard(PAIRES);
+  c_.aToi(carte, [
+    { titre: 'Même valeur', enonce: `<p>${p[0]} ${BF.fmt(p[2])} ${p[1]}.</p>`,
+      parties: [{ type: 'nombre', q: p[3], label: `${p[4]} =`, valeur: p[2], unite: p[1], signe: false, indice: 'Troisième loi : les deux forces ont la même valeur.', solution: `<p>D'après la troisième loi de Newton, les deux forces ont la même valeur : ${BF.fmt(p[2])} ${p[1]}.</p>` }] },
+    { titre: 'Se compensent-elles ?', enonce: `<p>Le mur exerce sur la personne une force opposée à celle que la personne exerce sur le mur.</p>`,
+      parties: [{ type: 'choix', q: 'Ces deux forces se compensent-elles ?', options: [o('non', 'non : elles s\'appliquent sur deux objets différents'), o('oui', 'oui : elles sont opposées')], bonne: 'non', melanger: false, colonne: true,
+        indices: { oui: 'Des forces se compensent quand elles s\'exercent sur le <b>même</b> système. Ici, l\'une s\'exerce sur le mur, l\'autre sur la personne.' }, solution: '<p>Elles s\'appliquent sur deux objets différents (le mur et la personne) : elles ne se compensent pas.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Référentiel galiléen ---------- */
+const ETUDES = [
+  ['la chute d\'une bille pendant 1 s', 'terrestre', 'L\'étude dure moins de quelques minutes : le référentiel terrestre peut être considéré comme galiléen.'],
+  ['le mouvement de la Lune autour de la Terre pendant une journée', 'geocentrique', 'Mouvement autour de la Terre, sur moins de quelques jours : référentiel géocentrique.'],
+  ['le mouvement de Mars autour du Soleil pendant un an', 'helio', 'Mouvement autour du Soleil, sur une longue durée : référentiel héliocentrique.'],
+  ['le démarrage d\'une voiture pendant 10 s', 'terrestre', 'L\'étude dure moins de quelques minutes : le référentiel terrestre peut être considéré comme galiléen.'],
+];
+const OPTS_REF = [o('terrestre', 'terrestre'), o('geocentrique', 'géocentrique'), o('helio', 'héliocentrique')];
+const NON_GAL = [
+  ['le référentiel d\'un manège qui tourne', 'non', 'Il tourne par rapport au référentiel terrestre : il n\'est pas galiléen.'],
+  ['le référentiel d\'un train qui freine', 'non', 'Il ralentit par rapport au référentiel terrestre : il n\'est pas galiléen.'],
+  ['le référentiel d\'un train qui roule en ligne droite à vitesse constante', 'oui', 'Il est en translation rectiligne uniforme par rapport au référentiel terrestre : il est galiléen (pour une étude courte).'],
+  ['le référentiel d\'un ascenseur qui démarre', 'non', 'Il accélère par rapport au référentiel terrestre : il n\'est pas galiléen.'],
+];
+function etape2(c_) {
+  const carte = c_.carte('2. Le référentiel galiléen');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Référentiel galiléen.</b> C'est un référentiel dans lequel le <b>principe d'inertie</b> est vérifié (module 3). Un référentiel qui <b>tourne</b>, <b>ralentit</b> ou <b>accélère</b> par rapport à un référentiel galiléen n'est pas galiléen.</p></div>
+      <div class="crs-defile"><table class="crs-tab ln-tab-ref">
+        <thead><tr><th>Référentiel</th><th>Galiléen…</th></tr></thead>
+        <tbody><tr><td>héliocentrique (centre du Soleil, trois étoiles lointaines)</td><td>oui</td></tr>
+          <tr><td>géocentrique (centre de la Terre, trois étoiles lointaines)</td><td>si l'étude ne dépasse pas quelques jours</td></tr>
+          <tr><td>terrestre (le sol, le laboratoire)</td><td>si l'étude ne dépasse pas quelques minutes</td></tr></tbody>
+      </table></div>
+    </div>
+    ${exemple('<p>Une balle est posée sur la tablette d\'un train arrêté : elle reste immobile. Quand le train démarre, elle roule vers l\'arrière alors que les forces qui s\'exercent sur elle (poids, réaction de la tablette) n\'ont pas changé : dans le référentiel du train qui accélère, le principe d\'inertie n\'est plus vérifié. Ce référentiel n\'est pas galiléen.</p>')}`);
+  const e = hasard(ETUDES), n = hasard(NON_GAL);
+  c_.aToi(carte, [
+    { titre: 'Quel référentiel ?', enonce: `<p>On étudie ${e[0]}.</p>`,
+      parties: [{ type: 'choix', q: 'Quel référentiel galiléen choisir ?', options: OPTS_REF, bonne: e[1], melanger: false, indice: 'Autour de quoi a lieu le mouvement, et combien de temps dure l\'étude ?', solution: `<p>${e[2]}</p>` }] },
+    { titre: 'Galiléen ou non ?', enonce: `<p>On considère ${n[0]}.</p>`,
+      parties: [{ type: 'choix', q: 'Ce référentiel est-il galiléen ?', options: [o('oui', 'oui'), o('non', 'non')], bonne: n[1], melanger: false, indice: 'Tourne-t-il, ralentit-il ou accélère-t-il par rapport au référentiel terrestre ?', solution: `<p>${n[2]}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Troisième loi</b> : ${FAB} = −${FBA} (même direction, sens opposés, même valeur, sur deux objets différents).</p></div>
+    <div class="cle"><p><b>Référentiel galiléen</b> : le principe d'inertie y est vérifié. Héliocentrique ; géocentrique (quelques jours) ; terrestre (quelques minutes). Un référentiel qui tourne, ralentit ou accélère n'est pas galiléen.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : principe d'inertie →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+BF.menu('module_2_cours');
+</script>
+</body>
+</html>

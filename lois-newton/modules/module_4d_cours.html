@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : sens et direction de la résultante — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../cinematique/modules/vecteurs.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 4 / 5</span>
+    <h2 class="er-titre">Sens et direction de la résultante</h2>
+    <p class="er-contexte">La résultante des forces a la <b>même direction</b> et le <b>même sens</b> que l'accélération, donc que la <b>variation du vecteur vitesse</b> : on la devine en regardant le mouvement.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Σ F⃗ et a⃗ : même direction, même sens ; a⃗ ≈ Δv⃗ / Δt (cinématique) :
+      accéléré en ligne droite → vers l'avant ; ralenti → vers l'arrière ;
+      virage → vers l'intérieur. Lien facultatif vers « Cinématique ».
+   « À toi » : tracer a⃗ connaissant les forces (BF.partieAcc, quadrillage
+   de cinematique/modules/vecteurs.js), sens de Σ F⃗ d'après une
+   chronophotographie (LN.chrono).
+   ============================================================ */
+const { hasard, exemple } = COURS;
+const { V, SF, SFX, NUL, chrono } = LN;
+const { partieAcc } = BF;
+const o = (id, label) => ({ id, label });
+const LIEN = '<div class="ph-lien-app"><p>Revois les vecteurs vitesse et accélération (facultatif).</p><a class="btn-small" href="../../cinematique/index.html" target="_blank" rel="noopener">Cinématique ↗</a></div>';
+const FORCES = [[[0, 2], [3, 0], [0, -2]], [[-1, 0], [0, 3], [0, -1], [3, 0]], [[0, -3], [2, 0], [0, 1]], [[0, 2], [-2, 0], [0, -4]]];
+const CHRONOS = [['accelere', 'avant', 'Les écarts augmentent : la vitesse augmente, Δ<span class="vec-nom">v</span> et Σ <span class="vec-nom">F</span> sont dans le sens du mouvement.'],
+  ['ralenti', 'arriere', 'Les écarts diminuent : la vitesse diminue, Δ<span class="vec-nom">v</span> et Σ <span class="vec-nom">F</span> sont dans le sens opposé au mouvement.'],
+  ['uniforme', 'nulle', 'Mouvement rectiligne uniforme : Δ<span class="vec-nom">v</span> = <span class="vec-nom">0</span>, donc Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>.'],
+  ['courbe', 'interieur', 'La trajectoire tourne : Σ <span class="vec-nom">F</span> est dirigée vers l\'intérieur du virage.']];
+function etape1(c_) {
+  const carte = c_.carte('1. Même direction et même sens que l\'accélération');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> ${SFX} = m ${V('a')} avec m &gt; 0 : ${SFX} et ${V('a')} ont la <b>même direction</b> et le <b>même sens</b>.</p>
+        <p>Or ${V('a')} ≈ Δ${V('v')} / Δt (cinématique) : la résultante a la direction et le sens de la <b>variation du vecteur vitesse</b>.</p></div>
+      <ul class="er-liste"><li>Mouvement rectiligne accéléré : ${SF} dans le sens du mouvement.</li><li>Mouvement rectiligne ralenti : ${SF} dans le sens opposé au mouvement.</li>
+        <li>Mouvement rectiligne uniforme : ${SF} = ${NUL}.</li><li>Trajectoire courbe : ${SF} vers l'intérieur de la courbe.</li></ul>
+      ${LIEN}
+    </div>
+    ${exemple(`<p>Une voiture roule vers la droite et freine en ligne droite : les écarts entre les positions diminuent. Δ${V('v')} est vers la gauche, donc ${V('a')} et ${SF} aussi : les frottements l'emportent sur la force motrice.</p>${chrono({ type: 'ralenti', aria: 'Chronophotographie : les écarts diminuent, la voiture ralentit' })}`)}`);
+  const c = hasard(CHRONOS), sens = hasard([1, -1]);
+  c_.aToi(carte, [
+    { titre: 'Tracer l\'accélération', enonce: `<p>Des forces s'exercent sur un palet ; leur somme ${SF} est tracée en noir (1 carreau = 1 N).</p>`,
+      parties: [partieAcc({ forces: hasard(FORCES).map((x, i) => ({ nom: `F_${i + 1}`, coord: x })), etendue: 4, solution: `<p>${V('a')} a la même direction et le même sens que ${SF} ; sa longueur dépend de la masse.</p>` })] },
+    { titre: 'D\'après le mouvement', enonce: `<p>Chronophotographie d'un système (positions à intervalles de temps égaux), vers la ${sens > 0 ? 'droite' : 'gauche'}.</p>${chrono({ type: c[0], sens })}`,
+      parties: [{ type: 'choix', q: `Comment est dirigée la résultante ${SF} ?`, options: [o('avant', 'dans le sens du mouvement'), o('arriere', 'dans le sens opposé au mouvement'), o('interieur', 'vers l\'intérieur de la courbe'), o('nulle', 'elle est nulle')], bonne: c[1], melanger: false, colonne: true,
+        indice: `${SF} a la direction et le sens de Δ${V('v')} : la vitesse augmente-t-elle, diminue-t-elle, change-t-elle de direction ?`, solution: `<p>${c[2]}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>${SFX}, ${V('a')} et Δ${V('v')} ont la même direction et le même sens : vers l'avant si le système accélère, vers l'arrière s'il ralentit, vers l'intérieur d'un virage.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4e_cours.html">Cours : projections sur des axes →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#sens">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+BF.menu('module_4d_cours');
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : six façons d'utiliser le principe d'inertie — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+<script src="../../bilan-forces/modules/situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 2</span>
+    <h2 class="er-titre">Six façons d'utiliser le principe d'inertie</h2>
+    <p class="er-contexte">Du <b>mouvement</b> on déduit la <b>résultante des forces</b>, ou de la résultante on déduit le mouvement ; et si les deux ne collent pas, le <b>référentiel n'est pas galiléen</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Les six phrases du cours, telles quelles (LN.PHRASES).
+   1. Phrases 1 à 4 (référentiel galiléen) : ballon posé, bagages sur
+      le toit d'une voiture qui démarre, ballon pendant la frappe.
+   2. Phrases 5 et 6 (référentiel non galiléen) : passager d'une
+      voiture qui freine brusquement, dans le référentiel de la voiture.
+   « À toi » : choisir la phrase qui convient (LN.choixPhrase).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { V, SF, SFX, NUL, PHRASES, choixPhrase } = LN;
+const { nomV, sceneRemplie, SITUATIONS: S } = BF;
+const o = (id, label) => ({ id, label });
+const liste = (de, a) => `<ol class="ln-phrases" start="${de}">${PHRASES.slice(de - 1, a).map(p => `<li>${p}</li>`).join('')}</ol>`;
+
+/* ---------- 1. Dans un référentiel galiléen ---------- */
+const CAS_GAL = [
+  ['Une bille tombe de plus en plus vite (référentiel terrestre supposé galiléen).', 3, 'La bille n\'a pas un mouvement rectiligne uniforme : la résultante des forces n\'est pas nulle (il y a son poids).'],
+  ['Un palet glisse en ligne droite, à vitesse constante, sur la glace (référentiel terrestre supposé galiléen).', 1, 'Mouvement rectiligne uniforme : la résultante des forces est nulle.'],
+  ['Une sonde spatiale, loin de tout astre, n\'est soumise à aucune force (référentiel héliocentrique).', 2, 'La résultante est nulle : la sonde garde un mouvement rectiligne uniforme.'],
+  ['On pousse un caddie immobile ; frottements négligés, le poids et la réaction du sol se compensent (référentiel terrestre supposé galiléen).', 4, 'La résultante est la force de poussée, non nulle : le caddie ne reste pas immobile, il se met en mouvement.'],
+];
+function etape1(c_) {
+  const carte = c_.carte('1. Dans un référentiel galiléen : phrases 1 à 4');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">On est dans un référentiel galiléen pour les points de 1 à 4.</b></p>${liste(1, 4)}</div>
+    </div>
+    ${exemple(`<p><b>Ballon posé sur le sol</b>, immobile dans le référentiel terrestre supposé galiléen : il est immobile donc, d'après le principe d'inertie, ${SFX} = ${NUL} : ${nomV('P')} et ${nomV('RN')} se compensent (phrase 1).</p>
+      <div class="bf-sc-cadre">${sceneRemplie(S.ballonAvant)}</div>
+      <p><b>Bagages non attachés sur le toit d'une voiture qui démarre rapidement</b> (référentiel terrestre supposé galiléen). Avant le démarrage, ils sont immobiles : ${SFX} = ${NUL} (phrase 1). Au démarrage, les forces n'ont pas le temps de changer : ${SFX} = ${NUL}, donc les bagages restent immobiles (phrase 2) : la voiture avance sous eux, ils tombent à l'arrière.</p>
+      <p><b>Ballon pendant la frappe</b> : le pied exerce une force, ${SFX} ≠ ${NUL}, donc le ballon ne reste pas immobile (phrase 4) : il se met en mouvement.</p>`)}`);
+  const cas = melanger(CAS_GAL).slice(0, 2);
+  c_.aToi(carte, cas.map((c, k) => ({ titre: `Situation ${k + 1}`, enonce: `<p>${c[0]}</p>`, parties: [choixPhrase({ bonne: c[1], solution: c[2] })] })));
+  return carte;
+}
+
+/* ---------- 2. Le référentiel n'est pas galiléen ---------- */
+const CAS_NON = [
+  ['Dans le référentiel d\'un manège qui tourne, un enfant reste immobile sur son siège ; pourtant, la résultante des forces qui s\'exercent sur lui n\'est pas nulle.', 5, 'Immobile et résultante non nulle : le référentiel du manège n\'est pas galiléen.'],
+  ['Une valise posée sur le sol lisse d\'un train glisse vers l\'arrière quand le train démarre (référentiel du train) ; son poids et la réaction du sol se compensent.', 6, 'Pas de mouvement rectiligne uniforme et résultante nulle : le référentiel du train qui démarre n\'est pas galiléen.'],
+  ['Dans le référentiel d\'un bus qui freine, un ballon posé dans l\'allée roule vers l\'avant ; son poids et la réaction du sol se compensent.', 6, 'Le ballon accélère alors que la résultante est nulle : le référentiel du bus qui freine n\'est pas galiléen.'],
+];
+function etape2(c_) {
+  const carte = c_.carte('2. Le référentiel n\'est pas galiléen : phrases 5 et 6');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle">${liste(5, 6)}</div>
+    </div>
+    ${exemple(`<p><b>Système : passager assis dans une voiture qui freine brusquement.</b> On considère le mouvement dans le référentiel voiture.</p>
+      <ul class="er-liste"><li>Avant le choc : le passager est immobile, d'après le principe d'inertie ${SF} = ${NUL}.</li>
+        <li>Au moment du choc, rapide : ${SF} = ${NUL} (les forces n'ont pas eu le temps de changer) mais le passager n'est plus immobile, il est projeté vers l'avant. Donc la voiture n'est pas un référentiel galiléen (phrase 6).</li></ul>`)}`);
+  c_.aToi(carte, melanger(CAS_NON).slice(0, 2).map((c, k) => ({ titre: `Situation ${k + 1}`, enonce: `<p>${c[0]}</p>`, parties: [choixPhrase({ bonne: c[1], solution: c[2] })] })));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Référentiel galiléen : <b>immobile / MRU ⟺ ${SFX} = ${NUL}</b> (phrases 1 et 2) ; <b>pas de MRU ⟺ ${SFX} ≠ ${NUL}</b> (phrases 3 et 4).</p></div>
+    <div class="cle"><p>Si le mouvement et la résultante ne sont pas d'accord avec le principe d'inertie (phrases 5 et 6), le <b>référentiel n'est pas galiléen</b>.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_simulation.html">Animation : le principe d'inertie →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_questions.html">Questions</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#six">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+BF.menu('module_3b_cours');
+</script>
+</body>
+</html>

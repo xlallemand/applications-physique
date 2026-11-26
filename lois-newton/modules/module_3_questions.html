@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 3 : 10 questions.
+   Sept situations variées (chute, glissement, choc, freinage, caddie
+   poussé à force constante comme à l'ex. 11, référentiels non galiléens) :
+   a) choisir la phrase du cours qui convient (LN.choixPhrase),
+   b) compléter la conclusion.
+   Puis : isolé ou pseudo-isolé, chronophotographie (Σ F⃗ nulle ou non),
+   énoncé du principe d'inertie.
+   ============================================================ */
+const { o, fq, hasard, melanger } = BF;
+const { V, SF, SFX, NUL, choixPhrase, chrono } = LN;
+
+// [énoncé, phrase, question de la conclusion, options [id, texte], bonne, explication]
+const SITUATIONS = [
+  ['Une bille tombe en chute libre, de plus en plus vite (référentiel terrestre supposé galiléen).', 3, 'Conclusion :', [['non', `${SFX} ≠ ${NUL}`], ['nul', `${SFX} = ${NUL}`], ['gal', 'le référentiel n\'est pas galiléen']], 'non', 'Le mouvement n\'est pas uniforme (la vitesse augmente) : la résultante des forces n\'est pas nulle.'],
+  ['Un livre glisse sur une table et ralentit jusqu\'à s\'arrêter (référentiel terrestre supposé galiléen).', 3, 'Conclusion :', [['non', `${SFX} ≠ ${NUL}`], ['nul', `${SFX} = ${NUL}`], ['gal', 'le référentiel n\'est pas galiléen']], 'non', 'Il ralentit : son mouvement n\'est pas uniforme, la résultante (les frottements) n\'est pas nulle.'],
+  ['Un palet glisse en ligne droite à vitesse constante sur la glace (référentiel terrestre supposé galiléen).', 1, 'Conclusion :', [['nul', `${SFX} = ${NUL}`], ['non', `${SFX} ≠ ${NUL}`], ['gal', 'le référentiel n\'est pas galiléen']], 'nul', 'Mouvement rectiligne uniforme : la résultante des forces est nulle.'],
+  ['On pousse un caddie avec une force constante ; les frottements sont négligés, le poids et la réaction du sol se compensent (référentiel terrestre supposé galiléen).', 4, 'Le caddie :', [['pas', 'n\'a pas un mouvement rectiligne uniforme : il accélère'], ['mru', 'a un mouvement rectiligne uniforme'], ['immo', 'reste immobile']], 'pas', 'La résultante est la force de poussée, non nulle : le caddie n\'a pas un mouvement rectiligne uniforme (sa vitesse augmente).'],
+  ['Pendant le choc, une boule de billard immobile reçoit une force de la boule qui la frappe (référentiel terrestre supposé galiléen).', 4, 'La boule frappée :', [['pas', 'ne reste pas immobile'], ['immo', 'reste immobile'], ['mru', 'garde un mouvement rectiligne uniforme']], 'pas', 'Pendant le choc, la résultante n\'est pas nulle : la boule ne reste pas immobile, elle se met en mouvement.'],
+  ['Une sonde spatiale, très loin de tout astre, n\'est soumise à aucune force (référentiel héliocentrique).', 2, 'La sonde :', [['mru', 'garde un mouvement rectiligne uniforme'], ['ral', 'ralentit puis s\'arrête'], ['acc', 'accélère']], 'mru', 'La résultante est nulle : la sonde garde un mouvement rectiligne uniforme (pas besoin de moteur pour avancer).'],
+  ['Un parachutiste descend verticalement à vitesse constante (référentiel terrestre supposé galiléen).', 1, 'Conclusion :', [['nul', `${SFX} = ${NUL} : la force de l'air compense le poids`], ['non', `${SFX} ≠ ${NUL} : il descend`], ['gal', 'le référentiel n\'est pas galiléen']], 'nul', 'Mouvement rectiligne uniforme : la force de l\'air compense exactement le poids.'],
+  ['Dans le référentiel d\'un bus qui freine, un passager debout, sans se tenir, est projeté vers l\'avant ; les forces qui s\'exercent sur lui (poids, réaction du plancher) se compensent.', 6, 'Conclusion :', [['gal', 'le référentiel du bus n\'est pas galiléen'], ['nul', 'le passager garde un mouvement rectiligne uniforme'], ['non', `${SFX} ≠ ${NUL}`]], 'gal', 'Pas de mouvement rectiligne uniforme et résultante nulle : le référentiel du bus qui freine n\'est pas galiléen.'],
+  ['Dans le référentiel d\'un manège qui tourne, un enfant reste immobile sur son cheval de bois, alors que la résultante des forces qui s\'exercent sur lui n\'est pas nulle.', 5, 'Conclusion :', [['gal', 'le référentiel du manège n\'est pas galiléen'], ['nul', `${SFX} = ${NUL}`], ['acc', 'l\'enfant accélère dans ce référentiel']], 'gal', 'Immobile et résultante non nulle : le référentiel du manège n\'est pas galiléen.'],
+  ['Une voiture prend un virage à vitesse constante (référentiel terrestre supposé galiléen).', 3, 'Conclusion :', [['non', `${SFX} ≠ ${NUL}`], ['nul', `${SFX} = ${NUL} car la vitesse est constante`], ['gal', 'le référentiel n\'est pas galiléen']], 'non', 'La trajectoire n\'est pas une droite : le mouvement n\'est pas rectiligne uniforme, la résultante n\'est pas nulle.'],
+];
+function situation(s) {
+  return { theme: 'Principe d\'inertie', enonce: `<p>${s[0]}</p>`,
+    parties: [choixPhrase({ bonne: s[1], q: 'a) Quelle façon d\'utiliser le principe d\'inertie convient ici ?' }),
+      fq.choix(`b) ${s[2]}`, s[3].map(x => o(x[0], x[1])), s[4], { melanger: false, colonne: true, indice: `Applique la phrase ${s[1]} du cours.`, solution: `<p>${s[5]}</p>` })] };
+}
+const SYSTEMES = [['Un livre posé sur une table.', 'pseudo', 'Le poids et la réaction de la table se compensent : pseudo-isolé.'], ['Une sonde spatiale loin de tout astre.', 'isole', 'Aucune force : isolé.'],
+  ['Un mobile autoporteur sur une table à coussin d\'air horizontale.', 'pseudo', 'Le poids et la réaction du coussin d\'air se compensent : pseudo-isolé.'], ['Une pierre qui tombe, frottements négligés.', 'aucun', 'Seul le poids : ni isolée, ni pseudo-isolée.']];
+function isole() {
+  const s = hasard(SYSTEMES);
+  return { theme: 'Isolé, pseudo-isolé', enonce: `<p>${s[0]}</p>`, parties: [fq.choix('Ce système est :', [o('isole', 'isolé'), o('pseudo', 'pseudo-isolé'), o('aucun', 'ni isolé, ni pseudo-isolé')], s[1],
+    { melanger: false, indices: { isole: 'Isolé : aucune force ne s\'exerce. Est-ce le cas ?', pseudo: 'Pseudo-isolé : des forces qui se compensent. Est-ce le cas ?', aucun: 'Les forces se compensent-elles ?' }, solution: `<p>${s[2]}</p>` })] };
+}
+const CHRONOS = [['uniforme', 'nul', 'Positions alignées, régulièrement espacées : mouvement rectiligne uniforme, donc Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>.'], ['accelere', 'non', 'Les écarts augmentent : la vitesse change, donc Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>.'],
+  ['ralenti', 'non', 'Les écarts diminuent : la vitesse change, donc Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>.'], ['courbe', 'non', 'La trajectoire est courbe : la direction de la vitesse change, donc Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>.']];
+function chronoQ() {
+  const c = hasard(CHRONOS);
+  return { theme: 'Chronophotographie', enonce: `<p>Positions successives d'un palet à intervalles de temps égaux, dans le référentiel terrestre supposé galiléen.</p>${chrono({ type: c[0], sens: hasard([1, -1]) })}`,
+    parties: [fq.choix(`Que peut-on dire de ${SF} ?`, [o('nul', `${SF} = ${NUL}`), o('non', `${SF} ≠ ${NUL}`)], c[1], { melanger: false, indice: 'Le mouvement est-il rectiligne <b>et</b> uniforme (écarts égaux) ?', solution: `<p>${c[2]}</p>` })] };
+}
+function enonce() {
+  return { theme: 'Énoncé', parties: [fq.choix('Le principe d\'inertie dit que, dans un référentiel galiléen :', [o('ok', `${SFX} = ${NUL} ⟺ le système est immobile ou en mouvement rectiligne uniforme`), o('mvt', `${SFX} = ${NUL} ⟺ le système est immobile`),
+    o('sens', `un système en mouvement a forcément ${SFX} ≠ ${NUL}`), o('acc', `${SFX} = ${NUL} ⟺ le système accélère`)], 'ok',
+  { colonne: true, indices: { mvt: 'Un système peut bouger sans force résultante : en mouvement rectiligne uniforme.', sens: 'Un mouvement rectiligne uniforme se fait avec une résultante nulle.', acc: 'Si la résultante est nulle, la vitesse ne change pas.' }, solution: `<p>${SFX} = ${NUL} ⟺ ${V('v')} constant : immobile ou mouvement rectiligne uniforme.</p>` })] };
+}
+
+BF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Principe d\'inertie',
+  intro: '<p class="er-contexte">10 questions : choisir la phrase du cours qui convient puis conclure (chute, glissement, choc, freinage, caddie, référentiels non galiléens), système isolé ou pseudo-isolé, chronophotographie, énoncé.</p>',
+  questions: () => melanger(melanger(SITUATIONS).slice(0, 7).map(situation).concat([isole(), chronoQ(), enonce()])),
+  revoir: { href: 'module_3a_cours.html', label: 'Revoir les cours' },
+  suite: { href: 'module_4a_cours.html', label: 'Module 4 : deuxième loi →' },
+});
+BF.menu('module_3_questions');
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : énoncé du principe d'inertie — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+<script src="../../bilan-forces/modules/situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 2</span>
+    <h2 class="er-titre">Énoncé du principe d'inertie</h2>
+    <p class="er-contexte">La <b>première loi de Newton</b> relie les forces et le mouvement : un système <b>isolé</b> ou <b>pseudo-isolé</b> est immobile ou en <b>mouvement rectiligne uniforme</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Énoncé du principe d'inertie (première loi de Newton), système
+      isolé ou pseudo-isolé, Σ F⃗ext = 0⃗ ⟺ v⃗ constant ; exemple du
+      palet sur coussin d'air (situation BF.SITUATIONS.palet).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { V, SFX, NUL, chrono } = LN;
+const { nomV, sceneRemplie, SITUATIONS: S } = BF;
+const o = (id, label) => ({ id, label });
+
+const SYSTEMES = [
+  ['Une sonde spatiale très loin de tout astre.', 'isole', 'Aucune force ne s\'exerce sur elle (attractions négligeables) : elle est isolée.'],
+  ['Un livre posé sur une table.', 'pseudo', 'Son poids et la réaction de la table se compensent : il est pseudo-isolé.'],
+  ['Un palet qui glisse sur un coussin d\'air, sans frottements.', 'pseudo', 'Son poids et la réaction du coussin d\'air se compensent : il est pseudo-isolé.'],
+  ['Une pomme qui tombe (action de l\'air négligée).', 'aucun', 'Seul son poids s\'exerce : la somme des forces n\'est pas nulle, la pomme n\'est ni isolée ni pseudo-isolée.'],
+  ['Une voiture qui freine.', 'aucun', 'Les frottements ne sont pas compensés : elle n\'est ni isolée ni pseudo-isolée.'],
+];
+const MOUV = [
+  ['uniforme', 'oui', 'Positions alignées et régulièrement espacées : mouvement rectiligne uniforme, la somme des forces est nulle.'],
+  ['accelere', 'non', 'Les écarts augmentent : la vitesse augmente, la somme des forces n\'est pas nulle.'],
+  ['ralenti', 'non', 'Les écarts diminuent : la vitesse diminue, la somme des forces n\'est pas nulle.'],
+  ['courbe', 'non', 'La trajectoire n\'est pas une droite : la direction de la vitesse change, la somme des forces n\'est pas nulle.'],
+];
+function etape1(c_) {
+  const carte = c_.carte('1. Le principe d\'inertie (première loi de Newton)');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Principe d'inertie.</b> Dans un référentiel galiléen, si un système est <b>isolé</b> ou <b>pseudo-isolé</b>, il est <b>immobile</b> ou en <b>mouvement rectiligne uniforme</b>, et réciproquement.</p>
+        <p class="crs-formule">${SFX} = ${NUL} ⟺ ${V('v')} constant</p></div>
+      <div class="cle"><p><b class="cle-titre">Isolé, pseudo-isolé.</b> Un système est <b>isolé</b> quand aucune force ne s'exerce sur lui ; <b>pseudo-isolé</b> quand les forces qui s'exercent sur lui se compensent (leur somme est nulle).</p></div>
+    </div>
+    ${exemple(`<p>Un palet glisse sur un coussin d'air, sans frottements : son poids ${nomV('P')} et la réaction ${nomV('RN')} se compensent. Il est pseudo-isolé : d'après le principe d'inertie, il a un mouvement rectiligne uniforme.</p>
+      <div class="bf-noms-figs"><div class="bf-sc-cadre">${sceneRemplie(S.palet)}</div>${chrono({ type: 'uniforme', aria: 'Chronophotographie du palet : positions alignées et régulièrement espacées' })}</div>`)}`);
+  const s = hasard(SYSTEMES), m = hasard(MOUV);
+  c_.aToi(carte, [
+    { titre: 'Isolé, pseudo-isolé ?', enonce: `<p>${s[0]}</p>`,
+      parties: [{ type: 'choix', q: 'Ce système est :', options: [o('isole', 'isolé'), o('pseudo', 'pseudo-isolé'), o('aucun', 'ni isolé, ni pseudo-isolé')], bonne: s[1], melanger: false,
+        indices: { isole: 'Isolé : <b>aucune</b> force. Y a-t-il des forces qui s\'exercent ?', pseudo: 'Pseudo-isolé : les forces se <b>compensent</b>. Est-ce le cas ?', aucun: 'Fais le bilan : les forces se compensent-elles ?' }, solution: `<p>${s[2]}</p>` }] },
+    { titre: 'D\'après le mouvement', enonce: `<p>Chronophotographie d'un système (positions à intervalles de temps égaux), dans le référentiel terrestre supposé galiléen.</p>${chrono({ type: m[0] })}`,
+      parties: [{ type: 'choix', q: `A-t-on ${SFX} = ${NUL} ?`, options: [o('oui', 'oui'), o('non', 'non')], bonne: m[1], melanger: false, indice: 'Le mouvement est-il rectiligne <b>et</b> uniforme ?', solution: `<p>${m[2]}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Principe d'inertie</b> : dans un référentiel galiléen, un système isolé (aucune force) ou pseudo-isolé (forces qui se compensent) est immobile ou en mouvement rectiligne uniforme, et réciproquement : ${SFX} = ${NUL} ⟺ ${V('v')} constant.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : six façons de l'utiliser →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#enonce">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+BF.menu('module_3a_cours');
+</script>
+</body>
+</html>
