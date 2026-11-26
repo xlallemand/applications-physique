@@ -128,7 +128,7 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 | `chapitre-06.md` | Titrages | `titrages/` | | à faire | | liens ↗ vers `titrage-ph/`, `titrage-conductimetrique/` |
 | `bilan-forces.md` | Bilan des forces | `bilan-forces/` | 07 | fait | 26/11/2026 | 2de, 1re, Tle ; moteur extrait dans `bilan-forces/modules/bf.js` ; atelier sur un écran (`modules/atelier.js`, 30 situations, filtre de niveau) ; séries au choix du niveau (`niveaux` de `BF.serie`) ; pas de lien vers `principe-dynamique/`, dont le module 2 est remplacé par une page ↗ vers l'atelier |
 | — | Somme des forces et variation de la vitesse | `forces-vitesse/` | | fait | 26/11/2026 | 1re ; cours repris de `bilan-forces/` (ancien cours 5c, Δv⃗) ; charge le moteur `bilan-forces/modules/bf.js` avec son propre plan (`BF_AUTRE_PLAN`) ; page ↗ vers l'atelier de `bilan-forces/` |
-| `chapitre-07.md` | Forces et mouvement : lois de Newton | `lois-newton/` | | à faire | | |
+| `chapitre-07.md` | Forces et mouvement : lois de Newton | `lois-newton/` | | fait | 26/11/2026 | charge le moteur `bilan-forces/modules/bf.js` avec son propre plan (`BF_AUTRE_PLAN`, comme `forces-vitesse/`) ; page ↗ vers l'atelier de `bilan-forces/` ; ex. 1 à 4 avec `BF.bilan` ; pages sur un écran : cadre `LN.cadre`, `LN.defis`, `LN.grilleForces` (`lois-newton/modules/sim.js`) ; ex. 20 : question complexe (`LN.complexe`) |
 | `chapitre-08.md` | Mouvement dans un champ uniforme | `champ-uniforme/` | | à faire | | |
 | `travail-force.md` | Travail d'une force | `travail-force/` | 09 | à faire | | spe et STI2D |
 | `chapitre-09.md` | Énergie et travail | `energie-travail/` | | à faire | | |

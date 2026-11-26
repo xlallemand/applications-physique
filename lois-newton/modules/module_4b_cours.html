@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : résultante connaissant le mouvement — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 2 / 5</span>
+    <h2 class="er-titre">Résultante connaissant le mouvement</h2>
+    <p class="er-contexte">Du mouvement on tire l'<b>accélération</b>, puis la deuxième loi de Newton donne la <b>résultante des forces</b>, sans avoir besoin de connaître chaque force.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Méthode en quatre points (cours) ; exemple de la voiture de course
+      (m = 600 kg, 0 à 100 km/h = 27,8 m·s⁻¹ en 2,5 s : a = 11 m·s⁻²,
+      Σ F = 6,7 × 10³ N ; valeurs vérifiées par un script).
+   « À toi » : conversion km/h → m/s, a = Δv / Δt, Σ F = m a.
+   ============================================================ */
+const { hasard, exemple } = COURS;
+const { V, SFX, CALC, fl, nom, svg, txt } = LN;
+const { fmt, cs } = BF;
+const MS2 = 'm·s<sup>−2</sup>', MS = 'm·s<sup>−1</sup>';
+const METHODE = `<ol class="ln-methode"><li>Définir le système étudié.</li><li>Définir le référentiel d'étude et vérifier qu'il est galiléen.</li><li>Faire un schéma de la situation.</li>
+  <li>« Dans le référentiel … supposé galiléen, d'après la deuxième loi de Newton pour le système de masse constante, ${SFX} = m ${V('a')} ».</li></ol>`;
+// schéma de la voiture : vitesse au départ et à l'arrivée
+const SCHEMA = svg(330, 92, `<line x1="10" y1="70" x2="320" y2="70" stroke="#16181d" stroke-width="2"/>` +
+  `<rect x="30" y="46" width="44" height="18" rx="5" fill="#ebe7f8" stroke="#5a3fc4" stroke-width="2"/><circle cx="40" cy="66" r="5" fill="#16181d"/><circle cx="64" cy="66" r="5" fill="#16181d"/>` +
+  `<rect x="236" y="46" width="44" height="18" rx="5" fill="#ebe7f8" stroke="#5a3fc4" stroke-width="2" stroke-dasharray="4 3"/><circle cx="246" cy="66" r="5" fill="#16181d"/><circle cx="270" cy="66" r="5" fill="#16181d"/>` +
+  txt(52, 88, 'v = 0 m·s⁻¹', { a: 'middle', t: 11 }) + txt(258, 88, 'v = 27,8 m·s⁻¹', { a: 'middle', t: 11 }) + fl(282, 40, 318, 40, '#5a3fc4') + nom(300, 30, 'v', '', '#5a3fc4') +
+  txt(155, 30, 'Δt = 2,5 s', { a: 'middle', t: 12, g: 800, c: '#16181d' }), 'Schéma : la voiture part de l\'arrêt et atteint 27,8 mètres par seconde en 2,5 secondes');
+
+// [système, m (kg), vitesse atteinte (km/h), Δt (s)] : départ arrêté
+const DONNEES = [['une moto', 180, 90, 5.0], ['un cycliste et son vélo', 80, 36, 8.0], ['un TGV', 4.0e5, 108, 300], ['une voiture', 1000, 72, 8.0]];
+function etape1(c_) {
+  const carte = c_.carte('1. Déterminer la résultante des forces connaissant l\'accélération');
+  c_.ajouter(carte, `<div class="cours-bloc"><div class="cle"><p><b class="cle-titre">Méthode.</b></p>${METHODE}</div></div>
+    ${exemple(`<p>Une voiture de course de masse m = 600 kg passe de 0 à 100 km/h (= 27,8 ${MS}) en Δt = 2,5 s en ligne droite. On considère que son accélération est constante. Calculer la résultante des forces qui s'applique sur la voiture lors de ce mouvement.</p>
+      <ul class="er-liste"><li>Système : {voiture}.</li><li>Référentiel terrestre supposé galiléen (l'étude dure 2,5 s).</li><li>Schéma : pas besoin de dessiner les forces, on ne cherche que leur résultante.</li></ul>
+      ${SCHEMA}
+      <p>Accélération (c'est la variation de vitesse par unité de temps) ; on la calcule entre deux instants quand on n'a pas v(t) :</p>
+      <p class="crs-calc">a<sub>voiture</sub> = Δv / Δt = (27,8 − 0) / 2,5 = 11,12 ≈ <span class="c">11 ${MS2}</span></p>
+      <p>Dans le référentiel terrestre supposé galiléen, d'après la deuxième loi de Newton pour la voiture de masse constante, ${SFX} = m ${V('a')}, donc :</p>
+      <p class="crs-calc">Σ F<sub>ext</sub> = m<sub>voiture</sub> × a<sub>voiture</sub> = 600 × 11,12 = 6 672 N ≈ <span class="c">6,7 × 10<sup>3</sup> N</span></p>`)}`);
+  const d = hasard(DONNEES), v = d[2] / 3.6, a = v / d[3], F = d[1] * a;
+  c_.aToi(carte, [{ titre: 'Au démarrage', enonce: `<p>${d[0][0].toUpperCase() + d[0].slice(1)} de masse ${fmt(d[1])} kg démarre en ligne droite et atteint ${fmt(d[2])} km/h en ${fmt(d[3])} s, avec une accélération constante (référentiel terrestre supposé galiléen).</p>`,
+    parties: [
+      { type: 'nombre', q: 'a) Convertis la vitesse atteinte en m·s<sup>−1</sup>.', label: 'v =', valeur: v, affiche: fmt(+v.toFixed(2)), rel: .01, unite: MS, signe: false,
+        diag: x => (Math.abs(x - d[2] * 3.6) < 1e-6 * d[2] ? 'Pour passer des km/h aux m/s, on <b>divise</b> par 3,6.' : '1 km/h = 1 000 m / 3 600 s : on divise par 3,6.'), solution: `<p class="crs-calc">v = ${fmt(d[2])} / 3,6 = <span class="c">${fmt(v)} ${MS}</span></p>` },
+      { type: 'nombre', q: 'b) Calcule son accélération.', label: 'a =', valeur: a, affiche: fmt(+a.toPrecision(3)), rel: .02, unite: MS2 + CALC, signe: false,
+        diag: x => (Math.abs(x - d[2] / d[3]) < 1e-6 * d[2] ? 'Utilise la vitesse en m·s<sup>−1</sup>.' : 'a = Δv / Δt, avec Δv = v − 0.'), solution: `<p class="crs-calc">a = Δv / Δt = (${fmt(v)} − 0) / ${fmt(d[3])} = <span class="c">${fmt(a)} ${MS2}</span></p>` },
+      { type: 'nombre', q: 'c) Déduis-en la résultante des forces qui s\'exercent sur le système.', label: 'Σ F<sub>ext</sub> =', valeur: F, rel: .02, unite: 'N' + CALC, signe: false,
+        diag: x => (Math.abs(x - d[1] / a) < 1e-6 * d[1] / a ? 'Σ F<sub>ext</sub> = m × a : on multiplie.' : 'D\'après la deuxième loi de Newton, Σ F<sub>ext</sub> = m × a.'),
+        solution: `<p>Dans le référentiel terrestre supposé galiléen, d'après la deuxième loi de Newton pour le système de masse constante, ${SFX} = m ${V('a')} :</p><p class="crs-calc">Σ F<sub>ext</sub> = ${fmt(d[1])} × ${fmt(a)} = <span class="c">${F >= 1e4 ? BF.sci(F, 2) : fmt(F)} N</span></p>` }] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Système, référentiel galiléen, schéma, puis : « Dans le référentiel … supposé galiléen, d'après la deuxième loi de Newton pour le système de masse constante, ${SFX} = m ${V('a')} ». L'accélération se calcule entre deux instants : a = Δv / Δt.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4c_cours.html">Cours : accélération connaissant les forces →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#resultante">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+BF.menu('module_4b_cours');
+</script>
+</body>
+</html>

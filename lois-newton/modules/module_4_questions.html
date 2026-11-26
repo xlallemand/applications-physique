@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions — Forces et mouvement : lois de Newton</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="ln.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../cinematique/modules/vecteurs.js"></script>
+<script src="ln.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 4 : 10 questions.
+   a à partir des forces (poussée et frottements) ; Σ F à partir du
+   mouvement (démarrage, freinage, conversion km/h → m/s) ; sens de Σ F⃗
+   d'après une chronophotographie ; tracer a⃗ (BF.partieAcc) ;
+   projections (cos, sin) ; plan incliné sans frottements (a = g sin α) ;
+   conversions km/h → m/s ; énoncé et unités de la deuxième loi.
+   Valeurs choisies pour tomber juste (vérifiées par un script).
+   ============================================================ */
+const { o, fq, fmt, cs, sci, hasard, melanger, partieAcc } = BF;
+const { V, SF, SFX, NUL, CALC, chrono } = LN;
+const MS2 = 'm·s<sup>−2</sup>', MS = 'm·s<sup>−1</sup>';
+const rad = d => d * Math.PI / 180;
+const Maj = t => t[0].toUpperCase() + t.slice(1);
+
+// a à partir des forces : [système, m (kg), F (N), f (N)]
+const POUSSEES = [['une caisse', 25, 100, 40], ['un traîneau', 40, 90, 30], ['un palet', 0.20, 1.5, 0.30], ['une barque', 150, 400, 250], ['un chariot', 8.0, 30, 6.0]];
+function forcesA() {
+  const d = hasard(POUSSEES), S = d[2] - d[3], a = S / d[1];
+  return { theme: 'Accélération connaissant les forces', enonce: `<p>${Maj(d[0])} de masse ${fmt(d[1])} kg est tiré horizontalement par une force F = ${fmt(d[2])} N ; les frottements valent f = ${fmt(d[3])} N ; le poids et la réaction normale se compensent (référentiel terrestre supposé galiléen).</p>`,
+    parties: [fq.nombre('a) Valeur de la résultante des forces :', 'Σ F<sub>ext</sub> =', S, 'N', { signe: false, rel: .005, diag: x => (Math.abs(x - d[2] - d[3]) < 1e-9 ? 'Les frottements s\'opposent au mouvement : on soustrait.' : 'Σ F<sub>ext</sub> = F − f.'), solution: `<p>Σ F<sub>ext</sub> = F − f = ${fmt(d[2])} − ${fmt(d[3])} = ${fmt(S)} N</p>` }),
+      fq.nombre('b) Valeur de l\'accélération :', 'a =', a, MS2, { signe: false, rel: .01, calc: true, diag: x => (Math.abs(x - d[2] / d[1]) < 1e-9 ? 'Utilise la résultante, pas seulement F.' : Math.abs(x - S * d[1]) < 1e-6 ? 'a = Σ F / m : on divise.' : 'D\'après la deuxième loi de Newton, a = Σ F<sub>ext</sub> / m.'),
+        solution: `<p>Dans le référentiel terrestre supposé galiléen, d'après la deuxième loi de Newton : a = Σ F<sub>ext</sub> / m = ${fmt(S)} / ${fmt(d[1])} = ${fmt(a)} ${MS2}</p>` })] };
+}
+// Σ F à partir du mouvement : [système, m (kg), v1 (km/h), v2 (km/h), Δt (s)]
+const MOUVEMENTS = [['une moto', 200, 0, 72, 4.0], ['une voiture', 1200, 72, 0, 4.0], ['un bus', 1.2e4, 0, 36, 10], ['un scooter', 120, 0, 54, 6.0], ['une voiture', 1000, 90, 0, 5.0]];
+function mouvementF() {
+  const d = hasard(MOUVEMENTS), v1 = d[2] / 3.6, v2 = d[3] / 3.6, a = (v2 - v1) / d[4], F = d[1] * Math.abs(a), frein = v2 < v1;
+  return { theme: 'Résultante connaissant le mouvement', enonce: `<p>${Maj(d[0])} de masse ${fmt(d[1])} kg passe en ligne droite de ${fmt(d[2])} km/h à ${fmt(d[3])} km/h en ${fmt(d[4])} s, avec une accélération constante (référentiel terrestre supposé galiléen).</p>`,
+    parties: [fq.nombre(`a) Valeur de l'accélération (a = |Δv| / Δt, vitesses en ${MS}) :`, 'a =', Math.abs(a), MS2, { signe: false, rel: .01, calc: true,
+        diag: x => (Math.abs(x - Math.abs(d[3] - d[2]) / d[4]) < 1e-6 ? 'Convertis d\'abord les vitesses en m·s<sup>−1</sup> (on divise par 3,6).' : 'a = |v<sub>2</sub> − v<sub>1</sub>| / Δt, vitesses en m·s<sup>−1</sup>.'),
+        solution: `<p>${fmt(Math.max(d[2], d[3]))} km/h = ${fmt(Math.max(v1, v2))} ${MS} ; a = ${fmt(Math.max(v1, v2))} / ${fmt(d[4])} = ${fmt(Math.abs(a))} ${MS2}</p>` }),
+      fq.nombre('b) Valeur de la résultante des forces :', 'Σ F<sub>ext</sub> =', F, 'N', { signe: false, rel: .01, calc: true, diag: () => 'D\'après la deuxième loi de Newton, Σ F<sub>ext</sub> = m × a.',
+        solution: `<p>Σ F<sub>ext</sub> = m × a = ${fmt(d[1])} × ${fmt(Math.abs(a))} = ${F >= 1e4 ? sci(F, 2) : fmt(F)} N</p>` }),
+      fq.choix(`c) Sens de ${SF} :`, [o('avant', 'dans le sens du mouvement'), o('arriere', 'dans le sens opposé au mouvement')], frein ? 'arriere' : 'avant', { melanger: false,
+        indice: `${SF} a le sens de Δ${V('v')} : la vitesse augmente-t-elle ou diminue-t-elle ?`, solution: `<p>${frein ? 'Le véhicule ralentit : Σ <span class="vec-nom">F</span> est vers l\'arrière.' : 'Le véhicule accélère : Σ <span class="vec-nom">F</span> est vers l\'avant.'}</p>` })] };
+}
+const CHRONOS = [['accelere', 'avant', 'La vitesse augmente : Σ <span class="vec-nom">F</span> dans le sens du mouvement.'], ['ralenti', 'arriere', 'La vitesse diminue : Σ <span class="vec-nom">F</span> dans le sens opposé au mouvement.'],
+  ['uniforme', 'nulle', 'Mouvement rectiligne uniforme : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>.'], ['courbe', 'interieur', 'Trajectoire courbe : Σ <span class="vec-nom">F</span> vers l\'intérieur de la courbe.']];
+function chronoQ(c) {
+  return { theme: 'Sens de la résultante', enonce: `<p>Chronophotographie d'un système, positions à intervalles de temps égaux (référentiel terrestre supposé galiléen).</p>${chrono({ type: c[0], sens: hasard([1, -1]) })}`,
+    parties: [fq.choix(`Comment est dirigée ${SF} ?`, [o('avant', 'dans le sens du mouvement'), o('arriere', 'dans le sens opposé au mouvement'), o('interieur', 'vers l\'intérieur de la courbe'), o('nulle', 'elle est nulle')], c[1],
+      { melanger: false, colonne: true, indice: `${SF} a la direction et le sens de Δ${V('v')}.`, solution: `<p>${c[2]}</p>` })] };
+}
+const FORCES = [[[0, 2], [3, 0], [0, -2]], [[-1, 0], [0, 3], [0, -1], [3, 0]], [[0, -3], [2, 0], [0, 1]], [[0, 2], [-2, 0], [0, -4]], [[2, 0], [0, -1], [-4, 0]]];
+function traceA() {
+  return { theme: 'Sens de la résultante', enonce: `<p>Des forces s'exercent sur un système ; leur somme ${SF} est tracée en noir.</p>`,
+    parties: [partieAcc({ forces: hasard(FORCES).map((x, i) => ({ nom: `F_${i + 1}`, coord: x })), etendue: 4, solution: `<p>${V('a')} = ${SF} / m : même direction et même sens.</p>` })] };
+}
+const VECTEURS = [[10, 30], [20, 60], [15, 40], [12, 20], [8.0, 50], [25, 35]];
+function projection() {
+  const v = hasard(VECTEURS), Fx = v[0] * Math.cos(rad(v[1])), Fy = v[0] * Math.sin(rad(v[1]));
+  return { theme: 'Projections', enonce: `<p>Une force de valeur F = ${fmt(v[0])} N fait un angle α = ${v[1]}° avec l'axe Ox, vers le haut et la droite.</p>`,
+    parties: [fq.nombre('a) Coordonnée sur Ox (3 chiffres significatifs) :', 'F<sub>x</sub> =', Fx, 'N', { rel: .015, calc: true, cs: 3, diag: x => (Math.abs(x - Fy) < .02 * Fy ? 'Sur l\'axe de l\'angle, c\'est le cosinus.' : 'F<sub>x</sub> = F × cos α (calculatrice en degrés).'), solution: `<p>F<sub>x</sub> = ${fmt(v[0])} × cos ${v[1]}° = ${cs(Fx, 3)} N</p>` }),
+      fq.nombre('b) Coordonnée sur Oy :', 'F<sub>y</sub> =', Fy, 'N', { rel: .015, calc: true, cs: 3, diag: x => (Math.abs(x - Fx) < .02 * Fx ? 'Sur Oy, c\'est le sinus de l\'angle avec Ox.' : 'F<sub>y</sub> = F × sin α.'), solution: `<p>F<sub>y</sub> = ${fmt(v[0])} × sin ${v[1]}° = ${cs(Fy, 3)} N</p>` })] };
+}
+const PENTES = [10, 15, 20, 25, 30];
+function pente() {
+  const al = hasard(PENTES), a = 9.81 * Math.sin(rad(al));
+  return { theme: 'Plan incliné', enonce: `<p>Un skieur descend une piste rectiligne inclinée de α = ${al}° sur l'horizontale, sans frottements ; g = 9,81 N·kg<sup>−1</sup>. Axe x le long de la pente, vers le bas (référentiel terrestre supposé galiléen).</p>`,
+    parties: [fq.nombre('Valeur de son accélération (3 chiffres significatifs) :', 'a<sub>x</sub> =', a, MS2, { signe: false, rel: .015, calc: true, cs: 3,
+      diag: x => (Math.abs(x - 9.81 * Math.cos(rad(al))) < .02 * 9.81 ? 'Le long de la pente : P<sub>x</sub> = P sin α, donc a<sub>x</sub> = g sin α.' : Math.abs(x - 9.81) < .05 ? 'Seule la composante du poids le long de la pente fait accélérer le skieur.' : 'Projette la deuxième loi sur x : m g sin α = m a<sub>x</sub>.'),
+      solution: `<p>Sur x : m × g × sin α + 0 = m × a<sub>x</sub>, donc a<sub>x</sub> = g sin α = 9,81 × sin ${al}° = ${cs(a, 3)} ${MS2}</p>` })] };
+}
+const VITESSES = [36, 54, 72, 90, 108, 126, 50];
+function conversion() {
+  const v = hasard(VITESSES);
+  return { theme: 'Conversion', parties: [fq.nombre(`Convertis ${v} km/h en ${MS}.`, 'v =', v / 3.6, MS, { signe: false, rel: .01, cs: 3, calc: v % 18 !== 0,
+    diag: x => (Math.abs(x - v * 3.6) < 1e-6 ? 'Pour passer des km/h aux m/s, on divise par 3,6.' : '1 km/h = 1 000 m / 3 600 s : on divise par 3,6.'), solution: `<p>v = ${v} / 3,6 = ${cs(v / 3.6, 3)} ${MS}</p>` })] };
+}
+function enonceQ() {
+  return { theme: 'Énoncé', parties: [fq.choix('Dans la deuxième loi de Newton, Σ F<sub>ext</sub> = m × a, les unités sont :', [o('ok', `N, kg, ${MS2}`), o('g', `N, g, ${MS2}`), o('ms', `N, kg, ${MS}`), o('kgf', `kg, N, ${MS2}`)], 'ok',
+    { indices: { g: 'La masse est en kilogrammes.', ms: 'L\'accélération est en m·s<sup>−2</sup>.', kgf: 'La force est en newtons, la masse en kilogrammes.' }, solution: `<p>F en N, m en kg, a en ${MS2} (1 N = 1 kg·${MS2}).</p>` })] };
+}
+
+BF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Deuxième loi de Newton',
+  intro: '<p class="er-contexte">10 questions : accélération à partir des forces, résultante à partir du mouvement, sens de la résultante, projections, plan incliné, conversions. Garde ta calculatrice à portée de main.</p>',
+  questions: () => {
+    const ch = melanger(CHRONOS);
+    return melanger([forcesA(), forcesA(), mouvementF(), mouvementF(), chronoQ(ch[0]), traceA(), projection(), pente(), conversion(), enonceQ()]);
+  },
+  revoir: { href: 'module_4a_cours.html', label: 'Revoir les cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+});
+BF.menu('module_4_questions');
+</script>
+</body>
+</html>
