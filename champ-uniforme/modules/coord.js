@@ -163,10 +163,15 @@
     return [0, 1].map(k => ({ type: 'choix', q: `Coordonnée de ${v} sur l'axe ${s.ax[k]} :`, options: options(s), bonne: id(s.coords[k]), colonne: false, melanger: false,
       indice: aideCoord(s, k), solution: sol, correction: sol }));
   }
+  // lien vers le cours de trigonométrie de l'application Cinématique (nouvelle fenêtre)
+  const TRIGO = '../../cinematique/modules/module_2b_cours.html';
+  const lienTrigo = `<a href="${TRIGO}" target="_blank" rel="noopener">Revoir la trigonométrie (Cinématique) ↗</a>`;
+  // encadré pour les cours et la fiche
+  const encadreTrigo = `<div class="ph-lien-app"><p>Besoin de revoir cos et sin dans le triangle rectangle ? La méthode est détaillée dans le cours de cinématique.</p><a class="btn-small" href="${TRIGO}" target="_blank" rel="noopener">Cinématique : module et trigonométrie ↗</a></div>`;
   function aideCoord(s, k) {
     if (s.type === 'axe') return `Le vecteur est-il porté par l'axe ${s.ax[k]} ? Si oui, compare son sens avec celui de l'axe ; sinon, la coordonnée est nulle.`;
-    if (s.type === 'incline') return s.long ? 'Le vecteur est parallèle à la pente : il est porté par un seul axe.' : `Trace le triangle rectangle : l'angle entre le vecteur vertical et l'axe perpendiculaire à la pente vaut β. Puis compare les sens.`;
-    return `Trace le triangle rectangle : le côté adjacent à ${s.angNom} donne cos ${s.angNom}, le côté opposé sin ${s.angNom}. Puis compare le sens du vecteur et celui de l'axe ${s.ax[k]}.`;
+    if (s.type === 'incline') return s.long ? 'Le vecteur est parallèle à la pente : il est porté par un seul axe.' : `Trace le triangle rectangle : l'angle entre le vecteur vertical et l'axe perpendiculaire à la pente vaut β. Puis compare les sens. ${lienTrigo}`;
+    return `Trace le triangle rectangle : le côté adjacent à ${s.angNom} donne cos ${s.angNom}, le côté opposé sin ${s.angNom}. Puis compare le sens du vecteur et celui de l'axe ${s.ax[k]}. ${lienTrigo}`;
   }
   // valeurs numériques
   function partiesNum(s) {
@@ -178,5 +183,5 @@
       diag: x => (Math.abs(x + vals[k]) < 1e-6 * Math.max(1, Math.abs(N)) + .01 * Math.abs(vals[k]) && vals[k] ? 'Le signe est faux : compare le sens du vecteur et celui de l\'axe.' : aideCoord(s, k)), solution: sol, correction: sol })) };
   }
 
-  CU.coord = { gen, fig, parties, partiesNum, solution, ecrire, nomV };
+  CU.coord = { gen, fig, parties, partiesNum, solution, ecrire, nomV, encadreTrigo };
 })();
