@@ -51,6 +51,7 @@ Ce fichier est lu au début de chaque session qui fabrique l'application d'un ch
   - vérification avant livraison : `document.documentElement.scrollHeight <= innerHeight` à 1280 × 720, 1280 × 650 et 390 × 844, dans chaque état, défis réussis dans le désordre.
 - Portail : ajoute l'application dans `APPS` de `index.html` (racine), `niv: ['sti']`, `titre` = nom de l'application, parmi les applications STI2D du même domaine dans l'ordre des numéros de chapitre, avec ses mots-clés de recherche `mots` (charte §2) ; relance ensuite `python3 docs/outils/index-recherche.py` (index de recherche du portail). Ajoute un dessin d'en-tête dans `assets/hero.js` seulement si aucun dessin existant ne convient (liste en tête du fichier).
 - Applications d'outils à citer en lien (« Revois… ») plutôt que de refaire leur contenu : `conversions/`, `puissances-10/`, `equations-en-physique/`, `proportionnalite/`, `lecture-graphique/`.
+- **Module à faire situé dans une autre application** : une page externe ↗ du `PLAN` (charte §5). Le `desc` de son module commence par « À savoir faire : » et résume en une phrase ce que l'élève doit savoir faire en sortant de l'autre application (modèle : module 2 de `principe-dynamique/`). Le prompt du chapitre donne ce résumé ; sinon, rédige-le à partir des cours de l'autre application.
 
 ## 4. Habitudes du professeur (visibles dans les corrections)
 
