@@ -25,6 +25,7 @@
                                          des forces sur le schéma, noms, compensation
    BF.verif                              vérifications et diagnostics de chaque étape du bilan (atelier)
    BF.infoForces()                       infographie : forces à distance, forces de contact
+   BF.quadrillage(zone, o)               forces déjà tracées dans un quadrillage (à regarder)
    BF.partieResultante(o), BF.partieAcc(o)
                                          tracer Σ <span class="vec-nom">F</span> puis <span class="vec-nom">a</span> (ou <span class="vec-nom">Δv</span>) dans un quadrillage
                                          (repère de cinematique/modules/vecteurs.js, à charger avant)
@@ -1288,6 +1289,12 @@
       // une couleur par force (Σ F⃗, déjà tracée, en noir)
       vecteurs: o.forces.map((f, i) => ({ nom: f.nom, dep: [0, 0], coord: f.coord, fixe: true, coul: f.nom === 'ΣF' ? window.VEC.C.encre : COUL_QUAD[i % COUL_QUAD.length], nomPos: f.nomPos })).concat([aTracer]) });
   }
+  // quadrillage seulement à regarder : forces déjà tracées depuis G (o.forces = [{ nom, coord }], o.etendue)
+  function quadrillage(zone, o) {
+    return new window.VEC.Repere(zone, { xmin: -(o.etendue || 4), xmax: o.etendue || 4, ymin: -(o.etendue || 4), ymax: o.etendue || 4, axes: false, unitaires: false, mode: 'mixte',
+      points: [{ nom: 'G', x: 0, y: 0, dx: -10, dy: 16 }], aria: o.aria || 'Quadrillage : forces appliquées au point G',
+      vecteurs: o.forces.map((f, i) => ({ nom: f.nom, dep: [0, 0], coord: f.coord, fixe: true, coul: COUL_QUAD[i % COUL_QUAD.length] })) });
+  }
   function partieResultante(o) {
     const S = o.somme || somme(o.forces), ech = o.echelle || 1;
     return { type: 'perso', q: o.q || 'Trace la résultante Σ <span class="vec-nom">F</span> depuis le point G (glisse la pointe, ou utilise les flèches), puis valide.', solution: o.solution,
@@ -1581,6 +1588,6 @@
     question, serie, confettis, fig, monter, outil, cap, V, NOMS, nomV, nomSVG, SENS_NOM, DIRS8, DIR_TXT, texteDir, ecartAngle, LF, HS, scene, sceneRemplie,
     reactions, reactionsSVG, bilan, verif, diagPt, diagDir,
     COUL, COUL_LIBRES, couleurs, couleursForces, court, diagramme, diagrammeDe, diagrammesDe, typeDe, DIST, sorteDist, MANQUE, REGLE_AIR, OPTS_AIR, bonneAir, infoForces,
-    somme, partieResultante, partieAcc, SOLIDES, solide, partieCentre, flecheEchelle, marteauLance, PLAN, menu, accueil, marquer, pastilles,
+    somme, quadrillage, partieResultante, partieAcc, SOLIDES, solide, partieCentre, flecheEchelle, marteauLance, PLAN, menu, accueil, marquer, pastilles,
   });
 })();

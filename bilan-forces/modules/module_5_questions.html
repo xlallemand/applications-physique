@@ -20,11 +20,23 @@
 <script>
 /* ============================================================
    Série du module 5 : 10 questions, au choix du niveau (2de, ou 1re et
-   Terminale) : cinq bilans tout faits sur des situations du niveau (les
-   forces se compensent-elles ?), quatre cas du principe d'inertie,
-   caractéristiques de deux forces qui se compensent.
+   Terminale) : trois bilans tout faits sur des situations du niveau (les
+   forces se compensent-elles ?), deux sommes de forces dans un quadrillage,
+   quatre cas du principe d'inertie, caractéristiques de deux forces qui se
+   compensent.
+   Sommes de forces : en 2de, à lire (deux forces opposées de même valeur,
+   quatre forces qui se compensent deux à deux : la somme est nulle) ; en 1re
+   et en Terminale, à tracer (deux forces opposées, trois forces).
    ============================================================ */
-const { o, fq, hasard, melanger, sceneRemplie, SITUATIONS: S, PARCOURS } = BF;
+const { o, fq, hasard, melanger, sceneRemplie, quadrillage, partieResultante, SITUATIONS: S, PARCOURS } = BF;
+const SF = 'Σ&nbsp;<span class="vec-nom">F</span>', NUL = '<span class="vec-nom">0</span>';
+const fs = l => l.map((c, i) => ({ nom: `F_${i + 1}`, coord: c }));
+// 2de : sommes nulles à lire (1 carreau = 1 N)
+const DEUX_NULLES = [[[3, 0], [-3, 0]], [[0, 2], [0, -2]], [[0, -4], [0, 4]], [[-2, 0], [2, 0]]];
+const QUATRE_NULLES = [[[0, 3], [2, 0], [0, -3], [-2, 0]], [[0, -2], [-4, 0], [0, 2], [4, 0]], [[1, 0], [0, 4], [-1, 0], [0, -4]], [[0, 1], [3, 0], [0, -1], [-3, 0]]];
+// 1re et Terminale : sommes à tracer
+const PAIRES = [[[-4, 0], [2, 0]], [[0, 3], [0, -1]], [[3, 0], [-1, 0]], [[0, -4], [0, 1]]];
+const TRIPLES = [[[0, 2], [3, 0], [0, -4]], [[-2, 0], [0, 3], [4, 0]], [[0, -3], [-2, 0], [0, 1]]];
 const INERTIE = [['Un livre est posé, immobile, sur une table.', 'oui', 'Immobile : les forces se compensent.'], ['Une voiture roule en ligne droite à 90 km/h constants.', 'oui', 'Mouvement rectiligne uniforme : les forces se compensent.'],
   ['Une voiture freine en ligne droite.', 'non', 'La vitesse diminue : les forces ne se compensent pas.'], ['Une moto prend un virage à vitesse constante.', 'non', 'Le mouvement n\'est pas rectiligne : les forces ne se compensent pas.'],
   ['Un ascenseur monte à vitesse constante.', 'oui', 'Mouvement rectiligne uniforme : les forces se compensent.'], ['Une pomme tombe de plus en plus vite.', 'non', 'La vitesse augmente : les forces ne se compensent pas.']];
@@ -37,13 +49,34 @@ function inertie(c) {
   return { theme: 'Principe d\'inertie', enonce: `<p>${c[0]}</p>`, parties: [fq.choix('Que peut-on dire des forces qui s\'exercent sur le système ?', [o('oui', 'elles se compensent'), o('non', 'elles ne se compensent pas')], c[1],
     { melanger: false, indice: 'Principe d\'inertie : les forces se compensent ⇔ immobile ou mouvement rectiligne uniforme.', solution: `<p>${c[2]}</p>` })] };
 }
+// 2de : forces déjà tracées ; que vaut leur somme ? se compensent-elles ?
+function sommeNulle(l) {
+  const val = l.map(c => Math.abs(c[0]) + Math.abs(c[1])), tot = val.reduce((a, b) => a + b, 0), quatre = l.length === 4;
+  const opts = [o('nul', `${SF} = ${NUL} : la somme est nulle`), o('add', `${SF} vaut ${tot} N : on additionne les valeurs`),
+    quatre ? o('diag', `${SF} est en diagonale`) : o('une', `${SF} vaut ${val[0]} N`)];
+  const sol = quatre ? `<p>${SF} est nulle : les forces opposées se compensent deux à deux (même direction, sens opposés, même valeur) ; bout à bout, les quatre flèches reviennent au point G.</p>`
+    : `<p>${SF} est nulle : les deux forces ont la même direction, des sens opposés et la même valeur ; bout à bout, la deuxième flèche revient au point G.</p>`;
+  return { theme: 'Somme des forces', enonce: `<p>${quatre ? 'Quatre' : 'Deux'} forces s'exercent au point G (1 carreau = 1 N).</p>`,
+    figure: z => quadrillage(z, { forces: fs(l) }),
+    parties: [fq.choix(`Que vaut la somme des forces ${SF} ?`, opts, 'nul', { melanger: false, colonne: true,
+        indices: { add: 'Des forces de sens opposés ne s\'additionnent pas : on soustrait leurs valeurs.', une: 'Mets les flèches bout à bout : où arrive la deuxième ?', diag: 'Regarde d\'abord les forces opposées, deux par deux.' }, solution: sol }),
+      fq.choix('Ces forces se compensent-elles ?', [o('oui', 'oui'), o('non', 'non')], 'oui', { melanger: false, indice: `Des forces se compensent quand leur somme est nulle.`, solution: `<p>${SF} = ${NUL} : les forces se compensent.</p>` })] };
+}
+// 1re et Terminale : Σ F⃗ à tracer
+function sommeTracee(l) {
+  return { theme: 'Somme des forces', enonce: `<p>${l.length === 2 ? 'Deux' : 'Trois'} forces s'exercent au point G (1 carreau = 1 N).</p>`,
+    parties: [partieResultante({ forces: fs(l), etendue: 4, solution: l.length === 2 ? `<p>Forces opposées : on soustrait ; ${SF} est dans le sens de la plus grande.</p>`
+      : `<p>Les forces opposées se réduisent ; avec la force perpendiculaire, ${SF} est la diagonale du rectangle.</p>` })] };
+}
 // niv : '2de' (situations de 2de) ou 'sup' (situations de 1re et de Terminale)
 function tirage(niv) {
   const sits = PARCOURS.map(id => S[id]).filter(s => s.comp && (niv === '2de' ? s.niv === '2de' : s.niv !== '2de'));
-  // cinq situations différentes, avec au moins un « oui » et un « non »
-  let cinq;
-  do { cinq = melanger(sits).slice(0, 5); } while (!cinq.some(s => s.comp.bonne === 'oui') || !cinq.some(s => s.comp.bonne === 'non'));
-  const qs = cinq.map(compense);
+  // trois situations différentes, avec au moins un « oui » et un « non »
+  let trois;
+  do { trois = melanger(sits).slice(0, 3); } while (!trois.some(s => s.comp.bonne === 'oui') || !trois.some(s => s.comp.bonne === 'non'));
+  const qs = trois.map(compense);
+  if (niv === '2de') qs.push(sommeNulle(hasard(DEUX_NULLES)), sommeNulle(hasard(QUATRE_NULLES)));
+  else qs.push(sommeTracee(hasard(PAIRES)), sommeTracee(hasard(TRIPLES)));
   melanger(INERTIE).slice(0, 4).forEach(c => qs.push(inertie(c)));
   qs.push({ theme: 'Forces qui se compensent', parties: [fq.choix('Deux forces qui se compensent ont :', [o('ok', 'la même direction, des sens opposés, la même valeur'), o('sens', 'la même direction, le même sens, la même valeur'), o('val', 'la même direction, des sens opposés, des valeurs différentes'), o('dir', 'des directions perpendiculaires')], 'ok',
     { indices: { sens: 'Deux forces de même sens s\'ajoutent : leur somme n\'est pas nulle.', val: 'Si les valeurs sont différentes, la somme n\'est pas nulle.', dir: 'Deux forces perpendiculaires ne peuvent pas se compenser.' }, solution: '<p>Même direction, sens opposés, même valeur : leur somme est nulle.</p>' })] });
@@ -53,7 +86,7 @@ function tirage(niv) {
 BF.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 5 · QUESTIONS', titre: 'Forces qui se compensent',
-  intro: '<p class="er-contexte">10 questions : les forces se compensent-elles (bilans tout faits sur des situations de ton niveau), principe d\'inertie, caractéristiques de deux forces qui se compensent.</p>',
+  intro: '<p class="er-contexte">10 questions : les forces se compensent-elles (bilans tout faits sur des situations de ton niveau), sommes de forces dans un quadrillage, principe d\'inertie, caractéristiques de deux forces qui se compensent.</p>',
   niveaux: [{ id: '2de', nom: '2de' }, { id: 'sup', nom: '1re ou Terminale' }],
   questions: tirage,
   revoir: { href: 'module_5a_cours.html', label: 'Revoir les cours' },
