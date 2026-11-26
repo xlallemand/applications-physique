@@ -1,5 +1,5 @@
 /* ============================================================
-   Animation « accélérateur linéaire » (module 4, page sur un écran)
+   Animation « accélérateur linéaire » (module 5, page sur un écran)
 
    CU.simAccelerateur(zone) : une suite de N condensateurs accolés (grilles
    percées) reliés à un générateur dont la polarité peut s'inverser. Les
@@ -20,7 +20,8 @@
    Réglages : U, nombre d'étages, particule (proton, électron), polarité de
    départ, L, mode, fréquence ; Lecture / Pause, Pas à pas (jusqu'au
    prochain événement), ↺ Recommencer, vitesse. Onglet « Vitesse » : v(t)
-   et v après chaque étage, comparée à vₙ = √(2nqU/m) (non relativiste).
+   et v après chaque étage, comparée à la vitesse attendue : n étages de tension U
+   accélèrent comme un seul condensateur de tension nU (non relativiste).
    Défis : atteindre une vitesse donnée, accélérer un électron (autre
    polarité), vitesse indépendante de L, sans inversion, synchronisation.
    prefers-reduced-motion : pas d'animation automatique, avance par étapes.
@@ -43,7 +44,7 @@
     const st = { U: 10, N: 5, part: 'p', pol: '+', L: 10, mode: 'sync', fr: 0.85, vit: 1, joue: false, essais: [], recul: false };
     let sim = null;
     const c = CU.cadre(zone, {
-      badge: 'MODULE 4 · ANIMATION', titre: 'Accélérateur linéaire',
+      badge: 'MODULE 5 · ANIMATION', titre: 'Accélérateur linéaire',
       bande: '<p class="cu-eqs" data-a="etat" aria-live="polite"></p>',
       bas: `<div class="cu-anim-ctrl"><button type="button" class="btn-primary cu-lire" data-a="lire">▶ Lecture</button><button type="button" class="btn-secondary" data-a="pas">Pas à pas</button>
           <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
@@ -60,7 +61,7 @@
         { id: 'defis', html: '<div data-a="defis"></div>' },
         { id: 'bilan', html: `<div class="cu-bilan"><div class="cle"><p>Dans chaque condensateur, la particule est accélérée si la force q${V('E')} est dans le sens du mouvement : il faut <b>inverser la polarité chaque fois qu'elle change de condensateur</b>.</p></div>
             <div class="cle"><p>Sans inversion, elle est freinée dans le condensateur suivant et repart en arrière.</p></div>
-            <div class="cle"><p>Chaque étage apporte la même énergie qU : v<sub>n</sub> = √(2nqU / m), qui ne dépend pas de L. Un électron (q = −e) demande la polarité inverse de celle du proton.</p></div>
+            <div class="cle"><p>Chaque étage apporte la même énergie qU : après n étages, la particule a la vitesse que lui donnerait un seul condensateur de tension n U, qui ne dépend pas de L. Un électron (q = −e) demande la polarité inverse de celle du proton.</p></div>
             <div class="cle"><p>Avec un générateur de fréquence fixe, les étages s'allongent (la particule va de plus en plus vite) pour que chaque traversée dure une demi-période.</p></div></div>` },
       ],
       surOnglet: id => { if (id === 'bilan') window.SOM.marquer({ fait: true }); if (id === 'vit') graphe(); },
@@ -128,7 +129,7 @@
       const vN = vTh(st.N);
       if (sim.fin === 'sortie') {
         st.essais.push({ part: st.part, U: st.U, N: st.N, L: st.L, mode: st.mode, v: sim.v, ratio: sim.v / vN });
-        c.message(`Sortie après ${st.N} étage${st.N > 1 ? 's' : ''} : v = <b>${nb(sim.v)} m·s<sup>−1</sup></b> ; √(2NqU/m) = ${nb(vN)} m·s<sup>−1</sup>.`, sim.v > .98 * vN ? 'ok' : 'info');
+        c.message(`Sortie après ${st.N} étage${st.N > 1 ? 's' : ''} : v = <b>${nb(sim.v)} m·s<sup>−1</sup></b> ; vitesse attendue (un seul condensateur de tension ${st.N} U) : ${nb(vN)} m·s<sup>−1</sup>.`, sim.v > .98 * vN ? 'ok' : 'info');
       } else if (sim.fin === 'recul') c.message(`La particule est repoussée vers l'arrière : le champ du premier condensateur n'est pas dans le bon sens pour ${st.part === 'e' ? 'un électron (charge négative)' : 'un proton'}. Change la polarité de départ.`, 'refus');
       else c.message(st.mode === 'sans' ? 'Sans inversion : accélérée dans le premier condensateur, freinée dans le deuxième, elle repart en arrière et oscille.' : 'La particule n\'est pas sortie : l\'inversion tombe au mauvais moment (règle la fréquence).', 'info');
       verifier();
@@ -189,11 +190,11 @@
       const X = t => mg + t / T * (W - mg - 8), Y = v => 10 + (vmax - v) / (vmax - vmin) * (H - 34);
       let d = `<line x1="${mg}" y1="${Y(0)}" x2="${W - 4}" y2="${Y(0)}" stroke="${ENCRE}" stroke-width="1.2"/><line x1="${mg}" y1="${Y(vmin)}" x2="${mg}" y2="4" stroke="${ENCRE}" stroke-width="1.2"/>`;
       for (let n = 1; n <= st.N; n++) d += `<line x1="${mg}" y1="${Y(vTh(n))}" x2="${W - 4}" y2="${Y(vTh(n))}" stroke="${COUL.grille}" stroke-dasharray="3 3"/>`;
-      d += txt(mg + 4, Y(vN) - 4, `√(2NqU/m) = ${sciTxt(vN)} m·s⁻¹`, { t: 9 });
+      d += txt(mg + 4, Y(vN) - 4, `attendue : ${sciTxt(vN)} m·s⁻¹`, { t: 9 });
       d += txt(W - 4, Y(0) + 12, 't', { t: 10, a: 'end', g: 700, c: ENCRE }) + txt(mg + 4, 12, 'v', { t: 10, g: 700, c: ENCRE });
       d += `<path d="${h.map((p, i) => `${i ? 'L' : 'M'}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join('')}" fill="none" stroke="${COUL.traj}" stroke-width="2.2"/>`;
       sv.innerHTML = d;
-      $('tab').innerHTML = `<table class="cu-tableau-v"><thead><tr><th>étage n</th><th>v mesurée (m·s<sup>−1</sup>)</th><th>√(2nqU/m)</th></tr></thead><tbody>${Array.from({ length: st.N }, (_, i) => `<tr><td>${i + 1}</td><td>${sim.etages[i] != null ? nb(sim.etages[i]) : '…'}</td><td>${nb(vTh(i + 1))}</td></tr>`).join('')}</tbody></table>`;
+      $('tab').innerHTML = `<table class="cu-tableau-v"><thead><tr><th>étage n</th><th>v mesurée (m·s<sup>−1</sup>)</th><th>v attendue (tension n U)</th></tr></thead><tbody>${Array.from({ length: st.N }, (_, i) => `<tr><td>${i + 1}</td><td>${sim.etages[i] != null ? nb(sim.etages[i]) : '…'}</td><td>${nb(vTh(i + 1))}</td></tr>`).join('')}</tbody></table>`;
     }
 
     /* ---------- Animation ---------- */
@@ -264,7 +265,7 @@
         ok: () => st.essais.some(a => a.mode === 'sync' && st.essais.some(b => b.mode === 'sync' && b.part === a.part && b.U === a.U && b.N === a.N && b.L !== a.L && Math.abs(b.v / a.v - 1) < .01)) },
       { t: 'Mode <b>sans inversion</b> : lance et observe ce qui arrive à la particule dans le deuxième condensateur.', preparer: prep({ mode: 'sans', pol: '+', part: 'p', N: 3 }),
         ok: () => st.recul },
-      { t: 'Mode <b>fréquence fixe</b> : règle f pour que la particule sorte avec la vitesse maximale √(2NqU/m) (à 2 % près).', preparer: prep({ mode: 'freq', pol: '+', part: 'p', fr: 0.85 }),
+      { t: 'Mode <b>fréquence fixe</b> : règle f pour que la particule sorte avec la vitesse maximale, celle que donnerait un seul condensateur de tension N U (à 2 % près).', preparer: prep({ mode: 'freq', pol: '+', part: 'p', fr: 0.85 }),
         ok: () => sortie(e => e.mode === 'freq' && e.ratio > .98) },
     ], { bilan: '<b>Tous les défis sont réussis !</b> Ouvre le « Bilan ».', surReussite: () => { if (c.tel()) setTimeout(() => c.onglet('defis'), 0); } });
     function verifier() { defis.verifier(); }

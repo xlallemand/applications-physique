@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="cu.js"></script>
+<script src="coord.js"></script>
 </head>
 <body>
 <div id="app-nav"></div>
@@ -17,88 +18,25 @@
 
 <script>
 /* ============================================================
-   Série du module 2 : 10 questions.
-   Équations horaires à compléter, coordonnées de v⃗₀ (cos / sin,
-   échange diagnostiqué), durée de chute, distance (lancer horizontal),
-   altitude maximale, portée (second degré), équation de la trajectoire,
-   lecture de la courbe v_y(t), vitesse au sol, influence de la masse.
+   Série du module 2 : 10 questions tirées au hasard (CU.coord).
+   Deux vecteurs portés par un axe, deux angles repérés depuis
+   l'horizontale, deux depuis la verticale, deux repères inclinés,
+   deux calculs numériques (signe compris). Les repères varient : axes
+   x, y ou x, z, sens de chaque axe, vecteur à l'origine ou ailleurs.
    ============================================================ */
-const { o, fq, fmt, cs, hasard, melanger, V, MS, MS2, fr, courbes, COUL } = CU;
-const G = 9.81, rad = d => d * Math.PI / 180;
-const t2 = 't<sup>2</sup>';
-
-function equation() {
-  return { theme: 'Équations horaires', enonce: `<p>Une balle est lancée depuis une hauteur h avec une vitesse ${V('v', '0')} faisant l'angle α avec l'horizontale (axe x horizontal, axe y vertical vers le haut, origine au sol).</p>`,
-    parties: [fq.choix('a) Expression de x(t) :', melanger([o('ok', 'x(t) = (v<sub>0</sub> cos α) t'), o('sin', 'x(t) = (v<sub>0</sub> sin α) t'), o('g', `x(t) = −½ g ${t2} + (v<sub>0</sub> cos α) t`), o('h', 'x(t) = (v<sub>0</sub> cos α) t + h')]), 'ok',
-      { melanger: false, colonne: true, indices: { sin: 'Projection horizontale : côté adjacent à α, donc cos α.', g: 'Le poids est vertical : a<sub>x</sub> = 0.', h: 'x(0) = 0 : l\'origine est sous le point de lancer.' }, solution: '<p>a<sub>x</sub> = 0, v<sub>x</sub> = v<sub>0</sub> cos α, x(0) = 0.</p>' }),
-    fq.choix('b) Expression de v<sub>y</sub>(t) :', melanger([o('ok', 'v<sub>y</sub>(t) = −g t + v<sub>0</sub> sin α'), o('p', 'v<sub>y</sub>(t) = g t + v<sub>0</sub> sin α'), o('cos', 'v<sub>y</sub>(t) = −g t + v<sub>0</sub> cos α'), o('c', 'v<sub>y</sub>(t) = v<sub>0</sub> sin α')]), 'ok',
-      { melanger: false, colonne: true, indices: { p: 'a<sub>y</sub> = −g : l\'axe y est vers le haut.', cos: 'v<sub>y</sub>(0) = v<sub>0</sub> sin α.', c: 'v<sub>y</sub> varie : a<sub>y</sub> = −g ≠ 0.' }, solution: '<p>Primitive de −g : −g t + C, et C = v<sub>y</sub>(0) = v<sub>0</sub> sin α.</p>' })] };
-}
-function coords() {
-  const v0 = hasard([6.0, 9.0, 12, 25]), al = hasard([20, 35, 55, 65]), vx = v0 * Math.cos(rad(al)), vy = v0 * Math.sin(rad(al));
-  return { theme: 'Coordonnées de la vitesse initiale', enonce: `<p>v<sub>0</sub> = ${fmt(v0)} ${MS}, α = ${al}° au-dessus de l'horizontale.</p>`,
-    parties: [fq.nombre('a) v<sub>0x</sub> (3 chiffres significatifs) :', 'v<sub>0x</sub> =', vx, MS, { calc: true, rel: .01, cs: 3, signe: false,
-      diag: v => (Math.abs(v - vy) < .02 * vy ? 'Tu as pris le sinus : sur l\'axe horizontal (adjacent à α), c\'est le cosinus.' : Math.abs(v - v0 * Math.cos(al)) < .03 * v0 ? 'Calculatrice en radians : passe en degrés.' : 'v<sub>0x</sub> = v<sub>0</sub> cos α.'), solution: `<p>v<sub>0x</sub> = ${fmt(v0)} × cos ${al}° = ${cs(vx, 3)} ${MS}</p>` }),
-    fq.nombre('b) v<sub>0y</sub> (3 chiffres significatifs) :', 'v<sub>0y</sub> =', vy, MS, { calc: true, rel: .01, cs: 3, signe: false,
-      diag: v => (Math.abs(v - vx) < .02 * vx ? 'Tu as pris le cosinus : sur l\'axe vertical (opposé à α), c\'est le sinus.' : 'v<sub>0y</sub> = v<sub>0</sub> sin α.'), solution: `<p>v<sub>0y</sub> = ${fmt(v0)} × sin ${al}° = ${cs(vy, 3)} ${MS}</p>` })] };
-}
-function horizontal() {
-  const v0 = hasard([2.0, 4.0, 5.0, 10]), h = hasard([1.25, 5.0, 20, 45]), tc = Math.sqrt(2 * h / G);
-  return { theme: 'Lancer horizontal', enonce: `<p>Une bille roule sur une table et la quitte avec une vitesse horizontale v<sub>0</sub> = ${fmt(v0)} ${MS}, d'une hauteur h = ${fmt(h)} m (g = 9,81 ${MS2}).</p>`,
-    parties: [fq.nombre('a) Durée de la chute (2 chiffres significatifs) :', 't<sub>chute</sub> =', tc, 's', { calc: true, rel: .02, cs: 2, signe: false,
-      diag: v => (Math.abs(v - Math.sqrt(h / G)) < .03 * tc ? 'y(t) = −½ g t² + h = 0 donne t² = 2h / g : il manque le 2.' : Math.abs(v - h / v0) < .03 * tc ? 'La vitesse horizontale ne change pas la durée de chute.' : 't<sub>chute</sub> = √(2h / g).'), solution: `<p>t<sub>chute</sub> = √(2 × ${fmt(h)} / 9,81) = ${cs(tc, 2)} s</p>` }),
-    fq.nombre('b) Distance du point de chute au pied de la table :', 'd =', v0 * tc, 'm', { calc: true, rel: .02, cs: 2, signe: false, diag: () => 'd = x(t<sub>chute</sub>) = v<sub>0</sub> t<sub>chute</sub>.', solution: `<p>d = ${fmt(v0)} × ${cs(tc, 2)} = ${cs(v0 * tc, 2)} m</p>` })] };
-}
-function sommet() {
-  const v0 = hasard([10, 12, 15, 20]), al = hasard([30, 45, 60]), h = hasard([0, 1.8, 2.0]), vy = v0 * Math.sin(rad(al)), ym = h + vy * vy / (2 * G);
-  return { theme: 'Altitude maximale', enonce: `<p>v<sub>0</sub> = ${fmt(v0)} ${MS}, α = ${al}°, h = ${fmt(h)} m, g = 9,81 ${MS2}.</p>`,
-    parties: [fq.choix('a) Au sommet de la trajectoire :', [o('ok', 'v<sub>y</sub> = 0'), o('vx', 'v<sub>x</sub> = 0'), o('v', 'v = 0'), o('y', 'y = 0')], 'ok', { melanger: false, colonne: false,
-      indices: { vx: 'v<sub>x</sub> reste égale à v<sub>0</sub> cos α.', v: 'La balle avance toujours : seul v<sub>y</sub> s\'annule.', y: 'y = 0 : retour au sol.' }, solution: '<p>Au sommet, ' + V('v') + ' est horizontal : v<sub>y</sub> = 0.</p>' }),
-    fq.nombre('b) Altitude maximale (2 chiffres significatifs) :', 'y<sub>max</sub> =', ym, 'm', { calc: true, rel: .02, cs: 2, signe: false,
-      diag: v => (Math.abs(v - (ym - h)) < .03 * ym ? 'N\'oublie pas la hauteur de départ h.' : 't<sub>S</sub> = v<sub>0</sub> sin α / g, puis y<sub>max</sub> = y(t<sub>S</sub>).'),
-      solution: `<p>t<sub>S</sub> = ${fmt(v0)} × sin ${al}° / 9,81 = ${cs(vy / G, 3)} s ; y<sub>max</sub> = y(t<sub>S</sub>) = ${cs(ym, 2)} m</p>` })] };
-}
-function portee() {
-  const v0 = hasard([10, 12, 14]), al = hasard([30, 40, 45]), h = hasard([1.5, 2.0]);
-  const vx = v0 * Math.cos(rad(al)), vy = v0 * Math.sin(rad(al)), tc = (vy + Math.sqrt(vy * vy + 2 * G * h)) / G;
-  return { theme: 'Point de chute', enonce: `<p>Un poids est lancé depuis h = ${fmt(h)} m, avec v<sub>0</sub> = ${v0} ${MS} et α = ${al}° (g = 9,81 ${MS2}).</p>`,
-    parties: [fq.nombre('a) Durée du vol, solution positive de y(t) = 0 (3 chiffres significatifs) :', 't<sub>chute</sub> =', tc, 's', { calc: true, rel: .01, cs: 3, signe: false,
-      diag: v => (Math.abs(v - 2 * vy / G) < .02 * tc ? 'Ce serait la date du retour à l\'altitude h : il faut y = 0.' : Math.abs(v - (vy - Math.sqrt(vy * vy + 2 * G * h)) / G) < .02 ? 'Racine négative : elle n\'a pas de sens physique.' : 'Discriminant Δ = (v<sub>0</sub> sin α)² + 2gh, puis t = (v<sub>0</sub> sin α + √Δ) / g.'),
-      solution: `<p>Δ = ${cs(vy * vy + 2 * G * h, 3)} ; t<sub>chute</sub> = (${cs(vy, 3)} + √Δ) / 9,81 = ${cs(tc, 3)} s</p>` }),
-    fq.nombre('b) Distance du lancer (2 chiffres significatifs) :', 'd =', vx * tc, 'm', { calc: true, rel: .02, cs: 2, signe: false, diag: () => 'd = (v<sub>0</sub> cos α) t<sub>chute</sub>.', solution: `<p>d = ${cs(vx, 3)} × ${cs(tc, 3)} = ${cs(vx * tc, 2)} m</p>` })] };
-}
-function trajectoire() {
-  return { theme: 'Équation de la trajectoire', parties: [fq.choix(`En éliminant t entre x(t) = (v<sub>0</sub> cos α) t et y(t) = −½ g ${t2} + (v<sub>0</sub> sin α) t + h, on obtient :`,
-    melanger([o('ok', `y = −${fr('g', '2(v<sub>0</sub> cos α)<sup>2</sup>')} x<sup>2</sup> + (tan α) x + h`), o('cos', `y = −${fr('g', '2v<sub>0</sub><sup>2</sup>')} x<sup>2</sup> + (tan α) x + h`), o('sin', `y = −${fr('g', '2(v<sub>0</sub> cos α)<sup>2</sup>')} x<sup>2</sup> + (sin α) x + h`), o('t', `y = −${fr('g', '2')} x<sup>2</sup> + (v<sub>0</sub> sin α) x + h`)]), 'ok',
-    { melanger: false, colonne: true, indices: { cos: 't = x / (v<sub>0</sub> cos α) : au carré, le cos α reste.', sin: 'v<sub>0</sub> sin α × x / (v<sub>0</sub> cos α) = (tan α) x.', t: 'Il faut remplacer t par x / (v<sub>0</sub> cos α), pas par x.' },
-      solution: '<p>t = x / (v<sub>0</sub> cos α), puis on remplace dans y(t) : c\'est une parabole.</p>' })] };
-}
-function lecture() {
-  const ts = hasard([0.4, 0.5, 0.6, 0.8]), vy0 = G * ts;
-  return { theme: 'Lecture de courbe', enonce: `<p>Courbe de v<sub>y</sub>(t) pour un tir oblique (axe y vers le haut).</p>${courbes({ tmax: 1.6, ymin: -10, ymax: 10, pasT: .2, pasY: 2, nomY: 'vy (m·s⁻¹)', series: [{ f: t => vy0 - G * t, coul: COUL.traj }], aria: 'v_y(t) est une droite décroissante qui coupe l\'axe des temps' })}`,
-    parties: [fq.nombre('a) Lis la date t<sub>S</sub> à laquelle la balle est au sommet de sa trajectoire :', 't<sub>S</sub> =', ts, 's', { tol: .05, signe: false, dec: 1,
-      diag: v => (Math.abs(v) < .01 ? 'À t = 0, la balle part : le sommet est atteint quand v<sub>y</sub> s\'annule.' : 'Au sommet, v<sub>y</sub> = 0 : la droite coupe l\'axe des temps.'), solution: `<p>v<sub>y</sub>(t<sub>S</sub>) = 0 pour t<sub>S</sub> = ${fmt(ts)} s.</p>` }),
-    fq.choix('b) Que vaut le coefficient directeur de la droite ?', [o('ok', `−g = −9,81 ${MS2}`), o('p', `+9,81 ${MS2}`), o('v0', `v<sub>0</sub> sin α = ${fmt(+vy0.toFixed(1))} ${MS}`)], 'ok', { melanger: false, indices: { p: 'La droite descend.', v0: 'C\'est l\'ordonnée à l\'origine, v<sub>y</sub>(0).' }, solution: '<p>v<sub>y</sub>(t) = −g t + v<sub>0</sub> sin α.</p>' })] };
-}
-function vitesseSol() {
-  const v0 = hasard([3.0, 5.0, 8.0]), h = hasard([5.0, 10, 20]), vy = Math.sqrt(2 * G * h), v = Math.hypot(v0, vy);
-  return { theme: 'Vitesse au sol', enonce: `<p>Une balle est lancée horizontalement à v<sub>0</sub> = ${fmt(v0)} ${MS} depuis h = ${fmt(h)} m (g = 9,81 ${MS2}). Au sol, v<sub>y</sub> = −g t<sub>chute</sub> = −${cs(vy, 3)} ${MS}.</p>`,
-    parties: [fq.nombre('Valeur de la vitesse au sol (2 chiffres significatifs) :', 'v =', v, MS, { calc: true, rel: .02, cs: 2, signe: false,
-      diag: x => (Math.abs(x - (v0 + vy)) < .02 * v ? 'Les coordonnées ne s\'additionnent pas : v = √(v<sub>x</sub>² + v<sub>y</sub>²).' : Math.abs(x - vy) < .02 * vy ? 'Il faut aussi v<sub>x</sub> = v<sub>0</sub> : v = √(v<sub>x</sub>² + v<sub>y</sub>²).' : 'v = √(v<sub>x</sub>² + v<sub>y</sub>²) avec v<sub>x</sub> = v<sub>0</sub>.'),
-      solution: `<p>v = √(${fmt(v0)}<sup>2</sup> + ${cs(vy, 3)}<sup>2</sup>) = ${cs(v, 2)} ${MS}</p>` })] };
-}
-function masse() {
-  return { theme: 'Influence de la masse', parties: [fq.choix('On lâche, sans vitesse initiale et sans frottements, une bille de 3 g et une boule de 5 kg de la même hauteur. Laquelle arrive au sol en premier ?', [o('ok', 'elles arrivent en même temps'), o('lourd', 'la boule de 5 kg'), o('leger', 'la bille de 3 g')], 'ok',
-    { melanger: false, colonne: true, indices: { lourd: `Le poids est plus grand, mais la masse aussi : ${V('a')} = ${V('g')} pour les deux.`, leger: 'Sans frottements, la masse ne joue aucun rôle.' }, solution: `<p>m ${V('a')} = m ${V('g')} donc ${V('a')} = ${V('g')} : même accélération, mêmes conditions initiales, même mouvement.</p>` })] };
-}
+const { melanger, hasard } = CU;
+const K = CU.coord;
+const THEMES = { axe: 'Vecteur porté par un axe', angleH: 'Angle repéré depuis l\'horizontale', angleV: 'Angle repéré depuis la verticale', incline: 'Repère incliné' };
+const litterale = type => { const s = K.gen(type); return { theme: THEMES[type], enonce: K.fig(s), parties: K.parties(s) }; };
+const numerique = () => { const s = K.gen(hasard(['angleH', 'angleV', 'incline'])), n = K.partiesNum(s); return { theme: 'Avec des valeurs', enonce: `${K.fig(s)}<p>${n.donnees}</p>`, parties: n.parties }; };
 
 CU.serie({
   app: document.getElementById('app'),
-  badge: 'MODULE 2 · QUESTIONS', titre: 'Chute libre dans un champ de pesanteur uniforme',
-  intro: '<p class="er-contexte">10 questions : équations horaires, coordonnées de la vitesse initiale, durée de chute, distance, altitude maximale, trajectoire, lecture de courbe. Garde ta calculatrice (en degrés) à portée de main.</p>',
-  questions: () => melanger([equation(), coords(), horizontal(), horizontal(), sommet(), portee(), trajectoire(), lecture(), vitesseSol(), masse()]),
-  revoir: { href: 'module_2a_cours.html', label: 'Revoir les cours' },
-  suite: { href: 'module_3a_cours.html', label: 'Module 3 : particule chargée →' },
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Coordonnées d\'un vecteur',
+  intro: '<p class="er-contexte">10 questions : écrire les coordonnées d\'un vecteur dans des repères variés (axes x et y ou x et z, orientés dans un sens ou dans l\'autre, inclinés).</p>',
+  questions: () => melanger([litterale('axe'), litterale('axe'), litterale('angleH'), litterale('angleH'), litterale('angleV'), litterale('angleV'), litterale('incline'), litterale('incline'), numerique(), numerique()]),
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : chute libre →' },
 });
 CU.menu('module_2_questions');
 </script>

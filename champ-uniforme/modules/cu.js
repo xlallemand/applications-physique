@@ -18,7 +18,12 @@
    CU.V(n, s)                 nom de vecteur (flèche au-dessus), indice hors de la flèche
    CU.col(a, b)               coordonnées en colonne
    CU.sys(l1, l2, …)          système avec une accolade à sa hauteur
-   CU.fr(h, b), CU.rac(x)     fraction sur deux étages, racine carrée
+   CU.fr(h, b), CU.rac(x)     fraction sur deux étages, racine carrée (signe relié à la barre)
+   CU.newton(sys, F, a, proj) phrase de la seconde loi de Newton (toujours la même)
+   CU.integ(quoi, prim, cst, res)  intégration rédigée comme la correction de l'ex. 1 (trois systèmes)
+   CU.ci(o), CU.figCI(fig, c) conditions initiales, à côté du schéma de la situation
+   CU.etapeM(n, titre, html)  étape numérotée de la méthode de résolution
+   CU.trad(lieu, eq), CU.aide6(lieu, eq)  étape 6 : traduire la question (cours ; indices)
    CU.CALC                    icône calculatrice (après l'unité d'un champ)
    CU.MS, CU.MS2, CU.VM       unités m·s⁻¹, m·s⁻², V·m⁻¹
    CU.E_CH, CU.M_P, CU.M_E    charge élémentaire, masses du proton et de l'électron
@@ -571,7 +576,37 @@
   const ACC = '<span class="cu-acc" aria-hidden="true"><svg viewBox="0 0 10 8"><path d="M10,1 Q5,1 5,8"/></svg><i></i>' +
     '<svg viewBox="0 0 10 14"><path d="M5,0 Q5,7 0,7 Q5,7 5,14"/></svg><i></i><svg viewBox="0 0 10 8"><path d="M5,0 Q5,7 10,7"/></svg></span>';
   const sys = (...l) => `<span class="cu-sys">${ACC}<span class="cu-sys-l">${l.map(x => `<span>${x}</span>`).join('')}</span></span>`;
-  const rac = x => `<span class="racine">√<span>${x}</span></span>`;
+  // racine carrée écrite avec sa barre : le signe (SVG étiré) prend la hauteur du contenu (une fraction
+  // comprise) et rejoint la barre posée juste au-dessus du contenu (même dessin que energie-cinetique)
+  const rac = x => '<span class="racine"><span class="racine-signe"><span class="racine-lu">√</span>' +
+    '<svg viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0,62 L2.6,55 L5.6,99 L10,0" vector-effect="non-scaling-stroke"/></svg></span>' +
+    `<span class="racine-sous">${x}</span></span>`;
+
+  /* ---------- rédaction des résolutions (cours, fiches, corrections) ---------- */
+  // seconde loi de Newton, toujours la même phrase : newton('la balle', 'm g⃗', 'g⃗', ['a<sub>x</sub>(t) = 0', 'a<sub>y</sub>(t) = −g'])
+  const newton = (systeme, forces, a, proj) => `Dans le référentiel terrestre supposé galiléen, pour ${systeme} de masse constante, d'après la seconde loi de Newton, <span class="cu-nobr">m ${V('a')} = Σ ${V('F', 'ext')}</span>` +
+    (forces ? ` = ${forces}` : '') + (a ? ` donc ${V('a')} = ${a}` : '') + (proj ? `, soit en projetant sur les axes : ${sys(...proj)}` : '.');
+  // une intégration rédigée comme dans la correction de l'exercice 1 : primitives, « avec, à t = 0, » constantes, « soit » résultat
+  // quoi : 'v' (on intègre l'accélération) ou 'p' (on intègre la vitesse)
+  const integ = (quoi, prim, cst, res) => `<div class="cu-integ"><p>En intégrant ${quoi === 'v' ? 'l\'accélération, on obtient la vitesse' : 'la vitesse, on obtient la position'} :</p>` +
+    `<div class="cu-integ-l">${S1(prim)}<span class="cu-integ-m">avec, à t = 0,</span>${S1(cst)}<span class="cu-integ-m">soit</span>${S1(res)}</div></div>`;
+  const S1 = l => (l.length > 1 ? sys(...l) : `<span>${l[0]}</span>`);   // une seule coordonnée : pas d'accolade
+  // conditions initiales, à placer à côté du schéma : ci({ v: ['v<sub>0</sub> cos α', 'v<sub>0</sub> sin α'], p: ['0', 'h'], ax: ['x', 'y'], vNom })
+  const ci = o => {
+    const ax = o.ax || ['x', 'y'], nul = o.v.every(x => x === '0');
+    if (ax.length === 1) return `<div class="cu-ci"><p class="cu-ci-t">Conditions initiales (t = 0)</p><p>v<sub>${ax[0]}</sub>(0) = ${o.v[0]}</p><p>${ax[0]}(0) = ${o.p[0]}</p></div>`;
+    return `<div class="cu-ci"><p class="cu-ci-t">Conditions initiales (t = 0)</p>` +
+      `<p>${V('v')}(0) = ${nul ? V('0') : (o.vNom || V('v', '0'))} ${col(`v<sub>${ax[0]}</sub>(0) = ${o.v[0]}`, `v<sub>${ax[1]}</sub>(0) = ${o.v[1]}`)}</p>` +
+      `<p>${V('OM')}(0) ${col(`${ax[0]}(0) = ${o.p[0]}`, `${ax[1]}(0) = ${o.p[1]}`)}</p></div>`;
+  };
+  // schéma de la situation et conditions initiales côte à côte
+  const figCI = (fig, c) => `<div class="cu-fig-ci">${fig}${c}</div>`;
+  // une étape de la méthode de résolution, numérotée (n de 1 à 6)
+  const etapeM = (n, titre, html) => `<div class="cu-me"><span class="cu-me-n">${n}</span><p class="cu-me-t">${titre}</p><div class="cu-me-c">${html}</div></div>`;
+  // étape 6 : le point du schéma et sa traduction dans une équation établie
+  const trad = (lieu, eq) => `<p class="cu-trad"><span class="cu-trad-l">${lieu}</span><span class="cu-trad-f" aria-hidden="true">→</span><span class="cu-trad-e">${eq}</span></p>`;
+  // aide (indice) de l'étape 6, dans les questions et les exercices
+  const aide6 = (lieu, eq) => `Regarde sur le schéma où se trouve ${lieu}, puis traduis-le dans l'une des équations établies (vitesse ou position) : ${eq}.`;
   const MS = 'm·s<sup>−1</sup>', MS2 = 'm·s<sup>−2</sup>', VM = 'V·m<sup>−1</sup>';
   // constantes (valeurs du cours et des exercices)
   const E_CH = 1.60e-19, M_P = 1.67e-27, M_E = 9.11e-31;
@@ -650,7 +685,7 @@
   /* ---------- Condensateur plan horizontal ----------
      o = { haut: '+' ou '−' (signe de l'armature du haut), E (true : flèches de E⃗), U (true : flèche de U),
            q: 1 | −1 | 0 (particule entrant en O), ang (angle de v⃗₀, degrés), traj (true), a (true : a⃗ ou F⃗ dessinée),
-           nomA, nomB (noms des armatures), W, H, aria } */
+           nomA, nomB (noms des armatures), axes (repère x, z d'origine O), W, H, aria } */
   function condo(o) {
     o = Object.assign({ haut: '+', E: true, U: true, q: 0, ang: 0, traj: true, W: 340, H: 170 }, o);
     const yh = 28, yb = o.H - 28, x0 = 40, x1 = o.W - 50, ym = (yh + yb) / 2, haut = o.haut === '+';
@@ -672,6 +707,9 @@
       c += fl(xu, ym - (yb - yh) / 2 * d + 4 * d, xu, ym + (yb - yh) / 2 * d - 4 * d, ENCRE, { ep: 1.6, lt: 8 }) + txt(xu + 6, ym + 4, 'U', { g: 800, c: ENCRE, t: 13 });
     }
     // particule entrant en O, vecteur vitesse initiale, trajectoire parabolique
+    // repère (o.axes) : axe x parallèle aux armatures, axe z vers le haut, origine O au point d'entrée
+    if (o.axes) c += fl(x0, ym, x1 + 36, ym, ENCRE3, { ep: 1.1, lt: 7 }) + txt(x1 + 34, ym + 14, 'x', { g: 800, c: ENCRE, t: 12, a: 'end' }) +
+      fl(x0, ym, x0, yh + 10, ENCRE3, { ep: 1.1, lt: 7 }) + txt(x0 - 6, yh + 20, 'z', { g: 800, c: ENCRE, t: 12, a: 'end' });
     if (o.q) {
       c += txt(x0 - 6, ym + 4, 'O', { g: 800, c: ENCRE, t: 12, a: 'end' });
       const ar = o.ang * Math.PI / 180, bas = (o.q > 0) === haut;           // accélération vers le bas ?
@@ -777,29 +815,31 @@
   const PLAN = [
     { n: 1, titre: 'De l\'accélération à la position', desc: 'Intégrer : primitives, constantes fixées par les conditions initiales, les six étapes de résolution', fiche: 'fiche_1',
       parties: [{ nom: 'De l\'accélération à la position', cours: 'module_1_cours', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Chute libre dans un champ de pesanteur uniforme', desc: 'Équations horaires, mouvement plan, trajectoire parabolique, durée de chute, portée, altitude maximale', fiche: 'fiche_2',
+    { n: 2, titre: 'Coordonnées d\'un vecteur', desc: 'Projeter un vecteur sur les axes d\'un repère : axes x, y ou z, sens des axes, angle repéré par rapport à l\'horizontale ou à la verticale', fiche: 'fiche_2',
+      parties: [{ nom: 'Coordonnées d\'un vecteur', cours: 'module_2_cours', questions: 'module_2_questions' }] },
+    { n: 3, titre: 'Chute libre dans un champ de pesanteur uniforme', desc: 'Équations horaires, mouvement plan, trajectoire parabolique, durée de chute, portée, altitude maximale', fiche: 'fiche_3',
       sousModules: true,
       parties: [
-        { nom: 'Chute sans vitesse initiale', slug: 'sans-vitesse', cours: 'module_2a_cours', noms: { cours: 'Cours : chute sans vitesse initiale' } },
-        { nom: 'Vitesse initiale horizontale', slug: 'horizontale', cours: 'module_2b_cours', noms: { cours: 'Cours : vitesse initiale horizontale' } },
-        { nom: 'Vitesse initiale quelconque', slug: 'quelconque', cours: 'module_2c_cours', noms: { cours: 'Cours : vitesse initiale quelconque' } },
-        { nom: 'Exploiter les équations', slug: 'exploiter', cours: 'module_2d_cours', noms: { cours: 'Cours : exploiter les équations' } },
-        { nom: 'Chute libre', simulation: 'module_2_simulation', questions: 'module_2_questions', noms: { simulation: 'Simulateur : tir dans le champ de pesanteur' } }] },
-    { n: 3, titre: 'Particule chargée dans un champ électrique uniforme', desc: 'Condensateur plan, E = U / L, force q<span class="vec-nom">E</span>, poids négligeable, équations du mouvement, déviation', fiche: 'fiche_3',
+        { nom: 'Chute sans vitesse initiale', slug: 'sans-vitesse', cours: 'module_3a_cours', noms: { cours: 'Cours : chute sans vitesse initiale' } },
+        { nom: 'Vitesse initiale horizontale', slug: 'horizontale', cours: 'module_3b_cours', noms: { cours: 'Cours : vitesse initiale horizontale' } },
+        { nom: 'Vitesse initiale quelconque', slug: 'quelconque', cours: 'module_3c_cours', noms: { cours: 'Cours : vitesse initiale quelconque' } },
+        { nom: 'Exploiter les équations', slug: 'exploiter', cours: 'module_3d_cours', noms: { cours: 'Cours : exploiter les équations' } },
+        { nom: 'Chute libre', simulation: 'module_3_simulation', questions: 'module_3_questions', noms: { simulation: 'Simulateur : tir dans le champ de pesanteur' } }] },
+    { n: 4, titre: 'Particule chargée dans un champ électrique uniforme', desc: 'Condensateur plan, E = U / L, force q<span class="vec-nom">E</span>, poids négligeable, équations du mouvement, déviation', fiche: 'fiche_4',
       sousModules: true,
       parties: [
-        { nom: 'Champ électrique et condensateur plan', slug: 'condensateur', cours: 'module_3a_cours', noms: { cours: 'Cours : champ électrique et condensateur plan' } },
-        { nom: 'Poids et force électrique', slug: 'poids', cours: 'module_3b_cours', noms: { cours: 'Cours : poids et force électrique' } },
-        { nom: 'Équations du mouvement', slug: 'equations', cours: 'module_3c_cours', noms: { cours: 'Cours : équations du mouvement' } },
-        { nom: 'Déviation d\'une particule', slug: 'deviation', cours: 'module_3d_cours', noms: { cours: 'Cours : déviation d\'une particule' } },
-        { nom: 'Particule chargée', simulation: 'module_3_simulation', questions: 'module_3_questions', noms: { simulation: 'Simulateur : déviation dans un condensateur' } }] },
-    { n: 4, titre: 'Accélérateurs de particules', desc: 'Vitesse de sortie v = √(2qU / m), succession de condensateurs et inversion de polarité, applications', fiche: 'fiche_4',
+        { nom: 'Champ électrique et condensateur plan', slug: 'condensateur', cours: 'module_4a_cours', noms: { cours: 'Cours : champ électrique et condensateur plan' } },
+        { nom: 'Poids et force électrique', slug: 'poids', cours: 'module_4b_cours', noms: { cours: 'Cours : poids et force électrique' } },
+        { nom: 'Équations du mouvement', slug: 'equations', cours: 'module_4c_cours', noms: { cours: 'Cours : équations du mouvement' } },
+        { nom: 'Déviation d\'une particule', slug: 'deviation', cours: 'module_4d_cours', noms: { cours: 'Cours : déviation d\'une particule' } },
+        { nom: 'Particule chargée', simulation: 'module_4_simulation', questions: 'module_4_questions', noms: { simulation: 'Simulateur : déviation dans un condensateur' } }] },
+    { n: 5, titre: 'Accélérateurs de particules', desc: 'Vitesse de sortie d\'un condensateur (la méthode), succession de condensateurs et inversion de polarité, applications', fiche: 'fiche_5',
       sousModules: true,
       parties: [
-        { nom: 'Accélération dans un condensateur', slug: 'acceleration', cours: 'module_4a_cours', noms: { cours: 'Cours : accélération dans un condensateur' } },
-        { nom: 'Accélérateur linéaire et applications', slug: 'pratique', cours: 'module_4b_cours', noms: { cours: 'Cours : accélérateur linéaire et applications' } },
-        { nom: 'Accélérateurs', simulation: 'module_4_simulation', questions: 'module_4_questions', noms: { simulation: 'Animation : accélérateur linéaire' } }] },
-    { n: 5, titre: 'Exercices', desc: 'Les exercices 1 à 16 de la feuille (avec 1 bis et 2 bis), guidés pas à pas', exercices: 'module_5', exNom: 'Exercices 1 à 16', nbEx: 18 },
+        { nom: 'Accélération dans un condensateur', slug: 'acceleration', cours: 'module_5a_cours', noms: { cours: 'Cours : accélération dans un condensateur' } },
+        { nom: 'Accélérateur linéaire et applications', slug: 'pratique', cours: 'module_5b_cours', noms: { cours: 'Cours : accélérateur linéaire et applications' } },
+        { nom: 'Accélérateurs', simulation: 'module_5_simulation', questions: 'module_5_questions', noms: { simulation: 'Animation : accélérateur linéaire' } }] },
+    { n: 6, titre: 'Exercices', desc: 'Les exercices 1 à 16 de la feuille (avec 1 bis et 2 bis), guidés pas à pas', exercices: 'module_6', exNom: 'Exercices 1 à 16', nbEx: 18 },
   ];
   window.SOM.init({ nom: 'Mouvement dans un champ uniforme', id: 'champ-uniforme', cleEx: 'champ-uniforme-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
@@ -808,7 +848,7 @@
   window.CU = Object.assign(window.CU || {}, {
     MOINS, fmt, cs, sci, lire, proche, fr, unite, o, fq, el, secouer, melanger, hasard, entre, champ, PARTIES, boutonValider, CALC,
     question, serie, confettis, fig, monter, outil, cap,
-    V, NUL, col, sys, rac, MS, MS2, VM, E_CH, M_P, M_E,
+    V, NUL, col, sys, rac, newton, integ, ci, figCI, etapeM, trad, aide6, MS, MS2, VM, E_CH, M_P, M_E,
     ENCRE, ENCRE2, ENCRE3, COUL, fl, nom, txt, svg, figTir, condo, courbes, partieConstante,
     PLAN, menu, accueil,
   });

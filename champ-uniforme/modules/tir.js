@@ -1,5 +1,5 @@
 /* ============================================================
-   Simulateur « tir dans le champ de pesanteur » (module 2, page sur un écran)
+   Simulateur « tir dans le champ de pesanteur » (module 3, page sur un écran)
 
    CU.simTir(zone) : v₀, α, h, g (Terre, Lune, Mars, comète 67P) et l'objet
    lancé se règlent à tout moment ; la trajectoire (parabole) est recalculée
@@ -30,7 +30,7 @@
   function simTir(zone) {
     const st = { v0: 8, al: 50, h: 2, astre: 'terre', objet: 'bille', cible: 'panier', t: 0, joue: false, vit: 1, plusieurs: false, courbe: 'y', lances: [] };
     const c = CU.cadre(zone, {
-      badge: 'MODULE 2 · SIMULATEUR', titre: 'Tir dans le champ de pesanteur',
+      badge: 'MODULE 3 · SIMULATEUR', titre: 'Tir dans le champ de pesanteur',
       bande: '<div class="cu-eqs" data-a="eqs"></div>',
       bas: `<div class="cu-anim-ctrl"><button type="button" class="btn-primary cu-lire" data-a="lire">▶ Lancer</button><button type="button" class="btn-secondary" data-a="pas">Pas à pas</button>
           <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>

@@ -3,14 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 : poids et force électrique — Mouvement dans un champ uniforme</title>
+<title>Module 3 : vitesse initiale horizontale — Mouvement dans un champ uniforme</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/equations.css">
 <link rel="stylesheet" href="cu.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
 <script src="cu.js"></script>
+<script src="../../assets/equations.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
 <body>
@@ -18,8 +21,8 @@
 <div class="er-page">
   <div class="er-card">
     <span class="er-badge">MODULE 3 · COURS 2 / 4</span>
-    <h2 class="er-titre">Poids et force électrique</h2>
-    <p class="er-contexte">Pour une particule chargée (proton, électron), on compare le <b>poids</b> et la <b>force électrique</b> : le poids est <b>négligeable</b>.</p>
+    <h2 class="er-titre">Vitesse initiale horizontale</h2>
+    <p class="er-contexte">La balle est maintenant <b>lancée horizontalement</b> : il faut deux axes. On établit les <b>équations horaires</b>, on montre que le mouvement est <b>plan</b>, puis on élimine t pour obtenir la <b>trajectoire</b>, une parabole.</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -27,45 +30,116 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
-   1. Comparaison pour un proton dans E = 1 V·m⁻¹ (exemple du cours),
-      rapport F / P, conclusion : poids négligeable
+   1. Étapes 1 à 5 rédigées comme la correction de l'exercice 1
+      (v₀ = 5,0 m·s⁻¹ horizontale, h = 2,0 m), mouvement plan
+   2. Équation de la trajectoire (éliminer t : éditeur EQ) ; étape 6 :
+      le sol (y = 0) donne la durée de chute, puis la distance d
+   3. Les courbes vₓ(t), v_y(t), x(t), y(t) commentées
    ============================================================ */
-const { exemple, hasard } = COURS;
-const { V, fmt, sci, fr, VM, CALC, E_CH, M_P, M_E } = CU;
+const { exemple, hasard, melanger } = COURS;
+const { V, fmt, cs, sys, fr, rac, col, MS, MS2, CALC, figTir, courbes, COUL, newton, integ, ci, figCI, etapeM, trad, aide6 } = CU;
 const o = (id, label) => ({ id, label });
+const t2 = 't<sup>2</sup>';
 const G = 9.81;
 
+/* ---------- 1. Étapes 1 à 5, mouvement plan ---------- */
 function etape1(c) {
-  const carte = c.carte('1. Comparer le poids et la force électrique');
+  const carte = c.carte('1. Équations horaires et mouvement plan');
   c.ajouter(carte, `<div class="cours-bloc">
-      <p>On calcule les deux valeurs, puis leur <b>rapport</b> : si une force est plus de 100 fois plus faible que l'autre, on peut la négliger.</p>
-      <div class="cle"><p>Pour une particule chargée (proton, électron, ion) dans un condensateur, même avec un champ faible, la force électrique est des milliards de fois plus grande que le poids : <b>on néglige le poids</b>. Le système n'est alors soumis qu'à ${V('F', 'él')} = q ${V('E')}.</p></div>
+      <p>À t = 0, une balle est lancée d'une hauteur h avec une vitesse ${V('v', '0')} <b>horizontale</b>.</p>
+      ${etapeM(1, 'Schéma de la situation, repère et conditions initiales', `<p>Axe x horizontal dans le sens de ${V('v', '0')}, axe y vertical vers le haut, origine O au sol sous le point de lancer. ${V('v', '0')} est horizontal : il n'a de coordonnée que sur l'axe x.</p>
+        ${figCI(figTir({ h: 2, v0: 5, alpha: 0, aria: 'Balle lancée horizontalement depuis la hauteur h : trajectoire courbée vers le bas' }), ci({ v: ['v<sub>0</sub>', '0'], p: ['0', 'h'] }))}`)}
+      ${etapeM(2, 'Bilan des forces', `<p>La balle n'est soumise qu'à son poids, donc Σ ${V('F', 'ext')} = ${V('P')} = m ${V('g')}.</p>`)}
+      ${etapeM(3, 'Seconde loi de Newton', `<p>${newton('la balle', `m ${V('g')}`, V('g'), ['a<sub>x</sub>(t) = 0', 'a<sub>y</sub>(t) = −g'])}</p>`)}
+      ${etapeM(4, 'Vitesse', integ('v', ['v<sub>x</sub>(t) = C<sub>1</sub>', 'v<sub>y</sub>(t) = −g t + C<sub>2</sub>'], ['C<sub>1</sub> = v<sub>x</sub>(0) = v<sub>0</sub>', 'C<sub>2</sub> = v<sub>y</sub>(0) = 0'], ['v<sub>x</sub>(t) = v<sub>0</sub>', 'v<sub>y</sub>(t) = −g t']))}
+      ${etapeM(5, 'Position', integ('p', ['x(t) = v<sub>0</sub> t + C<sub>3</sub>', `y(t) = −${fr('1', '2')} g ${t2} + C<sub>4</sub>`], ['C<sub>3</sub> = x(0) = 0', 'C<sub>4</sub> = y(0) = h'], ['x(t) = v<sub>0</sub> t', `y(t) = −${fr('1', '2')} g ${t2} + h`]))}
+      <div class="cle"><p><b class="cle-titre">Mouvement plan.</b> Sur le troisième axe (horizontal, perpendiculaire à ${V('v', '0')}), a<sub>z</sub> = 0, v<sub>z</sub>(0) = 0 et z(0) = 0 donnent z(t) = 0 : le mouvement reste dans le plan vertical défini par ${V('g')} et ${V('v', '0')}.</p></div>
     </div>
-    ${exemple(`<p>Proton (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg, q = e = 1,60 × 10<sup>−19</sup> C) dans un champ E = 1 ${VM}, g = 9,81 N·kg<sup>−1</sup> :</p>
-      <p class="crs-calc">P = m<sub>p</sub> g = 1,67 × 10<sup>−27</sup> × 9,81 = 1,64 × 10<sup>−26</sup> N &nbsp;;&nbsp; F<sub>él</sub> = e E = 1,60 × 10<sup>−19</sup> × 1 = 1,60 × 10<sup>−19</sup> N</p>
-      <p class="crs-calc">${fr('F<sub>él</sub>', 'P')} = ${fr('1,60 × 10<sup>−19</sup>', '1,64 × 10<sup>−26</sup>')} ≈ <span class="c">1 × 10<sup>7</sup></span> : le poids est dix millions de fois plus faible, il est négligeable.</p>`)}`);
-  const E = hasard([1.0e3, 1.0e4, 5.0e4]), P = M_E * G, F = E_CH * E;
+    ${exemple(`<p>v<sub>0</sub> = 5,0 ${MS}, h = 2,0 m : x(t) = 5,0 t et y(t) = −4,905 ${t2} + 2,0. À t = 0,20 s :</p>
+      <p class="crs-calc">x = 5,0 × 0,20 = <span class="c">1,0 m</span> ; y = −4,905 × 0,20<sup>2</sup> + 2,0 = <span class="c">1,8 m</span></p>`)}`);
+  const v0 = hasard([3.0, 4.0, 6.0, 8.0]), t = hasard([0.1, 0.2, 0.3]);
   c.aToi(carte, [
-    { titre: 'Le poids d\'un électron', parties: [{ type: 'sci', q: `Masse d'un électron : m<sub>e</sub> = 9,11 × 10<sup>−31</sup> kg. Valeur de son poids (3 chiffres significatifs) :`, label: 'P =', valeur: P, cs: 3, rel: .01, unite: 'N' + CALC,
-      diag: () => 'P = m<sub>e</sub> × g.', solution: `<p>P = 9,11 × 10<sup>−31</sup> × 9,81 = ${sci(P, 3)} N</p>` }] },
-    { titre: 'La force électrique', parties: [{ type: 'sci', q: `Cet électron est dans un champ E = ${sci(E, 2)} ${VM}. Valeur de la force électrique (3 chiffres significatifs) :`, label: 'F<sub>él</sub> =', valeur: F, cs: 3, rel: .01, unite: 'N' + CALC,
-      diag: () => 'F<sub>él</sub> = e × E (valeur : on prend e, positif).', solution: `<p>F<sub>él</sub> = 1,60 × 10<sup>−19</sup> × ${sci(E, 2)} = ${sci(F, 3)} N</p>` }] },
-    { titre: 'Conclure', parties: [{ type: 'choix', q: `Le rapport F<sub>él</sub> / P vaut environ ${sci(F / P, 1)}. Que conclure ?`, colonne: true, melanger: false,
-      options: [o('ok', 'Le poids est négligeable devant la force électrique.'), o('f', 'La force électrique est négligeable devant le poids.'), o('c', 'Les deux forces se compensent.')], bonne: 'ok',
-      indices: { f: 'C\'est l\'inverse : F<sub>él</sub> est bien plus grande.', c: 'Elles n\'ont pas la même valeur.' }, solution: '<p>F<sub>él</sub> est des milliards de fois plus grande que P : on néglige le poids.</p>' }] },
+    { titre: 'Conditions initiales', parties: [{ type: 'choix', q: `Balle lancée horizontalement à v<sub>0</sub> depuis la hauteur h (axe x dans le sens de ${V('v', '0')}, axe y vers le haut, origine au sol). Coordonnées de ${V('v')}(0) :`, colonne: false, melanger: false,
+      options: [o('ok', col('v<sub>x</sub>(0) = v<sub>0</sub>', 'v<sub>y</sub>(0) = 0')), o('inv', col('v<sub>x</sub>(0) = 0', 'v<sub>y</sub>(0) = v<sub>0</sub>')), o('h', col('v<sub>x</sub>(0) = v<sub>0</sub>', 'v<sub>y</sub>(0) = h'))], bonne: 'ok',
+      indices: { inv: V('v', '0') + ' est horizontal : il est porté par l\'axe x.', h: 'h est une position (y(0) = h), pas une vitesse.' },
+      solution: `<p>${V('v', '0')} est horizontal, dans le sens de l'axe x : v<sub>x</sub>(0) = v<sub>0</sub> et v<sub>y</sub>(0) = 0.</p>` }] },
+    { titre: 'Sur l\'axe horizontal', parties: [{ type: 'choix', q: 'Comment évolue v<sub>x</sub> au cours de la chute ?', colonne: true, melanger: false,
+      options: [o('ok', 'Elle reste égale à v<sub>0</sub> : aucune force horizontale.'), o('dim', 'Elle diminue, à cause du poids.'), o('z', 'Elle est nulle.')], bonne: 'ok',
+      indices: { dim: 'Le poids est vertical : il ne modifie que v<sub>y</sub>.', z: 'v<sub>x</sub>(0) = v<sub>0</sub> et a<sub>x</sub> = 0.' },
+      solution: '<p>a<sub>x</sub> = 0 donc v<sub>x</sub> est constante : v<sub>x</sub> = v<sub>0</sub>. Le mouvement horizontal est uniforme.</p>' }] },
+    { titre: 'Une position', enonce: `<p>Balle lancée horizontalement à v<sub>0</sub> = ${fmt(v0)} ${MS} depuis h = 2,0 m.</p>`,
+      parties: [{ type: 'champs', ligne: true, q: `Position à t = ${fmt(t)} s (2 chiffres significatifs) :`, champs: [{ label: 'x =', valeur: v0 * t, rel: .02, unite: 'm' }, { label: 'y =', valeur: 2 - G * t * t / 2, rel: .02, unite: 'm' + CALC }],
+        diag: v => (Math.abs(v[1] - (2 - G * t * t)) < .02 ? 'y(t) = −½ g t² + h : il manque le ½.' : 'x = v<sub>0</sub> t et y = −½ g t² + h.'),
+        solution: `<p>x = ${fmt(v0)} × ${fmt(t)} = ${cs(v0 * t, 2)} m ; y = −4,905 × ${fmt(t)}<sup>2</sup> + 2,0 = ${cs(2 - G * t * t / 2, 2)} m</p>` }] },
   ]);
   return carte;
 }
 
-function aRetenir(c) {
-  const carte = c.carte('À retenir');
-  c.ajouter(carte, `<div class="cle"><p>Pour une particule chargée dans un champ électrique, le poids est négligeable devant la force électrique : on calcule F<sub>él</sub> / P pour le justifier.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3c_cours.html">Cours : équations du mouvement →</a>
-      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#poids">Fiche récapitulative</a></div>`);
+/* ---------- 2. Trajectoire ; étape 6 : durée de chute, distance ---------- */
+const GE = { x: 'x', v: 'v<sub>0</sub>', t: 't' };
+function etape2(c) {
+  const carte = c.carte('2. Trajectoire, durée de chute et distance');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p><b>Équation de la trajectoire</b> y(x) : on <b>élimine t</b> entre x(t) et y(t).</p>
+      <p class="crs-calc">x = v<sub>0</sub> t ⟺ t = ${fr('x', 'v<sub>0</sub>')}, que l'on remplace dans y(t) : y = −${fr('1', '2')} g ${fr('x<sup>2</sup>', 'v<sub>0</sub><sup>2</sup>')} + h = −${fr('g', '2v<sub>0</sub><sup>2</sup>')} x<sup>2</sup> + h</p>
+      <p>C'est l'équation d'une <b>parabole</b>.</p>
+      ${etapeM(6, 'Traduire la question', `${trad('Point de chute C : la balle touche le sol (y = 0 sur le schéma)', 'y(t<sub>chute</sub>) = 0')}
+        <p class="crs-calc">−${fr('1', '2')} g t<sub>chute</sub><sup>2</sup> + h = 0 ⟺ t<sub>chute</sub> = ${rac(fr('2h', 'g'))}</p>
+        ${trad('Distance d du point de chute : abscisse de C', 'd = x(t<sub>chute</sub>) = v<sub>0</sub> t<sub>chute</sub>')}`)}
+    </div>
+    ${exemple(`<p class="crs-calc">v<sub>0</sub> = 5,0 ${MS}, h = 2,0 m : t<sub>chute</sub> = ${rac(fr('2 × 2,0', '9,81'))} = 0,64 s &nbsp;;&nbsp; d = 5,0 × 0,64 = <span class="c">3,2 m</span></p>`)}`);
+  const v0 = hasard([3.0, 6.0, 8.0]), h = hasard([1.2, 5.0, 20]), tc = Math.sqrt(2 * h / G);
+  c.aToi(carte, [
+    { titre: 'Éliminer t', enonce: '<p class="er-consigne">Isole t dans x = v<sub>0</sub> t (glisse v<sub>0</sub> de l\'autre côté), puis « Vérifier l\'étape ».</p>',
+      parties: [EQ.partie(EQ.exercice({ eq: 'x = v t', g: GE, cible: 't', valeurs: () => { const v = 1 + Math.random() * 20, t = Math.random() * 5 + .2; return { v, t, x: v * t }; } }), { solution: `<p>t = ${fr('x', 'v<sub>0</sub>')}</p>` })] },
+    { titre: 'La distance', enonce: `<p>Une bille est lancée horizontalement à v<sub>0</sub> = ${fmt(v0)} ${MS} depuis une hauteur h = ${fmt(h)} m.</p>`,
+      parties: [{ type: 'nombre', q: 'Durée de la chute (2 chiffres significatifs) :', label: 't<sub>chute</sub> =', valeur: tc, rel: .02, unite: 's' + CALC, signe: false,
+        diag: v => (Math.abs(v - Math.sqrt(h / G)) < .02 * tc ? 'Repars de y(t<sub>chute</sub>) = 0 : −½ g t² + h = 0 donne t² = 2h / g.' : aide6('le point de chute', 'le sol est à y = 0, donc y(t<sub>chute</sub>) = 0')),
+        solution: `<p class="crs-calc">y(t<sub>chute</sub>) = 0 ⟺ t<sub>chute</sub> = ${rac(fr(`2 × ${fmt(h)}`, '9,81'))} = ${cs(tc, 2)} s</p>` },
+      { type: 'nombre', q: 'Distance d du point de chute (2 chiffres significatifs) :', label: 'd =', valeur: v0 * tc, rel: .02, unite: 'm' + CALC, signe: false,
+        diag: () => aide6('le point de chute', 'd est son abscisse, d = x(t<sub>chute</sub>) = v<sub>0</sub> t<sub>chute</sub>'), solution: `<p>d = x(t<sub>chute</sub>) = ${fmt(v0)} × ${cs(tc, 2)} = ${cs(v0 * tc, 2)} m</p>` }] },
+  ]);
   return carte;
 }
 
-new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+/* ---------- 3. Les courbes ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Les courbes de la vitesse et de la position');
+  const tc = Math.sqrt(4 / G);
+  const gp = courbes({ tmax: .64, ymin: 0, ymax: 4, pasT: .1, pasY: 1, nomY: 'distances (m)', series: [{ f: t => 5 * t, coul: COUL.v, nom: 'x(t) : droite', tNom: .5 }, { f: t => 2 - G * t * t / 2, coul: COUL.traj, nom: 'y(t) : parabole', tNom: .05 }], aria: 'x(t) est une droite passant par l\'origine, y(t) une parabole qui part de 2 m et décroît jusqu\'à 0 à t = 0,64 s' });
+  const gv = courbes({ tmax: .64, ymin: -7, ymax: 6, pasT: .1, pasY: 2, nomY: "vitesses (m·s⁻¹)", series: [{ f: () => 5, coul: COUL.v, nom: 'v<tspan dy="3" font-size="8">x</tspan><tspan dy="-3">(t) : constante</tspan>', tNom: .3 }, { f: t => -G * t, coul: COUL.traj, nom: 'v<tspan dy="3" font-size="8">y</tspan><tspan dy="-3">(t) : droite décroissante</tspan>', tNom: .3 }], aria: 'vx(t) est constante égale à 5, vy(t) est une droite qui décroît à partir de 0' });
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Avec v<sub>0</sub> = 5,0 ${MS} et h = 2,0 m, jusqu'au sol (t<sub>chute</sub> = 0,64 s) :</p>
+      <div class="cu-figs2">${gp}${gv}</div>
+      <div class="cle"><p>x(t) = v<sub>0</sub> t est une <b>droite</b> passant par l'origine ; y(t) est une <b>parabole</b> ; v<sub>x</sub> est <b>constante</b> ; v<sub>y</sub>(t) = −g t est une droite décroissante de coefficient directeur −g.</p></div>
+    </div>`);
+  const ordre = hasard([0, 1, 2, 3]);
+  const NOMS = [['x', 'une droite qui monte, passant par l\'origine'], ['y', 'une parabole qui part de h et décroît'], ['vx', 'une droite horizontale'], ['vy', 'une droite qui descend, partant de 0']];
+  const n = NOMS[ordre];
+  const lib = { x: 'x(t)', y: 'y(t)', vx: 'v<sub>x</sub>(t)', vy: 'v<sub>y</sub>(t)' };
+  c.aToi(carte, [
+    { titre: 'Reconnaître une courbe', parties: [{ type: 'choix', q: `Quelle grandeur est représentée par ${n[1]} ?`, colonne: false, melanger: false,
+      options: Object.keys(lib).map(k => o(k, lib[k])), bonne: n[0], indice: 'x = v<sub>0</sub> t, y = −½ g t² + h, v<sub>x</sub> = v<sub>0</sub>, v<sub>y</sub> = −g t.',
+      solution: `<p>${lib[n[0]]}.</p>` }] },
+    { titre: 'Une pente', parties: [{ type: 'nombre', q: 'Que vaut le coefficient directeur de la droite v<sub>y</sub>(t) ?', label: 'coefficient =', valeur: -G, rel: .003, unite: MS2,
+      diag: v => (Math.abs(v - G) < .01 ? 'La droite descend : le coefficient est négatif.' : 'v<sub>y</sub>(t) = −g t.'), solution: `<p>v<sub>y</sub>(t) = −g t : coefficient directeur −g = −9,81 ${MS2}, c'est a<sub>y</sub>.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>Conditions initiales</b> lues sur le schéma : ${V('v', '0')} horizontal, donc v<sub>x</sub>(0) = v<sub>0</sub> et v<sub>y</sub>(0) = 0 ; x(0) = 0 et y(0) = h.</p></div>
+    <div class="cle"><p><b>Seconde loi de Newton</b> : ${V('a')} = ${V('g')}, soit a<sub>x</sub> = 0 et a<sub>y</sub> = −g. Le poids ne modifie que la coordonnée verticale de la vitesse ; le mouvement est <b>plan</b>.</p></div>
+    <div class="cle"><p><b>Trajectoire</b> : on élimine t entre x(t) et y(t) ; on obtient une parabole.</p></div>
+    <div class="cle"><p><b>Traduire la question</b> : point de chute, y(t<sub>chute</sub>) = 0 ; distance, d = x(t<sub>chute</sub>).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3c_cours.html">Cours : vitesse initiale quelconque →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#horizontale">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
 CU.menu('module_3b_cours');
 </script>
 </body>

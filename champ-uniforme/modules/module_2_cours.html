@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : coordonnées d'un vecteur — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="coord.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Coordonnées d'un vecteur dans un repère</h2>
+    <p class="er-contexte">Avant d'intégrer, il faut écrire <b>correctement les coordonnées</b> de <span class="vec-nom">g</span>, <span class="vec-nom">v</span><sub>0</sub>, <span class="vec-nom">E</span>… dans le repère choisi. Les axes peuvent s'appeler x et y ou x et z, être orientés dans un sens ou dans l'autre, ou même être inclinés : la méthode est toujours la même.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Vecteur porté par un axe : 0 sur l'autre axe, ±valeur selon le sens
+   2. Vecteur incliné : triangle rectangle (adjacent → cos, opposé → sin),
+      angle repéré depuis l'horizontale ou la verticale, puis les signes ;
+      l'endroit où le vecteur est dessiné ne compte pas
+   3. Repère incliné (plan incliné) : g⃗ fait l'angle β avec l'axe
+      perpendiculaire à la pente
+   Figures et questions : modules/coord.js (CU.coord).
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { V, col } = CU;
+const K = CU.coord;
+// une figure et ses coordonnées, pour les exemples
+const ex = s => `<div>${K.fig(s)}<p class="cu-petit">${K.nomV(s.vec)} ${col(K.ecrire(s, s.coords[0]), K.ecrire(s, s.coords[1]))} dans le repère (O ; ${s.ax[0]}, ${s.ax[1]})</p></div>`;
+// « À toi » tiré au hasard : la figure, puis une question par axe
+const aToiCoord = (titre, s) => ({ titre, enonce: K.fig(s), parties: K.parties(s) });
+
+/* ---------- 1. Vecteur porté par un axe ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Un vecteur porté par un axe');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Les coordonnées d'un vecteur sont ses <b>projections</b> sur les axes du repère.</p>
+      <div class="cle"><p><b class="cle-titre">Vecteur parallèle à un axe.</b></p>
+        <ol class="cu-methode"><li>Sa coordonnée sur l'<b>autre</b> axe est <b>nulle</b>.</li>
+          <li>Sur son axe, elle vaut <b>+ sa valeur</b> s'il est dans le <b>même sens</b> que l'axe, <b>− sa valeur</b> s'il est de <b>sens opposé</b>.</li></ol></div>
+    </div>
+    ${exemple(`<p>Le même vecteur ${V('g')} (vertical, vers le bas) dans deux repères : ses coordonnées dépendent du sens de l'axe vertical.</p>
+      <div class="cu-figs2">${ex(K.gen('axe', { vec: 'g', ax: ['x', 'y'], sx: 1, sy: 1, loin: false }))}${ex(K.gen('axe', { vec: 'g', ax: ['x', 'y'], sx: 1, sy: -1, loin: false }))}</div>`)}`);
+  c.aToi(carte, [aToiCoord('Premier repère', K.gen('axe')), aToiCoord('Autre repère', K.gen('axe'))]);
+  return carte;
+}
+
+/* ---------- 2. Vecteur incliné ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Un vecteur incliné');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b></p>
+        <ol class="cu-methode"><li>On trace le <b>triangle rectangle</b> formé par le vecteur et ses projections sur les axes.</li>
+          <li>Le côté <b>adjacent</b> à l'angle donne la valeur × <b>cos</b> ; le côté <b>opposé</b> donne la valeur × <b>sin</b>. Attention : si l'angle est repéré par rapport à la <b>verticale</b>, c'est la projection verticale qui est adjacente.</li>
+          <li>Le <b>signe</b> de chaque coordonnée : + si la projection est dans le sens de l'axe, − sinon.</li></ol></div>
+      <p>L'endroit où le vecteur est dessiné ne change pas ses coordonnées : seuls comptent sa direction, son sens et sa valeur.</p>
+    </div>
+    ${exemple(`<p>Un angle repéré par rapport à l'horizontale, puis par rapport à la verticale :</p>
+      <div class="cu-figs2">${ex(K.gen('angleH', { vec: 'v0', ax: ['x', 'y'], sx: 1, sy: 1, loin: false, ang: 35, angNom: 'α', dh: 1, dv: 1 }))}${ex(K.gen('angleV', { vec: 'F', ax: ['x', 'z'], sx: 1, sy: 1, loin: true, ang: 30, angNom: 'α', dh: -1, dv: 1 }))}</div>`)}`);
+  const s = K.gen(hasard(['angleH', 'angleV'])), n = K.partiesNum(s);
+  c.aToi(carte, [aToiCoord('Angle et horizontale', K.gen('angleH')), aToiCoord('Angle et verticale', K.gen('angleV')),
+    { titre: 'Avec des valeurs', enonce: `${K.fig(s)}<p>${n.donnees}</p>`, parties: n.parties }]);
+  return carte;
+}
+
+/* ---------- 3. Repère incliné ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Un repère incliné');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour un solide sur un plan incliné d'un angle β, on prend souvent un axe parallèle à la pente et un axe perpendiculaire. Un vecteur vertical (${V('g')}, ${V('P')}) n'est alors porté par aucun axe.</p>
+      <div class="cle"><p>L'angle entre la <b>verticale</b> et l'axe <b>perpendiculaire à la pente</b> vaut <b>β</b> (deux angles à côtés perpendiculaires). La projection sur l'axe perpendiculaire est donc adjacente à β (× cos β), celle sur l'axe parallèle à la pente est opposée (× sin β). Puis on place les signes.</p></div>
+    </div>
+    ${exemple(`<div class="cu-figs2">${ex(K.gen('incline', { vec: 'g', beta: 30, desc: 1, pente: 1, long: false }))}<p>L'axe x descend la pente, comme la composante de ${V('g')} le long de la pente : +g sin β. L'axe y s'éloigne de la pente, ${V('g')} va vers elle : −g cos β.</p></div>`)}`);
+  c.aToi(carte, [aToiCoord('Plan incliné', K.gen('incline', { long: false })), aToiCoord('Encore', K.gen('incline'))]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>Coordonnées d'un vecteur</b> : ses projections sur les axes du repère choisi.</p>
+      <ol class="cu-methode"><li>Porté par un axe : 0 sur l'autre axe, ± sa valeur sur le sien.</li>
+        <li>Incliné : triangle rectangle ; côté adjacent à l'angle → cos, côté opposé → sin.</li>
+        <li>Signe : + si la projection va dans le sens de l'axe, − sinon.</li></ol></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions du module 2 →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : chute libre</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+CU.menu('module_2_cours');
+</script>
+</body>
+</html>

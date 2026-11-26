@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 4 : accélérateur linéaire et applications — Mouvement dans un champ uniforme</title>
+<title>Module 4 : poids et force électrique — Mouvement dans un champ uniforme</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="cu.css">
@@ -17,9 +17,9 @@
 <div id="app-nav"></div>
 <div class="er-page">
   <div class="er-card">
-    <span class="er-badge">MODULE 4 · COURS 2 / 2</span>
-    <h2 class="er-titre">Accélérateur linéaire et applications</h2>
-    <p class="er-contexte">Une seule très grande tension est difficile à produire : on fait passer la particule dans une <b>succession de condensateurs</b>, en <b>inversant la polarité</b> chaque fois qu'elle change de condensateur.</p>
+    <span class="er-badge">MODULE 4 · COURS 2 / 4</span>
+    <h2 class="er-titre">Poids et force électrique</h2>
+    <p class="er-contexte">Pour une particule chargée (proton, électron), on compare le <b>poids</b> et la <b>force électrique</b> : le poids est <b>négligeable</b>.</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -27,90 +27,45 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
-   1. Succession de condensateurs, inversion de polarité ;
-      vₙ = √(2nqU / m) après n étages
-   2. Applications : canon à électrons (tube cathodique), accélérateurs
-      linéaires du CERN, radiothérapie, analyse d'œuvres d'art
+   1. Comparaison pour un proton dans E = 1 V·m⁻¹ (exemple du cours),
+      rapport F / P, conclusion : poids négligeable
    ============================================================ */
 const { exemple, hasard } = COURS;
-const { V, fmt, cs, sci, fr, rac, MS, CALC, E_CH, M_P, M_E, svg, fl, nom, txt, COUL, ENCRE, ENCRE2 } = CU;
+const { V, fmt, sci, fr, VM, CALC, E_CH, M_P, M_E } = CU;
 const o = (id, label) => ({ id, label });
+const G = 9.81;
 
-// trois condensateurs C₁, C₂, C₃ côte à côte (grilles percées) ; etat 1 : particule dans C₁ ; etat 2 : dans C₂, polarité inversée
-function chaine(etat) {
-  const X = [30, 110, 190, 270], s0 = etat === 1 ? 1 : -1;
-  let s = '';
-  X.forEach((x, k) => {
-    const sg = (k % 2 === 0 ? s0 : -s0) > 0 ? '+' : '−';
-    s += `<line x1="${x}" y1="20" x2="${x}" y2="66" stroke="${ENCRE2}" stroke-width="3"/><line x1="${x}" y1="80" x2="${x}" y2="126" stroke="${ENCRE2}" stroke-width="3"/>`;
-    s += txt(x, 16, sg, { g: 800, c: ENCRE, t: 14, a: 'middle' }) + txt(x, 142, sg, { g: 800, c: ENCRE, t: 14, a: 'middle' });
-  });
-  for (let k = 0; k < 3; k++) {
-    const vers = (k % 2 === 0 ? s0 : -s0) > 0 ? 1 : -1, xm = (X[k] + X[k + 1]) / 2;
-    s += fl(xm - 24 * vers, 40, xm + 24 * vers, 40, COUL.E, { ep: 2 }) + nom(xm, 33, 'E', '', COUL.E, { t: 12 }) + txt(xm, 112, `C${['₁', '₂', '₃'][k]}`, { g: 700, c: ENCRE2, t: 12, a: 'middle' });
-  }
-  const xp = etat === 1 ? 62 : 142;
-  s += `<line x1="16" y1="73" x2="290" y2="73" stroke="#c8c4bb" stroke-dasharray="3 3"/><circle cx="${xp}" cy="73" r="6" fill="#fff" stroke="${ENCRE}" stroke-width="1.8"/>` + txt(xp, 76.5, '+', { g: 800, c: ENCRE, t: 9, a: 'middle' });
-  s += fl(xp + 8, 92, xp + 38, 92, COUL.F, { ep: 2 }) + nom(xp + 23, 106, 'F', '', COUL.F, { t: 12 });
-  return svg(300, 150, s, etat === 1 ? 'La particule positive est dans le condensateur C1, où le champ est dirigé vers l\'avant : elle est accélérée' : 'La particule est passée dans C2 : la polarité a été inversée, le champ dans C2 est dirigé vers l\'avant, elle est de nouveau accélérée');
-}
-
-/* ---------- 1. La succession de condensateurs ---------- */
 function etape1(c) {
-  const carte = c.carte('1. Une succession de condensateurs');
+  const carte = c.carte('1. Comparer le poids et la force électrique');
   c.ajouter(carte, `<div class="cours-bloc">
-      <p>Les condensateurs sont accolés (armatures percées pour laisser passer la particule) et reliés à un générateur. Dans des condensateurs voisins, les champs sont de sens opposés.</p>
-      <div class="cu-figs2"><div>${chaine(1)}<p class="cu-petit">Particule positive dans C<sub>1</sub> : ${V('E')} vers l'avant, elle est accélérée.</p></div>
-        <div>${chaine(2)}<p class="cu-petit">Elle entre dans C<sub>2</sub> : on <b>inverse la polarité</b> du générateur (donc des armatures) pour qu'elle soit de nouveau accélérée.</p></div></div>
-      <div class="cle"><p><b class="cle-titre">Accélérateur linéaire.</b> Chaque fois que la particule « change de condensateur », la polarité est inversée : le champ qu'elle traverse est toujours dans le bon sens. Chaque étage lui apporte la même énergie qU : après n étages,</p>
-        <p class="crs-formule">v<sub>n</sub> = ${rac(fr('2 n q U', 'm'))}</p>
-        <p>On accélère fortement avec des tensions relativement faibles (effets relativistes négligés).</p></div>
+      <p>On calcule les deux valeurs, puis leur <b>rapport</b> : si une force est plus de 100 fois plus faible que l'autre, on peut la négliger.</p>
+      <div class="cle"><p>Pour une particule chargée (proton, électron, ion) dans un condensateur, même avec un champ faible, la force électrique est des milliards de fois plus grande que le poids : <b>on néglige le poids</b>. Le système n'est alors soumis qu'à ${V('F', 'él')} = q ${V('E')}.</p></div>
     </div>
-    ${exemple(`<p>10 étages de 10 kV donnent la même vitesse qu'un seul condensateur de 100 kV : pour un proton, v<sub>10</sub> = √(2 × 10 × 1,60 × 10<sup>−19</sup> × 1,0 × 10<sup>4</sup> / 1,67 × 10<sup>−27</sup>) = <span class="c">4,4 × 10<sup>6</sup> ${MS}</span>.</p>`)}`);
-  const n = hasard([4, 6, 8]), U = hasard([5.0e3, 2.0e4]), v = Math.sqrt(2 * n * E_CH * U / M_P);
+    ${exemple(`<p>Proton (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg, q = e = 1,60 × 10<sup>−19</sup> C) dans un champ E = 1 ${VM}, g = 9,81 N·kg<sup>−1</sup> :</p>
+      <p class="crs-calc">P = m<sub>p</sub> g = 1,67 × 10<sup>−27</sup> × 9,81 = 1,64 × 10<sup>−26</sup> N &nbsp;;&nbsp; F<sub>él</sub> = e E = 1,60 × 10<sup>−19</sup> × 1 = 1,60 × 10<sup>−19</sup> N</p>
+      <p class="crs-calc">${fr('F<sub>él</sub>', 'P')} = ${fr('1,60 × 10<sup>−19</sup>', '1,64 × 10<sup>−26</sup>')} ≈ <span class="c">1 × 10<sup>7</sup></span> : le poids est dix millions de fois plus faible, il est négligeable.</p>`)}`);
+  const E = hasard([1.0e3, 1.0e4, 5.0e4]), P = M_E * G, F = E_CH * E;
   c.aToi(carte, [
-    { titre: 'Après n étages', parties: [{ type: 'sci', q: `Un proton traverse ${n} étages de ${fmt(U / 1000)} kV chacun, en partant du repos. Vitesse finale (2 chiffres significatifs) :`, label: 'v =', valeur: v, cs: 2, unite: MS + CALC,
-      diag: x => (Math.abs(x / (v / Math.sqrt(n)) - 1) < .05 ? 'Ça, c\'est la vitesse après un seul étage : il y en a ' + n + '.' : Math.abs(x / (v * Math.sqrt(n)) - 1) < .05 ? 'v<sub>n</sub> = √(2nqU / m) : n est sous la racine.' : 'v<sub>n</sub> = √(2 n e U / m<sub>p</sub>).'),
-      solution: `<p>v = √(2 × ${n} × 1,60 × 10<sup>−19</sup> × ${sci(U, 1)} / 1,67 × 10<sup>−27</sup>) = ${sci(v, 2)} ${MS}</p>` }] },
-    { titre: 'Sans inversion ?', parties: [{ type: 'choix', q: 'Que se passerait-il si on n\'inversait pas la polarité quand la particule passe de C<sub>1</sub> à C<sub>2</sub> ?', colonne: true, melanger: false,
-      options: [o('ok', 'Elle serait freinée dans C<sub>2</sub>, puis repoussée en arrière.'), o('c', 'Elle continuerait à vitesse constante.'), o('a', 'Elle serait accélérée encore plus.')], bonne: 'ok',
-      indices: { c: 'Dans C<sub>2</sub>, le champ est vers l\'arrière : une force agit.', a: 'Le champ de C<sub>2</sub> est opposé à celui de C<sub>1</sub>.' }, solution: '<p>Le champ de C<sub>2</sub> s\'oppose au mouvement : elle perd dans C<sub>2</sub> ce qu\'elle a gagné dans C<sub>1</sub>.</p>' }] },
-  ]);
-  return carte;
-}
-
-/* ---------- 2. Applications ---------- */
-function etape2(c) {
-  const carte = c.carte('2. Applications des accélérateurs');
-  c.ajouter(carte, `<div class="cours-bloc">
-      <ul class="cu-methode">
-        <li><b>Canon à électrons</b> (tube cathodique des anciennes télévisions et des oscilloscopes) : des électrons émis par un filament chauffé sont accélérés par une tension de quelques kilovolts, puis déviés par deux paires de plaques (verticalement et horizontalement) pour atteindre un point de l'écran.</li>
-        <li><b>CERN</b> : les particules (protons, ions) sont d'abord accélérées dans des <b>accélérateurs linéaires</b>, puis injectées dans des anneaux de plus en plus grands, jusqu'au LHC.</li>
-        <li><b>Radiothérapie</b> : un accélérateur linéaire d'électrons produit un faisceau (ou des rayons X) pour détruire des cellules cancéreuses.</li>
-        <li><b>Analyse d'œuvres d'art</b> : au Louvre, un accélérateur envoie des protons ou des particules α sur un objet ; les rayonnements émis révèlent sa composition sans l'abîmer.</li>
-        <li>Autres dispositifs : accélérateur de Van de Graaff, cyclotron, imprimante à jet d'encre (gouttes chargées déviées par un condensateur), expérience de Millikan (gouttelettes chargées en équilibre).</li>
-      </ul>
-    </div>
-    ${exemple(`<p class="crs-calc">Électron d'un tube cathodique, U = 20 kV : v = ${rac(fr('2 × 1,60 × 10<sup>−19</sup> × 2,0 × 10<sup>4</sup>', '9,11 × 10<sup>−31</sup>'))} = <span class="c">8,4 × 10<sup>7</sup> ${MS}</span> (plus du quart de la vitesse de la lumière).</p>`)}`);
-  c.aToi(carte, [
-    { parties: [{ type: 'choix', q: 'Dans un tube cathodique, à quoi servent les plaques placées après le canon à électrons ?', colonne: true, melanger: false,
-      options: [o('ok', 'À dévier le faisceau d\'électrons, pour viser un point de l\'écran.'), o('a', 'À accélérer encore les électrons.'), o('s', 'À arrêter les électrons.')], bonne: 'ok',
-      indices: { a: 'Le champ entre ces plaques est perpendiculaire au faisceau.', s: 'Les électrons doivent atteindre l\'écran.' }, solution: '<p>Le champ perpendiculaire au faisceau courbe la trajectoire (déviation, module 3).</p>' }] },
+    { titre: 'Le poids d\'un électron', parties: [{ type: 'sci', q: `Masse d'un électron : m<sub>e</sub> = 9,11 × 10<sup>−31</sup> kg. Valeur de son poids (3 chiffres significatifs) :`, label: 'P =', valeur: P, cs: 3, rel: .01, unite: 'N' + CALC,
+      diag: () => 'P = m<sub>e</sub> × g.', solution: `<p>P = 9,11 × 10<sup>−31</sup> × 9,81 = ${sci(P, 3)} N</p>` }] },
+    { titre: 'La force électrique', parties: [{ type: 'sci', q: `Cet électron est dans un champ E = ${sci(E, 2)} ${VM}. Valeur de la force électrique (3 chiffres significatifs) :`, label: 'F<sub>él</sub> =', valeur: F, cs: 3, rel: .01, unite: 'N' + CALC,
+      diag: () => 'F<sub>él</sub> = e × E (valeur : on prend e, positif).', solution: `<p>F<sub>él</sub> = 1,60 × 10<sup>−19</sup> × ${sci(E, 2)} = ${sci(F, 3)} N</p>` }] },
+    { titre: 'Conclure', parties: [{ type: 'choix', q: `Le rapport F<sub>él</sub> / P vaut environ ${sci(F / P, 1)}. Que conclure ?`, colonne: true, melanger: false,
+      options: [o('ok', 'Le poids est négligeable devant la force électrique.'), o('f', 'La force électrique est négligeable devant le poids.'), o('c', 'Les deux forces se compensent.')], bonne: 'ok',
+      indices: { f: 'C\'est l\'inverse : F<sub>él</sub> est bien plus grande.', c: 'Elles n\'ont pas la même valeur.' }, solution: '<p>F<sub>él</sub> est des milliards de fois plus grande que P : on néglige le poids.</p>' }] },
   ]);
   return carte;
 }
 
 function aRetenir(c) {
   const carte = c.carte('À retenir');
-  c.ajouter(carte, `<div class="cle"><p>Accélérateur linéaire : succession de condensateurs ; la polarité est inversée chaque fois que la particule change de condensateur, pour qu'elle soit toujours accélérée. v<sub>n</sub> = √(2nqU / m).</p></div>
-    <div class="cle"><p>Applications : canon à électrons, accélérateurs linéaires du CERN, radiothérapie, analyse d'œuvres d'art.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_simulation.html">Animation : accélérateur linéaire →</a>
-      <a class="btn-secondary" style="text-decoration:none" href="module_4_questions.html">Questions du module 4</a>
-      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#pratique">Fiche récapitulative</a></div>`);
+  c.ajouter(carte, `<div class="cle"><p>Pour une particule chargée dans un champ électrique, le poids est négligeable devant la force électrique : on calcule F<sub>él</sub> / P pour le justifier.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4c_cours.html">Cours : équations du mouvement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#poids">Fiche récapitulative</a></div>`);
   return carte;
 }
 
-new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
 CU.menu('module_4b_cours');
 </script>
 </body>

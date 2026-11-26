@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 : déviation d'une particule — Mouvement dans un champ uniforme</title>
+<title>Module 3 : exploiter les équations — Mouvement dans un champ uniforme</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="cu.css">
@@ -18,8 +18,8 @@
 <div class="er-page">
   <div class="er-card">
     <span class="er-badge">MODULE 3 · COURS 4 / 4</span>
-    <h2 class="er-titre">Déviation d'une particule chargée</h2>
-    <p class="er-contexte">Selon le <b>signe de sa charge</b>, la particule est déviée vers une armature ou vers l'autre. À la sortie du condensateur, on calcule sa <b>déviation</b>.</p>
+    <h2 class="er-titre">Exploiter les équations</h2>
+    <p class="er-contexte">Une question sur le mouvement se <b>traduit par une équation</b> : au <b>sommet</b>, v<sub>y</sub> = 0 ; au <b>point de chute</b>, y = 0 ; pour une <b>cible</b>, on calcule y à l'abscisse de la cible.</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -27,66 +27,114 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
-   1. q > 0 : parabole vers l'armature − ; q < 0 : vers l'armature +
-   2. Point de sortie (x = ℓ, longueur des armatures), mouvement ultérieur
+   Étape 6 de la méthode : on regarde sur le schéma à quel endroit
+   correspond la question et on le traduit dans une équation établie.
+   1. Sommet : v_y(t_S) = 0 → t_S → altitude maximale y(t_S)
+   2. Point de chute : y(t_chute) = 0 (second degré) → t_chute → distance, vitesse
+   3. Une cible (x_C ; y_C) : panier de basket à 4,6 m, cercle à 3,0 m
+   Exemple du cours : v₀ = 5,0 m·s⁻¹, α = 40°, h = 2,0 m.
    ============================================================ */
 const { exemple, hasard } = COURS;
-const { V, fmt, cs, sci, fr, MS, VM, CALC, condo, E_CH, M_E } = CU;
+const { V, fmt, cs, sys, fr, rac, MS, MS2, CALC, figTir, etapeM, trad, aide6 } = CU;
 const o = (id, label) => ({ id, label });
+const t2 = 't<sup>2</sup>';
+const G = 9.81, rad = d => d * Math.PI / 180;
+// équations établies dans le cours précédent, rappelées en tête de chaque partie
+const EQS = `<p class="crs-calc">${sys('v<sub>x</sub>(t) = v<sub>0</sub> cos α', 'v<sub>y</sub>(t) = −g t + v<sub>0</sub> sin α')} &nbsp; ${sys('x(t) = (v<sub>0</sub> cos α) t', `y(t) = −${fr('1', '2')} g ${t2} + (v<sub>0</sub> sin α) t + h`)}</p>`;
 
-/* ---------- 1. Le sens de la déviation ---------- */
+/* ---------- 1. Le sommet ---------- */
 function etape1(c) {
-  const carte = c.carte('1. Le sens de la déviation');
+  const carte = c.carte('1. Le sommet de la trajectoire');
   c.ajouter(carte, `<div class="cours-bloc">
-      <div class="cu-figs2">${condo({ haut: '+', q: 1, ang: 35, aria: 'q positive : la parabole est tournée vers l\'armature négative' })}${condo({ haut: '+', q: -1, ang: 35, aria: 'q négative : la trajectoire part vers l\'armature positive' })}</div>
-      <div class="cle"><p><b>q > 0</b> : ${V('a')} a le sens de ${V('E')}, la parabole est tournée vers l'armature <b>−</b>. <b>q < 0</b> : la particule est déviée vers l'armature <b>+</b>.</p>
-        <p>Inverser la tension U (ou le signe de la charge) inverse le sens de la déviation.</p></div>
+      <p>Les équations établies (repère : x horizontal, y vers le haut, origine au sol) :</p>${EQS}
+      <div class="cle"><p><b class="cle-titre">Étape 6.</b> On regarde sur le schéma à quel endroit correspond la question, puis on le traduit dans l'une des équations établies (sur la vitesse ou sur la position).</p></div>
+      ${figTir({ h: 2, v0: 5, alpha: 40, sommet: 'v', chute: true, aria: 'Au sommet S de la trajectoire, le vecteur vitesse est horizontal ; C est le point de chute' })}
+      ${etapeM(6, 'Altitude maximale : le sommet S', `<p>Au sommet S, la balle ne monte plus et ne descend pas encore : sur le schéma, le vecteur vitesse y est <b>horizontal</b>, sa coordonnée verticale est nulle.</p>
+        ${trad('Sommet S', 'v<sub>y</sub>(t<sub>S</sub>) = 0 (équation de la vitesse)')}
+        <p class="crs-calc">−g t<sub>S</sub> + v<sub>0</sub> sin α = 0 ⟺ t<sub>S</sub> = ${fr('v<sub>0</sub> sin α', 'g')}</p>
+        ${trad('Altitude du sommet', 'y<sub>max</sub> = y(t<sub>S</sub>) (équation de la position)')}`)}
     </div>
-    ${exemple('<p>Un faisceau d\'électrons passe entre deux armatures horizontales, celle du haut étant positive : il est dévié vers le haut.</p>')}`);
-  const haut = hasard(['+', '−']), q = hasard([1, -1]);
+    ${exemple(`<p class="crs-calc">t<sub>S</sub> = ${fr('5,0 × sin 40°', '9,81')} = 0,328 s ; y<sub>max</sub> = y(0,328) = −4,905 × 0,328<sup>2</sup> + 3,21 × 0,328 + 2,0 = <span class="c">2,5 m</span></p>`)}`);
+  const v0 = hasard([8.0, 10, 12]), al = hasard([30, 45, 60]), h = hasard([0, 1.0, 2.0]);
+  const vy = v0 * Math.sin(rad(al)), ts = vy / G, ym = h + vy * vy / (2 * G);
   c.aToi(carte, [
-    { enonce: condo({ haut, q, traj: false, aria: `Particule ${q > 0 ? 'positive' : 'négative'} entrant entre les armatures ; l'armature du haut est ${haut === '+' ? 'positive' : 'négative'}` }),
-      parties: [{ type: 'choix', q: `Vers où cette particule (${q > 0 ? 'positive' : 'négative'}) est-elle déviée ?`, colonne: false, melanger: false, options: [o('h', 'vers le haut'), o('b', 'vers le bas'), o('n', 'elle n\'est pas déviée')],
-        bonne: (q > 0) === (haut === '+') ? 'b' : 'h', indices: { n: 'Elle subit la force q' + V('E') + ', perpendiculaire aux armatures.' }, indice: 'Charge positive : attirée par l\'armature − ; négative : par l\'armature +.',
-        solution: `<p>${q > 0 ? 'Charge positive, attirée par l\'armature −' : 'Charge négative, attirée par l\'armature +'}, qui est ${(q > 0) === (haut === '+') ? 'en bas' : 'en haut'}.</p>` }] },
+    { titre: 'Altitude maximale', enonce: `<p>v<sub>0</sub> = ${fmt(v0)} ${MS}, α = ${al}°, h = ${fmt(h)} m.</p>`,
+      parties: [{ type: 'choix', q: 'Quelle équation traduit « la balle est au sommet » ?', colonne: false, melanger: false, options: [o('ok', 'v<sub>y</sub>(t<sub>S</sub>) = 0'), o('y', 'y(t<sub>S</sub>) = 0'), o('x', 'v<sub>x</sub>(t<sub>S</sub>) = 0')], bonne: 'ok',
+        indices: { y: 'y = 0 : c\'est le sol sur le schéma.', x: 'v<sub>x</sub> = v<sub>0</sub> cos α ne s\'annule jamais.' }, indice: aide6('le sommet', 'la vitesse y est horizontale'),
+        solution: '<p>Au sommet, la vitesse est horizontale : v<sub>y</sub>(t<sub>S</sub>) = 0.</p>' },
+      { type: 'nombre', q: 'Date t<sub>S</sub> du sommet (3 chiffres significatifs) :', label: 't<sub>S</sub> =', valeur: ts, rel: .01, unite: 's' + CALC, signe: false,
+        diag: v => (Math.abs(v - v0 * Math.cos(rad(al)) / G) < .02 * ts ? 'C\'est v<sub>y</sub> qui s\'annule : v<sub>y</sub>(t) = −g t + v<sub>0</sub> sin α.' : 'Résous −g t<sub>S</sub> + v<sub>0</sub> sin α = 0.'), solution: `<p>−g t<sub>S</sub> + v<sub>0</sub> sin α = 0 ⟺ t<sub>S</sub> = ${fmt(v0)} × sin ${al}° / 9,81 = ${cs(ts, 3)} s</p>` },
+      { type: 'nombre', q: 'Altitude maximale (2 chiffres significatifs) :', label: 'y<sub>max</sub> =', valeur: ym, rel: .02, unite: 'm' + CALC, signe: false,
+        diag: v => (Math.abs(v - (ym - h)) < .02 * ym ? 'N\'oublie pas h dans y(t).' : 'L\'altitude du sommet est donnée par l\'équation de la position : y<sub>max</sub> = y(t<sub>S</sub>).'),
+        solution: `<p>y<sub>max</sub> = y(t<sub>S</sub>) = −4,905 × ${cs(ts, 3)}<sup>2</sup> + ${cs(vy, 3)} × ${cs(ts, 3)} + ${fmt(h)} = ${cs(ym, 2)} m</p>` }] },
   ]);
   return carte;
 }
 
-/* ---------- 2. Le point de sortie ---------- */
+/* ---------- 2. Le point de chute ---------- */
 function etape2(c) {
-  const carte = c.carte('2. La déviation à la sortie');
+  const carte = c.carte('2. Le point de chute');
   c.ajouter(carte, `<div class="cours-bloc">
-      <p>Un électron entre en O avec ${V('v', '0')} parallèle aux armatures (α = 0), de longueur ℓ. Avec E vers le bas : z(x) = ${fr('eE', '2m v<sub>0</sub><sup>2</sup>')} x<sup>2</sup>.</p>
-      <div class="cle"><p>La particule sort au point S d'abscisse x<sub>S</sub> = ℓ (si elle ne touche pas une armature avant) :</p>
-        <p class="crs-formule">z<sub>S</sub> = ${fr('eE ℓ<sup>2</sup>', '2m v<sub>0</sub><sup>2</sup>')}</p>
-        <p>Ensuite, elle n'est plus soumise à aucune force (poids négligé) : d'après le principe d'inertie, son mouvement est <b>rectiligne uniforme</b>.</p></div>
+      ${etapeM(6, 'Durée de la chute : le point de chute C', `<p>Sur le schéma, C est sur le sol, à l'altitude 0.</p>
+        ${trad('Point de chute C', 'y(t<sub>chute</sub>) = 0 (équation de la position)')}
+        <p class="crs-calc">−${fr('1', '2')} g t<sub>chute</sub><sup>2</sup> + (v<sub>0</sub> sin α) t<sub>chute</sub> + h = 0</p>
+        <p>C'est une équation du <b>second degré</b> : Δ = (v<sub>0</sub> sin α)<sup>2</sup> + 2gh > 0, deux racines, une seule est positive ; l'autre n'a pas de sens physique.</p>`)}
+      ${etapeM(6, 'Distance et vitesse au point de chute', `${trad('Distance d du lancer : abscisse de C', 'd = x(t<sub>chute</sub>)')}
+        ${trad('Vitesse en C', `v<sub>x</sub>(t<sub>chute</sub>) et v<sub>y</sub>(t<sub>chute</sub>), puis v = ${rac('v<sub>x</sub><sup>2</sup> + v<sub>y</sub><sup>2</sup>')}`)}`)}
     </div>
-    ${exemple(`<p>v<sub>0</sub> = 2,0 × 10<sup>7</sup> ${MS}, E = 1,0 × 10<sup>4</sup> ${VM}, ℓ = 5,0 cm, m<sub>e</sub> = 9,11 × 10<sup>−31</sup> kg :</p>
-      <p class="crs-calc">z<sub>S</sub> = ${fr('1,60 × 10<sup>−19</sup> × 1,0 × 10<sup>4</sup> × (5,0 × 10<sup>−2</sup>)<sup>2</sup>', '2 × 9,11 × 10<sup>−31</sup> × (2,0 × 10<sup>7</sup>)<sup>2</sup>')} = <span class="c">5,5 × 10<sup>−3</sup> m = 5,5 mm</span></p>`)}`);
-  const v0 = hasard([2.5e7, 3.0e7, 4.0e7]), E = hasard([1.5e4, 2.0e4]), l = hasard([4.0, 6.0]), z = E_CH * E * Math.pow(l / 100, 2) / (2 * M_E * v0 * v0);
+    ${exemple(`<p class="crs-calc">−4,905 t<sup>2</sup> + 3,21 t + 2,0 = 0 ; Δ = 3,21<sup>2</sup> + 4 × 4,905 × 2,0 = 49,6 ; t<sub>chute</sub> = ${fr(`−3,21 − ${rac('49,6')}`, '2 × (−4,905)')} = 1,05 s</p>
+      <p class="crs-calc">d = x(1,05) = 3,83 × 1,05 = <span class="c">4,0 m</span> ; v<sub>y</sub> = −9,81 × 1,05 + 3,21 = −7,04 ${MS} ; v = ${rac('3,83<sup>2</sup> + 7,04<sup>2</sup>')} = <span class="c">8,0 ${MS}</span></p>`)}`);
+  const v0 = hasard([6.0, 8.0, 10]), al = hasard([30, 45]), h = hasard([1.0, 2.0, 5.0]);
+  const vx = v0 * Math.cos(rad(al)), vy = v0 * Math.sin(rad(al)), tc = (vy + Math.sqrt(vy * vy + 2 * G * h)) / G;
   c.aToi(carte, [
-    { titre: 'Calcule la déviation', enonce: `<p>Électron : v<sub>0</sub> = ${sci(v0, 2)} ${MS}, E = ${sci(E, 2)} ${VM}, armatures de longueur ℓ = ${fmt(l)} cm.</p>`,
-      parties: [{ type: 'nombre', q: 'Déviation z<sub>S</sub> à la sortie, en millimètres (2 chiffres significatifs) :', label: 'z<sub>S</sub> =', valeur: z * 1000, rel: .03, unite: 'mm' + CALC, signe: false,
-        diag: v => (Math.abs(v / (z * 1000) - 2) < .05 ? 'Il y a un 2 au dénominateur.' : Math.abs(v / (z * 1e7) - 1) < .05 ? 'Convertis ℓ en mètres avant le calcul.' : 'z<sub>S</sub> = eEℓ² / (2 m v<sub>0</sub>²), puis conversion en mm.'),
-        solution: `<p>z<sub>S</sub> = 1,60 × 10<sup>−19</sup> × ${sci(E, 2)} × (${fmt(l / 100)})<sup>2</sup> / (2 × 9,11 × 10<sup>−31</sup> × (${sci(v0, 2)})<sup>2</sup>) = ${cs(z * 1000, 2)} mm</p>` },
-      { type: 'choix', q: 'Après la sortie du condensateur, le mouvement de l\'électron est :', colonne: false, melanger: false, options: [o('ok', 'rectiligne uniforme'), o('p', 'toujours parabolique'), o('arret', 'il s\'arrête')], bonne: 'ok',
-        indices: { p: 'Hors du condensateur, il n\'y a plus de champ électrique.', arret: 'Aucune force ne le freine : principe d\'inertie.' }, solution: '<p>Plus de force (poids négligé) : principe d\'inertie, mouvement rectiligne uniforme.</p>' }] },
+    { titre: 'Durée et distance', enonce: `<p>v<sub>0</sub> = ${fmt(v0)} ${MS}, α = ${al}°, h = ${fmt(h)} m.</p>`,
+      parties: [{ type: 'nombre', q: 'Durée de la chute (3 chiffres significatifs) :', label: 't<sub>chute</sub> =', valeur: tc, rel: .01, unite: 's' + CALC, signe: false,
+        diag: v => (Math.abs(v - 2 * vy / G) < .02 * tc ? 'Ce serait la durée pour revenir à l\'altitude de départ : C est sur le sol, à y = 0.' : Math.abs(v - Math.sqrt(2 * h / G)) < .02 ? 'La vitesse initiale verticale n\'est pas nulle : y(t) contient (v<sub>0</sub> sin α) t.' : aide6('le point de chute', 'y(t<sub>chute</sub>) = 0, équation du second degré dont on garde la racine positive')),
+        solution: `<p>y(t<sub>chute</sub>) = 0 : Δ = ${cs(vy, 3)}<sup>2</sup> + 2 × 9,81 × ${fmt(h)} = ${cs(vy * vy + 2 * G * h, 3)} ; t<sub>chute</sub> = (${cs(vy, 3)} + ${rac('Δ')}) / 9,81 = ${cs(tc, 3)} s</p>` },
+      { type: 'nombre', q: 'Distance du lancer (2 chiffres significatifs) :', label: 'd =', valeur: vx * tc, rel: .02, unite: 'm' + CALC, signe: false,
+        diag: v => (Math.abs(v - v0 * tc) < .02 * v0 * tc ? 'd = x(t<sub>chute</sub>), avec x(t) = (v<sub>0</sub> cos α) t.' : aide6('le point de chute', 'd est son abscisse, d = x(t<sub>chute</sub>)')), solution: `<p>d = x(t<sub>chute</sub>) = ${cs(vx, 3)} × ${cs(tc, 3)} = ${cs(vx * tc, 2)} m</p>` }] },
   ]);
   return carte;
 }
 
+/* ---------- 3. Une cible ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Atteindre une cible');
+  const yp = x => -G * x * x / (2 * Math.pow(7.5 * Math.cos(rad(52)), 2)) + Math.tan(rad(52)) * x + 2;
+  c.ajouter(carte, `<div class="cours-bloc">
+      ${etapeM(6, 'Une cible de coordonnées (x<sub>cible</sub> ; y<sub>cible</sub>)', `<p>Sur le schéma, on repère la cible (panier, barre transversale d'un but…) et ses coordonnées dans le repère choisi.</p>
+        ${trad('L\'objet passe par la cible', 'x(t) = x<sub>cible</sub> et y(t) = y<sub>cible</sub>')}
+        <p>La première équation donne la date t<sub>cible</sub> de passage à l'abscisse de la cible ; on calcule y(t<sub>cible</sub>) et on compare à y<sub>cible</sub>. Avec l'équation de la trajectoire, c'est plus direct : on compare y(x<sub>cible</sub>) à y<sub>cible</sub>.</p>`)}
+    </div>
+    ${exemple(`<p>Un basketteur lance le ballon de h = 2,0 m, à v<sub>0</sub> = 7,5 ${MS} et α = 52°. Le cercle du panier est à x<sub>cible</sub> = 4,6 m et y<sub>cible</sub> = 3,0 m.</p>
+      <p class="crs-calc">y(4,6) = −${fr('9,81', '2 × (7,5 × cos 52°)<sup>2</sup>')} × 4,6<sup>2</sup> + tan 52° × 4,6 + 2,0 = <span class="c">${cs(yp(4.6), 2)} m</span></p>
+      <p>y(4,6) = y<sub>cible</sub> = 3,0 m : le ballon passe par le cercle. (Plus grand : au-dessus ; plus petit : en dessous.)</p>`)}`);
+  const v0 = hasard([18, 20, 22]), al = hasard([20, 25]), x = hasard([16, 20]);
+  const y = -G * x * x / (2 * Math.pow(v0 * Math.cos(rad(al)), 2)) + Math.tan(rad(al)) * x;
+  c.aToi(carte, [
+    { titre: 'Sous la barre ?', enonce: `<p>Un ballon de football est frappé depuis le sol (h = 0) à v<sub>0</sub> = ${v0} ${MS}, α = ${al}°. Le but est à ${x} m ; sa barre transversale est à 2,44 m de haut.</p>`,
+      parties: [{ type: 'nombre', q: 'Hauteur du ballon à l\'abscisse du but (2 chiffres significatifs) :', label: 'y =', valeur: y, rel: .03, unite: 'm' + CALC,
+        diag: () => aide6('le but', `il est à l'abscisse x = ${x} m : calcule y(${x}) avec l'équation de la trajectoire`), solution: `<p>y(${x}) = −9,81 × ${x}<sup>2</sup> / (2 × (${v0} × cos ${al}°)<sup>2</sup>) + tan ${al}° × ${x} = ${cs(y, 2)} m</p>` },
+      { type: 'choix', q: 'Le ballon passe-t-il sous la barre (en supposant qu\'il est entre les poteaux) ?', colonne: false, melanger: false, options: [o('sous', 'oui, en dessous'), o('dessus', 'non, au-dessus'), o('sol', 'il touche le sol avant')],
+        bonne: y < 0 ? 'sol' : y < 2.44 ? 'sous' : 'dessus', indice: 'Compare y(' + x + ') à 2,44 m.', solution: `<p>y = ${cs(y, 2)} m ${y < 0 ? '< 0 : le ballon est retombé avant le but.' : y < 2.44 ? '< 2,44 m : il passe sous la barre.' : '> 2,44 m : il passe au-dessus.'}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
 function aRetenir(c) {
   const carte = c.carte('À retenir');
-  c.ajouter(carte, `<div class="cle"><p>q > 0 : déviation vers l'armature − ; q < 0 : vers l'armature +.</p></div>
-    <div class="cle"><p>Sortie en x = ℓ : z<sub>S</sub> = |q| E ℓ<sup>2</sup> / (2 m v<sub>0</sub><sup>2</sup>) (pour v<sub>0</sub> parallèle aux armatures) ; ensuite, mouvement rectiligne uniforme.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_simulation.html">Simulateur : déviation dans un condensateur →</a>
+  c.ajouter(carte, `<div class="cle"><p><b>Étape 6</b> : on regarde sur le schéma à quel endroit correspond la question, puis on le traduit dans l'une des équations établies.</p>
+      ${trad('Sommet S (vitesse horizontale)', 'v<sub>y</sub>(t<sub>S</sub>) = 0, puis y<sub>max</sub> = y(t<sub>S</sub>)')}
+      ${trad('Point de chute C (sol)', 'y(t<sub>chute</sub>) = 0, puis d = x(t<sub>chute</sub>)')}
+      ${trad('Cible (x<sub>cible</sub> ; y<sub>cible</sub>)', 'x(t) = x<sub>cible</sub> et y(t) = y<sub>cible</sub>, ou y(x<sub>cible</sub>) comparé à y<sub>cible</sub>')}</div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_simulation.html">Simulateur : tir dans le champ de pesanteur →</a>
       <a class="btn-secondary" style="text-decoration:none" href="module_3_questions.html">Questions du module 3</a>
-      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#deviation">Fiche récapitulative</a></div>`);
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#exploiter">Fiche récapitulative</a></div>`);
   return carte;
 }
 
-new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
 CU.menu('module_3d_cours');
 </script>
 </body>

@@ -171,9 +171,15 @@ sub, sup { font-size: .7em; line-height: 0; }
 .fr > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 .2em .05em; }
 .fr > span:last-child { padding: .05em .2em 0; }
 .ph-formule .fr, .ph-calc .fr { font-size: .85em; }
-.racine { white-space: nowrap; }
+/* racine carrée (CU.rac) : le signe √ (SVG étiré) prend la hauteur du contenu et rejoint la barre,
+   bord haut du contenu, sans espace entre le signe et la barre (comme energie-cinetique) */
+.racine { --rac-ep: 1.5px; display: inline-flex; align-items: stretch; vertical-align: baseline; white-space: nowrap; margin: 0 .05em; }
+.racine-signe { position: relative; flex: none; width: .62em; }
+.racine-signe svg { position: absolute; left: 0; top: calc(var(--rac-ep) / 2); width: 100%; height: calc(100% - var(--rac-ep) / 2); overflow: visible;
+  fill: none; stroke: currentColor; stroke-width: var(--rac-ep); stroke-linejoin: round; stroke-linecap: round; }
+.racine-sous { align-self: baseline; border-top: var(--rac-ep) solid currentColor; padding: .12em .15em 0 .12em; }
+.racine-lu { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .cu-nobr { white-space: nowrap; display: inline-block; }
-.racine > span { border-top: 1.5px solid currentColor; padding: 0 .15em; margin-left: .05em; }
 
 /* tableaux du cours */
 .cu-tab { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
@@ -428,10 +434,32 @@ sub, sup { font-size: .7em; line-height: 0; }
   .cu-cocher { font-size: .78rem; min-height: 32px; }
   .cu-tableau-v { font-size: .72rem; }
 }
-.racine > span { display: inline-block; padding-top: .12em; }
-.racine .fr { vertical-align: top; }
 .cu-at-champs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: .9rem; }
 .cu-at-champs .ph-champ-box { margin: 0; }
 .cu-at-champs .btn-small { min-height: 40px; }
 .cu-masse { margin: 0; padding: 8px 12px; font-size: .86rem; display: flex; flex-direction: column; gap: 6px; }
 .cu-vif { color: var(--accent-ink); background: var(--cle-bg); border-radius: 6px; padding: 0 4px; }
+
+/* ---------- rédaction des résolutions (CU.integ, CU.ci, CU.etapeM, CU.trad) ---------- */
+.cu-integ { margin: 8px 0; }
+.cu-integ-l { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 4px; }
+.cu-integ-m { color: var(--ink-2); font-size: .92em; white-space: nowrap; }
+.cu-fig-ci { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 18px; }
+.cu-fig-ci > .cu-fig-cadre { flex: 1 1 260px; min-width: 0; max-width: 460px; }
+.cu-ci { flex: 0 1 auto; border: 1.5px solid var(--cle-line); background: var(--cle-bg); border-radius: 10px; padding: 8px 14px; line-height: 1.5; }
+.cu-ci p + p { margin-top: 6px; }
+.cu-ci-t { font-weight: 800; color: var(--accent-ink); font-size: .9em; }
+.cu-me { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; row-gap: 4px; align-items: center; margin: 12px 0; }
+.cu-me-n { width: 1.7em; height: 1.7em; border-radius: 50%; background: var(--accent); color: var(--sheet); font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: .9em; }
+.cu-me-c { grid-column: 2; min-width: 0; }
+@media (max-width: 600px) { .cu-me-c { grid-column: 1 / -1; } }
+.cu-me-c > * + * { margin-top: 6px; }
+.cu-me-t { font-weight: 800; }
+.cu-trad { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.cu-trad-l { font-weight: 700; }
+.cu-trad-f { color: var(--accent); font-weight: 800; }
+.cu-trad-e { background: var(--cle-bg); border: 1px solid var(--cle-line); border-radius: 6px; padding: 1px 8px; }
+.cu-applis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 700px) { .cu-applis { grid-template-columns: 1fr; } }
+.cu-appli { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px 10px; background: var(--sheet); }
+.cu-appli p { font-size: .94em; }

@@ -1,5 +1,5 @@
 /* ============================================================
-   Simulateur « déviation dans un condensateur » (module 3, page sur un écran)
+   Simulateur « déviation dans un condensateur » (module 4, page sur un écran)
 
    CU.simDeviation(zone) : tension U, polarité (armature du haut + ou −),
    distance L entre les armatures, longueur ℓ des armatures, particule
@@ -32,7 +32,7 @@
   function simDeviation(zone) {
     const st = { U: 400, haut: '+', L: 4, l: 10, part: 'p', lv: 6, al: 0, signes: {} };
     const c = CU.cadre(zone, {
-      badge: 'MODULE 3 · SIMULATEUR', titre: 'Déviation dans un condensateur',
+      badge: 'MODULE 4 · SIMULATEUR', titre: 'Déviation dans un condensateur',
       bande: '<p class="cu-eqs" data-a="analogie"></p>',
       bas: '<p class="cu-valeurs" data-a="resume" aria-live="polite"></p>',
       onglets: [{ id: 'reg', nom: 'Réglages', sections: ['reg'] }, { id: 'val', nom: 'Valeurs', sections: ['val'] }, { id: 'defis', nom: 'Défis', sections: ['defis'] }, { id: 'bilan', nom: 'Bilan', sections: ['bilan'] }],
@@ -48,7 +48,7 @@
         { id: 'defis', html: '<div data-a="defis"></div>' },
         { id: 'bilan', html: `<div class="cu-bilan"><div class="cle"><p>Entre les armatures : ${V('E')} uniforme, de + vers −, E = U / L ; ${V('F', 'él')} = q ${V('E')} ; le poids est négligeable (F / P de l'ordre de 10<sup>12</sup> et plus).</p></div>
             <div class="cle"><p>${V('a')} = q ${V('E')} / m est constante : trajectoire parabolique, comme une chute libre où g serait remplacé par qE / m. q > 0 : déviation vers l'armature − ; q < 0 : vers l'armature +.</p></div>
-            <div class="cle"><p>Sortie (v<sub>0</sub> parallèle aux armatures) : z<sub>S</sub> = |q| E ℓ<sup>2</sup> / (2 m v<sub>0</sub><sup>2</sup>) ; ensuite, mouvement rectiligne uniforme.</p></div></div>` },
+            <div class="cle"><p>Sortie : le point S est au bout des armatures, x(t<sub>S</sub>) = ℓ donne t<sub>S</sub>, puis z<sub>S</sub> = z(t<sub>S</sub>) ; ensuite, plus aucune force : mouvement rectiligne uniforme.</p></div></div>` },
       ],
       surOnglet: id => { if (id === 'bilan') window.SOM.marquer({ fait: true }); },
     });
