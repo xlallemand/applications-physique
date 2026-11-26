@@ -424,7 +424,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -463,8 +463,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -476,7 +476,7 @@
       const q = qs[idx];
       window.OEM.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -496,7 +496,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -511,10 +511,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -637,10 +637,10 @@
   // diagnostics d'un calcul λ = c / f : f en Hz, fNum : nombre écrit devant le préfixe (100 pour 100 MHz)
   function diagLambda(v, f, fNum, unite) {
     const k = unite ? ({ km: 1e3, m: 1, cm: 1e-2, mm: 1e-3 })[unite] : 1, l = C / f / k;
-    if (fNum != null && fNum !== f && proche(v, C / fNum / k, .02)) return 'Convertis d\'abord f en Hz : 1 kHz = 10<sup>3</sup> Hz, 1 MHz = 10<sup>6</sup> Hz, 1 GHz = 10<sup>9</sup> Hz.';
+    if (fNum != null && fNum !== f && proche(v, C / fNum / k, .02)) return 'Convertis d\'abord f en Hz : 1 kHz = 10<sup>3</sup> Hz, 1 MHz = 10<sup>6</sup> Hz, 1 GHz = 10<sup>9</sup> Hz.';
     if (proche(v, f / C / k, .02)) return 'λ = c / f, et non f / c.';
-    if (proche(v, C * f / k, .02)) return 'On divise : λ = c / f.';
-    if ([1e3, 1e-3, 1e6, 1e-6].some(x => proche(v, l * x, .02))) return 'Erreur de puissance de 10 : ne confonds pas 10<sup>3</sup> (kilo) et 10<sup>6</sup> (méga), ni 10<sup>6</sup> et 10<sup>9</sup> (giga).' + (unite && unite !== 'm' ? ` Le résultat est demandé en ${unite}.` : '');
+    if (proche(v, C * f / k, .02)) return 'On divise : λ = c / f.';
+    if ([1e3, 1e-3, 1e6, 1e-6].some(x => proche(v, l * x, .02))) return 'Erreur de puissance de 10 : ne confonds pas 10<sup>3</sup> (kilo) et 10<sup>6</sup> (méga), ni 10<sup>6</sup> et 10<sup>9</sup> (giga).' + (unite && unite !== 'm' ? ` Le résultat est demandé en ${unite}.` : '');
     return 'λ = c / f, avec c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup> et f en Hz.';
   }
   // diagnostics d'un calcul f = c / λ : λ en m, lNum : nombre écrit devant l'unité (12 pour 12 cm) ; k : unité du résultat (1e6 pour MHz)
@@ -649,9 +649,9 @@
     const f = C / l / k;
     if (lNum != null && lNum !== l && proche(v, C / lNum / k, .02)) return 'Convertis d\'abord λ en mètres (1 cm = 10<sup>−2</sup> m, 1 mm = 10<sup>−3</sup> m, 1 km = 10<sup>3</sup> m).';
     if (proche(v, l / C / k, .02)) return 'f = c / λ, et non λ / c.';
-    if (proche(v, C * l / k, .02)) return 'On divise : f = c / λ.';
-    if ([1e3, 1e-3, 1e6, 1e-6].some(x => proche(v, f * x, .02))) return 'Erreur de puissance de 10 : vérifie la conversion des unités (10<sup>3</sup> et 10<sup>6</sup> ne sont pas interchangeables).';
-    return 'f = c / λ, avec λ en m : le résultat est en Hz.';
+    if (proche(v, C * l / k, .02)) return 'On divise : f = c / λ.';
+    if ([1e3, 1e-3, 1e6, 1e-6].some(x => proche(v, f * x, .02))) return 'Erreur de puissance de 10 : vérifie la conversion des unités (10<sup>3</sup> et 10<sup>6</sup> ne sont pas interchangeables).';
+    return 'f = c / λ, avec λ en m : le résultat est en Hz.';
   }
   // puissance de 10 dans un texte SVG : 10⁻¹²
   const p10 = e => `10<tspan dy="-6" font-size="0.72em">${String(e).replace('-', MOINS)}</tspan><tspan dy="6"></tspan>`;
@@ -680,11 +680,11 @@
   // partie de question : domaine d'une onde de longueur d'onde l (en m), écrite « texte »
   function partieDomaine(l, texte, q) {
     const d = domaine(l);
-    return { type: 'choix', q: q || `Dans quel domaine est une onde de longueur d'onde λ = ${texte} ?`, options: optionsDomaine(), bonne: d.id, melanger: false,
-      indices: { radio: d.id === 'micro' ? 'Les micro-ondes vont de 1 mm à 30 cm : c\'est le domaine précis de cette onde.' : 'Les ondes radio ont des longueurs d\'onde supérieures à 30 cm.',
+    return { type: 'choix', q: q || `Dans quel domaine est une onde de longueur d'onde λ = ${texte} ?`, options: optionsDomaine(), bonne: d.id, melanger: false,
+      indices: { radio: d.id === 'micro' ? 'Les micro-ondes vont de 1 mm à 30 cm : c\'est le domaine précis de cette onde.' : 'Les ondes radio ont des longueurs d\'onde supérieures à 30 cm.',
         micro: 'Les micro-ondes ont des longueurs d\'onde de 1 mm à 30 cm.' },
       indice: 'Écris λ en mètres (avec une puissance de 10), puis compare aux bornes des domaines.',
-      solution: `<p>λ = ${texte} : domaine ${d.id === 'visible' ? 'du <b>visible</b>' : `des <b>${d.nom}</b>`} (${BORNES_DOM[d.id]}).</p>` };
+      solution: `<p>λ = ${texte} : domaine ${d.id === 'visible' ? 'du <b>visible</b>' : `des <b>${d.nom}</b>`} (${BORNES_DOM[d.id]}).</p>` };
   }
 
   // couleur d'une radiation visible (λ en nm), en attribut SVG (comme VEC.C), reprise du chapitre 10
@@ -716,7 +716,7 @@
     o = o || {};
     const W = Math.max(280, Math.round(o.W || 700)), g = geomEM(W), etroit = W < 560, id = 'oem-vis-' + (++nEM);
     const yB = g.yB, hB = g.hB, X = g.X;
-    let s = `<svg viewBox="0 0 ${W} ${g.H}" width="${W}" height="${g.H}" class="oem-svg oem-em-svg" role="img" aria-label="${o.aria || 'Échelle des ondes électromagnétiques : longueur d\'onde en haut, fréquence en bas, de gauche à droite : rayons gamma, rayons X, ultraviolet, visible, infrarouge, micro-ondes, ondes radio'}">`;
+    let s = `<svg viewBox="0 0 ${W} ${g.H}" width="${W}" height="${g.H}" class="oem-svg oem-em-svg" role="img" aria-label="${o.aria || 'Échelle des ondes électromagnétiques : longueur d\'onde en haut, fréquence en bas, de gauche à droite : rayons gamma, rayons X, ultraviolet, visible, infrarouge, micro-ondes, ondes radio'}">`;
     s += `<defs><linearGradient id="${id}" x1="0" x2="1" y1="0" y2="0">` +
       [400, 450, 490, 530, 570, 600, 640, 700, 800].map(nm => `<stop offset="${((Math.log10(nm) - Math.log10(400)) / Math.log10(2)).toFixed(3)}" stop-color="${couleurLambda(nm)}"/>`).join('') + '</linearGradient></defs>';
     // domaines
@@ -786,7 +786,7 @@
       if (rep && g) rep.setAttribute('transform', `translate(${r1(g.X(lg))},0)`);
       range.value = String(Math.round((lg - EM.lmin) * 100));
       const l = Math.pow(10, lg), f = C / l;
-      lect.innerHTML = voir ? `λ = <b>${txtL(l, 2)}</b> ; f = <b>${txtF(f, 2)}</b> ; domaine : <b>${domaine(l).nom}</b>` : 'Place le repère, puis valide.';
+      lect.innerHTML = voir ? `λ = <b>${txtL(l, 2)}</b> ; f = <b>${txtF(f, 2)}</b> ; domaine : <b>${domaine(l).nom}</b>` : 'Place le repère, puis valide.';
       if (!silencieux) ecouteurs.forEach(fn => fn(lg));
     }
     // glisser sur l'échelle (souris, doigt) ou la toucher
@@ -858,9 +858,9 @@
           let diag;
           const v = Math.log10(o.valeur);
           if (o.donnee === 'f' && Math.abs(x - v) <= .3) diag = 'Tu as placé la fréquence sur l\'axe des <b>longueurs d\'onde</b> (en haut). La fréquence se lit sur l\'axe du <b>bas</b>, f (Hz).';
-          else if (Math.abs(Math.abs(ecart) - 3) <= .3 || Math.abs(Math.abs(ecart) - 6) <= .3) diag = 'Ton repère est à 3 ou 6 graduations près : vérifie la conversion du préfixe (1 kHz = 10<sup>3</sup> Hz, 1 MHz = 10<sup>6</sup> Hz, 1 GHz = 10<sup>9</sup> Hz ; 1 mm = 10<sup>−3</sup> m, 1 nm = 10<sup>−9</sup> m).';
-          else diag = ecart > 0 ? 'Ton repère est trop à <b>droite</b> : la longueur d\'onde y est trop grande (la fréquence trop petite).'
-            : 'Ton repère est trop à <b>gauche</b> : la longueur d\'onde y est trop petite (la fréquence trop grande).';
+          else if (Math.abs(Math.abs(ecart) - 3) <= .3 || Math.abs(Math.abs(ecart) - 6) <= .3) diag = 'Ton repère est à 3 ou 6 graduations près : vérifie la conversion du préfixe (1 kHz = 10<sup>3</sup> Hz, 1 MHz = 10<sup>6</sup> Hz, 1 GHz = 10<sup>9</sup> Hz ; 1 mm = 10<sup>−3</sup> m, 1 nm = 10<sup>−9</sup> m).';
+          else diag = ecart > 0 ? 'Ton repère est trop à <b>droite</b> : la longueur d\'onde y est trop grande (la fréquence trop petite).'
+            : 'Ton repère est trop à <b>gauche</b> : la longueur d\'onde y est trop petite (la fréquence trop grande).';
           api.erreur(diag + ' Une graduation = une puissance de 10.');
         };
         return { montrer() { ech.placer(cible, true); ech.bloquer(); ech.lecture(true); bVal.fermer(); } };
@@ -887,9 +887,9 @@
   function diagBande(f, id, viaLambda) {
     const b = bande(f), i = BANDES.findIndex(x => x.id === id), j = BANDES.indexOf(b);
     if (!b || i < 0) return '';
-    if (Math.abs(i - j) === 3) return 'Tu t\'es trompé de préfixe : 1 GHz = 1 000 MHz, 1 MHz = 1 000 kHz.';
+    if (Math.abs(i - j) === 3) return 'Tu t\'es trompé de préfixe : 1 GHz = 1 000 MHz, 1 MHz = 1 000 kHz.';
     if (viaLambda && Math.abs(i - j) >= 1) return 'Calcule d\'abord la fréquence f = c / λ (λ en m), puis compare-la aux bornes des bandes.';
-    return `La bande ${id} va de ${BANDES[i].bornes}. Les bornes sont des « 3 × 10<sup>n</sup> » : compare ${txtF(f)} à ces bornes.`;
+    return `La bande ${id} va de ${BANDES[i].bornes}. Les bornes sont des « 3 × 10<sup>n</sup> » : compare ${txtF(f)} à ces bornes.`;
   }
 
   // échelle des bandes (SVG, largeur fixe, défile sur un petit écran)
@@ -899,7 +899,7 @@
     const W = 700, x0 = 22, cw = (W - 2 * x0) / 7, haut = o.usages ? 52 : 0, yA = haut + 22, yC = yA + 8, hC = 72;
     const X = f => x0 + (Math.log10(300e9) - Math.log10(f)) * cw;
     const H = yC + hC + (o.marques ? 34 : 6);
-    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="oem-svg oem-bandes-svg" role="img" aria-label="${o.aria || 'Bandes de fréquences radio, de 300 GHz à gauche à 30 kHz à droite : EHF, SHF, UHF, VHF, HF (ondes courtes), MF (petites ondes), BF (grandes ondes)'}">`;
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="oem-svg oem-bandes-svg" role="img" aria-label="${o.aria || 'Bandes de fréquences radio, de 300 GHz à gauche à 30 kHz à droite : EHF, SHF, UHF, VHF, HF (ondes courtes), MF (petites ondes), BF (grandes ondes)'}">`;
     BANDES.forEach((b, k) => {
       const x = x0 + k * cw;
       s += `<rect class="oem-bd-c${k % 2 ? ' c2' : ''}" x="${r1(x)}" y="${yC}" width="${r1(cw)}" height="${hC}"/>`;
@@ -962,7 +962,7 @@
     return {
       type: 'perso', usages: us,             // usages tirés (utile pour vérifier l'application)
       q: o.q || 'Place chaque étiquette dans la bonne bande (calcule d\'abord f = c / λ quand on te donne la longueur d\'onde).',
-      solution: o.solution || `<ul class="er-liste">${us.map(u => `<li><b>${u.nom}</b> : ${u.l ? `f = c / λ = ${fmt(C)} / ${fmt(u.l)} ≈ ${txtF(u.f, 2)}, ` : `f = ${u.txt}, `}bande <b>${bande(u.f).id}</b> (${bande(u.f).bornes}).</li>`).join('')}</ul>`,
+      solution: o.solution || `<ul class="er-liste">${us.map(u => `<li><b>${u.nom}</b> : ${u.l ? `f = c / λ = ${fmt(C)} / ${fmt(u.l)} ≈ ${txtF(u.f, 2)}, ` : `f = ${u.txt}, `}bande <b>${bande(u.f).id}</b> (${bande(u.f).bornes}).</li>`).join('')}</ul>`,
       monter(zone, api) {
         const d = el('div', 'oem-et');
         d.innerHTML = `<div class="oem-et-palette"><p class="oem-et-palette-t">Étiquettes à placer <span>· fais-les glisser dans une bande, ou touche une étiquette puis une bande</span></p>
@@ -1018,7 +1018,7 @@
           chips.forEach(c => { const ok = fausses.indexOf(c) === -1; c.classList.toggle('ok', ok); c.classList.toggle('ko', !ok); });
           if (!fausses.length) { terminer(); api.reussi(); return; }
           api.erreur(`${fausses.length > 1 ? `${fausses.length} étiquettes sont mal placées` : 'Une étiquette est mal placée'} (en rouge).<br>` +
-            fausses.map(c => { const u = us_(c.dataset.id); return `☛ ${u.nom} : ${diagBande(u.f, c.closest('.oem-et-bande').dataset.b, !!u.l)}`; }).join('<br>'));
+            fausses.map(c => { const u = us_(c.dataset.id); return `☛ ${u.nom} : ${diagBande(u.f, c.closest('.oem-et-bande').dataset.b, !!u.l)}`; }).join('<br>'));
           secouer(d.querySelector('.oem-et-bandes'));
         };
         return {
@@ -1040,7 +1040,7 @@
     o = o || {};
     const W = Math.max(260, Math.round(o.W || 560)), H = 150, n = o.n || 3, D = o.D, x0 = 26, x1 = W - 70, y0 = 78, A = 34;
     const X = x => x0 + x / D * (x1 - x0), lam = D / n;
-    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="oem-svg" role="img" aria-label="${o.aria || `Onde dessinée en fonction de la distance : ${n} longueurs d'onde sur ${fmt(D)} ${o.unite || 'm'}`}">`;
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="oem-svg" role="img" aria-label="${o.aria || `Onde dessinée en fonction de la distance : ${n} longueurs d'onde sur ${fmt(D)} ${o.unite || 'm'}`}">`;
     if (o.pas) {
       for (let x = 0; x <= D + 1e-9; x += o.pas) {
         s += `<line class="mod-grille" x1="${r1(X(x))}" y1="${y0 - A - 6}" x2="${r1(X(x))}" y2="${y0 + A + 6}"/>`;
@@ -1087,7 +1087,7 @@
   // carte RFID : antenne bobinée sur une surface rectangulaire de 6,5 cm × 4,5 cm
   function svgCarteRFID() {
     const W = 380, H = 250, x = 40, y = 30, w = 260, h = 180;
-    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="oem-svg" role="img" aria-label="Carte RFID : fil de cuivre bobiné autour d'une surface rectangulaire de 6,5 cm sur 4,5 cm, relié à la puce">`;
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="oem-svg" role="img" aria-label="Carte RFID : fil de cuivre bobiné autour d'une surface rectangulaire de 6,5 cm sur 4,5 cm, relié à la puce">`;
     s += `<rect class="oem-carte" x="${x - 18}" y="${y - 14}" width="${w + 36}" height="${h + 28}" rx="14"/>`;
     for (let k = 0; k < 4; k++) s += `<rect class="oem-spire" x="${x + k * 6}" y="${y + k * 6}" width="${w - 12 * k}" height="${h - 12 * k}" rx="6"/>`;
     s += `<rect class="oem-puce" x="${x + w / 2 - 18}" y="${y + h / 2 - 14}" width="36" height="28" rx="4"/><text class="mod-txt" x="${x + w / 2}" y="${y + h / 2 + 32}" text-anchor="middle">puce</text>`;
@@ -1102,7 +1102,7 @@
   // talkie-walkie dessiné à l'échelle (la photo de l'énoncé), avec une règle de 10 cm
   function svgTalkie() {
     const W = 300, H = 300, k = 12, x = 70, y = 70, w = 6 * k, h = 15 * k;           // 1 cm = 12 px : boîtier 6 cm × 15 cm
-    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="oem-svg" role="img" aria-label="Talkie-walkie dessiné à l'échelle : boîtier d'environ 15 cm de haut, antenne d'environ 4 cm ; règle de 10 cm">`;
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="oem-svg" role="img" aria-label="Talkie-walkie dessiné à l'échelle : boîtier d'environ 15 cm de haut, antenne d'environ 4 cm ; règle de 10 cm">`;
     s += `<rect class="oem-tw-ant" x="${x + w - 20}" y="${y - 4 * k}" width="12" height="${4 * k + 6}" rx="6"/>`;
     s += `<rect class="oem-tw" x="${x}" y="${y}" width="${w}" height="${h}" rx="16"/>`;
     s += `<rect class="oem-tw-ecran" x="${x + 14}" y="${y + 30}" width="${w - 28}" height="34" rx="5"/><text class="mod-txt" x="${x + w / 2}" y="${y + 53}" text-anchor="middle">3</text>`;
@@ -1124,28 +1124,28 @@
       // deux sous-modules de cours, puis une seule série de questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Longueur d\'onde et fréquence', slug: 'lambda', cours: 'module_1a_cours', noms: { cours: 'Cours : longueur d\'onde et fréquence' } },
-        { nom: 'Domaines des ondes', slug: 'domaines', cours: 'module_1b_cours', noms: { cours: 'Cours : domaines des ondes électromagnétiques' } },
+        { nom: 'Longueur d\'onde et fréquence', slug: 'lambda', cours: 'module_1a_cours', noms: { cours: 'Cours : longueur d\'onde et fréquence' } },
+        { nom: 'Domaines des ondes', slug: 'domaines', cours: 'module_1b_cours', noms: { cours: 'Cours : domaines des ondes électromagnétiques' } },
         { nom: 'Longueur d\'onde et fréquence', questions: 'module_1_questions' }] },
     { n: 2, titre: 'Domaines de fréquences des télécommunications', desc: 'Bandes EHF à BF, placer une onde dans sa bande, portée et débit', fiche: 'fiche_2',
       sousModules: true,
       parties: [
-        { nom: 'Bandes de fréquences', slug: 'bandes', cours: 'module_2a_cours', noms: { cours: 'Cours : bandes de fréquences' } },
-        { nom: 'Usages, portée et débit', slug: 'portee', cours: 'module_2b_cours', noms: { cours: 'Cours : usages, portée et débit' } },
+        { nom: 'Bandes de fréquences', slug: 'bandes', cours: 'module_2a_cours', noms: { cours: 'Cours : bandes de fréquences' } },
+        { nom: 'Usages, portée et débit', slug: 'portee', cours: 'module_2b_cours', noms: { cours: 'Cours : usages, portée et débit' } },
         { nom: 'Fréquences des télécommunications', questions: 'module_2_questions' }] },
-    { n: 3, titre: 'Transposition de fréquence et modulation', desc: 'Modulant, porteuse, signal modulé ; AM et FM ; bande occupée 2 f<sub>h</sub>, bande passante d\'un canal', fiche: 'fiche_3',
+    { n: 3, titre: 'Transposition de fréquence et modulation', desc: 'Modulant, porteuse, signal modulé ; AM et FM ; bande occupée 2 f<sub>h</sub>, bande passante d\'un canal', fiche: 'fiche_3',
       // le simulateur (activité de découverte), deux sous-modules de cours, puis les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Simulateur', simulation: 'module_3_simulation', noms: { simulation: 'Simulateur : modulation AM et FM' } },
-        { nom: 'Transposition et modulation', slug: 'modulation', cours: 'module_3a_cours', noms: { cours: 'Cours : transposition et modulation' } },
-        { nom: 'Spectre et bande passante', slug: 'spectre', cours: 'module_3b_cours', noms: { cours: 'Cours : spectre et bande passante' } },
+        { nom: 'Simulateur', simulation: 'module_3_simulation', noms: { simulation: 'Simulateur : modulation AM et FM' } },
+        { nom: 'Transposition et modulation', slug: 'modulation', cours: 'module_3a_cours', noms: { cours: 'Cours : transposition et modulation' } },
+        { nom: 'Spectre et bande passante', slug: 'spectre', cours: 'module_3b_cours', noms: { cours: 'Cours : spectre et bande passante' } },
         { nom: 'Modulation', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Antennes', desc: 'Antenne demi-onde L = λ / 2, quart d\'onde L = λ / 4, antenne bobinée', fiche: 'fiche_4',
       parties: [{ nom: 'Antennes', cours: 'module_4_cours', questions: 'module_4_questions' }] },
-    { n: 5, titre: 'Exercices', desc: 'Exercices 9, 10, 11, 12 et 17 du manuel, exercices de bac « Carte RFID » et « Le talkie-walkie »', exercices: 'module_5', exNom: 'Exercices 9 à 17 et bac', nbEx: 7 },
+    { n: 5, titre: 'Exercices', desc: 'Exercices 9, 10, 11, 12 et 17 du manuel, exercices de bac « Carte RFID » et « Le talkie-walkie »', exercices: 'module_5', exNom: 'Exercices 9 à 17 et bac', nbEx: 7 },
   ];
-  window.SOM.init({ nom: 'Chapitre 19 : Ondes électromagnétiques', id: 'ondes-electromagnetiques', cleEx: 'ondes-electromagnetiques-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 19 : Ondes électromagnétiques', id: 'ondes-electromagnetiques', cleEx: 'ondes-electromagnetiques-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

@@ -82,106 +82,106 @@
   /* ---------- Textes (remplaçables par l'option textes) ---------- */
   const TEXTES = {
     // repérage de la boucle principale sur le schéma
-    vide: 'Touche les fils et les dipôles de la boucle, puis « Vérifier ».',
-    sansG: 'La boucle principale contient le générateur : c\'est lui qui fait circuler le courant.',
-    voltBoucle: 'Le voltmètre n\'est jamais dans la boucle principale : il se branche en dérivation, une fois la boucle faite.',
-    ouverte: ou => `Ta boucle s'arrête ${ou} : suis les fils jusqu'à revenir au générateur.`,
-    deuxFois: 'Ta boucle passe deux fois par le nœud cerclé sur le schéma : une boucle ne prend qu\'une des branches.',
-    morceaux: 'Garde une seule boucle : celle qui part du générateur et y revient.',
-    boucleOk: 'Juste ! C\'est la boucle principale : elle part du générateur et y revient. Elle reste surlignée pendant le montage.',
-    boucleDabordSchema: 'Commence par repérer la boucle principale sur le schéma : touche ses fils et ses dipôles, puis « Vérifier ».',
+    vide: 'Touche les fils et les dipôles de la boucle, puis « Vérifier ».',
+    sansG: 'La boucle principale contient le générateur : c\'est lui qui fait circuler le courant.',
+    voltBoucle: 'Le voltmètre n\'est jamais dans la boucle principale : il se branche en dérivation, une fois la boucle faite.',
+    ouverte: ou => `Ta boucle s'arrête ${ou} : suis les fils jusqu'à revenir au générateur.`,
+    deuxFois: 'Ta boucle passe deux fois par le nœud cerclé sur le schéma : une boucle ne prend qu\'une des branches.',
+    morceaux: 'Garde une seule boucle : celle qui part du générateur et y revient.',
+    boucleOk: 'Juste ! C\'est la boucle principale : elle part du générateur et y revient. Elle reste surlignée pendant le montage.',
+    boucleDabordSchema: 'Commence par repérer la boucle principale sur le schéma : touche ses fils et ses dipôles, puis « Vérifier ».',
     // refus d'un fil (mode monter)
-    depart: 'On part toujours d\'une borne du générateur : la borne + ou la borne −.',
-    attacher: 'Pars du montage déjà relié au générateur : un nouveau fil part toujours d\'une borne déjà branchée.',
-    suivant: (x, y) => `D'après le schéma, après ${x} vient ${y} : relie la borne libre ${de(x)} ${a(y)}.`,
-    suivantOu: (x, l) => `D'après le schéma, après ${x} vient ${ou(l)} : relie la borne libre ${de(x)} à l'un d'eux.`,
-    premier: (x, y) => `D'après le schéma, après ${x} vient ${y} : relie ${x} ${a(y)}.`,
-    premierOu: (x, l) => `D'après le schéma, après ${x} vient ${ou(l)} : relie ${x} à l'un d'eux.`,
-    fermer: x => `D'après le schéma, après ${x} on revient au générateur : relie la borne libre ${de(x)} à l'autre borne du générateur.`,
-    rejoindre: x => `D'après le schéma, après ${x} la dérivation rejoint le circuit au point cerclé : relie la borne libre ${de(x)} à une borne de ce point.`,
+    depart: 'On part toujours d\'une borne du générateur : la borne + ou la borne −.',
+    attacher: 'Pars du montage déjà relié au générateur : un nouveau fil part toujours d\'une borne déjà branchée.',
+    suivant: (x, y) => `D'après le schéma, après ${x} vient ${y} : relie la borne libre ${de(x)} ${a(y)}.`,
+    suivantOu: (x, l) => `D'après le schéma, après ${x} vient ${ou(l)} : relie la borne libre ${de(x)} à l'un d'eux.`,
+    premier: (x, y) => `D'après le schéma, après ${x} vient ${y} : relie ${x} ${a(y)}.`,
+    premierOu: (x, l) => `D'après le schéma, après ${x} vient ${ou(l)} : relie ${x} à l'un d'eux.`,
+    fermer: x => `D'après le schéma, après ${x} on revient au générateur : relie la borne libre ${de(x)} à l'autre borne du générateur.`,
+    rejoindre: x => `D'après le schéma, après ${x} la dérivation rejoint le circuit au point cerclé : relie la borne libre ${de(x)} à une borne de ce point.`,
     versDeriv: l => `D'après le schéma, une dérivation part de ce point vers ${ou(l)}.`,
     pasDeDeriv: 'D\'après le schéma, aucune dérivation ne part de ce point.',
-    finirG: x => `On finit la boucle sur l'autre borne du générateur : continue-la d'abord depuis la borne libre ${de(x)}.`,
+    finirG: x => `On finit la boucle sur l'autre borne du générateur : continue-la d'abord depuis la borne libre ${de(x)}.`,
     horsBoucle: 'Ce dipôle n\'est pas dans la boucle principale surlignée sur le schéma.',
     impasse: 'Par ce dipôle, la boucle ne pourrait pas revenir au générateur sans repasser par le même point.',
-    dixA: 'On commence par l\'entrée 10A, le plus grand calibre ; on passe à mA ensuite si l\'intensité est petite.',
+    dixA: 'On commence par l\'entrée 10A, le plus grand calibre ; on passe à mA ensuite si l\'intensité est petite.',
     ampBornes: 'L\'ampèremètre se branche sur ses bornes 10A et COM.',
     voltBornes: 'Le voltmètre se branche sur ses bornes V et COM.',
-    serieA: 'L\'ampèremètre se branche en série : le courant doit le traverser.',
-    voltSerie: 'Le voltmètre se branche en dérivation, sur les bornes du dipôle, sans modifier le circuit : il n\'est jamais dans la boucle principale.',
-    boucleDabord: 'Ferme d\'abord la boucle principale ; on ajoute les dérivations ensuite.',
-    finirDeriv: x => `Termine d'abord la dérivation commencée : relie la borne libre ${de(x)} à la suite du schéma.`,
-    noeud: 'Le schéma n\'a pas de nœud à cet endroit : on ne met deux fils sur une même borne que là où le schéma a un point noir.',
+    serieA: 'L\'ampèremètre se branche en série : le courant doit le traverser.',
+    voltSerie: 'Le voltmètre se branche en dérivation, sur les bornes du dipôle, sans modifier le circuit : il n\'est jamais dans la boucle principale.',
+    boucleDabord: 'Ferme d\'abord la boucle principale ; on ajoute les dérivations ensuite.',
+    finirDeriv: x => `Termine d'abord la dérivation commencée : relie la borne libre ${de(x)} à la suite du schéma.`,
+    noeud: 'Le schéma n\'a pas de nœud à cet endroit : on ne met deux fils sur une même borne que là où le schéma a un point noir.',
     court: 'Ce fil relierait directement les bornes du générateur.',
-    courtDipole: x => `Ce fil relierait les deux bornes ${de(x)} : le courant ne le traverserait plus.`,
+    courtDipole: x => `Ce fil relierait les deux bornes ${de(x)} : le courant ne le traverserait plus.`,
     memeAppareil: 'Ce fil relierait deux bornes du même appareil.',
     dejaRelies: 'Ces deux bornes sont déjà reliées.',
     pasRelies: 'Sur le schéma, ces deux bornes ne sont pas reliées par un fil.',
-    fini: 'Le montage est terminé : il n\'y a plus de fil à poser.',
+    fini: 'Le montage est terminé : il n\'y a plus de fil à poser.',
     // oscilloscope
-    oscBoucle: 'L\'oscilloscope se branche en dérivation, comme un voltmètre : il n\'est jamais dans la boucle principale. Ferme d\'abord la boucle, puis branche ses voies.',
+    oscBoucle: 'L\'oscilloscope se branche en dérivation, comme un voltmètre : il n\'est jamais dans la boucle principale. Ferme d\'abord la boucle, puis branche ses voies.',
     voieRouge: k => `La borne rouge de la voie CH${k} se branche au point où arrive la flèche CH${k} sur le schéma.`,
-    voieMasse: 'La borne noire est la masse de l\'oscilloscope : elle se branche au point marqué du symbole de masse sur le schéma.',
-    masseCourt: 'Les deux bornes noires sont reliées entre elles dans l\'oscilloscope : branchées à deux points différents du circuit, elles feraient un court-circuit.',
+    voieMasse: 'La borne noire est la masse de l\'oscilloscope : elle se branche au point marqué du symbole de masse sur le schéma.',
+    masseCourt: 'Les deux bornes noires sont reliées entre elles dans l\'oscilloscope : branchées à deux points différents du circuit, elles feraient un court-circuit.',
     voieInutile: k => `Le schéma n'utilise pas la voie CH${k} de l'oscilloscope.`,
     // vérification, générateur allumé
-    delEnvers: 'La DEL ne s\'éclaire pas : elle est branchée à l\'envers. Elle ne laisse passer le courant que dans un sens : sa borne + doit être du côté de la borne + du générateur. Retire ses deux fils et rebranche-la dans l\'autre sens.',
-    ampEnvers: x => `${cap(x)} est branché à l'envers : le courant doit entrer par la borne 10A et sortir par la borne COM, reliée du côté de la borne − du générateur. Il indiquerait une valeur négative. Retire ses deux fils et inverse-les.`,
-    voltEnvers: x => `${cap(x)} est branché à l'envers : sa borne COM doit être reliée du côté de la borne − du générateur. Il indiquerait une valeur négative. Retire ses deux fils et inverse-les.`,
+    delEnvers: 'La DEL ne s\'éclaire pas : elle est branchée à l\'envers. Elle ne laisse passer le courant que dans un sens : sa borne + doit être du côté de la borne + du générateur. Retire ses deux fils et rebranche-la dans l\'autre sens.',
+    ampEnvers: x => `${cap(x)} est branché à l'envers : le courant doit entrer par la borne 10A et sortir par la borne COM, reliée du côté de la borne − du générateur. Il indiquerait une valeur négative. Retire ses deux fils et inverse-les.`,
+    voltEnvers: x => `${cap(x)} est branché à l'envers : sa borne COM doit être reliée du côté de la borne − du générateur. Il indiquerait une valeur négative. Retire ses deux fils et inverse-les.`,
     // consignes (mode monter)
-    cBoucle: 'Surligne la <b>boucle principale</b> : touche ses fils et ses dipôles sur le schéma, puis « Vérifier ».',
+    cBoucle: 'Surligne la <b>boucle principale</b> : touche ses fils et ses dipôles sur le schéma, puis « Vérifier ».',
     cDepart: 'Tire le premier fil depuis une <b>borne du générateur</b> (+ ou −) vers le premier dipôle de la boucle principale.',
-    cSuite: x => `Continue la boucle principale : relie la borne libre ${de(x)} au dipôle suivant du schéma.`,
-    cFermer: x => `Ferme la boucle : relie la borne libre ${de(x)} à l'autre borne du générateur.`,
-    cDeriv: 'Ajoute une <b>dérivation</b> : pars d\'une borne du montage reliée à un nœud du schéma (point noir).',
-    cDerivSuite: x => `Continue la dérivation : relie la borne libre ${de(x)} à la suite du schéma.`,
-    cRejoindre: x => `Termine la dérivation : relie la borne libre ${de(x)} au point du circuit où elle arrive sur le schéma.`,
+    cSuite: x => `Continue la boucle principale : relie la borne libre ${de(x)} au dipôle suivant du schéma.`,
+    cFermer: x => `Ferme la boucle : relie la borne libre ${de(x)} à l'autre borne du générateur.`,
+    cDeriv: 'Ajoute une <b>dérivation</b> : pars d\'une borne du montage reliée à un nœud du schéma (point noir).',
+    cDerivSuite: x => `Continue la dérivation : relie la borne libre ${de(x)} à la suite du schéma.`,
+    cRejoindre: x => `Termine la dérivation : relie la borne libre ${de(x)} au point du circuit où elle arrive sur le schéma.`,
     cReprendre: 'Rebranche les fils qui manquent, en suivant le schéma.',
-    cVerifier: k => `Le montage est terminé. Vérifie-le : ${k ? 'ferme l\'interrupteur (touche son levier), puis ' : ''}allume le générateur (touche son bouton <b>Marche</b>).`,
-    cInterrupteur: 'Ferme l\'interrupteur : touche son levier.',
-    cOscillo: 'Branche l\'oscilloscope : pour chaque voie, la borne <b>rouge</b> au point où arrive sa flèche sur le schéma et la borne <b>noire</b> (masse) au point marqué du symbole de masse.',
-    cVoieRouge: k => `Termine la voie CH${k} : relie sa borne <b>rouge</b> au point où arrive la flèche CH${k} sur le schéma.`,
-    cVoieMasse: k => `Termine la voie CH${k} : relie sa borne <b>noire</b> (masse) au point marqué du symbole de masse sur le schéma.`,
+    cVerifier: k => `Le montage est terminé. Vérifie-le : ${k ? 'ferme l\'interrupteur (touche son levier), puis ' : ''}allume le générateur (touche son bouton <b>Marche</b>).`,
+    cInterrupteur: 'Ferme l\'interrupteur : touche son levier.',
+    cOscillo: 'Branche l\'oscilloscope : pour chaque voie, la borne <b>rouge</b> au point où arrive sa flèche sur le schéma et la borne <b>noire</b> (masse) au point marqué du symbole de masse.',
+    cVoieRouge: k => `Termine la voie CH${k} : relie sa borne <b>rouge</b> au point où arrive la flèche CH${k} sur le schéma.`,
+    cVoieMasse: k => `Termine la voie CH${k} : relie sa borne <b>noire</b> (masse) au point marqué du symbole de masse sur le schéma.`,
     fin: 'Le montage est conforme au schéma et il fonctionne.',
     // mode mesurer
-    debrancher: (x, y) => `Débranche le fil qui relie ${x} ${a(y)} : l'ampèremètre va prendre sa place (voir le schéma). Touche ce fil, puis « Retirer ce fil ».`,
+    debrancher: (x, y) => `Débranche le fil qui relie ${x} ${a(y)} : l'ampèremètre va prendre sa place (voir le schéma). Touche ce fil, puis « Retirer ce fil ».`,
     pasCeFil: 'Ce n\'est pas ce fil.',
-    pasToucher: 'Ce fil reste en place : seul le fil remplacé par l\'ampèremètre se débranche.',
-    voltSansDebrancher: 'Le voltmètre se branche en dérivation : on ne débranche aucun fil du circuit.',
-    dejaBien: 'L\'appareil est bien branché : pas besoin de le débrancher.',
+    pasToucher: 'Ce fil reste en place : seul le fil remplacé par l\'ampèremètre se débranche.',
+    voltSansDebrancher: 'Le voltmètre se branche en dérivation : on ne débranche aucun fil du circuit.',
+    dejaBien: 'L\'appareil est bien branché : pas besoin de le débrancher.',
     debrancherDabord: 'Débranche d\'abord le fil dont l\'ampèremètre va prendre la place.',
-    reglerMaintenant: 'L\'appareil est branché : règle-le maintenant (touche son sélecteur).',
+    reglerMaintenant: 'L\'appareil est branché : règle-le maintenant (touche son sélecteur).',
     memeMultimetre: 'Utilise le même multimètre pour ses deux fils.',
     unFil: 'Cette borne de l\'appareil est déjà branchée.',
-    cBrancherA: (x, y) => `Branche l'ampèremètre <b>en série</b>, à la place du fil retiré : relie sa borne <b>10A</b> ${a(x)} et sa borne <b>COM</b> ${a(y)}. Le courant entre par 10A et sort par COM, du côté de la borne − du générateur.`,
-    cBrancherV: x => `Branche le voltmètre <b>en dérivation</b> aux bornes ${de(x)}, sans débrancher aucun fil : borne <b>V</b> du côté de la borne + du générateur, borne <b>COM</b> du côté de la borne −.`,
-    lieuA: (x, y) => `L'ampèremètre se branche en série, à la place du fil retiré : relie-le ${a(x)} et ${a(y)}.`,
-    lieuV: x => `Le voltmètre se branche aux bornes ${de(x)} : relie ses bornes V et COM aux deux bornes ${de(x)}, ou à des bornes reliées à elles par un fil.`,
-    cCal10: 'Règle l\'ampèremètre : touche son sélecteur, choisis la fonction <b>A⎓</b> et le plus grand calibre, <b>10 A</b>.',
-    cVersmA: t => `L'écran affiche <b>${t}</b> : ${t.replace('.', ',')} A, lecture peu précise. Passe la fiche de l'entrée <b>10A</b> à l'entrée <b>mA</b> : fais-la glisser d'une borne à l'autre.`,
-    cCalmA: 'Choisis le calibre en mA le plus adapté : le <b>plus petit calibre qui reste plus grand que l\'intensité</b> mesurée.',
-    cCalmax: 'Règle le voltmètre : touche son sélecteur, choisis la fonction <b>V⎓</b> et le plus grand calibre, <b>600 V</b>.',
-    cCalV: t => `L'écran affiche <b>${t}</b> : lecture peu précise. Choisis le <b>plus petit calibre qui reste plus grand que la tension</b> mesurée.`,
+    cBrancherA: (x, y) => `Branche l'ampèremètre <b>en série</b>, à la place du fil retiré : relie sa borne <b>10A</b> ${a(x)} et sa borne <b>COM</b> ${a(y)}. Le courant entre par 10A et sort par COM, du côté de la borne − du générateur.`,
+    cBrancherV: x => `Branche le voltmètre <b>en dérivation</b> aux bornes ${de(x)}, sans débrancher aucun fil : borne <b>V</b> du côté de la borne + du générateur, borne <b>COM</b> du côté de la borne −.`,
+    lieuA: (x, y) => `L'ampèremètre se branche en série, à la place du fil retiré : relie-le ${a(x)} et ${a(y)}.`,
+    lieuV: x => `Le voltmètre se branche aux bornes ${de(x)} : relie ses bornes V et COM aux deux bornes ${de(x)}, ou à des bornes reliées à elles par un fil.`,
+    cCal10: 'Règle l\'ampèremètre : touche son sélecteur, choisis la fonction <b>A⎓</b> et le plus grand calibre, <b>10 A</b>.',
+    cVersmA: t => `L'écran affiche <b>${t}</b> : ${t.replace('.', ',')} A, lecture peu précise. Passe la fiche de l'entrée <b>10A</b> à l'entrée <b>mA</b> : fais-la glisser d'une borne à l'autre.`,
+    cCalmA: 'Choisis le calibre en mA le plus adapté : le <b>plus petit calibre qui reste plus grand que l\'intensité</b> mesurée.',
+    cCalmax: 'Règle le voltmètre : touche son sélecteur, choisis la fonction <b>V⎓</b> et le plus grand calibre, <b>600 V</b>.',
+    cCalV: t => `L'écran affiche <b>${t}</b> : lecture peu précise. Choisis le <b>plus petit calibre qui reste plus grand que la tension</b> mesurée.`,
     cLire: n => `Lis l'écran et écris ${n} avec son unité.`,
-    fonctionA: 'Choisis la fonction <b>A⎓</b> : intensité, courant continu.',
-    fonctionV: 'Choisis la fonction <b>V⎓</b> : tension continue.',
-    commencer10: 'On commence toujours par le plus grand calibre : <b>10 A</b>.',
-    commencer600: 'On commence toujours par le plus grand calibre : <b>600 V</b>.',
-    depasse: 'L\'écran affiche « 1 » à gauche : la valeur dépasse le calibre. Choisis un calibre plus grand.',
-    plusPetit: 'Un calibre plus petit donnerait une lecture plus précise, sans dépasser : essaie-le.',
-    entreeMA: 'La fiche est sur l\'entrée mA : choisis un calibre en mA.',
+    fonctionA: 'Choisis la fonction <b>A⎓</b> : intensité, courant continu.',
+    fonctionV: 'Choisis la fonction <b>V⎓</b> : tension continue.',
+    commencer10: 'On commence toujours par le plus grand calibre : <b>10 A</b>.',
+    commencer600: 'On commence toujours par le plus grand calibre : <b>600 V</b>.',
+    depasse: 'L\'écran affiche « 1 » à gauche : la valeur dépasse le calibre. Choisis un calibre plus grand.',
+    plusPetit: 'Un calibre plus petit donnerait une lecture plus précise, sans dépasser : essaie-le.',
+    entreeMA: 'La fiche est sur l\'entrée mA : choisis un calibre en mA.',
     lireFormat: 'Écris un nombre suivi de son unité, par exemple 16,3 mA ou 6,37 V.',
     lireUniteA: 'Une intensité s\'exprime en ampères (A ou mA).',
     lireUniteV: 'Une tension s\'exprime en volts (V ou mV).',
-    lireMilli: 'Attention à l\'unité : l\'écran affiche la valeur dans l\'unité du calibre (mA pour un calibre en mA, mV pour un calibre en mV).',
-    lireFaux: 'Relis l\'écran du multimètre : écris le nombre affiché, avec l\'unité du calibre.',
+    lireMilli: 'Attention à l\'unité : l\'écran affiche la valeur dans l\'unité du calibre (mA pour un calibre en mA, mV pour un calibre en mV).',
+    lireFaux: 'Relis l\'écran du multimètre : écris le nombre affiché, avec l\'unité du calibre.',
     // mode mesurer : oscilloscope
-    cBrancherVoie: (k, u) => `Branche la voie <b>CH${k}</b>${u ? `, qui mesure la tension <b>${u}</b> (flèche sur le schéma),` : ''} en dérivation, sans débrancher aucun fil : borne <b>rouge</b> au point où arrive la flèche CH${k} sur le schéma, borne <b>noire</b> (masse) au point marqué du symbole de masse.`,
-    lieuVoie: k => `Relie la borne rouge de la voie CH${k} au point de la flèche CH${k} et sa borne noire au point de la masse : à une borne de ce point, ou à une borne reliée à elle par un fil.`,
-    autreVoie: k => `Sur le schéma, c'est la voie CH${k} : utilise la fiche CH${k} de l'oscilloscope.`,
+    cBrancherVoie: (k, u) => `Branche la voie <b>CH${k}</b>${u ? `, qui mesure la tension <b>${u}</b> (flèche sur le schéma),` : ''} en dérivation, sans débrancher aucun fil : borne <b>rouge</b> au point où arrive la flèche CH${k} sur le schéma, borne <b>noire</b> (masse) au point marqué du symbole de masse.`,
+    lieuVoie: k => `Relie la borne rouge de la voie CH${k} au point de la flèche CH${k} et sa borne noire au point de la masse : à une borne de ce point, ou à une borne reliée à elle par un fil.`,
+    autreVoie: k => `Sur le schéma, c'est la voie CH${k} : utilise la fiche CH${k} de l'oscilloscope.`,
     ficheFiche: 'Relie la fiche de l\'oscilloscope à un point du circuit.',
-    oscSansDebrancher: 'L\'oscilloscope se branche en dérivation : on ne débranche aucun fil du circuit.',
-    finOsc: 'L\'oscilloscope est branché : chaque voie affiche la tension entre son point et la masse.',
+    oscSansDebrancher: 'L\'oscilloscope se branche en dérivation : on ne débranche aucun fil du circuit.',
+    finOsc: 'L\'oscilloscope est branché : chaque voie affiche la tension entre son point et la masse.',
   };
   const ou = l => l.join(', ').replace(/, ([^,]*)$/, ' ou $1');
   const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -1860,7 +1860,7 @@
       if (st.phase === 'boucle') {
         h = `<p>${T.cBoucle}</p><div class="mt-cons-actions"><button type="button" class="btn-small" data-a="verifier">Vérifier</button></div>`;
         if (st.diagBoucle) h += `<div class="callout-danger mt-diag"><b>Ce n'est pas ça.</b> ${st.diagBoucle}</div>`;
-      } else if (st.phase === 'fin') h = `<p class="mt-ok"><b>Juste !</b> ${!mesure ? T.fin : opts.mesurer.every(id => sch(id).type === 'voie') ? T.finOsc : 'Les mesures sont faites.'}</p>`;
+      } else if (st.phase === 'fin') h = `<p class="mt-ok"><b>Juste !</b> ${!mesure ? T.fin : opts.mesurer.every(id => sch(id).type === 'voie') ? T.finOsc : 'Les mesures sont faites.'}</p>`;
       else if (mesure) h = consigneMesure();
       else if (st.phase === 'verif') {
         if (st.sensKO) h = st.sensKO.map(p => `<div class="callout-danger mt-diag"><b>Ce n'est pas ça.</b> ${p.msg}</div>`).join('');
@@ -1892,7 +1892,7 @@
           return { debrancher: 'Débranche le fil à la place duquel se met l\'ampèremètre.', cal10: 'Règle-le sur A⎓, calibre 10 A.',
             versmA: 'Passe la fiche de l\'entrée 10A à l\'entrée mA.', calmA: 'Choisis le calibre en mA le plus adapté.',
             calmax: 'Règle-le sur V⎓, calibre 600 V.', calV: 'Choisis le calibre le plus adapté.', lire: `Lis ${d.type === 'amperemetre' ? 'l\'intensité' : 'la tension'} ${n}.`,
-            brancher: d.type === 'amperemetre' ? 'Branche l\'ampèremètre en série : bornes 10A et COM.' : d.type === 'voie' ? `Branche la voie CH${d.voie}${d.mesure ? ` (tension ${n})` : ''} : borne rouge au point de la flèche, borne noire à la masse.` : 'Branche le voltmètre en dérivation : bornes V et COM.' }[E.e];
+            brancher: d.type === 'amperemetre' ? 'Branche l\'ampèremètre en série : bornes 10A et COM.' : d.type === 'voie' ? `Branche la voie CH${d.voie}${d.mesure ? ` (tension ${n})` : ''} : borne rouge au point de la flèche, borne noire à la masse.` : 'Branche le voltmètre en dérivation : bornes V et COM.' }[E.e];
         };
         l = L.map((E, i) => [lab(E), i < st.k, i === st.k]);
       } else {
@@ -1900,10 +1900,10 @@
         const bl = A.libres.filter(t => !t.startsWith('G.'));
         const boucleFaite = A.ferme || fini || (bl.length === 1 && sommetDe(bl[0]) === pointFermeture(bl[0], A));
         if (opts.boucle) l.push(['Surligne la boucle principale sur le schéma.', st.phase !== 'boucle']);
-        l.push(['Réalise la boucle principale : pars d\'une borne du générateur et suis les dipôles dans l\'ordre du schéma.', boucleFaite]);
+        l.push(['Réalise la boucle principale : pars d\'une borne du générateur et suis les dipôles dans l\'ordre du schéma.', boucleFaite]);
         l.push(['Ferme la boucle sur l\'autre borne du générateur.', A.ferme || fini]);
-        if (deriv) l.push([c.dipoles.some(d => d.type === 'voie') ? 'Ajoute les dérivations, une par une : chaque voie de l\'oscilloscope en est une, de son point à la masse.' : 'Ajoute les dérivations, une par une.', fini]);
-        l.push([c.dipoles.some(d => d.type === 'interrupteur') ? 'Ferme l\'interrupteur et allume le générateur : le montage est vérifié.' : 'Allume le générateur : le montage est vérifié.', st.phase === 'fin']);
+        if (deriv) l.push([c.dipoles.some(d => d.type === 'voie') ? 'Ajoute les dérivations, une par une : chaque voie de l\'oscilloscope en est une, de son point à la masse.' : 'Ajoute les dérivations, une par une.', fini]);
+        l.push([c.dipoles.some(d => d.type === 'interrupteur') ? 'Ferme l\'interrupteur et allume le générateur : le montage est vérifié.' : 'Allume le générateur : le montage est vérifié.', st.phase === 'fin']);
         const i = l.findIndex(x => !x[1]);
         l = l.map((x, j) => [x[0], x[1], j === i]);
       }

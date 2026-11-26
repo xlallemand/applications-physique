@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 : questions sur l'énergie d'un échantillon — Chapitre 13 : Énergie nucléaire</title>
+<title>Module 3 : questions sur l'énergie d'un échantillon — Chapitre 13 : Énergie nucléaire</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="nuc.css">
@@ -43,12 +43,12 @@ const sci = (q, label, valeur, unite, diag, correction, opts) => Object.assign({
 const nombre = (q, label, valeur, unite, diag, correction, opts) => Object.assign({ type: 'nombre', q, label, valeur, unite, diag, solution: correction, rel: .01, signe: false, cs: 3 }, opts);
 const enKg = mg => (mg >= 1000 ? `${fmt(mg / 1000)} kg` : `${fmt(mg)} × 10<sup>−3</sup> kg`);
 // partie : nombre de noyaux
-const partieN = (x, mg, mt, q) => sci(q || 'Combien de noyaux contient cet échantillon ?', 'N =', mg * 1e-3 / x.m, 'noyaux', v => diagN(v, mg, x.m, mt),
+const partieN = (x, mg, mt, q) => sci(q || 'Combien de noyaux contient cet échantillon ?', 'N =', mg * 1e-3 / x.m, 'noyaux', v => diagN(v, mg, x.m, mt),
   `<p class="ph-calc">m = ${mt} = ${enKg(mg)}</p><p class="ph-calc">N = m / m(1 noyau) = ${enKg(mg)} / ${x.mt} = ${sciTxt(mg * 1e-3 / x.m, 3)} noyaux</p>`);
 
 function qN() {
   const x = hasard(NOYAUX), [mg, mt] = hasard(MASSES);
-  return { theme: 'Nombre de noyaux', enonce: `<p>Un échantillon de ${mt} ; masse d'un noyau ${x.nom} : ${x.mt} kg.</p>`, parties: [partieN(x, mg, mt)] };
+  return { theme: 'Nombre de noyaux', enonce: `<p>Un échantillon de ${mt} ; masse d'un noyau ${x.nom} : ${x.mt} kg.</p>`, parties: [partieN(x, mg, mt)] };
 }
 function qEtot() {
   const x = hasard(NOYAUX), N = +(hasard([1, 2, 5, 10, 500, 1000]) * 1e-3 / x.m).toPrecision(3);
@@ -58,36 +58,36 @@ function qEtot() {
 function qPetrole() {
   const E = +(hasard([1.2, 2.5, 3.8, 5.9, 7.6, 8.6]) * Math.pow(10, hasard([10, 11, 12, 13]))).toPrecision(2);
   const m = E / PC;
-  return { theme: 'Masse de pétrole équivalente', enonce: `<p>Un combustible nucléaire libère E = ${sciTxt(E, 2)} J. Pouvoir calorifique du pétrole : PC = 42 MJ·kg<sup>−1</sup>.</p>`,
-    parties: [sci('Quelle masse de pétrole libère la même énergie par combustion ?', 'm =', m, 'kg', v => diagPetrole(v, E), `<p class="ph-calc">m = E / PC = ${sciTxt(E, 2)} / 42 × 10<sup>6</sup> = ${sciTxt(m, 3)} kg${m >= 1000 ? `, soit ${fmt(+(m / 1000).toPrecision(3))} t` : ''}</p>`)] };
+  return { theme: 'Masse de pétrole équivalente', enonce: `<p>Un combustible nucléaire libère E = ${sciTxt(E, 2)} J. Pouvoir calorifique du pétrole : PC = 42 MJ·kg<sup>−1</sup>.</p>`,
+    parties: [sci('Quelle masse de pétrole libère la même énergie par combustion ?', 'm =', m, 'kg', v => diagPetrole(v, E), `<p class="ph-calc">m = E / PC = ${sciTxt(E, 2)} / 42 × 10<sup>6</sup> = ${sciTxt(m, 3)} kg${m >= 1000 ? `, soit ${fmt(+(m / 1000).toPrecision(3))} t` : ''}</p>`)] };
 }
 function qActivite() {
   const P = hasard([1, 2, 5, 20, 50, 100, 240, 4400]), x = hasard(NOYAUX.filter(y => y.reac === 'désintégration α').concat([{ E: 8.64e-13 }, { E: 6.4e-13 }]));
   return { theme: 'Puissance et activité', enonce: `<p>Une source radioactive fournit une puissance thermique P = ${fmt(P)} W. Chaque désintégration libère ${sciTxt(x.E, 3)} J.</p>`,
-    parties: [sci('Combien de désintégrations par seconde ? C\'est l\'activité de la source.', 'A =', P / x.E, 'Bq', v => diagActivite(v, P, x.E), `<p class="ph-calc">A = P / E(1 désintégration) = ${fmt(P)} / ${sciTxt(x.E, 3)} = ${sciTxt(P / x.E, 3)} Bq</p>`)] };
+    parties: [sci('Combien de désintégrations par seconde ? C\'est l\'activité de la source.', 'A =', P / x.E, 'Bq', v => diagActivite(v, P, x.E), `<p class="ph-calc">A = P / E(1 désintégration) = ${fmt(P)} / ${sciTxt(x.E, 3)} = ${sciTxt(P / x.E, 3)} Bq</p>`)] };
 }
 function qNotion() {
   return hasard([
-    { theme: 'Pouvoir calorifique', parties: [{ type: 'choix', q: 'Le pouvoir calorifique du pétrole vaut 42 MJ·kg<sup>−1</sup>. Cela signifie :', colonne: true,
+    { theme: 'Pouvoir calorifique', parties: [{ type: 'choix', q: 'Le pouvoir calorifique du pétrole vaut 42 MJ·kg<sup>−1</sup>. Cela signifie :', colonne: true,
       options: [o('ok', 'la combustion de 1 kg de pétrole libère 42 × 10<sup>6</sup> J'), o('k', 'la combustion de 1 kg de pétrole libère 42 × 10<sup>3</sup> J'), o('inv', 'il faut 42 kg de pétrole pour libérer 1 MJ')], bonne: 'ok',
-      indices: { k: 'M (méga) = 10<sup>6</sup> ; k (kilo) = 10<sup>3</sup>.', inv: 'MJ·kg<sup>−1</sup> : des mégajoules par kilogramme, pour 1 kg.' },
+      indices: { k: 'M (méga) = 10<sup>6</sup> ; k (kilo) = 10<sup>3</sup>.', inv: 'MJ·kg<sup>−1</sup> : des mégajoules par kilogramme, pour 1 kg.' },
       solution: '<p>1 kg de pétrole libère 42 MJ = 42 × 10<sup>6</sup> J.</p>' }] },
-    { theme: 'Nombre de noyaux', parties: [{ type: 'choix', q: 'Pour calculer N = m / m(1 noyau) avec m = 5,00 g et m(1 noyau) en kg :', colonne: true,
-      options: [o('ok', 'on convertit d\'abord m en kg : 5,00 × 10<sup>−3</sup> kg'), o('g', 'on garde m en grammes'), o('mul', 'on multiplie les deux masses')], bonne: 'ok',
-      indices: { g: 'Les deux masses doivent être dans la même unité : sinon, le résultat est faux d\'un facteur 1 000.', mul: 'N = m / m(1 noyau) : on divise.' },
-      solution: '<p>Les deux masses dans la même unité : m = 5,00 g = 5,00 × 10<sup>−3</sup> kg.</p>' }] },
-    { theme: 'Activité', parties: [{ type: 'choix', q: 'Une source libère 4 400 W et chaque désintégration libère E. Le nombre de désintégrations par seconde est :', colonne: true,
+    { theme: 'Nombre de noyaux', parties: [{ type: 'choix', q: 'Pour calculer N = m / m(1 noyau) avec m = 5,00 g et m(1 noyau) en kg :', colonne: true,
+      options: [o('ok', 'on convertit d\'abord m en kg : 5,00 × 10<sup>−3</sup> kg'), o('g', 'on garde m en grammes'), o('mul', 'on multiplie les deux masses')], bonne: 'ok',
+      indices: { g: 'Les deux masses doivent être dans la même unité : sinon, le résultat est faux d\'un facteur 1 000.', mul: 'N = m / m(1 noyau) : on divise.' },
+      solution: '<p>Les deux masses dans la même unité : m = 5,00 g = 5,00 × 10<sup>−3</sup> kg.</p>' }] },
+    { theme: 'Activité', parties: [{ type: 'choix', q: 'Une source libère 4 400 W et chaque désintégration libère E. Le nombre de désintégrations par seconde est :', colonne: true,
       options: [o('ok', '4 400 / E'), o('inv', 'E / 4 400'), o('mul', '4 400 × E')], bonne: 'ok',
-      indices: { inv: 'Chaque seconde, la source libère 4 400 J : combien de fois E dans 4 400 J ?', mul: 'Chaque seconde, la source libère 4 400 J : combien de fois E dans 4 400 J ? On divise.' },
-      solution: '<p>A = P / E : 4 400 J par seconde, divisés par l\'énergie d\'une désintégration.</p>' }] },
+      indices: { inv: 'Chaque seconde, la source libère 4 400 J : combien de fois E dans 4 400 J ?', mul: 'Chaque seconde, la source libère 4 400 J : combien de fois E dans 4 400 J ? On divise.' },
+      solution: '<p>A = P / E : 4 400 J par seconde, divisés par l\'énergie d\'une désintégration.</p>' }] },
   ]);
 }
 // échantillon → N → E
 function qChaine() {
   const x = hasard(NOYAUX), [mg, mt] = hasard(MASSES.slice(0, 4)), N = mg * 1e-3 / x.m;
-  return { theme: 'Énergie d\'un échantillon', enonce: `<p>Un échantillon de ${mt} ; masse d'un noyau ${x.nom} : ${x.mt} kg. Chaque ${x.reac} libère ${sciTxt(x.E, 3)} J.</p>`,
-    parties: [partieN(x, mg, mt, 'a) Combien de noyaux contient l\'échantillon ?'),
-      sci('b) Quelle énergie libèrent-ils ?', 'E =', N * x.E, 'J', v => diagEtot(v, N, x.E), `<p class="ph-calc">E = ${sciTxt(N, 3)} × ${sciTxt(x.E, 3)} = ${sciTxt(N * x.E, 3)} J</p>`)] };
+  return { theme: 'Énergie d\'un échantillon', enonce: `<p>Un échantillon de ${mt} ; masse d'un noyau ${x.nom} : ${x.mt} kg. Chaque ${x.reac} libère ${sciTxt(x.E, 3)} J.</p>`,
+    parties: [partieN(x, mg, mt, 'a) Combien de noyaux contient l\'échantillon ?'),
+      sci('b) Quelle énergie libèrent-ils ?', 'E =', N * x.E, 'J', v => diagEtot(v, N, x.E), `<p class="ph-calc">E = ${sciTxt(N, 3)} × ${sciTxt(x.E, 3)} = ${sciTxt(N * x.E, 3)} J</p>`)] };
 }
 
 function tirage() {
@@ -97,10 +97,10 @@ function tirage() {
 NUC.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Énergie d\'un échantillon',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : nombre de noyaux dans un échantillon, énergie libérée, masse de pétrole équivalente, activité d\'une source d\'après sa puissance.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : nombre de noyaux dans un échantillon, énergie libérée, masse de pétrole équivalente, activité d\'une source d\'après sa puissance.</p>',
   questions: tirage,
   revoir: { href: 'module_3a_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_4.html', label: 'Module 4 : exercices →' },
+  suite: { href: 'module_4.html', label: 'Module 4 : exercices →' },
 });
 NUC.menu('module_3_questions');
 </script>

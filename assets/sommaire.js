@@ -38,6 +38,20 @@
      Chaque type de page d'une partie vaut la clé de la page (nom du fichier sans .html,
      ou nom de l'ancre en mode page unique). noms : libellés propres, ex. { questions: 'Vérification' }.
 
+   Page externe ↗ (module à faire situé dans une autre application, charte §5) : une partie
+     { nom: 'Double périodicité', externe: { app: 'double-periodicite', page: 'index', nom: 'Simulateur : double périodicité',
+                                             appNom: "Double périodicité d'une onde" } }
+       app    : dossier de l'autre application ; page : clé de la page dans SON PLAN,
+                ou 'index' pour une application sans plan (son accueil) ;
+       nom    : libellé de la page dans le sommaire et sur l'accueil ;
+       appNom : (facultatif) nom de l'autre application, écrit en petit (sinon « autre application »).
+     Lien : ../../<app>/modules/<page>.html (ou ../../<app>/index.html), dans une nouvelle fenêtre, icône ↗.
+     État lu dans la progression de l'autre application (localStorage <app>-progression, même origine) :
+       ✓ si la page est faite, sa note sinon ; page 'index' : faite dès que <app>-progression existe
+       (une application sans plan l'enregistre à l'ouverture, page 'index' faite : SOM.menu('accueil') avec plan: []).
+       L'état est relu quand la fenêtre redevient visible (retour depuis l'autre application).
+     La page compte dans n/m et dans le ✓ du module ; elle n'entre jamais dans « Reprendre ».
+
    Ordinateur (900 px et plus) : sommaire toujours ouvert dans une colonne à gauche.
    Téléphone : bandeau « où suis-je » ; un appui déroule le sommaire sous le bandeau.
    ============================================================ */
@@ -47,9 +61,10 @@
   const C = { nom: '', id: 'app', cleEx: null, spa: false, coches: true, liensDirects: false, flashcards: false, plan: [] };
 
   // types de pages d'une partie, dans l'ordre d'affichage
-  const ONGLETS = ['simulation', 'cours', 'exemple', 'questions', 'entrainement'];
+  // (externe : page ↗ d'une autre application, voir l'en-tête)
+  const ONGLETS = ['simulation', 'cours', 'exemple', 'questions', 'entrainement', 'externe'];
   const NOMS = { simulation: 'Simulation', cours: 'Cours', exemple: 'Exemple', questions: 'Questions', entrainement: 'Entraînement', fiche: 'Fiche récapitulative', exercices: 'Exercices' };
-  const ICONES = { simulation: '▸', cours: 'C', exemple: 'Ex', questions: 'Q', entrainement: 'E', fiche: '≡', exercices: '#' };
+  const ICONES = { simulation: '▸', cours: 'C', exemple: 'Ex', questions: 'Q', entrainement: 'E', fiche: '≡', exercices: '#', externe: '↗' };
   // page Flashcards (application avec flashcards) : comme un module sans numéro, en bas du sommaire
   const FC = { n: '⧉', titre: 'Flashcards', cle: 'flashcards' };
   let compteFc = '';                     // « cartes ajoutées / total », connu une fois les cartes chargées
@@ -79,9 +94,27 @@
   }
 
   const pagesPartie = pt => ONGLETS.filter(o => pt[o]);
-  const nomPage = (pt, o) => (pt && pt.noms && pt.noms[o]) || NOMS[o];
-  // une page est faite quand elle est terminée ou qu'elle a une note
-  const pageFaite = (pt, o, pages) => { const a = pages[pt[o]] || {}; return !!a.fait || a.note != null; };
+  const nomPage = (pt, o) => (pt && pt.noms && pt.noms[o]) || (o === 'externe' && pt && pt.externe ? pt.externe.nom : NOMS[o]);
+
+  /* ---------- Pages externes ↗ (module situé dans une autre application) ---------- */
+  // état { fait, note } lu dans la progression de l'autre application (jamais écrite ici)
+  function etatExterne(x) {
+    try {
+      const v = localStorage.getItem(x.app + '-progression');
+      if (v == null) return {};
+      if (x.page === 'index') return { fait: true };            // application sans plan : ouverte
+      const a = ((JSON.parse(v) || {}).pages || {})[x.page];
+      return a && typeof a === 'object' ? a : {};
+    } catch (e) { return {}; }
+  }
+  // adresse de la page dans l'autre application, depuis l'accueil (ou une application en une seule page) ou une page de module
+  const adresseExterne = (x, depuisAccueil) => (C.spa || depuisAccueil ? '../' : '../../') + x.app + (x.page === 'index' ? '/index.html' : '/modules/' + x.page + '.html');
+  const appExterne = x => x.appNom || 'autre application';
+  // lien qui ouvre l'autre application dans une nouvelle fenêtre (texte pour les lecteurs d'écran)
+  const attrsExterne = x => ` target="_blank" rel="noopener" data-externe="${x.app}/${x.page}" aria-label="${x.nom} (↗ ouvre l'application ${appExterne(x)} dans une nouvelle fenêtre)"`;
+
+  // une page est faite quand elle est terminée ou qu'elle a une note (page externe : dans l'autre application)
+  const pageFaite = (pt, o, pages) => { const a = o === 'externe' ? etatExterne(pt.externe) : pages[pt[o]] || {}; return !!a.fait || a.note != null; };
   const partieFaite = (pt, pages) => pagesPartie(pt).every(o => pageFaite(pt, o, pages));
   const parties = m => m.parties || [];
   // module affiché en une seule liste de pages : une seule partie, ou des sous-modules de cours
@@ -111,6 +144,7 @@
   function lien(m, p, onglet, depuisAccueil) {
     if (onglet === 'fiche') return adresse(m.fiche, depuisAccueil) + (!C.spa && p && p.slug && parties(m).length > 1 ? '#' + p.slug : '');
     if (onglet === 'exercices') return adresse(m.exercices, depuisAccueil);
+    if (onglet === 'externe') return adresseExterne(p.externe, depuisAccueil);
     return adresse(p[onglet], depuisAccueil);
   }
   const accueilApp = () => (C.spa ? 'index.html' : '../index.html');
@@ -168,7 +202,7 @@
   const faitModule = (m, pages, ex) => parties(m).reduce((n, pt) => n + pagesPartie(pt).filter(o => pageFaite(pt, o, pages)).length, 0) + exFaits(m, pages, ex);
   // état d'une page : ✓ ou meilleure note
   function etatPage(cle, pages) {
-    const a = pages[cle] || {};
+    const a = typeof cle === 'object' ? etatExterne(cle) : pages[cle] || {};      // page externe : son objet externe
     return a.note != null ? fmt(a.note) + '/20' : a.fait ? '✓' : '';
   }
 
@@ -177,8 +211,12 @@
   const feuille = (href, ic, lib, etat, ici) =>
     `<a class="som-page${ici ? ' ici' : ''}" href="${href}"${ici ? ' aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${lib}${etat ? `<em>${etat}</em>` : ''}</a>`;
   // les pages d'une partie (Cours ✓, Questions 16/20…)
+  // page externe ↗ : nom, application d'origine en petit, nouvelle fenêtre
+  const feuilleExterne = (m, p, pages) =>
+    `<a class="som-page som-ext" href="${lien(m, p, 'externe')}"${attrsExterne(p.externe)}><span class="ic" aria-hidden="true">${ICONES.externe}</span>` +
+    `<span class="som-ext-t">${p.externe.nom}<small>${appExterne(p.externe)}</small></span>${C.coches && etatPage(p.externe, pages) ? `<em>${etatPage(p.externe, pages)}</em>` : ''}</a>`;
   const feuillesPages = (m, p, s, pages) =>
-    pagesPartie(p).map(o => feuille(lien(m, p, o), ICONES[o], nomPage(p, o), C.coches ? etatPage(p[o], pages) : '', s.m === m && s.p === p && s.onglet === o)).join('');
+    pagesPartie(p).map(o => o === 'externe' ? feuilleExterne(m, p, pages) : feuille(lien(m, p, o), ICONES[o], nomPage(p, o), C.coches ? etatPage(p[o], pages) : '', s.m === m && s.p === p && s.onglet === o)).join('');
   // la fiche du module (p : la partie dont la fiche s'ouvre à l'ancre ; null : la fiche entière)
   const feuilleFiche = (m, p, s) => (m.fiche ? feuille(lien(m, p, 'fiche'), ICONES.fiche, 'Fiche', '', s.m === m && s.onglet === 'fiche' && (!p || s.p === p)) : '');
   const feuilleEx = (m, s, pages) => feuille(lien(m, null, 'exercices'), ICONES.exercices, m.exNom || 'Exercices', m.nbEx || !C.coches ? '' : etatPage(m.exercices, pages), s.m === m && s.onglet === 'exercices');
@@ -197,7 +235,7 @@
       else enfants = m.parties.map((p, i) => {
         const pici = ici && s.p === p, id = `som-s${m.n}-${i}`;
         return `<button type="button" class="som-spt${pici ? ' ici' : ''}" aria-expanded="${pici}" aria-controls="${id}">${C.coches && partieFaite(p, pages) ? '<span class="som-v" aria-label="terminé">✓</span>' : ''}${p.nom}${chev}</button>` +
-          `<div class="som-spages" id="${id}"${pici ? '' : ' hidden'}>${feuillesPages(m, p, s, pages)}${feuilleFiche(m, p, s)}</div>`;
+          `<div class="som-spages" id="${id}"${pici ? '' : ' hidden'}>${feuillesPages(m, p, s, pages)}${p.externe ? '' : feuilleFiche(m, p, s)}</div>`;
       }).join('') + (m.exercices ? `<div class="som-spages">${feuilleEx(m, s, pages)}</div>` : '');
       return `<div class="som-smod${ici ? ' ici' : ''}"><button type="button" class="som-sligne" aria-expanded="${ici}" aria-controls="som-s${m.n}">` +
         `<span class="som-snum${fini ? ' fait' : ''}">${fini ? '✓' : m.n}</span><span class="som-st">${m.titre}</span>${C.coches ? `<span class="som-sn">${n}/${t}</span>` : ''}${chev}</button>` +
@@ -210,6 +248,16 @@
     return `<div class="som-smod${ici ? ' ici' : ''}"><button type="button" class="som-sligne" aria-expanded="${ici}" aria-controls="som-sfc">` +
       `<span class="som-snum">${FC.n}</span><span class="som-st">${FC.titre}</span><span class="som-sn" data-rev-compte>${compteFc}</span>${chev}</button>` +
       `<div class="som-senf" id="som-sfc"${ici ? '' : ' hidden'}><div class="som-spages">${feuille(adresse(FC.cle), FC.n, FC.titre, '', ici)}</div></div></div>`;
+  }
+
+  /* ---------- Retour sur la fenêtre (pages externes ↗) ---------- */
+  const aDesExternes = () => C.plan.some(m => parties(m).some(pt => pt.externe));
+  // fn() quand la fenêtre redevient visible ou reprend le focus (une seule fois par retour)
+  function surRetour(fn) {
+    let dernier = 0;
+    const f = () => { if (document.visibilityState !== 'visible' || Date.now() - dernier < 300) return; dernier = Date.now(); fn(); };
+    document.addEventListener('visibilitychange', f);
+    addEventListener('focus', f);
   }
 
   /* ---------- Navigation d'une page ---------- */
@@ -231,6 +279,10 @@
     pageEnCours = C.spa ? cle : null;
     // accueil de l'application : bandeau avec le lien vers le portail des applications (application mobile : sans ce lien)
     if (cle === 'accueil' || !situer(cle)) {
+      // application d'un seul écran (plan vide) : son ouverture est enregistrée (page 'index' faite),
+      // pour qu'une page externe ↗ d'une autre application la compte comme faite ; une page faite
+      // (et non seulement « derniere ») est aussi gardée par l'enregistrement de la progression (assets/progression.js)
+      if (!C.plan.length && C.id !== 'app') { const p = lireProg(); p.pages = p.pages || {}; if (!(p.pages.index && p.pages.index.fait)) { p.pages.index = { fait: true }; ecrireProg(p); } }
       racine.innerHTML = '<div class="app-topbar">' + (C.mobile ? '' : '<a class="som-pilule" href="../index.html"><span aria-hidden="true">←</span><span class="som-court">Applications</span><span class="som-long">Toutes les applications</span></a>') +
         `<div class="app-topbar-title"><span class="app-name">${C.nom}</span></div></div><div class="app-topbar-spacer"></div>`;
       return;
@@ -266,6 +318,23 @@
       if (ici && col.scrollHeight > col.clientHeight) col.scrollTop = ici.offsetTop - col.clientHeight / 2;
     }
     rendre();
+    // pages externes ↗ : leur état est relu quand la fenêtre redevient visible (retour depuis l'autre
+    // application), sans replier ce que l'élève a déplié ni rouvrir le sommaire du téléphone
+    if (aDesExternes()) surRetour(() => {
+      const ouverts = [...racine.querySelectorAll('[aria-expanded="true"][aria-controls]')].map(b => b.getAttribute('aria-controls'));
+      const col = racine.querySelector('.som-som'), haut = col ? col.scrollTop : 0, tel = html.classList.contains('som-ouvert');
+      rendre();
+      racine.querySelectorAll('button[aria-controls]').forEach(b => {
+        const id = b.getAttribute('aria-controls'), oui = ouverts.indexOf(id) >= 0;
+        if (b.classList.contains('som-ou')) return;
+        b.setAttribute('aria-expanded', oui);
+        const z = document.getElementById(id);
+        if (z) z.hidden = !oui;
+      });
+      const col2 = racine.querySelector('.som-som');
+      if (col2) col2.scrollTop = haut;
+      if (tel) ouvrir(true);
+    });
     // flashcards : compteur de l'entrée du sommaire, une fois les cartes chargées
     flashcards((REV, app) => {
       compteFc = REV.compte(app);
@@ -283,16 +352,23 @@
   }
 
   /* ---------- Accueil : une ligne dépliable par module ---------- */
-  function accueil(zone) {
+  function accueil(zone, garder) {
     const prog = lireProg(), pages = prog.pages || {}, ex = lireExercices();
     const derniere = prog.derniere && situer(prog.derniere) ? prog.derniere : null;
     const total = totalModule, fait = m => faitModule(m, pages, ex);
     // module demandé par l'adresse (#module-3 : résultat de recherche du portail), sinon celui de la dernière page, sinon le premier non terminé
     const demande = !C.spa && (/^#module-(\d+)$/.exec(location.hash) || [])[1], mDemande = demande && C.plan.find(m => String(m.n) === demande);
-    const ouvert = mDemande ? mDemande.n : derniere ? situer(derniere).m.n : (C.plan.find(m => fait(m) < total(m)) || C.plan[0]).n;
+    const ouvert = garder !== undefined ? garder : mDemande ? mDemande.n : derniere ? situer(derniere).m.n : (C.plan.find(m => fait(m) < total(m)) || C.plan[0]).n;
     const bt = (cle, txt, cls) => `<a class="som-bt${cls ? ' ' + cls : ''}" href="${adresse(cle, true)}">${txt}</a>`;
     // bouton d'une page d'une partie : Cours ✓, Questions 14/20…
     const btPage = (pt, o) => {
+      // page externe ↗ : nouvelle fenêtre, application d'origine en petit
+      if (o === 'externe') {
+        const x = pt.externe, e = etatExterne(x), fini = pageFaite(pt, o, pages);
+        const etat = e.note != null ? ` <span class="som-sc">${fmt(e.note)}/20</span>` : fini ? ' ✓' : '';
+        return `<a class="som-bt som-bt-ext${fini ? ' fait' : ''}" href="${adresseExterne(x, true)}"${attrsExterne(x)}><span aria-hidden="true">${ICONES.externe}</span>` +
+          `<span class="som-ext-t">${x.nom}${etat}<small>${appExterne(x)}</small></span></a>`;
+      }
       const a = pages[pt[o]] || {}, fini = pageFaite(pt, o, pages);
       const etat = a.note != null ? ` <span class="som-sc">${fmt(a.note)}/20</span>` : fini ? ' ✓' : '';
       return bt(pt[o], nomPage(pt, o) + etat, (fini ? 'fait ' : '') + (derniere === pt[o] ? 'ici' : ''));
@@ -332,7 +408,12 @@
       }
     }));
     // module demandé : sa ligne est amenée au milieu de l'écran
-    if (mDemande) { const b = document.getElementById('som-b' + mDemande.n); if (b) setTimeout(() => b.scrollIntoView({ block: 'center' }), 60); }
+    if (mDemande && garder === undefined) { const b = document.getElementById('som-b' + mDemande.n); if (b) setTimeout(() => b.scrollIntoView({ block: 'center' }), 60); }
+    // pages externes ↗ : état relu au retour depuis l'autre application (le module déplié reste déplié)
+    if (garder === undefined && aDesExternes()) surRetour(() => {
+      const b = zone.querySelector('button.som-ligne[aria-expanded="true"]');
+      accueil(zone, b ? +b.id.replace('som-b', '') : null);
+    });
   }
 
   // (chaque appel remplace toute la configuration : une page qui charge le moteur d'une autre application la reconfigure)

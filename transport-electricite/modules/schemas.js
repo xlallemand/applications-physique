@@ -154,7 +154,7 @@
     const connue = x => x === 'm' ? o.connues.indexOf('m') !== -1 : o.connues.indexOf(x) !== -1;
     const inconnues = r => ['m'].concat(r.syms).filter(x => !connue(x));
     const bonnes = R.filter(r => ['m'].concat(r.syms).indexOf(o.cherche) !== -1 && inconnues(r).length === 1);
-    if (bonnes.length !== 1) throw new Error('choixFormule : la bonne formule n\'est pas unique (' + o.cherche + ')');
+    if (bonnes.length !== 1) throw new Error('choixFormule : la bonne formule n\'est pas unique (' + o.cherche + ')');
     const indices = {};
     R.forEach(r => {
       if (r === bonnes[0]) return;
@@ -163,13 +163,13 @@
       const et = t => t.length > 1 ? t.slice(0, -1).join(', ') + ' et ' + t[t.length - 1] : t[0];
       indices[r.id] = ['m'].concat(r.syms).indexOf(o.cherche) === -1
         ? `Cette formule ne contient pas ${o.cherche === 'm' ? mN : SYM(o.cherche)}, la grandeur cherchée.`
-        : `Dans cette formule, ${et(inc)} ${inc.length > 1 ? 'sont inconnus' : 'est inconnu'} : il faut une formule avec une seule inconnue.`;
+        : `Dans cette formule, ${et(inc)} ${inc.length > 1 ? 'sont inconnus' : 'est inconnu'} : il faut une formule avec une seule inconnue.`;
     });
     const r = bonnes[0], quoi = ['m'].concat(r.syms).filter(x => connue(x) && x !== o.cherche).map(x => x === 'm' ? mN : SYM(x));
     return {
-      type: 'choix', q: o.q || `Laquelle des trois formules ${o.nomTr ? `de ${o.nomTr} ` : ''}utilises-tu pour calculer ${o.cherche === 'm' ? mN : SYM(o.cherche)} ?`,
+      type: 'choix', q: o.q || `Laquelle des trois formules ${o.nomTr ? `de ${o.nomTr} ` : ''}utilises-tu pour calculer ${o.cherche === 'm' ? mN : SYM(o.cherche)} ?`,
       options: R.map(x => ({ id: x.id, label: `${mN} = ${x.html}` })), bonne: r.id, melanger: false, indices,
-      solution: o.solution || `<p>${mN} = ${r.html} : on connaît ${quoi.join(' et ')}, il ne reste qu'une inconnue, ${o.cherche === 'm' ? mN : SYM(o.cherche)}.</p>`,
+      solution: o.solution || `<p>${mN} = ${r.html} : on connaît ${quoi.join(' et ')}, il ne reste qu'une inconnue, ${o.cherche === 'm' ? mN : SYM(o.cherche)}.</p>`,
     };
   }
 
@@ -220,7 +220,7 @@
     o = o || {};
     const C = { encre: '#16181d', encre2: '#55585f', gris: '#e9e6df', bord: '#bdb6a8', blanc: '#ffffff', accent: '#5a3fc4', fond: '#f3f1ec' };
     const X0 = 34, MW = 63;                                   // début des rangées, largeur d'un module
-    let s = `<div class="te-defile"><svg class="sch-tableau" viewBox="0 0 700 ${o.reperes ? 404 : 364}" role="img" aria-label="Tableau électrique : chaque rangée commence par un interrupteur différentiel 30 mA, suivi des disjoncteurs des circuits">`;
+    let s = `<div class="te-defile"><svg class="sch-tableau" viewBox="0 0 700 ${o.reperes ? 404 : 364}" role="img" aria-label="Tableau électrique : chaque rangée commence par un interrupteur différentiel 30 mA, suivi des disjoncteurs des circuits">`;
     s += `<rect x="8" y="8" width="684" height="348" rx="14" fill="${C.fond}" stroke="${C.bord}" stroke-width="2"/>`;
     // une rangée : différentiel (2 modules) puis disjoncteurs (1 module chacun)
     const rangee = (y, diff, disj) => {

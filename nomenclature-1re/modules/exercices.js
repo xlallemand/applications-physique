@@ -64,8 +64,8 @@
   function ligneTableau([n, s, donnee]) {
     const m = mol(s), r = O.nommer(m);
     const donne = donnee === 'nom' ? `<p class="nom-mol-n"><b>${r.nom}</b></p>` : dessin(s, { ecriture: 'semi', label: 'formule semi-développée donnée' });
-    const etape = donnee === 'nom' ? O.partieDessin(m, { ecriture: 'semi', q: 'Formule semi-développée :' }) : partieNom(m, { ecriture: 'semi', q: 'Nom :' });
-    return enchainer(`<p><b>Ligne ${n}</b> : ${CASES[donnee]} donnée.</p>${donne}`, [etape],
+    const etape = donnee === 'nom' ? O.partieDessin(m, { ecriture: 'semi', q: 'Formule semi-développée :' }) : partieNom(m, { ecriture: 'semi', q: 'Nom :' });
+    return enchainer(`<p><b>Ligne ${n}</b> : ${CASES[donnee]} donnée.</p>${donne}`, [etape],
       `<div class="nom-mols">${O.dessinHTML(m, { ecriture: 'semi', couleurs: r.couleurs, numeros: r.numeros })}</div><p class="nom-mol-n">${O.nomHTML(r.parties)}</p>`);
   }
   const ex4 = () => EX4.map(ligneTableau);
@@ -76,19 +76,19 @@
 
   const CTX = (titre, txt) => `<p class="er-contexte"><b>${titre}</b></p><p class="er-contexte">${txt}</p>`;
   const EXERCICES = [
-    { id: '1', num: '1', groupe: 'groupes', titre: 'Exercice 1 : reconnaître un groupe caractéristique', desc: '7 molécules : entourer et nommer le groupe, donner la famille',
-      contexte: CTX('Exercice 1 : reconnaître un groupe caractéristique.', 'Pour chaque molécule, entourer et nommer le groupe caractéristique. Associer à chaque groupe caractéristique la classe fonctionnelle correspondante. C₂H₅ est une écriture abrégée : touche ⓘ sous la formule.'),
+    { id: '1', num: '1', groupe: 'groupes', titre: 'Exercice 1 : reconnaître un groupe caractéristique', desc: '7 molécules : entourer et nommer le groupe, donner la famille',
+      contexte: CTX('Exercice 1 : reconnaître un groupe caractéristique.', 'Pour chaque molécule, entourer et nommer le groupe caractéristique. Associer à chaque groupe caractéristique la classe fonctionnelle correspondante. C₂H₅ est une écriture abrégée : touche ⓘ sous la formule.'),
       parties: ex1 },
-    { id: '2', num: '2', groupe: 'groupes', titre: 'Exercice 2 : plusieurs groupes caractéristiques', desc: 'Acides lactique, malique et pyruvique, glycéraldéhyde, acétoïne : tous les groupes',
-      contexte: CTX('Exercice 2 : plusieurs groupes caractéristiques.', 'Pour chacune des molécules suivantes, entourer et nommer les groupes caractéristiques. Associer à chaque groupe caractéristique la classe fonctionnelle correspondante.'),
+    { id: '2', num: '2', groupe: 'groupes', titre: 'Exercice 2 : plusieurs groupes caractéristiques', desc: 'Acides lactique, malique et pyruvique, glycéraldéhyde, acétoïne : tous les groupes',
+      contexte: CTX('Exercice 2 : plusieurs groupes caractéristiques.', 'Pour chacune des molécules suivantes, entourer et nommer les groupes caractéristiques. Associer à chaque groupe caractéristique la classe fonctionnelle correspondante.'),
       parties: ex2 },
-    { id: '3', num: '3', groupe: 'noms', titre: 'Exercice 3 : écrire une formule semi-développée à partir d\'un nom', desc: '4 noms : dessiner la formule semi-développée',
-      contexte: CTX('Exercice 3 : écrire une formule semi-développée à partir d\'un nom.', 'Écrire les formules semi-développées des molécules suivantes. Le nom de ce que tu dessines s\'affiche en direct.'),
+    { id: '3', num: '3', groupe: 'noms', titre: 'Exercice 3 : écrire une formule semi-développée à partir d\'un nom', desc: '4 noms : dessiner la formule semi-développée',
+      contexte: CTX('Exercice 3 : écrire une formule semi-développée à partir d\'un nom.', 'Écrire les formules semi-développées des molécules suivantes. Le nom de ce que tu dessines s\'affiche en direct.'),
       parties: ex3 },
-    { id: '4', num: '4', groupe: 'noms', titre: 'Exercice 4 : compléter le tableau', desc: '8 lignes : la formule semi-développée ou le nom',
-      contexte: CTX('Exercice 4 : compléter le tableau.', 'Chaque ligne donne une case : la formule semi-développée ou le nom. Complète l\'autre.'), parties: ex4 },
-    { id: '5', num: '5', groupe: 'noms', titre: 'Exercice 5 : alcanes cycliques', desc: 'Nommer quatre alcanes cycliques',
-      contexte: CTX('Exercice 5 : alcanes cycliques.', 'Nommer les molécules suivantes.'), parties: ex5 },
+    { id: '4', num: '4', groupe: 'noms', titre: 'Exercice 4 : compléter le tableau', desc: '8 lignes : la formule semi-développée ou le nom',
+      contexte: CTX('Exercice 4 : compléter le tableau.', 'Chaque ligne donne une case : la formule semi-développée ou le nom. Complète l\'autre.'), parties: ex4 },
+    { id: '5', num: '5', groupe: 'noms', titre: 'Exercice 5 : alcanes cycliques', desc: 'Nommer quatre alcanes cycliques',
+      contexte: CTX('Exercice 5 : alcanes cycliques.', 'Nommer les molécules suivantes.'), parties: ex5 },
   ];
   const GROUPES_EX = [
     { id: 'groupes', titre: 'Reconnaître les groupes caractéristiques' },

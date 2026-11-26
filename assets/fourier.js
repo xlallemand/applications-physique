@@ -384,7 +384,7 @@
     const racine = el('div', 'fo-simu');
     racine.innerHTML = `
       ${o.signal ? `<div class="fo-bloc"><div class="fo-g" data-a="gs"></div><p class="fo-lect-mes" data-a="lm" aria-live="polite" hidden></p>
-        ${o.legende === false ? '' : `<div class="fo-legende" data-a="leg" aria-label="Composantes du signal : touche-en une pour la mettre en valeur"></div>`}</div>` : ''}
+        ${o.legende === false ? '' : `<div class="fo-legende" data-a="leg" aria-label="Composantes du signal : touche-en une pour la mettre en valeur"></div>`}</div>` : ''}
       ${o.spectre ? `<div class="fo-bloc"><div class="fo-g fo-g-spectre" data-a="gf"></div>
         <p class="fo-lecture" data-a="lec" aria-live="polite"></p>
         ${o.commandes ? `<div class="fo-fin">

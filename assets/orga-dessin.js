@@ -767,7 +767,7 @@
   function aidesCondensees(mol) {
     const ts = [...new Set(mol.atomes.filter(a => a.etiq).map(a => a.etiq))];
     if (!ts.length) return '';
-    return `<p class="orga-cond">${ts.map(t => `<span class="orga-cond-t"><span>${formuleHTML(t)}</span>${info(O.AIDES_CONDENSEES[t] || 'Écriture abrégée d\'un groupe d\'atomes.', 'Que veut dire ' + t + ' ?')}</span>`).join('')}</p>`;
+    return `<p class="orga-cond">${ts.map(t => `<span class="orga-cond-t"><span>${formuleHTML(t)}</span>${info(O.AIDES_CONDENSEES[t] || 'Écriture abrégée d\'un groupe d\'atomes.', 'Que veut dire ' + t + ' ?')}</span>`).join('')}</p>`;
   }
 
   function dessiner(zone, mol, o) {
@@ -1081,7 +1081,7 @@
       const l = ed.mol.liaisons[k];
       let nouv = ed.ordre;
       if (nouv === l.o) nouv = 1;
-      if (nouv === l.o) return message('Pour changer une liaison, choisis « = » ou « ≡ » puis touche-la.', 'info');
+      if (nouv === l.o) return message('Pour changer une liaison, choisis « = » ou « ≡ » puis touche-la.', 'info');
       const plus = nouv - l.o;
       if (plus > 0) {
         const m = O.diagLiaison(ed.mol, l.a, plus) || O.diagLiaison(ed.mol, l.b, plus);
@@ -1129,13 +1129,13 @@
 
     // outil H (H à compléter)
     function outilH(cible) {
-      if (ed.hydro !== 'eleve') return message('Les H se complètent seuls : choisis « H à compléter » pour les écrire toi-même.', 'info');
+      if (ed.hydro !== 'eleve') return message('Les H se complètent seuls : choisis « H à compléter » pour les écrire toi-même.', 'info');
       if (cible.type === 'h') { memoriser(); ed.h[+cible.v] -= 1; return changement(); }
       if (cible.type !== 'atome') return;
       const i = +cible.v, el = ed.mol.atomes[i].el;
-      if (ed.ec === 'topo' && el === 'C') return message('En topologique, on n\'écrit pas les H des atomes de carbone : seulement ceux des autres atomes (OH, NH₂…).', 'info');
+      if (ed.ec === 'topo' && el === 'C') return message('En topologique, on n\'écrit pas les H des atomes de carbone : seulement ceux des autres atomes (OH, NH₂…).', 'info');
       ed.sel = i;
-      if (O.HALOGENES.includes(el)) { ed.rendre(); return message(`Un ${el} ne porte jamais d'H : il ne fait qu'une liaison.`, 'info'); }
+      if (O.HALOGENES.includes(el)) { ed.rendre(); return message(`Un ${el} ne porte jamais d'H : il ne fait qu'une liaison.`, 'info'); }
       if (ed.ec === 'developpee') {
         const h = ed.h[i] || 0;
         if (O.somme(ed.mol, i) + h >= O.valence(el)) { ed.rendre(); return message(`${O.CE(el).replace(/^./, c => c.toUpperCase())} a déjà ${O.valence(el)} liaisons en comptant ses H.`); }
@@ -1155,7 +1155,7 @@
     function verifierH() {
       if (ed.hydro !== 'eleve') return message('Les H sont complétés automatiquement.', 'info');
       const i = ed.mol.atomes.findIndex((a, j) => hAEcrire(j) && O.diagH(ed.mol, j, ed.h[j]));
-      if (i < 0) return message(`Juste ! Tous les H sont à leur place : ${O.formuleBrute(ed.mol, { html: true })}.`, 'ok');
+      if (i < 0) return message(`Juste ! Tous les H sont à leur place : ${O.formuleBrute(ed.mol, { html: true })}.`, 'ok');
       ed.sel = i; ed.rendre();
       message(O.diagH(ed.mol, i, ed.h[i]), 'faux');
     }
@@ -1239,9 +1239,9 @@
       const fb = O.formuleBrute(ed.mol, { html: true });
       let h = '';
       if (o.brute) h = eleve
-        ? `Formule brute avec tes H : <b>${O.formuleBrute(ed.mol, { html: true, h: hEleve().map(x => x || 0) })}</b>${ed.hJustes() ? ' ✓' : ''}`
-        : `Formule brute : <b>${fb}</b>`;
-      if (ed.nom) h += `<span class="orga-ed-nom">Ta molécule : ${ed.nom.horsProgramme ? `<i>nom hors programme</i> (${ed.nom.horsProgramme})` : nomHTML(ed.nom.parties)}</span>`;
+        ? `Formule brute avec tes H : <b>${O.formuleBrute(ed.mol, { html: true, h: hEleve().map(x => x || 0) })}</b>${ed.hJustes() ? ' ✓' : ''}`
+        : `Formule brute : <b>${fb}</b>`;
+      if (ed.nom) h += `<span class="orga-ed-nom">Ta molécule : ${ed.nom.horsProgramme ? `<i>nom hors programme</i> (${ed.nom.horsProgramme})` : nomHTML(ed.nom.parties)}</span>`;
       info.innerHTML = h;
       if (!premier || o.surChangeDebut) { if (o.surChange) o.surChange(ed); }
     }
@@ -1258,7 +1258,7 @@
     };
     ed.changerH = function (m) {
       ed.hydro = m;
-      if (m === 'eleve') message(ed.ec === 'topo' ? 'Choisis « H », puis touche chaque atome autre que C pour écrire ses H.' : 'Choisis « H », puis touche chaque atome pour écrire ses H.', 'info');
+      if (m === 'eleve') message(ed.ec === 'topo' ? 'Choisis « H », puis touche chaque atome autre que C pour écrire ses H.' : 'Choisis « H », puis touche chaque atome pour écrire ses H.', 'info');
       else message('');
       changement();
     };
@@ -1332,7 +1332,7 @@
   };
   const CONSIGNES = {
     replier: 'Touche chaque atome qui porte des H pour les regrouper sur lui.',
-    effacer: 'Touche chaque C (CH₃, CH₂, CH, C) pour l\'effacer : les traits restent.',
+    effacer: 'Touche chaque C (CH₃, CH₂, CH, C) pour l\'effacer : les traits restent.',
     ajouterC: 'Touche chaque sommet et chaque bout de trait, et choisis C, CH, CH₂ ou CH₃.',
   };
 
@@ -1397,7 +1397,7 @@
       if (!st.fini && !st.anime) sc.px.forEach((p, i) => { cibles += `<circle class="orga-cible" data-cible="a${i}" cx="${r1(p.x)}" cy="${r1(p.y)}" r="22"/>`; });
       sc.H.forEach(hh => { if (!st.fini && !st.anime) cibles += `<circle class="orga-cible" data-cible="a${hh.de}" cx="${r1(hh.x)}" cy="${r1(hh.y)}" r="14"/>`; });
       svg.innerHTML = svgCorps(sc, { points: ec === 'topo' && ph() === 'ajouterC' && !st.fini }) + `<g class="orga-cibles">${cibles}</g>`;
-      svg.setAttribute('aria-label', NOM_EC[ec] + ' : ' + O.formuleBrute(mol));
+      svg.setAttribute('aria-label', NOM_EC[ec] + ' : ' + O.formuleBrute(mol));
       return sc;
     }
 
@@ -1412,7 +1412,7 @@
     function rendre() {
       const p = ph();
       racine.querySelector('.orga-conv-phrase').hidden = o.phrase === false;
-      racine.querySelector('.orga-conv-phrase').innerHTML = `<b class="cle-titre">${p === 'replier' ? 'Développée → semi-développée' : p === 'effacer' ? 'Semi-développée → topologique' : 'Topologique → semi-développée'}.</b> « ${PHRASES[p]} »`;
+      racine.querySelector('.orga-conv-phrase').innerHTML = `<b class="cle-titre">${p === 'replier' ? 'Développée → semi-développée' : p === 'effacer' ? 'Semi-développée → topologique' : 'Topologique → semi-développée'}.</b> « ${PHRASES[p]} »`;
       racine.querySelector('.orga-conv-consigne').textContent = st.fini ? '' : CONSIGNES[p];
       if (p === 'replier') st.sc = dessin('developpee', PX.developpee, { replies: st.replies });
       else if (p === 'effacer') st.sc = dessin('semi', PX.semi, { masquer: st.effaces });
@@ -1448,20 +1448,20 @@
         mol.atomes.forEach((a, i) => st.replies.add(i));
         rendre();
         message('');
-        fait('Tous les H sont regroupés : on resserre, c\'est la formule semi-développée.');
+        fait('Tous les H sont regroupés : on resserre, c\'est la formule semi-développée.');
         transition('developpee', PX.developpee, PX.semi, { replies: st.replies }, () => {
           if (st.phase + 1 < phases.length) { st.phase++; st.cadre = null; rendre(); }
           else { st.fini = true; st.cadre = null; dessin('semi', PX.semi, {}); terminer(); }
         });
       } else if (p === 'effacer') {
         message('');
-        fait('Tous les C sont effacés : il reste les traits et les autres atomes. Mets maintenant la chaîne en zigzag.');
+        fait('Tous les C sont effacés : il reste les traits et les autres atomes. Mets maintenant la chaîne en zigzag.');
         actions.innerHTML = '<button type="button" class="btn-primary orga-conv-zz">Mettre en zigzag</button>';
         setTimeout(() => actions.scrollIntoView({ behavior: animer() ? 'smooth' : 'auto', block: 'nearest' }), 60);
       } else {
         // tous les C sont écrits : c'est déjà une formule semi-développée (redresser est facultatif)
         rendre();
-        terminer('Tous les C sont écrits avec leurs H : c\'est la formule semi-développée.', true);
+        terminer('Tous les C sont écrits avec leurs H : c\'est la formule semi-développée.', true);
       }
     }
 
@@ -1499,7 +1499,7 @@
       const p = ph(), el = mol.atomes[i].el, nh = O.nbH(mol, i);
       if (p === 'replier') {
         if (st.replies.has(i)) return;
-        if (!nh) return message(`${O.CE(el).replace(/^./, c => c.toUpperCase())} ne porte aucun H : rien à regrouper.`, 'info');
+        if (!nh) return message(`${O.CE(el).replace(/^./, c => c.toUpperCase())} ne porte aucun H : rien à regrouper.`, 'info');
         const replier = () => {
           message('');
           // les H glissent vers leur atome puis disparaissent
@@ -1523,17 +1523,17 @@
         bulle(zoneSvg, p2.x, p2.y, ops, k => {
           const h = ops[k].h;
           if (h === nh) return replier();
-          message(`Tu as regroupé ${h} H : ${O.CE(el)} en porte ${nh}. Compte les H liés à cet atome.`);
+          message(`Tu as regroupé ${h} H : ${O.CE(el)} en porte ${nh}. Compte les H liés à cet atome.`);
         });
       } else if (p === 'effacer') {
-        if (el !== 'C') return message(`On n'efface que les C et leurs H : ${O.etiquetteH(el, nh, true)} reste.`);
+        if (el !== 'C') return message(`On n'efface que les C et leurs H : ${O.etiquetteH(el, nh, true)} reste.`);
         if (st.effaces.has(i)) return;
         message('');
         const g = svg.querySelector(`.orga-at[data-a="${i}"]`);
         const fin = () => { st.effaces.add(i); rendre(); if (!aTraiter().length) finPhase(); };
         if (g && animer()) { g.style.transition = 'opacity .25s'; g.style.opacity = '0'; setTimeout(fin, 260); } else fin();
       } else {
-        if (el !== 'C') return message(`Au bout de ce trait il y a déjà ${O.etiquetteH(el, nh, true)} : pas de C à ajouter.`);
+        if (el !== 'C') return message(`Au bout de ce trait il y a déjà ${O.etiquetteH(el, nh, true)} : pas de C à ajouter.`);
         if (st.ajoutes.has(i)) return;
         const p2 = versConteneur(svg, zoneSvg, st.sc.px[i]);
         const ops = optionsH('C');
@@ -1541,7 +1541,7 @@
           const h = ops[k].h, traits = O.somme(mol, i);
           if (h === nh) { message(''); st.ajoutes.add(i); rendre(); if (!aTraiter().length) finPhase(); return; }
           const quoi = mol.liaisons.filter(l => l.a === i || l.b === i).length > 1 ? 'Ce sommet' : 'Ce bout de trait';
-          message(`${quoi} a ${traits} trait${traits > 1 ? 's' : ''} : 4 − ${traits} = ${nh} H, c'est ${O.etiquetteH('C', nh, true)}.`);
+          message(`${quoi} a ${traits} trait${traits > 1 ? 's' : ''} : 4 − ${traits} = ${nh} H, c'est ${O.etiquetteH('C', nh, true)}.`);
         });
       }
     }
@@ -1594,21 +1594,21 @@
 
   // règles du cours avec un mini-exemple (bulles des outils de nomenclature)
   const BULLES = {
-    chaine: '<b>La chaîne la plus longue</b> donne le nom. Elle n\'est pas toujours dessinée en ligne droite : suis tous les chemins d\'un bout à l\'autre. À longueur égale, on prend celle qui porte le plus de ramifications. Dans un alcane cyclique, la chaîne principale est le cycle.',
-    chaineGroupe: '<b>La chaîne principale contient le groupe caractéristique</b> : pour une C=C, ses deux C ; sinon le C qui porte le groupe.',
-    ramif: '<b>Nom d\'une ramification</b> : le nom de l\'alcane, en remplaçant « ane » par « yl ». –CH₃ : méthyl ; –CH₂–CH₃ : éthyl ; –CH₂–CH₂–CH₃ : propyl.',
-    numeros: '<b>Numérotation</b> : on numérote la chaîne principale par la droite ou par la gauche, pour que les numéros soient les plus petits possibles. Exemple : 2-méthylpentane, pas 4-méthylpentane.',
-    groupeNum: '<b>Le n° est celui de l\'atome de carbone qui porte le groupe caractéristique.</b> Il a le plus petit numéro possible. Exemple : butan-2-ol. Pour -al, -oïque, -oate, -amide, ce C est le n° 1 (on ne l\'écrit pas).',
-    multi: '<b>Ramifications identiques</b> : di (2), tri (3), tétra (4), penta (5), hexa (6), avec un numéro pour chacune. 2,3,5-triméthyl : un –CH₃ sur les carbones 2, 3 et 5.',
-    alpha: '<b>Ordre alphabétique</b> : é avant m (éthyl avant méthyl) ; di, tri… ne comptent pas. Exemple : 3-éthyl-2,2-diméthylhexane.',
-    tirets: '<b>Tirets et virgules</b> : une virgule entre deux chiffres (2,3), un tiret entre un chiffre et une lettre (2-méthyl, butan-2-ol), rien entre deux lettres (méthylpentane). Pas d\'espace, sauf « acide … » et « … de … ».',
-    racines: '<b>Nombre de C de la chaîne</b> : méth 1, éth 2, prop 3, but 4, pent 5, hex 6, hept 7, oct 8, non 9, déc 10. Alcane : …ane (hexane).',
-    suffixes: '<b>Terminaisons</b> : alcane -ane ; alcène -ène (but-2-ène) ; alcool -ol (butan-2-ol) ; aldéhyde -al (butanal) ; cétone -one (butan-2-one) ; acide carboxylique acide …-oïque (acide butanoïque) ; ester …oate de …yle ; amine -amine (butan-1-amine) ; amide -amide (butanamide). Devant une voyelle, « ane » perd son e : butan-2-ol.',
-    ester: '<b>Ester « alcanoate d\'alkyle »</b> : la chaîne qui porte le C=O donne l\'alcanoate (son C est le n° 1) ; la chaîne liée à l\'O donne l\'alkyle, numérotée à partir du C lié à l\'O. Exemple : CH₃–COO–CH₂–CH₂–CH₂–CH₃, éthanoate de butyle.',
-    N: '<b>N-</b> : la ramification est accrochée sur le N (pas sur un C). Exemple : N-éthyléthanamine : sur le N, il y a un éthyle accroché.',
-    entourer: '<b>Un groupe caractéristique</b> contient un atome autre que C et H (O, N, halogène), ou une double liaison C=C. Entoure tous ses atomes : C=O et OH sur le même C forment un seul groupe, le groupe carboxyle.',
-    familles: '<b>Familles</b> : C=C alcène ; –OH (hydroxyle) alcool ; C=O (carbonyle) au bout de la chaîne aldéhyde, entre deux C cétone ; –COOH (carboxyle) acide carboxylique ; –COO–C (ester) ester ; N (amine) amine ; –CO–N (amide) amide ; F, Cl, Br, I (halogéno) halogénoalcane.',
-    depart: '<b>Le n° 1</b> est à un bout de la chaîne principale : celui qui donne les plus petits numéros (d\'abord au groupe caractéristique, puis aux ramifications).',
+    chaine: '<b>La chaîne la plus longue</b> donne le nom. Elle n\'est pas toujours dessinée en ligne droite : suis tous les chemins d\'un bout à l\'autre. À longueur égale, on prend celle qui porte le plus de ramifications. Dans un alcane cyclique, la chaîne principale est le cycle.',
+    chaineGroupe: '<b>La chaîne principale contient le groupe caractéristique</b> : pour une C=C, ses deux C ; sinon le C qui porte le groupe.',
+    ramif: '<b>Nom d\'une ramification</b> : le nom de l\'alcane, en remplaçant « ane » par « yl ». –CH₃ : méthyl ; –CH₂–CH₃ : éthyl ; –CH₂–CH₂–CH₃ : propyl.',
+    numeros: '<b>Numérotation</b> : on numérote la chaîne principale par la droite ou par la gauche, pour que les numéros soient les plus petits possibles. Exemple : 2-méthylpentane, pas 4-méthylpentane.',
+    groupeNum: '<b>Le n° est celui de l\'atome de carbone qui porte le groupe caractéristique.</b> Il a le plus petit numéro possible. Exemple : butan-2-ol. Pour -al, -oïque, -oate, -amide, ce C est le n° 1 (on ne l\'écrit pas).',
+    multi: '<b>Ramifications identiques</b> : di (2), tri (3), tétra (4), penta (5), hexa (6), avec un numéro pour chacune. 2,3,5-triméthyl : un –CH₃ sur les carbones 2, 3 et 5.',
+    alpha: '<b>Ordre alphabétique</b> : é avant m (éthyl avant méthyl) ; di, tri… ne comptent pas. Exemple : 3-éthyl-2,2-diméthylhexane.',
+    tirets: '<b>Tirets et virgules</b> : une virgule entre deux chiffres (2,3), un tiret entre un chiffre et une lettre (2-méthyl, butan-2-ol), rien entre deux lettres (méthylpentane). Pas d\'espace, sauf « acide … » et « … de … ».',
+    racines: '<b>Nombre de C de la chaîne</b> : méth 1, éth 2, prop 3, but 4, pent 5, hex 6, hept 7, oct 8, non 9, déc 10. Alcane : …ane (hexane).',
+    suffixes: '<b>Terminaisons</b> : alcane -ane ; alcène -ène (but-2-ène) ; alcool -ol (butan-2-ol) ; aldéhyde -al (butanal) ; cétone -one (butan-2-one) ; acide carboxylique acide …-oïque (acide butanoïque) ; ester …oate de …yle ; amine -amine (butan-1-amine) ; amide -amide (butanamide). Devant une voyelle, « ane » perd son e : butan-2-ol.',
+    ester: '<b>Ester « alcanoate d\'alkyle »</b> : la chaîne qui porte le C=O donne l\'alcanoate (son C est le n° 1) ; la chaîne liée à l\'O donne l\'alkyle, numérotée à partir du C lié à l\'O. Exemple : CH₃–COO–CH₂–CH₂–CH₂–CH₃, éthanoate de butyle.',
+    N: '<b>N-</b> : la ramification est accrochée sur le N (pas sur un C). Exemple : N-éthyléthanamine : sur le N, il y a un éthyle accroché.',
+    entourer: '<b>Un groupe caractéristique</b> contient un atome autre que C et H (O, N, halogène), ou une double liaison C=C. Entoure tous ses atomes : C=O et OH sur le même C forment un seul groupe, le groupe carboxyle.',
+    familles: '<b>Familles</b> : C=C alcène ; –OH (hydroxyle) alcool ; C=O (carbonyle) au bout de la chaîne aldéhyde, entre deux C cétone ; –COOH (carboxyle) acide carboxylique ; –COO–C (ester) ester ; N (amine) amine ; –CO–N (amide) amide ; F, Cl, Br, I (halogéno) halogénoalcane.',
+    depart: '<b>Le n° 1</b> est à un bout de la chaîne principale : celui qui donne les plus petits numéros (d\'abord au groupe caractéristique, puis aux ramifications).',
   };
 
   /* ============================================================
@@ -1732,11 +1732,11 @@
   // diagnostic d'un entourage (atomes et H choisis) ; null si c'est juste
   function diagEntourer(md, gs, choisis, hPar, ec) {
     const attendus = new Set(gs.flatMap(g => g.at));
-    if (!choisis.size) return 'Touche les atomes à entourer : ils se marquent. Touche-les à nouveau pour les libérer.';
+    if (!choisis.size) return 'Touche les atomes à entourer : ils se marquent. Touche-les à nouveau pour les libérer.';
     const intrus = [...choisis].find(i => !attendus.has(i));
     if (intrus != null) {
       const a = md.atomes[intrus];
-      if (a.el === 'C' || a.etiq) return `${nomAtome(md, intrus, ec)} ne contient que des atomes de carbone et d'hydrogène : ce n'est pas un groupe caractéristique (${TEXTES.pasUnGroupe}).`;
+      if (a.el === 'C' || a.etiq) return `${nomAtome(md, intrus, ec)} ne contient que des atomes de carbone et d'hydrogène : ce n'est pas un groupe caractéristique (${TEXTES.pasUnGroupe}).`;
       return 'Entoure seulement les atomes des groupes caractéristiques.';
     }
     const hIntrus = hPar.find(de => !attendus.has(de));
@@ -1747,16 +1747,16 @@
       const el = i => md.atomes[i].el;
       const que = els => pris.every(i => els.includes(el(i)));
       if (g.cle === 'acide') return que(['O']) && pris.length === 1 && O.nbH(md, pris[0]) === 1
-        ? 'Ce OH est sur un C qui porte aussi un =O : C, =O et OH forment ensemble un <b>groupe carboxyle</b> (acide ≠ alcool). Entoure les trois.'
-        : 'Le groupe carboxyle est formé du C, du O lié par une double liaison et du OH, sur le même C : entoure-les tous.';
-      if (g.cle === 'ester') return 'Le groupe ester est formé du C, du =O et du O lié à un autre C, sur le même C : entoure les trois (ester ≠ cétone).';
-      if (g.cle === 'amide') return que(['N']) ? 'Ce N est lié au C d\'un C=O : C, =O et N forment ensemble un <b>groupe amide</b> (amide ≠ amine). Entoure les trois.'
-        : 'Le N lié au C du C=O fait partie du groupe : C, =O et N forment ensemble un <b>groupe amide</b> (amide ≠ cétone). Entoure les trois.';
-      if (g.cle === 'aldehyde' || g.cle === 'cetone') return 'Le groupe carbonyle, c\'est le C et le O liés par la double liaison : entoure les deux.';
+        ? 'Ce OH est sur un C qui porte aussi un =O : C, =O et OH forment ensemble un <b>groupe carboxyle</b> (acide ≠ alcool). Entoure les trois.'
+        : 'Le groupe carboxyle est formé du C, du O lié par une double liaison et du OH, sur le même C : entoure-les tous.';
+      if (g.cle === 'ester') return 'Le groupe ester est formé du C, du =O et du O lié à un autre C, sur le même C : entoure les trois (ester ≠ cétone).';
+      if (g.cle === 'amide') return que(['N']) ? 'Ce N est lié au C d\'un C=O : C, =O et N forment ensemble un <b>groupe amide</b> (amide ≠ amine). Entoure les trois.'
+        : 'Le N lié au C du C=O fait partie du groupe : C, =O et N forment ensemble un <b>groupe amide</b> (amide ≠ cétone). Entoure les trois.';
+      if (g.cle === 'aldehyde' || g.cle === 'cetone') return 'Le groupe carbonyle, c\'est le C et le O liés par la double liaison : entoure les deux.';
       if (g.cle === 'alcene') return 'Pour la double liaison C=C, entoure ses deux atomes de carbone.';
     }
     const oublie = gs.find(g => !g.at.some(i => choisis.has(i)));
-    if (oublie) return `Il manque ${gs.length > 1 ? 'au moins un' : 'le'} groupe caractéristique : ${TEXTES.groupeOublie}.`;
+    if (oublie) return `Il manque ${gs.length > 1 ? 'au moins un' : 'le'} groupe caractéristique : ${TEXTES.groupeOublie}.`;
     return null;
   }
 
@@ -1772,7 +1772,7 @@
       monter(zone, api) {
         const da = dessinActif(zone, md, { ecriture: ec, hCibles: ec === 'developpee', pos: o.pos });
         if (md.atomes.some(a => a.etiq)) zone.insertAdjacentHTML('beforeend', aidesCondensees(md));
-        const act = el('div', 'er-actions orga-actions-partie', `<button type="button" class="btn-primary">Valider</button>${o.bulles === false ? '' : info(BULLES.entourer, 'Aide : entourer un groupe')}`);
+        const act = el('div', 'er-actions orga-actions-partie', `<button type="button" class="btn-primary">Valider</button>${o.bulles === false ? '' : info(BULLES.entourer, 'Aide : entourer un groupe')}`);
         zone.appendChild(act);
         const choisis = new Set(), choisisH = new Set();
         let fige = false;
@@ -1803,14 +1803,14 @@
   // propositions « groupe … · famille des … » : la bonne et trois confusions classiques
   // (une application peut les adapter à son programme : ORGA.CONFUSIONS)
   const CONFUSIONS = {
-    alcool: [['alcool', 'acide', 'Le groupe hydroxyle –OH, sur un C qui ne porte pas de =O, donne la famille des <b>alcools</b>.'], ['acide', 'acide', 'Ce OH est sur un C qui ne porte pas de =O : c\'est un groupe <b>hydroxyle</b>.'], ['cetone', 'cetone', 'Pas de C=O ici : le O est lié à un H, c\'est –OH.']],
-    aldehyde: [['aldehyde', 'cetone', 'Le C du C=O est au bout de la chaîne et porte un H : famille des <b>aldéhydes</b>.'], ['alcool', 'alcool', 'Le O est lié au C par une double liaison : C=O, groupe <b>carbonyle</b>.'], ['acide', 'acide', 'Pas de OH sur ce C : ce n\'est pas un carboxyle.']],
-    cetone: [['cetone', 'aldehyde', 'Le C du C=O est entre deux C (il ne porte pas de H) : famille des <b>cétones</b>.'], ['alcool', 'alcool', 'Le O est lié au C par une double liaison : C=O, groupe <b>carbonyle</b>.'], ['ester', 'ester', 'Il n\'y a pas de second O sur ce C : ce n\'est pas un ester.']],
-    acide: [['alcool', 'alcool', 'Acide ≠ alcool : le OH est sur un C qui porte aussi un =O ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['cetone', 'cetone', 'Acide ≠ cétone : le C du C=O porte aussi un OH ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['ester', 'ester', 'Le O lié au C=O porte un H, pas un C : ce n\'est pas un ester.']],
-    ester: [['acide', 'acide', 'Ester ≠ acide : le O lié au C=O est lié à un C, pas à un H.'], ['cetone', 'cetone', 'Le C du C=O porte aussi un O lié à un C : groupe <b>ester</b>.'], ['alcool', 'alcool', 'Aucun O ne porte de H ici : pas de groupe hydroxyle.']],
-    amine: [['amide', 'amide', 'Le N n\'est pas lié au C d\'un C=O : c\'est un groupe <b>amine</b>.'], ['amine', 'amide', 'Le groupe amine donne la famille des <b>amines</b>.'], ['alcool', 'alcool', 'L\'atome entouré est un N, pas un O.']],
-    amide: [['amine', 'amine', 'Amide ≠ amine : le N est lié au C d\'un C=O ; ensemble, c\'est un groupe <b>amide</b>.'], ['cetone', 'cetone', 'Amide ≠ cétone : le C du C=O porte aussi un N ; ensemble, c\'est un groupe <b>amide</b>.'], ['amide', 'amine', 'Le groupe amide donne la famille des <b>amides</b>.']],
-    alcene: [['alcene', 'alcane', 'Une double liaison C=C donne la famille des <b>alcènes</b> (les alcanes n\'ont que des liaisons simples).'], ['cetone', 'cetone', 'C=C : deux atomes de carbone, pas de O.'], ['alcool', 'alcool', 'Il n\'y a pas de O dans ce groupe.']],
+    alcool: [['alcool', 'acide', 'Le groupe hydroxyle –OH, sur un C qui ne porte pas de =O, donne la famille des <b>alcools</b>.'], ['acide', 'acide', 'Ce OH est sur un C qui ne porte pas de =O : c\'est un groupe <b>hydroxyle</b>.'], ['cetone', 'cetone', 'Pas de C=O ici : le O est lié à un H, c\'est –OH.']],
+    aldehyde: [['aldehyde', 'cetone', 'Le C du C=O est au bout de la chaîne et porte un H : famille des <b>aldéhydes</b>.'], ['alcool', 'alcool', 'Le O est lié au C par une double liaison : C=O, groupe <b>carbonyle</b>.'], ['acide', 'acide', 'Pas de OH sur ce C : ce n\'est pas un carboxyle.']],
+    cetone: [['cetone', 'aldehyde', 'Le C du C=O est entre deux C (il ne porte pas de H) : famille des <b>cétones</b>.'], ['alcool', 'alcool', 'Le O est lié au C par une double liaison : C=O, groupe <b>carbonyle</b>.'], ['ester', 'ester', 'Il n\'y a pas de second O sur ce C : ce n\'est pas un ester.']],
+    acide: [['alcool', 'alcool', 'Acide ≠ alcool : le OH est sur un C qui porte aussi un =O ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['cetone', 'cetone', 'Acide ≠ cétone : le C du C=O porte aussi un OH ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['ester', 'ester', 'Le O lié au C=O porte un H, pas un C : ce n\'est pas un ester.']],
+    ester: [['acide', 'acide', 'Ester ≠ acide : le O lié au C=O est lié à un C, pas à un H.'], ['cetone', 'cetone', 'Le C du C=O porte aussi un O lié à un C : groupe <b>ester</b>.'], ['alcool', 'alcool', 'Aucun O ne porte de H ici : pas de groupe hydroxyle.']],
+    amine: [['amide', 'amide', 'Le N n\'est pas lié au C d\'un C=O : c\'est un groupe <b>amine</b>.'], ['amine', 'amide', 'Le groupe amine donne la famille des <b>amines</b>.'], ['alcool', 'alcool', 'L\'atome entouré est un N, pas un O.']],
+    amide: [['amine', 'amine', 'Amide ≠ amine : le N est lié au C d\'un C=O ; ensemble, c\'est un groupe <b>amide</b>.'], ['cetone', 'cetone', 'Amide ≠ cétone : le C du C=O porte aussi un N ; ensemble, c\'est un groupe <b>amide</b>.'], ['amide', 'amine', 'Le groupe amide donne la famille des <b>amides</b>.']],
+    alcene: [['alcene', 'alcane', 'Une double liaison C=C donne la famille des <b>alcènes</b> (les alcanes n\'ont que des liaisons simples).'], ['cetone', 'cetone', 'C=C : deux atomes de carbone, pas de O.'], ['alcool', 'alcool', 'Il n\'y a pas de O dans ce groupe.']],
     halogeno: [['halogeno', 'alcane', 'Un halogène (F, Cl, Br, I) sur la chaîne donne la famille des <b>halogénoalcanes</b>.'], ['alcool', 'alcool', 'L\'atome entouré est un halogène, pas un O.'], ['amine', 'amine', 'L\'atome entouré est un halogène, pas un N.']],
   };
   const NOM_GROUPE = c => (c === 'alcene' ? 'double liaison C=C' : c === 'alcane' ? '' : O.FAMILLES[c].nomGroupe);
@@ -1851,7 +1851,7 @@
       solution: `<p>La chaîne principale a ${res.n} C${res.chaine.length ? '' : ''}.</p>`,
       monter(zone, api) {
         const da = dessinActif(zone, mol, { ecriture: ec });
-        const act = el('div', 'er-actions orga-actions-partie', `<button type="button" class="btn-primary">Valider la chaîne</button>${info(BULLES.chaine, 'Aide : chaîne principale')}`);
+        const act = el('div', 'er-actions orga-actions-partie', `<button type="button" class="btn-primary">Valider la chaîne</button>${info(BULLES.chaine, 'Aide : chaîne principale')}`);
         zone.appendChild(act);
         const choisis = new Set();
         let fige = false;
@@ -1903,7 +1903,7 @@
 
   function solutionNom(mol, res, ec) {
     const ent = res.groupe ? [{ atomes: res.groupe.atomes, avecH: res.groupe.avecH }] : null;
-    const reg = res.variantes.length ? `<p class="orga-note">On regroupe les ramifications identiques, même si l'une est sur le N et l'autre sur un C : ${nomHTML(res.parties)} (on accepte aussi ${res.variantes[0]}).</p>` : '';
+    const reg = res.variantes.length ? `<p class="orga-note">On regroupe les ramifications identiques, même si l'une est sur le N et l'autre sur un C : ${nomHTML(res.parties)} (on accepte aussi ${res.variantes[0]}).</p>` : '';
     return `${dessinHTML(mol, { ecriture: ec, couleurs: res.couleurs, numeros: res.cyclo && res.ramifs.length < 2 ? null : res.numeros, entourer: ent })}<p class="orga-sol-nom">${nomHTML(res.parties)}</p>${reg}`;
   }
 
@@ -1915,7 +1915,7 @@
     return Object.assign({
       type: 'perso',
       q: o.q != null ? o.q : 'Donne le nom de cette molécule.',
-      solution: res.horsProgramme ? '' : `<p class="orga-sol-nom">${nomHTML(res.parties)}</p>${res.variantes.length ? `<p class="orga-note">On regroupe les ramifications identiques, même si l'une est sur le N et l'autre sur un C ; on accepte aussi ${res.variantes[0]}.</p>` : ''}`,
+      solution: res.horsProgramme ? '' : `<p class="orga-sol-nom">${nomHTML(res.parties)}</p>${res.variantes.length ? `<p class="orga-note">On regroupe les ramifications identiques, même si l'une est sur le N et l'autre sur un C ; on accepte aussi ${res.variantes[0]}.</p>` : ''}`,
       monter(zone, api) { return outilNom(zone, mol, res, o, api); },
     }, o.partie);
   }
@@ -1936,7 +1936,7 @@
       // panneau des aides
       if (!o.sansAide && o.panneau !== false) {
         const panneau = el('details', 'orga-aides');
-        panneau.innerHTML = `<summary>Aides</summary><div class="orga-aides-l">${[['couleurs', 'Couleurs : je repère le groupe, la chaîne, le n° 1 et les ramifications'], ['decoupe', 'Nom découpé : un morceau par partie de la molécule'], ['bulles', 'Bulles ⓘ : les règles du cours']]
+        panneau.innerHTML = `<summary>Aides</summary><div class="orga-aides-l">${[['couleurs', 'Couleurs : je repère le groupe, la chaîne, le n° 1 et les ramifications'], ['decoupe', 'Nom découpé : un morceau par partie de la molécule'], ['bulles', 'Bulles ⓘ : les règles du cours']]
           .map(([k, t]) => `<label class="orga-interr"><input type="checkbox" data-aide="${k}"${aides[k] ? ' checked' : ''}${k === 'couleurs' && md !== mol ? ' disabled' : ''}> ${t}${k === 'couleurs' && md !== mol ? ' (pas avec une écriture abrégée)' : ''}</label>`).join('')}</div>`;
         racine.appendChild(panneau);
         panneau.addEventListener('change', ev => {
@@ -1980,7 +1980,7 @@
       function etape(e) {
         st.etape = e; st.choisis.clear(); act.innerHTML = '';
         if (e === 'groupe') {
-          consigne.innerHTML = `Entoure le groupe caractéristique : touche ses atomes, puis valide. ${B('entourer', 'Aide : groupe caractéristique')}`;
+          consigne.innerHTML = `Entoure le groupe caractéristique : touche ses atomes, puis valide. ${B('entourer', 'Aide : groupe caractéristique')}`;
           act.innerHTML = '<button type="button" class="btn-primary">Valider le groupe</button>';
           act.querySelector('button').onclick = () => {
             const d = diagEntourer(mol, gsAt, st.choisis, [], ec);
@@ -1990,7 +1990,7 @@
         } else if (e === 'groupeNom') {
           const g = st.res.groupe ? st.res.groupe.cle : 'halogeno';
           const p = partieNommerGroupe(g, 'Nomme ce groupe et donne la famille de la molécule.');
-          consigne.innerHTML = `${p.q} ${B('familles', 'Aide : les familles')}`;
+          consigne.innerHTML = `${p.q} ${B('familles', 'Aide : les familles')}`;
           const box = el('div', 'orga-choix-box ph-choix ph-choix-col');
           p.options.forEach(op => {
             const b = el('button', 'btn-secondary', op.label);
@@ -2004,8 +2004,8 @@
           act.appendChild(box);
         } else if (e === 'chaine') {
           consigne.innerHTML = res0.cyclo
-            ? `Touche les C de la chaîne principale, puis valide : <b>dans un alcane cyclique, la chaîne principale est le cycle</b>. ${B('chaine', 'Aide : chaîne principale')}`
-            : `Touche les C de la chaîne principale${famille ? ' (la plus longue qui contient le groupe)' : ' (la plus longue)'}, puis valide. ${B('chaine', 'Aide : chaîne principale')}${famille ? B('chaineGroupe', 'Aide : chaîne et groupe') : ''}`;
+            ? `Touche les C de la chaîne principale, puis valide : <b>dans un alcane cyclique, la chaîne principale est le cycle</b>. ${B('chaine', 'Aide : chaîne principale')}`
+            : `Touche les C de la chaîne principale${famille ? ' (la plus longue qui contient le groupe)' : ' (la plus longue)'}, puis valide. ${B('chaine', 'Aide : chaîne principale')}${famille ? B('chaineGroupe', 'Aide : chaîne et groupe') : ''}`;
           act.innerHTML = '<button type="button" class="btn-primary">Valider la chaîne</button>';
           act.querySelector('button').onclick = () => {
             const r = O.evaluerChaine(mol, res0, [...st.choisis]);
@@ -2016,12 +2016,12 @@
             etape('depart');
           };
         } else if (e === 'depart') {
-          consigne.innerHTML = `Touche le C n° 1 de la chaîne principale. ${B('depart', 'Aide : le n° 1')}${famille ? B('groupeNum', 'Aide : numéro du groupe') : B('numeros', 'Aide : numérotation')}`;
+          consigne.innerHTML = `Touche le C n° 1 de la chaîne principale. ${B('depart', 'Aide : le n° 1')}${famille ? B('groupeNum', 'Aide : numéro du groupe') : B('numeros', 'Aide : numérotation')}`;
         } else if (e === 'ramifs') {
           if (!ramifsATrouver().length) return etape('nom');
-          consigne.innerHTML = `Touche les C de chaque ramification${st.res.famille === 'ester' ? ' (et de l\'alkyle, la chaîne liée à l\'O)' : ''} : elle prend la couleur de son type. ${B('ramif', 'Aide : ramifications')}${st.res.ramifs.some(r => r.pos === 'N') ? B('N', 'Aide : ramification sur le N') : ''}`;
+          consigne.innerHTML = `Touche les C de chaque ramification${st.res.famille === 'ester' ? ' (et de l\'alkyle, la chaîne liée à l\'O)' : ''} : elle prend la couleur de son type. ${B('ramif', 'Aide : ramifications')}${st.res.ramifs.some(r => r.pos === 'N') ? B('N', 'Aide : ramification sur le N') : ''}`;
         } else if (e === 'nom') {
-          consigne.innerHTML = aides.decoupe ? 'Écris le nom, morceau par morceau : commence par la chaîne principale, c\'est la fin du nom.' : 'Écris le nom de la molécule.';
+          consigne.innerHTML = aides.decoupe ? 'Écris le nom, morceau par morceau : commence par la chaîne principale, c\'est la fin du nom.' : 'Écris le nom de la molécule.';
           champNom(champ, aides);
         }
         majLegende();
@@ -2035,7 +2035,7 @@
           const cle = r.nom + (r.pos === 'N' ? 'N' : '');
           if (vus.has(cle)) return;
           vus.add(cle);
-          l.push(`<span class="orga-ram orga-n-${r.classe}">${r.alkyle ? 'alkyle : ' : ''}${r.nom}${r.pos === 'N' ? ' (sur le N)' : ''}</span>`);
+          l.push(`<span class="orga-ram orga-n-${r.classe}">${r.alkyle ? 'alkyle : ' : ''}${r.nom}${r.pos === 'N' ? ' (sur le N)' : ''}</span>`);
         });
         legende.innerHTML = l.join('');
       }
@@ -2076,7 +2076,7 @@
       function champNom(z, aides) {
         const res = st.res;
         if (!aides.decoupe) {
-          z.innerHTML = `<div class="orga-nom-libre"><input type="text" class="orga-champ orga-champ-nom" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Nom de la molécule" placeholder="nom">${B('tirets', 'Aide : tirets et virgules')}${B('alpha', 'Aide : ordre alphabétique')}</div>
+          z.innerHTML = `<div class="orga-nom-libre"><input type="text" class="orga-champ orga-champ-nom" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Nom de la molécule" placeholder="nom">${B('tirets', 'Aide : tirets et virgules')}${B('alpha', 'Aide : ordre alphabétique')}</div>
             <div class="er-actions orga-actions-partie"><button type="button" class="btn-primary">Valider</button></div>`;
           const inp = z.querySelector('input');
           const valider = () => {
@@ -2100,20 +2100,20 @@
               <input type="text" class="orga-champ orga-mx-num" data-r="num" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Numéros" placeholder="n°">
               <span class="orga-seg orga-mx-mult" role="group" aria-label="Préfixe">${['', 'di', 'tri', 'tétra'].map(x => `<button type="button" class="orga-pil" data-mult="${x}" aria-pressed="${x === '' ? 'true' : 'false'}">${x || '–'}</button>`).join('')}</span>
               <input type="text" class="orga-champ orga-mx-nom" data-r="nom" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Nom de la ramification" placeholder="${m.halo ? 'chloro…' : 'méthyl…'}">
-              ${B(m.halo ? 'multi' : 'ramif', 'Aide : nom de la ramification')}${B('numeros', 'Aide : numéros')}${m.locs.includes('N') ? B('N', 'Aide : N-') : ''}</div>`;
+              ${B(m.halo ? 'multi' : 'ramif', 'Aide : nom de la ramification')}${B('numeros', 'Aide : numéros')}${m.locs.includes('N') ? B('N', 'Aide : N-') : ''}</div>`;
           } else if (m.type === 'chaine') {
             h += `<div class="orga-mx" data-k="${k}" ${coul}><span class="orga-mx-t">Chaîne principale</span>
-              <input type="text" class="orga-champ orga-mx-chaine" data-r="chaine" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chaîne principale" placeholder="${res.famille === 'alcane' || res.famille === 'halogeno' ? 'hexane…' : res.famille === 'alcene' ? 'hex…' : 'hexan…'}">${B('racines', 'Aide : nombre de C')}</div>`;
+              <input type="text" class="orga-champ orga-mx-chaine" data-r="chaine" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chaîne principale" placeholder="${res.famille === 'alcane' || res.famille === 'halogeno' ? 'hexane…' : res.famille === 'alcene' ? 'hex…' : 'hexan…'}">${B('racines', 'Aide : nombre de C')}</div>`;
           } else if (m.type === 'groupe') {
             h += `<div class="orga-mx" data-k="${k}" ${coul}><span class="orga-mx-t">Groupe${m.acide ? ' (acide …)' : ''}</span>
               <input type="text" class="orga-champ orga-mx-num" data-r="gnum" inputmode="numeric" autocomplete="off" aria-label="Numéro du groupe" placeholder="n°">
-              <input type="text" class="orga-champ orga-mx-nom" data-r="suf" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminaison" placeholder="terminaison">${B('suffixes', 'Aide : terminaisons')}${B('groupeNum', 'Aide : numéro du groupe')}</div>`;
+              <input type="text" class="orga-champ orga-mx-nom" data-r="suf" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminaison" placeholder="terminaison">${B('suffixes', 'Aide : terminaisons')}${B('groupeNum', 'Aide : numéro du groupe')}</div>`;
           } else if (m.type === 'alkyle') {
             h += `<div class="orga-mx" data-k="${k}" ${coul}><span class="orga-mx-t">Alkyle (sur l'O)</span>
-              <input type="text" class="orga-champ orga-mx-nom" data-r="alk" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Alkyle" placeholder="éthyle…">${B('ester', 'Aide : ester')}</div>`;
+              <input type="text" class="orga-champ orga-mx-nom" data-r="alk" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Alkyle" placeholder="éthyle…">${B('ester', 'Aide : ester')}</div>`;
           }
         });
-        h += `</div><p class="orga-nom-complet" aria-live="polite"></p><div class="er-actions orga-actions-partie"><button type="button" class="btn-primary">Valider</button>${B('alpha', 'Aide : ordre alphabétique')}${B('tirets', 'Aide : tirets et virgules')}</div>`;
+        h += `</div><p class="orga-nom-complet" aria-live="polite"></p><div class="er-actions orga-actions-partie"><button type="button" class="btn-primary">Valider</button>${B('alpha', 'Aide : ordre alphabétique')}${B('tirets', 'Aide : tirets et virgules')}</div>`;
         z.innerHTML = h;
         const lignes = [...z.querySelectorAll('.orga-mx')];
         const ligneChaine = lignes.find(l => ms[+l.dataset.k].type === 'chaine');
@@ -2125,17 +2125,17 @@
         // diagnostic d'une chaîne fausse (le « e » de « ane » n'est jamais enlevé ou ajouté tout seul)
         const diagChaine = v => {
           const m = v.match(/^(cyclo)?(meth|eth|prop|but|pent|hex|hept|oct|non|dec)(.*)$/);
-          if (!m) return 'Écris le nom de la chaîne principale : méth (1 C), éth (2), prop (3), but (4), pent (5), hex (6)…';
+          if (!m) return 'Écris le nom de la chaîne principale : méth (1 C), éth (2), prop (3), but (4), pent (5), hex (6)…';
           const k = O.RACINES.map(O.sansAccent).indexOf(m[2]) + 1;
-          if (m[1] && !res.cyclo) return 'Il n\'y a pas de cycle : pas de « cyclo ».';
-          if (!m[1] && res.cyclo) return 'Les C forment un cycle : cyclo… (cyclohexane).';
-          if (k !== res.n) return `« ${O.RACINES[k - 1]} » veut dire ${k} C : la chaîne principale en a ${k > res.n ? 'moins' : 'plus'}. Compte-les.`;
+          if (m[1] && !res.cyclo) return 'Il n\'y a pas de cycle : pas de « cyclo ».';
+          if (!m[1] && res.cyclo) return 'Les C forment un cycle : cyclo… (cyclohexane).';
+          if (k !== res.n) return `« ${O.RACINES[k - 1]} » veut dire ${k} C : la chaîne principale en a ${k > res.n ? 'moins' : 'plus'}. Compte-les.`;
           const rac = (res.cyclo ? 'cyclo' : '') + O.RACINES[k - 1], fin = m[3], att = sa(mChaine.texte).slice(sa(rac).length);
           if (att === 'an') return fin === 'ane'
-            ? `Après la chaîne vient une terminaison qui commence par une voyelle (-ol, -al, -one, -oïque, -oate, -amine, -amide) : on enlève le « e » de « ane ». Écris « ${rac}an ».`
-            : `Devant la terminaison du groupe, la chaîne s'écrit avec « an » : « ${rac}an ».`;
-          if (att === 'ane') return `Il n'y a pas de terminaison de groupe : la chaîne d'un ${res.famille === 'halogeno' ? 'halogénoalcane' : 'alcane'} se termine par « ane » : « ${rac}ane ».`;
-          return `Pour un alcène, la chaîne s'écrit sans « an » : « ${rac} », puis la terminaison « -ène » (${rac}-1-ène).`;
+            ? `Après la chaîne vient une terminaison qui commence par une voyelle (-ol, -al, -one, -oïque, -oate, -amine, -amide) : on enlève le « e » de « ane ». Écris « ${rac}an ».`
+            : `Devant la terminaison du groupe, la chaîne s'écrit avec « an » : « ${rac}an ».`;
+          if (att === 'ane') return `Il n'y a pas de terminaison de groupe : la chaîne d'un ${res.famille === 'halogeno' ? 'halogénoalcane' : 'alcane'} se termine par « ane » : « ${rac}ane ».`;
+          return `Pour un alcène, la chaîne s'écrit sans « an » : « ${rac} », puis la terminaison « -ène » (${rac}-1-ène).`;
         };
         const verrou = () => {
           const ok = chaineJuste();
@@ -2170,7 +2170,7 @@
             `<span class="orga-n-chaine">${chaine}</span><span class="orga-n-groupe">${groupe}</span>${de}${alk ? `<span class="orga-n-${ms[ms.length - 1].classe}">${alk}</span>` : ''}`;
           return { texte, html };
         };
-        const maj = () => { verrou(); const a = assembler(); z.querySelector('.orga-nom-complet').innerHTML = a.texte.trim() ? `Nom : <span class="orga-nom">${a.html}</span>` : ''; };
+        const maj = () => { verrou(); const a = assembler(); z.querySelector('.orga-nom-complet').innerHTML = a.texte.trim() ? `Nom : <span class="orga-nom">${a.html}</span>` : ''; };
         z.addEventListener('input', () => { api.effacer(); lignes.forEach(l => l.classList.remove('ko')); maj(); });
         z.addEventListener('click', ev => {
           const b = ev.target.closest('[data-mult]');
@@ -2201,7 +2201,7 @@
           if (!chaineJuste()) {
             ligneChaine.classList.add('ko'); secouer(ligneChaine);
             const v = sa(ligneChaine.querySelector('input').value);
-            if (!v) { api.message('Commence par la chaîne principale : c\'est la fin du nom.'); return; }
+            if (!v) { api.message('Commence par la chaîne principale : c\'est la fin du nom.'); return; }
             api.erreur(diagChaine(v));
             return;
           }
@@ -2234,7 +2234,7 @@
         act.innerHTML = '';
         champ.querySelectorAll('.btn-primary').forEach(b => b.closest('.er-actions').remove());
         rendre();
-        api.reussi(d.numeroUn ? 'Validé quand même : la molécule est la bonne, mais retiens qu\'on n\'écrit pas ce « 1 ».' : d.remarque || undefined);
+        api.reussi(d.numeroUn ? 'Validé quand même : la molécule est la bonne, mais retiens qu\'on n\'écrit pas ce « 1 ».' : d.remarque || undefined);
       }
 
       ctx = {
@@ -2243,7 +2243,7 @@
           st.res = res0; st.ordre = res0.numeros; st.groupeFait = famille;
           res0.ramifs.forEach((r, k) => st.faites.add(k));
           consigne.innerHTML = ''; act.innerHTML = ''; legende.innerHTML = '';
-          champ.innerHTML = `<p class="orga-nom-complet">Nom : ${nomHTML(res0.parties)}</p>`;
+          champ.innerHTML = `<p class="orga-nom-complet">Nom : ${nomHTML(res0.parties)}</p>`;
           rendre();
         },
       };
@@ -2267,24 +2267,24 @@
      partieConversion(mol, de, vers, { compterH }) : la conversion guidée par les gestes du cours
      ============================================================ */
   function diagDessin(m, cible, o) {
-    if (!m.liaisons.length && m.atomes.length <= 1) return 'Dessine la molécule : tire un trait depuis le C pour ajouter un atome.';
+    if (!m.liaisons.length && m.atomes.length <= 1) return 'Dessine la molécule : tire un trait depuis le C pour ajouter un atome.';
     const comp = el => m.atomes.filter(a => a.el === el).length, compC = el => cible.atomes.filter(a => a.el === el).length;
     if (o.nom) {
       const d = O.nommer(m), e = O.nommer(cible);
       if (d.horsProgramme) return `Ta molécule n'a pas de nom au programme (${d.horsProgramme}).`;
-      if (d.famille !== e.famille) return `Ta molécule s'appelle ${d.nom} : c'est ${famLe(d.famille)} ; ${o.nom} est ${famLe(e.famille)}.`;
-      if (d.n !== e.n) return `Ta molécule s'appelle ${d.nom} : sa chaîne principale a ${d.n} C, il en faut ${e.n}. Écris d'abord la chaîne principale (la fin du nom), puis place les ramifications.`;
-      return `Ta molécule s'appelle ${d.nom}, pas ${o.nom} : compare les ramifications et leurs numéros.`;
+      if (d.famille !== e.famille) return `Ta molécule s'appelle ${d.nom} : c'est ${famLe(d.famille)} ; ${o.nom} est ${famLe(e.famille)}.`;
+      if (d.n !== e.n) return `Ta molécule s'appelle ${d.nom} : sa chaîne principale a ${d.n} C, il en faut ${e.n}. Écris d'abord la chaîne principale (la fin du nom), puis place les ramifications.`;
+      return `Ta molécule s'appelle ${d.nom}, pas ${o.nom} : compare les ramifications et leurs numéros.`;
     }
     const nc = comp('C'), ncC = compC('C');
     if (nc !== ncC) {
-      if (o.ecriture === 'topo' && nc < ncC) return `Il manque des C : ta molécule en a ${nc}, il en faut ${ncC}. En topologique, chaque sommet et chaque bout de trait est un C.`;
-      return `Ta molécule a ${nc} C ; il en faut ${ncC}. Compte les C.`;
+      if (o.ecriture === 'topo' && nc < ncC) return `Il manque des C : ta molécule en a ${nc}, il en faut ${ncC}. En topologique, chaque sommet et chaque bout de trait est un C.`;
+      return `Ta molécule a ${nc} C ; il en faut ${ncC}. Compte les C.`;
     }
-    for (const x of ['O', 'N', 'F', 'Cl', 'Br', 'I']) if (comp(x) !== compC(x)) return `Vérifie les atomes ${x} : il en faut ${compC(x)}${compC(x) ? '' : ' (aucun)'}.`;
+    for (const x of ['O', 'N', 'F', 'Cl', 'Br', 'I']) if (comp(x) !== compC(x)) return `Vérifie les atomes ${x} : il en faut ${compC(x)}${compC(x) ? '' : ' (aucun)'}.`;
     const d2 = mm => mm.liaisons.filter(l => l.o === 2).length;
-    if (d2(m) !== d2(cible)) return `Vérifie les doubles liaisons : il en faut ${d2(cible)}.`;
-    return 'Même formule brute, mais ce n\'est pas la même molécule : vérifie où sont accrochés les atomes et les ramifications.';
+    if (d2(m) !== d2(cible)) return `Vérifie les doubles liaisons : il en faut ${d2(cible)}.`;
+    return 'Même formule brute, mais ce n\'est pas la même molécule : vérifie où sont accrochés les atomes et les ramifications.';
   }
   const famLe = f => ({ alcane: 'un alcane', halogeno: 'un halogénoalcane', alcene: 'un alcène', alcool: 'un alcool', aldehyde: 'un aldéhyde', cetone: 'une cétone', acide: 'un acide carboxylique', ester: 'un ester', amine: 'une amine', amide: 'un amide' })[f];
 
@@ -2299,8 +2299,8 @@
       solution: o.nom && !res.horsProgramme ? `<p class="orga-sol-nom">${nomHTML(res.parties)}</p>` : (o.solution || ''),
       monter(zone, api) {
         const ed = editeur(zone, { ecriture: o.ecriture, ecritures: o.ecritures || [o.ecriture], hydrogenes: o.hydrogenes, choixH: false, elements: o.elements, nomDirect: !!o.nom && !o.sansAide && o.nomDirect !== false, brute: o.brute !== false && !o.sansAide, surChange: () => api.effacer() });
-        if (eleve) ed.message(o.ecriture === 'developpee' ? 'Dessine les atomes ; puis choisis « H » et touche chaque atome pour lui ajouter ses H un par un (touche un H pour l\'enlever).'
-          : o.ecriture === 'topo' ? 'Dessine les atomes ; puis choisis « H », touche chaque atome autre que C (O, N…) et choisis ses H.' : 'Dessine les atomes ; puis choisis « H », touche chaque atome et choisis ses H.', 'info');
+        if (eleve) ed.message(o.ecriture === 'developpee' ? 'Dessine les atomes ; puis choisis « H » et touche chaque atome pour lui ajouter ses H un par un (touche un H pour l\'enlever).'
+          : o.ecriture === 'topo' ? 'Dessine les atomes ; puis choisis « H », touche chaque atome autre que C (O, N…) et choisis ses H.' : 'Dessine les atomes ; puis choisis « H », touche chaque atome et choisis ses H.', 'info');
         const act = el('div', 'er-actions orga-actions-partie', '<button type="button" class="btn-primary">Valider</button>');
         zone.appendChild(act);
         let fige = false;

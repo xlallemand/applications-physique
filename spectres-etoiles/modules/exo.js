@@ -184,7 +184,7 @@
      TYPE « comparateur » : q.T (température de l'étoile), q.o (spectre de l'étoile, facultatif)
      ============================================================ */
   function tComparateur(zone, q, api) {
-    ligne(zone, 'Étoile<small>température ?</small>', q.o || { fond: 'continu', T: q.T });
+    ligne(zone, 'Étoile<small>température ?</small>', q.o || { fond: 'continu', T: q.T });
     const ref = ligne(zone, 'Corps chauffé', { fond: 'continu', T: TMIN });
     const c = el('div', 'sp-curseur-T', `<input type="range" min="0" max="1000" step="1" aria-label="Température du corps chauffé"><span class="sp-T"></span>`);
     zone.appendChild(c);
@@ -203,8 +203,8 @@
       if (guider) {
         const e = (T - q.T) / q.T;
         guide.innerHTML = Math.abs(e) <= .15 ? '<b>Les deux spectres sont maintenant identiques.</b>'
-          : e < 0 ? 'Ton corps chauffé est <b>moins chaud</b> que l\'étoile : son spectre a moins de bleu et de violet (et relativement plus de rouge).'
-            : 'Ton corps chauffé est <b>plus chaud</b> que l\'étoile : son spectre a plus de bleu et de violet (et relativement moins de rouge).';
+          : e < 0 ? 'Ton corps chauffé est <b>moins chaud</b> que l\'étoile : son spectre a moins de bleu et de violet (et relativement plus de rouge).'
+            : 'Ton corps chauffé est <b>plus chaud</b> que l\'étoile : son spectre a plus de bleu et de violet (et relativement moins de rouge).';
       }
     }
     curseur.addEventListener('input', maj);
@@ -215,8 +215,8 @@
       const T = tempCurseur(+curseur.value);
       if (juste()) { fermer(); api.repondre(true); }
       else api.repondre(false, T < q.T
-        ? 'Le spectre de l\'étoile contient plus de bleu et de violet que celui du corps chauffé : augmente la température.'
-        : 'Le spectre de l\'étoile contient moins de bleu et de violet que celui du corps chauffé : diminue la température.');
+        ? 'Le spectre de l\'étoile contient plus de bleu et de violet que celui du corps chauffé : augmente la température.'
+        : 'Le spectre de l\'étoile contient moins de bleu et de violet que celui du corps chauffé : diminue la température.');
     };
     function fermer() { curseur.disabled = true; bVal.disabled = true; }
     return {
@@ -237,7 +237,7 @@
     const z = el('div', 'sp-profil');
     zone.appendChild(z);
     const p = SP.profil(z, { T: q.T, max: false });
-    const f = el('div', 'sp-saisie', `<label>Température de surface : <span class="sp-nowrap"><input type="text" inputmode="numeric" autocomplete="off" aria-label="Température en °C"> °C</span></label><button type="button" class="btn-primary">Valider</button>`);
+    const f = el('div', 'sp-saisie', `<label>Température de surface : <span class="sp-nowrap"><input type="text" inputmode="numeric" autocomplete="off" aria-label="Température en °C"> °C</span></label><button type="button" class="btn-primary">Valider</button>`);
     zone.appendChild(f);
     const champ = f.querySelector('input'), bVal = f.querySelector('button');
     const valider = () => {
@@ -269,9 +269,9 @@
      q.outil : 'A' règle déplaçable, 'B' case cochée → raies prolongées en pointillés, 'AB' les deux
      ============================================================ */
   const OUTILS = {
-    A: '<b>Méthode : la règle.</b> Fais glisser la règle (ou touche un spectre) : elle traverse tous les spectres et indique la longueur d\'onde. Compare la position des raies, coche les éléments présents, puis valide.',
-    B: '<b>Méthode : prolonger les raies.</b> Coche un élément : ses raies sont prolongées en pointillés jusqu\'au spectre de l\'étoile. Garde cochés les éléments présents, puis valide.',
-    AB: 'Fais glisser la <b>règle</b> (ou touche un spectre) pour lire une longueur d\'onde. <b>Coche</b> un élément : ses raies sont prolongées jusqu\'au spectre de l\'étoile. Coche les éléments présents, puis valide.',
+    A: '<b>Méthode : la règle.</b> Fais glisser la règle (ou touche un spectre) : elle traverse tous les spectres et indique la longueur d\'onde. Compare la position des raies, coche les éléments présents, puis valide.',
+    B: '<b>Méthode : prolonger les raies.</b> Coche un élément : ses raies sont prolongées en pointillés jusqu\'au spectre de l\'étoile. Garde cochés les éléments présents, puis valide.',
+    AB: 'Fais glisser la <b>règle</b> (ou touche un spectre) pour lire une longueur d\'onde. <b>Coche</b> un élément : ses raies sont prolongées jusqu\'au spectre de l\'étoile. Coche les éléments présents, puis valide.',
   };
   function tElements(zone, q, api) {
     const outil = q.outil || 'AB', avecRegle = outil.includes('A'), avecProjection = outil.includes('B');
@@ -362,8 +362,8 @@
       const trop = coches.filter(id => !q.presents.includes(id)), oubli = q.presents.filter(id => !coches.includes(id));
       if (!trop.length && !oubli.length) { fermer(); api.repondre(true); return; }
       const msg = [];
-      if (trop.length) msg.push('Au moins un élément coché a une raie qui ne correspond à aucune raie noire de l\'étoile : il n\'est pas présent.');
-      if (oubli.length) msg.push('Certaines raies noires de l\'étoile ne correspondent à aucun élément coché : il manque au moins un élément.');
+      if (trop.length) msg.push('Au moins un élément coché a une raie qui ne correspond à aucune raie noire de l\'étoile : il n\'est pas présent.');
+      if (oubli.length) msg.push('Certaines raies noires de l\'étoile ne correspondent à aucun élément coché : il manque au moins un élément.');
       api.repondre(false, msg.join(' '));
     };
     function fermer() { cases.forEach(L => { L.cb.disabled = true; }); bVal.disabled = true; }
@@ -389,9 +389,9 @@
     const nombre = opts.nombre || 10;
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${nombre} questions de difficulté croissante${nombre === 10 ? ', notées sur 20' : ''} :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tu réponds juste du premier coup ;</li><li><b>1 point</b> si tu réponds juste au deuxième essai ;</li><li>pour les questions à deux choix, <b>un seul essai</b>${nombre === 10 ? '' : ` ;</li><li>à la fin, ton total sur ${2 * nombre} points est <b>ramené sur 20</b>`}.</li></ul></div>
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Les aides</b> · Si tu bloques, utilise les aides. <b>La première fois</b> que tu utilises une aide, elle est <b>gratuite</b>. Si tu as encore besoin de <b>la même aide</b> dans une question suivante, elle <b>coûte ½ point</b> : cela montre que tu n'as pas encore retenu ce qu'elle explique. Lis-la donc bien la première fois !</p></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${nombre} questions de difficulté croissante${nombre === 10 ? ', notées sur 20' : ''} :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tu réponds juste du premier coup ;</li><li><b>1 point</b> si tu réponds juste au deuxième essai ;</li><li>pour les questions à deux choix, <b>un seul essai</b>${nombre === 10 ? '' : ` ;</li><li>à la fin, ton total sur ${2 * nombre} points est <b>ramené sur 20</b>`}.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Les aides</b> · Si tu bloques, utilise les aides. <b>La première fois</b> que tu utilises une aide, elle est <b>gratuite</b>. Si tu as encore besoin de <b>la même aide</b> dans une question suivante, elle <b>coûte ½ point</b> : cela montre que tu n'as pas encore retenu ce qu'elle explique. Lis-la donc bien la première fois !</p></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
     }
@@ -403,7 +403,7 @@
       const q = qs[idx];
       window.EX.question = q;                 // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-        <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${ptsTxt(score)}</b></p>
+        <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${ptsTxt(score)}</b></p>
         <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card sp-question">
           <p class="er-q-nom">${q.theme}</p>
@@ -442,8 +442,8 @@
         score += p; recap.push({ n: idx + 1, p });
         app.querySelector('[data-a="score"]').textContent = ptsTxt(score);
         app.querySelectorAll('[data-a="aides"] button').forEach(b => { b.disabled = true; });
-        const retenue = base && etat.payantes ? ` (aide déjà utilisée : −${virgule(.5 * etat.payantes)} point)` : '';
-        const titre = base === 2 ? 'Bravo, c\'est juste du premier coup !' : base === 1 ? 'C\'est juste au deuxième essai.' : 'Ce n\'est pas ça.';
+        const retenue = base && etat.payantes ? ` (aide déjà utilisée : −${virgule(.5 * etat.payantes)} point)` : '';
+        const titre = base === 2 ? 'Bravo, c\'est juste du premier coup !' : base === 1 ? 'C\'est juste au deuxième essai.' : 'Ce n\'est pas ça.';
         retour.innerHTML = `<div class="${base ? 'callout-success' : 'callout-danger'} er-retour">
           <p><b class="${base ? 'er-ok' : 'er-ko'}">${titre}</b> +${ptsTxt(p)}${retenue}</p>
           ${base ? '' : '<p>La bonne réponse est affichée.</p>'}${q.explication ? `<p>${q.explication}</p>` : ''}</div>`;
@@ -466,7 +466,7 @@
       liste.forEach((a, k) => {
         const deja = aidesVues.has(a.id);
         const b = el('button', 'btn-small sp-aide-b' + (deja ? ' payante' : ''),
-          `Aide ${k + 1} : ${a.titre} <span class="sp-tag">${deja ? '−½ point' : 'gratuite'}</span>`);
+          `Aide ${k + 1} : ${a.titre} <span class="sp-tag">${deja ? '−½ point' : 'gratuite'}</span>`);
         b.type = 'button';
         b.disabled = k > 0;
         boutons.appendChild(b);
@@ -476,7 +476,7 @@
           aidesVues.add(a.id);
           b.classList.add('vue'); b.disabled = true;
           b.querySelector('.sp-tag').textContent = deja ? '−½ point' : 'utilisée';
-          const d = el('div', 'sp-aide-txt', `<p class="sp-aide-titre">Aide ${k + 1} : ${a.titre}${deja ? ' <span>(déjà utilisée dans une question précédente : −½ point)</span>' : ''}</p>${a.html || ''}`);
+          const d = el('div', 'sp-aide-txt', `<p class="sp-aide-titre">Aide ${k + 1} : ${a.titre}${deja ? ' <span>(déjà utilisée dans une question précédente : −½ point)</span>' : ''}</p>${a.html || ''}`);
           contenu.appendChild(d);
           if (a.apres) a.apres(d);
           if (a.action && ctx[a.action]) ctx[a.action]();
@@ -490,10 +490,10 @@
       const max = qs.length * 2, pct = Math.round(score / max * 100);
       const note = Math.round(score / max * 40) / 2;           // note sur 20, arrondie au demi-point
       window.SOM.marquer({ note });                              // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Sans-faute : tu maîtrises ces notions.' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence : les questions changent à chaque fois.' : 'Continue à t\'entraîner : lis bien les aides et les corrections.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Sans-faute : tu maîtrises ces notions.' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence : les questions changent à chaque fois.' : 'Continue à t\'entraîner : lis bien les aides et les corrections.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${virgule(note)} / 20</div><p class="er-score-pct">${max === 20 ? '' : `${virgule(score)} points sur ${max} · `}${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 0 ? 'ko' : 'moyen'}">Q${r.n}<b>${virgule(r.p)}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -528,7 +528,7 @@
       parties: [{ nom: 'Température', questions: 'module_2' }] },
     { n: 3, titre: 'Composition d\'une étoile', desc: 'Identifier les éléments chimiques grâce aux raies noires du spectre',
       parties: [{ nom: 'Composition', questions: 'module_3' }] },
-    { n: 4, titre: 'Bilan : mission astronome', desc: 'Type de spectre, température et composition de trois étoiles',
+    { n: 4, titre: 'Bilan : mission astronome', desc: 'Type de spectre, température et composition de trois étoiles',
       parties: [{ nom: 'Mission astronome', questions: 'module_4' }] },
   ];
   window.SOM.init({ nom: 'Spectres et étoiles', id: 'spectres-etoiles', plan: PLAN });

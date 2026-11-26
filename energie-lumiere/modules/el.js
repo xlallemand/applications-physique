@@ -429,7 +429,7 @@
       const videsATort = inconnues ? slots.filter(s => !s.querySelector('.sc-chip') && !estInconnue(s)) : [];
       if (videsATort.length >= 2) {
         secouer(d.querySelector('.sc-palette'));
-        api.message(`Il reste ${videsATort.length} cases à remplir : seule la case de l'inconnue reste vide.`);
+        api.message(`Il reste ${videsATort.length} cases à remplir : seule la case de l'inconnue reste vide.`);
         return;
       }
       // étiquettes mal placées, puis case laissée vide à tort (ce n'est pas une inconnue)
@@ -445,8 +445,8 @@
         .concat(videsATort.map(s => (p.indicesCases && p.indicesCases[s.dataset.slot]) || '').filter(Boolean));
       const phr = [];
       if (fausses.length) phr.push(`${fausses.length > 1 ? `${fausses.length} étiquettes sont mal placées` : 'Une étiquette est mal placée'} (case rouge)`);
-      if (videsATort.length) phr.push('la case vide en rouge n\'est pas une inconnue : sa valeur est connue, place-la');
-      const txt = phr.join(' ; ');
+      if (videsATort.length) phr.push('la case vide en rouge n\'est pas une inconnue : sa valeur est connue, place-la');
+      const txt = phr.join(' ; ');
       api.erreur(txt.charAt(0).toUpperCase() + txt.slice(1) + '.' + (indices.length ? '<br>' + indices.map(t => '☛ ' + t).join('<br>') : ''));
       secouer(d.querySelector('.el-sch') || d);
     };
@@ -568,7 +568,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || (note && typeof note === 'string')) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${typeof note === 'string' ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -603,8 +603,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -616,7 +616,7 @@
       const q = qs[idx];
       window.EL.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -636,7 +636,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -651,10 +651,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -769,12 +769,12 @@
       const x = x0 + (k + 1) * w;
       s += ligne(x, yB - 8, x, yB + hB + 8, 'el-sp-borne') + txt(x, yB - 13, t, 'el-t-b', 'middle') + txt(x, yB + hB + 22, fr_[k], 'el-t-b', 'middle');
     });
-    s += txt(x0 - 4, yB - 13, 'λ :', 'el-t-b', 'end') + txt(x0 - 4, yB + hB + 22, 'f (Hz) :', 'el-t-b', 'end');
+    s += txt(x0 - 4, yB - 13, 'λ :', 'el-t-b', 'end') + txt(x0 - 4, yB + hB + 22, 'f (Hz) :', 'el-t-b', 'end');
     // ondes hertziennes : micro-ondes et radio
     const xa = x0 + 5 * w + 6, xb = x0 + 7 * w - 6, yH = yB + hB + 38;
     s += `<path d="M${xa},${yH - 6} V${yH} H${xb} V${yH - 6}" class="el-accolade"/>` + txt((xa + xb) / 2, yH + 17, 'ondes hertziennes', 'el-t-a', 'middle');
     s += fl(x0 + 470, yH + 38, x0 + 140, yH + 38, 'el-f-fin', 9) + txt(x0 + 305, yH + 58, 'f et l\'énergie E des photons augmentent', 'el-t-a', 'middle');
-    return `<div class="el-defile"><svg viewBox="0 0 ${W} ${yH + 66}" class="el-spectre" role="img" aria-label="Spectre électromagnétique, des longueurs d'onde les plus courtes aux plus longues : rayons gamma (moins de 10 puissance −11 m), rayons X (jusqu'à 10 puissance −8 m), ultraviolet (jusqu'à 400 nm), visible (400 à 800 nm), infrarouge (jusqu'à 1 mm), micro-ondes (jusqu'à 1 m), ondes radio. Micro-ondes et radio forment les ondes hertziennes. La fréquence et l'énergie des photons augmentent quand la longueur d'onde diminue.">${s}</svg></div>`;
+    return `<div class="el-defile"><svg viewBox="0 0 ${W} ${yH + 66}" class="el-spectre" role="img" aria-label="Spectre électromagnétique, des longueurs d'onde les plus courtes aux plus longues : rayons gamma (moins de 10 puissance −11 m), rayons X (jusqu'à 10 puissance −8 m), ultraviolet (jusqu'à 400 nm), visible (400 à 800 nm), infrarouge (jusqu'à 1 mm), micro-ondes (jusqu'à 1 m), ondes radio. Micro-ondes et radio forment les ondes hertziennes. La fréquence et l'énergie des photons augmentent quand la longueur d'onde diminue.">${s}</svg></div>`;
   }
 
   /* ============================================================
@@ -822,7 +822,7 @@
     const schema = chaine({ entree: { slot: 'in' }, conv, sorties: o.sorties.map((e, k) => ({ slot: 'out' + k })), pertes: o.pertes ? { slot: 'pe' } : null, noms: o.noms });
     const rempli = chaine({ entree: ENERGIES[o.entree], conv: o.convOptions ? o.convOptions.find(c => c.id === o.convBonne).label : o.conv,
       sorties: o.sorties.map(e => ENERGIES[e]), pertes: o.pertes ? ENERGIES[o.pertes] : null, noms: o.noms });
-    return { type: 'schema', titrePalette: o.titrePalette || 'Énergies', q: o.q || 'Complète le schéma énergétique : fais glisser les étiquettes dans les cases.',
+    return { type: 'schema', titrePalette: o.titrePalette || 'Énergies', q: o.q || 'Complète le schéma énergétique : fais glisser les étiquettes dans les cases.',
       schema, etiquettes, solution: (o.solution || '') + (o.sansRempli ? '' : rempli), correction: (o.solution || '') + (o.sansRempli ? '' : rempli) };
   }
 
@@ -865,16 +865,16 @@
   function figNiveaux(o) {
     const niv = o.niveaux || HYDROGENE, t = o.de != null ? transition(niv, o.de, o.vers) : null;
     const et = { el: o.de != null ? o.vers : (o.electron == null ? 0 : o.electron), t: o.sansPhoton ? null : t };
-    const aria = t ? `Niveaux d'énergie ; ${t.sens === 'absorption' ? 'absorption d\'un photon : l\'électron monte' : 'émission d\'un photon : l\'électron descend'} du niveau ${niv[t.i].s} au niveau ${niv[t.j].s}` : 'Niveaux d\'énergie d\'un atome';
+    const aria = t ? `Niveaux d'énergie ; ${t.sens === 'absorption' ? 'absorption d\'un photon : l\'électron monte' : 'émission d\'un photon : l\'électron descend'} du niveau ${niv[t.i].s} au niveau ${niv[t.j].s}` : 'Niveaux d\'énergie d\'un atome';
     return `<svg viewBox="0 0 420 250" class="el-dessin el-niv-svg" role="img" aria-label="${aria}">${svgNiveaux(niv, et, o)}</svg>`;
   }
   // phrase qui décrit une transition (unités, chiffres significatifs)
   function texteTransition(niv, t) {
     const a = niv[Math.max(t.i, t.j)], b = niv[Math.min(t.i, t.j)];
     const vis = t.dom.id === 'visible' ? `lumière visible, <b>${nomCouleur(t.nm)}</b>` : `<b>${t.dom.nom}</b>`;
-    return `<p><b>${t.sens === 'absorption' ? 'Absorption' : 'Émission'}</b> : l'électron passe de E${ind_h(niv[t.i].s)} à E${ind_h(niv[t.j].s)} ; il ${t.sens === 'absorption' ? 'gagne' : 'perd'} ` +
+    return `<p><b>${t.sens === 'absorption' ? 'Absorption' : 'Émission'}</b> : l'électron passe de E${ind_h(niv[t.i].s)} à E${ind_h(niv[t.j].s)} ; il ${t.sens === 'absorption' ? 'gagne' : 'perd'} ` +
       `ΔE = E${ind_h(a.s)} − E${ind_h(b.s)} = ${fmt(t.dE, 2)} eV = ${sci(t.J, 3)} J.</p>` +
-      `<p>Photon ${t.sens === 'absorption' ? 'absorbé' : 'émis'} : f = ΔE / h = ${sci(t.f, 3)} Hz ; λ = c / f = ${t.nm < 2000 ? fmt(Math.round(t.nm)) + ' nm' : sci(t.lam, 3) + ' m'} : ${vis}.</p>`;
+      `<p>Photon ${t.sens === 'absorption' ? 'absorbé' : 'émis'} : f = ΔE / h = ${sci(t.f, 3)} Hz ; λ = c / f = ${t.nm < 2000 ? fmt(Math.round(t.nm)) + ' nm' : sci(t.lam, 3) + ' m'} : ${vis}.</p>`;
   }
   const ind_h = s => `<sub>${s}</sub>`;
 
@@ -890,8 +890,8 @@
     let fini = false;
     const vus = { absorption: false, emission: false };
     const d = el('div', 'el-niv-outil');
-    d.innerHTML = `<div class="el-niv-scene"><svg viewBox="0 0 420 250" class="el-dessin el-niv-svg" role="group" aria-label="Niveaux d'énergie de l'atome ; touche un niveau pour y faire passer l'électron"></svg></div>
-      <div class="el-niv-boutons" role="group" aria-label="Faire passer l'électron sur un niveau"><span>Faire passer l'électron sur :</span>
+    d.innerHTML = `<div class="el-niv-scene"><svg viewBox="0 0 420 250" class="el-dessin el-niv-svg" role="group" aria-label="Niveaux d'énergie de l'atome ; touche un niveau pour y faire passer l'électron"></svg></div>
+      <div class="el-niv-boutons" role="group" aria-label="Faire passer l'électron sur un niveau"><span>Faire passer l'électron sur :</span>
         ${niv.map((n, k) => `<button type="button" class="btn-secondary" data-k="${k}">${n.nom}</button>`).join('')}</div>
       <div class="el-niv-lect" aria-live="polite"><p>L'électron est sur le niveau ${niv[et.el].nom}. Touche un autre niveau.</p></div>`;
     zone.appendChild(d);
@@ -926,11 +926,11 @@
       if (!b) return;
       // une transition dans l'autre sens prépare la suivante : pas d'erreur comptée
       if (b.sens && et.t.sens !== b.sens) {
-        api.message(b.sens === 'emission' ? 'L\'électron monte : c\'est une absorption. Pour <b>émettre</b> un photon, il doit <b>descendre</b>.' : 'L\'électron descend : c\'est une émission. Pour <b>absorber</b> un photon, il doit <b>monter</b>.');
+        api.message(b.sens === 'emission' ? 'L\'électron monte : c\'est une absorption. Pour <b>émettre</b> un photon, il doit <b>descendre</b>.' : 'L\'électron descend : c\'est une émission. Pour <b>absorber</b> un photon, il doit <b>monter</b>.');
         return;
       }
       if (b.test(et.t)) { terminer(); api.reussi(); return; }
-      api.erreur(b.diag ? b.diag(et.t) : 'Ce photon ne convient pas : essaie une autre transition.');
+      api.erreur(b.diag ? b.diag(et.t) : 'Ce photon ne convient pas : essaie une autre transition.');
     }
     function terminer() { fini = true; rendre(); }
     svg.addEventListener('click', e => { const g = e.target.closest && e.target.closest('.el-niv'); if (g) aller(+g.dataset.k); });
@@ -990,17 +990,17 @@
     // caractéristique du cours (éclairement 500 W·m⁻²) : U_nominal ≈ 18 V, I_nominal ≈ 0,52 A, tension à vide 22 V
     cours: { pts: [[0, 0.6], [10, 0.585], [15, 0.565], [18, 0.52], [19, 0.46], [20.5, 0.28], [22, 0]],
       u: { max: 25, pas: 5, sous: 1 }, i: { max: 0.7, pas: 0.1, sous: 0.05 }, p: { max: 10, pas: 2 }, titre: '500 W·m⁻²',
-      aria: 'Caractéristique I(U) d\'un panneau éclairé à 500 W par m² : l\'intensité reste proche de 0,6 A puis chute vers 18 V et s\'annule à 22 V' },
+      aria: 'Caractéristique I(U) d\'un panneau éclairé à 500 W par m² : l\'intensité reste proche de 0,6 A puis chute vers 18 V et s\'annule à 22 V' },
     // module TE2200 (exercice 15 p. 131), éclairement 1,00 kW·m⁻² à 25 °C
     te2200: { pts: FORME, u: { max: 40, pas: 5, sous: 1 }, i: { max: 9, pas: 1, sous: 0.5 }, p: { max: 250, pas: 50 }, titre: 'TE2200 · 1,00 kW·m⁻² à 25 °C',
-      aria: 'Caractéristique I(U) du module TE2200 : l\'intensité reste proche de 8 A puis chute après 30 V et s\'annule vers 36 V' },
+      aria: 'Caractéristique I(U) du module TE2200 : l\'intensité reste proche de 8 A puis chute après 30 V et s\'annule vers 36 V' },
   };
   const carac = nom => preparer(Object.assign({}, CARACS[nom], { pts: CARACS[nom].pts.slice() }));
   // caractéristique de même forme, mise à l'échelle pour que le point de puissance maximale soit (um, im)
   function caracEchelle(um, im, axes) {
     const su = um / FORME_MPP[0], si = im / FORME_MPP[1];
     return preparer(Object.assign({ pts: FORME.map(([u, i]) => [u * su, i * si]),
-      aria: `Caractéristique I(U) d'un panneau : l'intensité reste presque constante puis chute et s'annule vers ${fmt(Math.round(36.3 * su))} V` }, axes));
+      aria: `Caractéristique I(U) d'un panneau : l'intensité reste presque constante puis chute et s'annule vers ${fmt(Math.round(36.3 * su))} V` }, axes));
   }
 
   // géométrie d'un graphique (largeur W) ; ax = { x: { max, pas, sous }, y: { max, pas, sous } }
@@ -1099,7 +1099,7 @@
   }
   function figPU(def, o) {
     preparer(def);
-    return figure(W => { const G = geom(axPU(def), W, 180, 280, .45); return `<svg viewBox="0 0 ${G.W} ${G.H}" width="${G.W}" class="ph-graphe" role="img" aria-label="Courbe P(U) du panneau : la puissance augmente avec U, passe par un maximum puis s'annule à la tension à vide">${svgPU(def, G, o)}</svg>`; });
+    return figure(W => { const G = geom(axPU(def), W, 180, 280, .45); return `<svg viewBox="0 0 ${G.W} ${G.H}" width="${G.W}" class="ph-graphe" role="img" aria-label="Courbe P(U) du panneau : la puissance augmente avec U, passe par un maximum puis s'annule à la tension à vide">${svgPU(def, G, o)}</svg>`; });
   }
 
   /* Outil du rectangle (partie 'perso') : le point glisse sur la caractéristique I(U) (au doigt, à la
@@ -1134,17 +1134,17 @@
     function lecture() {
       const u = st.u, i = def.f(u);
       lect.innerHTML = afficheP ? `U = <b>${fmt(u, 1)} V</b> · I = <b>${fmt(i, i < 2 ? 3 : 2)} A</b> · P = U × I = <b>${fmt(u * i, u * i < 20 ? 2 : 0)} W</b>`
-        : '<span class="el-gris">Fais glisser le point : le rectangle grisé a pour aire P = U × I.</span>';
+        : '<span class="el-gris">Fais glisser le point : le rectangle grisé a pour aire P = U × I.</span>';
     }
     function tracer() {
       const W = Math.min(Math.round(box.clientWidth), 640);
       if (!W) return;
       largeur = W;
       G = geom(axIU(def), W, 230, 340, .6);
-      box.innerHTML = `<svg viewBox="0 0 ${G.W} ${G.H}" width="${G.W}" class="ph-graphe el-pan-svg" role="group" aria-label="${def.aria || 'Caractéristique I(U)'} ; point à déplacer sur la courbe">${svgCarac(def, G)}<g data-a="mobile">${mobile()}</g></svg>`;
+      box.innerHTML = `<svg viewBox="0 0 ${G.W} ${G.H}" width="${G.W}" class="ph-graphe el-pan-svg" role="group" aria-label="${def.aria || 'Caractéristique I(U)'} ; point à déplacer sur la courbe">${svgCarac(def, G)}<g data-a="mobile">${mobile()}</g></svg>`;
       if (boxP) {
         G2 = geom(axPU(def), W, 150, 220, .34);
-        boxP.innerHTML = `<svg viewBox="0 0 ${G2.W} ${G2.H}" width="${G2.W}" class="ph-graphe" role="img" aria-label="Courbe P(U) correspondante : le point suit la position choisie">${svgPU(def, G2)}<g data-a="mobileP">${mobileP()}</g></svg>`;
+        boxP.innerHTML = `<svg viewBox="0 0 ${G2.W} ${G2.H}" width="${G2.W}" class="ph-graphe" role="img" aria-label="Courbe P(U) correspondante : le point suit la position choisie">${svgPU(def, G2)}<g data-a="mobileP">${mobileP()}</g></svg>`;
       }
       lecture();
     }
@@ -1183,17 +1183,17 @@
       d.querySelectorAll('.el-pan-pad button').forEach(b => { b.disabled = true; });
       bVal.fermer();
       maj();
-      if (afficheP) lect.innerHTML = `Point de fonctionnement : U ≈ <b>${fmt(st.u, 1)} V</b>, I ≈ <b>${fmt(def.f(st.u), def.f(st.u) < 2 ? 2 : 1)} A</b> ; P<sub>max</sub> = U × I ≈ <b>${fmt(st.u * def.f(st.u), st.u * def.f(st.u) < 20 ? 1 : 0)} W</b>`;
+      if (afficheP) lect.innerHTML = `Point de fonctionnement : U ≈ <b>${fmt(st.u, 1)} V</b>, I ≈ <b>${fmt(def.f(st.u), def.f(st.u) < 2 ? 2 : 1)} A</b> ; P<sub>max</sub> = U × I ≈ <b>${fmt(st.u * def.f(st.u), st.u * def.f(st.u) < 20 ? 1 : 0)} W</b>`;
     }
     bVal.onclick = () => {
       if (fini || api.fini()) return;
       const ecart = st.u - def.mpp.u;
       if (Math.abs(ecart) <= tol) { verrouiller(); api.reussi(); return; }
       api.erreur(ecart < 0
-        ? (st.u < def.mpp.u * .6 ? 'Ton rectangle est haut mais <b>étroit</b> : U est trop petite. Vers la droite, I ne diminue presque pas et U augmente : l\'aire P = U × I grandit encore.'
-          : 'Tu peux encore aller un peu vers la droite : I diminue à peine et U augmente, le rectangle grandit encore.')
-        : (def.f(st.u) < def.mpp.i * .6 ? 'Tu as dépassé le coude : I s\'effondre, le rectangle est large mais <b>aplati</b>. Reviens vers la gauche.'
-          : 'Un peu trop à droite : après le coude, I chute vite et le rectangle perd de la hauteur. Reviens légèrement vers la gauche.'));
+        ? (st.u < def.mpp.u * .6 ? 'Ton rectangle est haut mais <b>étroit</b> : U est trop petite. Vers la droite, I ne diminue presque pas et U augmente : l\'aire P = U × I grandit encore.'
+          : 'Tu peux encore aller un peu vers la droite : I diminue à peine et U augmente, le rectangle grandit encore.')
+        : (def.f(st.u) < def.mpp.i * .6 ? 'Tu as dépassé le coude : I s\'effondre, le rectangle est large mais <b>aplati</b>. Reviens vers la gauche.'
+          : 'Un peu trop à droite : après le coude, I chute vite et le rectangle perd de la hauteur. Reviens légèrement vers la gauche.'));
       secouer(box);
     };
     return { montrer() { st.u = def.mpp.u; verrouiller(); } };
@@ -1232,8 +1232,8 @@
       [[xV, 150, 1], [xA, yh, 2], [xR, 153, 3]].forEach(([x, y, n]) => { s += `<g class="el-pose-num"><circle cx="${x}" cy="${y}" r="15"/>${txt(x, y + 6, n, '', 'middle')}</g>`; });
     }
     return { W, H, svg: s, cases: { c1: [xV, 150, 1], c2: [xA, yh, 2], c3: [xR, 153, 3] },
-      aria: rempli ? 'Circuit de mesure : le panneau alimente une résistance variable ; un ampèremètre est en série dans le circuit, un voltmètre est branché en dérivation aux bornes du panneau'
-        : 'Circuit à compléter : panneau photovoltaïque ; emplacement 1 entre les deux fils, aux bornes du panneau ; emplacement 2 sur le fil du haut ; emplacement 3 sur la branche de droite' };
+      aria: rempli ? 'Circuit de mesure : le panneau alimente une résistance variable ; un ampèremètre est en série dans le circuit, un voltmètre est branché en dérivation aux bornes du panneau'
+        : 'Circuit à compléter : panneau photovoltaïque ; emplacement 1 entre les deux fils, aux bornes du panneau ; emplacement 2 sur le fil du haut ; emplacement 3 sur la branche de droite' };
   }
   function circuit() {
     const d = circuitSVG(true);
@@ -1251,15 +1251,15 @@
   function partieCircuit(o) {
     o = o || {};
     const d = circuitSVG(false);
-    return { type: 'schema', titrePalette: 'Appareils', q: o.q || 'Complète le circuit qui permet de tracer la caractéristique du panneau : fais glisser chaque appareil à sa place.',
+    return { type: 'schema', titrePalette: 'Appareils', q: o.q || 'Complète le circuit qui permet de tracer la caractéristique du panneau : fais glisser chaque appareil à sa place.',
       schema: schemaPose(d, { c1: slot('c1'), c2: slot('c2'), c3: slot('c3') }),
       etiquettes: [
-        { id: 'V', label: APPAREILS.V, cible: 'c1', indice: 'Le voltmètre mesure la tension <b>aux bornes</b> du panneau : il se branche en <b>dérivation</b>, entre les deux fils.' },
-        { id: 'A', label: APPAREILS.A, cible: 'c2', indice: 'L\'ampèremètre mesure le courant qui <b>traverse</b> le circuit : il se branche en <b>série</b>, sur un fil.' },
-        { id: 'R', label: APPAREILS.R, cible: 'c3', indice: 'La résistance variable est la charge du panneau : en la faisant varier, on obtient les différents points (U ; I).' },
-        { id: 'G', label: 'générateur', cible: null, indice: 'Pas de générateur : c\'est le panneau éclairé qui fournit l\'énergie électrique.' },
+        { id: 'V', label: APPAREILS.V, cible: 'c1', indice: 'Le voltmètre mesure la tension <b>aux bornes</b> du panneau : il se branche en <b>dérivation</b>, entre les deux fils.' },
+        { id: 'A', label: APPAREILS.A, cible: 'c2', indice: 'L\'ampèremètre mesure le courant qui <b>traverse</b> le circuit : il se branche en <b>série</b>, sur un fil.' },
+        { id: 'R', label: APPAREILS.R, cible: 'c3', indice: 'La résistance variable est la charge du panneau : en la faisant varier, on obtient les différents points (U ; I).' },
+        { id: 'G', label: 'générateur', cible: null, indice: 'Pas de générateur : c\'est le panneau éclairé qui fournit l\'énergie électrique.' },
       ],
-      solution: (o.solution || '<p>Le <b>voltmètre</b> est en <b>dérivation</b> aux bornes du panneau, l\'<b>ampèremètre</b> en <b>série</b> ; on fait varier la <b>résistance</b> pour obtenir chaque point (U ; I).</p>') + circuit() };
+      solution: (o.solution || '<p>Le <b>voltmètre</b> est en <b>dérivation</b> aux bornes du panneau, l\'<b>ampèremètre</b> en <b>série</b> ; on fait varier la <b>résistance</b> pour obtenir chaque point (U ; I).</p>') + circuit() };
   }
 
   /* ============================================================
@@ -1299,7 +1299,7 @@
       // légende
       s += `<g transform="translate(14,14)">${ligne(0, 6, 34, 6, 'el-e-sol')}${txt(42, 11, 'énergie solaire', 'el-t')}${ligne(0, 28, 34, 28, 'el-e-elec')}${txt(42, 33, 'énergie électrique', 'el-t')}${ligne(0, 50, 34, 50, 'el-e-th')}${txt(42, 55, 'énergie thermique', 'el-t')}</g>`;
       s += txt(588, 20, 'énergies en GJ', 'el-t-a', 'end') + txt(588, 38, '(10⁹ J) par an', 'el-t-a', 'end');
-      return { W, H, svg: s, aria: 'Bilan énergétique annuel d\'une maison à très faible consommation, en gigajoules : les panneaux photovoltaïques (40 m²) reçoivent 217 GJ d\'énergie solaire, le capteur hybride (8 m²) 36 GJ ; ensemble, ils fournissent 14 GJ d\'énergie électrique (7 vers le réseau, 7 pour les lumières et appareils) ; le capteur hybride fournit aussi 11 GJ d\'énergie thermique pour l\'eau chaude ; le capteur géothermique enterré fournit 19 GJ d\'énergie thermique à la pompe à chaleur (PAC), alimentée aussi par 8 GJ d\'électricité du réseau ; la PAC fournit 25 GJ pour le chauffage ; le réseau fournit encore 9 GJ aux lumières et appareils' };
+      return { W, H, svg: s, aria: 'Bilan énergétique annuel d\'une maison à très faible consommation, en gigajoules : les panneaux photovoltaïques (40 m²) reçoivent 217 GJ d\'énergie solaire, le capteur hybride (8 m²) 36 GJ ; ensemble, ils fournissent 14 GJ d\'énergie électrique (7 vers le réseau, 7 pour les lumières et appareils) ; le capteur hybride fournit aussi 11 GJ d\'énergie thermique pour l\'eau chaude ; le capteur géothermique enterré fournit 19 GJ d\'énergie thermique à la pompe à chaleur (PAC), alimentée aussi par 8 GJ d\'électricité du réseau ; la PAC fournit 25 GJ pour le chauffage ; le réseau fournit encore 9 GJ aux lumières et appareils' };
     },
     // Effet photoélectrique : photons qui arrivent sur un matériau, électrons arrachés
     photoelectrique() {
@@ -1316,7 +1316,7 @@
       s += fl(300, 166, 350, 74, 'el-f-elec', 11) + fl(360, 166, 430, 90, 'el-f-elec', 11);
       s += `<circle cx="356" cy="62" r="9" class="el-e-moins"/>${txt(356, 66.5, '−', 'el-t-e', 'middle')}<circle cx="438" cy="80" r="9" class="el-e-moins"/>${txt(438, 84.5, '−', 'el-t-e', 'middle')}`;
       s += txt(400, 40, 'électrons arrachés', 'el-t-a', 'middle');
-      return { W, H, svg: s, aria: 'Effet photoélectrique : des photons arrivent sur un matériau et en arrachent des électrons' };
+      return { W, H, svg: s, aria: 'Effet photoélectrique : des photons arrivent sur un matériau et en arrachent des électrons' };
     },
     // Capteurs du toit (exercices) : panneau solaire thermique, fluide caloporteur, ballon d'eau chaude
     capteurs() {
@@ -1331,7 +1331,7 @@
       s += `<path d="M308,112 V80 H436 V100 M157,192 V200 H436 V196" class="el-tuyau" fill="none"/>`;
       s += `<rect x="400" y="100" width="72" height="96" rx="20" class="el-ballon"/>` + txt(436, 146, 'ballon', 'el-t', 'middle') + txt(436, 162, 'd\'eau', 'el-t', 'middle');
       s += txt(372, 72, 'fluide caloporteur', 'el-t', 'middle') + txt(214, 226, 'panneau solaire thermique', 'el-t', 'middle');
-      return { W, H, svg: s, aria: 'Panneau solaire thermique : un fluide caloporteur se réchauffe dans le panneau éclairé par le Soleil et cède son énergie à l\'eau d\'un ballon' };
+      return { W, H, svg: s, aria: 'Panneau solaire thermique : un fluide caloporteur se réchauffe dans le panneau éclairé par le Soleil et cède son énergie à l\'eau d\'un ballon' };
     },
   };
   function dessin(type, o) {
@@ -1344,17 +1344,17 @@
      ============================================================ */
   const PLAN = [
     { n: 1, titre: 'Récupérer l\'énergie lumineuse', desc: 'Conversions photothermique et photovoltaïque, schémas énergétiques, rendement', fiche: 'fiche_1',
-      parties: [{ nom: 'Capteurs et rendement', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : capteurs hybrides' } }] },
+      parties: [{ nom: 'Capteurs et rendement', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : capteurs hybrides' } }] },
     { n: 2, titre: 'Conversion photothermique', desc: 'Q = m × c × (T<sub>f</sub> − T<sub>i</sub>), élévation de température, débits', fiche: 'fiche_2',
       parties: [{ nom: 'Conversion photothermique', cours: 'module_2_cours', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Ondes et photons', desc: 'λ = c / f, spectre électromagnétique, photon E = h f, niveaux d\'énergie', fiche: 'fiche_3',
       parties: [{ nom: 'Fréquence et longueur d\'onde', slug: 'ondes', cours: 'module_3a_cours' },
-        { nom: 'Photons et niveaux d\'énergie', slug: 'photons', simulation: 'module_3b_simulation', cours: 'module_3b_cours', questions: 'module_3_questions', noms: { simulation: 'Activité : effet photoélectrique' } }] },
+        { nom: 'Photons et niveaux d\'énergie', slug: 'photons', simulation: 'module_3b_simulation', cours: 'module_3b_cours', questions: 'module_3_questions', noms: { simulation: 'Activité : effet photoélectrique' } }] },
     { n: 4, titre: 'Panneau photovoltaïque et puissance solaire', desc: 'Caractéristique I(U), point de fonctionnement, P<sub>reçue</sub> = irradiance × S', fiche: 'fiche_4',
       parties: [{ nom: 'Panneau et puissance solaire', cours: 'module_4_cours', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 7, 8, 14, 10 et 15 de la feuille, guidés pas à pas', exercices: 'module_5', exNom: 'Exercices de la feuille', nbEx: 5 },
   ];
-  window.SOM.init({ nom: 'Chapitre 10 : Énergie transportée par la lumière', id: 'energie-lumiere', cleEx: 'energie-lumiere-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 10 : Énergie transportée par la lumière', id: 'energie-lumiere', cleEx: 'energie-lumiere-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

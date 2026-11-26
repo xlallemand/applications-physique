@@ -57,17 +57,17 @@
      ============================================================ */
   const FAMS = ['alcool', 'aldehyde', 'cetone', 'acide'];
   Object.assign(O.BULLES, {
-    chaineGroupe: '<b>La chaîne principale contient le groupe caractéristique</b> : elle passe par le C qui porte le groupe.',
-    groupeNum: '<b>Le n° est celui de l\'atome de carbone qui porte le groupe caractéristique.</b> Il a le plus petit numéro possible. Exemple : butan-2-ol. Pour -al et -oïque, ce C est le n° 1 (on ne l\'écrit pas).',
-    tirets: '<b>Tirets et virgules</b> : une virgule entre deux chiffres (2,3), un tiret entre un chiffre et une lettre (2-méthyl, butan-2-ol), rien entre deux lettres (méthylpentane). Pas d\'espace, sauf après « acide ».',
-    suffixes: '<b>Terminaisons</b> : alcane -ane ; alcool -ol (butan-2-ol) ; aldéhyde -al (butanal) ; cétone -one (butan-2-one) ; acide carboxylique acide …-oïque (acide butanoïque). Devant une voyelle, « ane » perd son e : butan-2-ol.',
-    entourer: '<b>Un groupe caractéristique</b> contient un atome autre que C et H (ici, un O). Entoure tous ses atomes : C=O et OH sur le même C forment un seul groupe, le groupe carboxyle.',
-    familles: '<b>Familles</b> : –OH (hydroxyle) alcool ; C=O (carbonyle) au bout de la chaîne aldéhyde, entre deux C cétone ; –COOH (carboxyle) acide carboxylique.',
+    chaineGroupe: '<b>La chaîne principale contient le groupe caractéristique</b> : elle passe par le C qui porte le groupe.',
+    groupeNum: '<b>Le n° est celui de l\'atome de carbone qui porte le groupe caractéristique.</b> Il a le plus petit numéro possible. Exemple : butan-2-ol. Pour -al et -oïque, ce C est le n° 1 (on ne l\'écrit pas).',
+    tirets: '<b>Tirets et virgules</b> : une virgule entre deux chiffres (2,3), un tiret entre un chiffre et une lettre (2-méthyl, butan-2-ol), rien entre deux lettres (méthylpentane). Pas d\'espace, sauf après « acide ».',
+    suffixes: '<b>Terminaisons</b> : alcane -ane ; alcool -ol (butan-2-ol) ; aldéhyde -al (butanal) ; cétone -one (butan-2-one) ; acide carboxylique acide …-oïque (acide butanoïque). Devant une voyelle, « ane » perd son e : butan-2-ol.',
+    entourer: '<b>Un groupe caractéristique</b> contient un atome autre que C et H (ici, un O). Entoure tous ses atomes : C=O et OH sur le même C forment un seul groupe, le groupe carboxyle.',
+    familles: '<b>Familles</b> : –OH (hydroxyle) alcool ; C=O (carbonyle) au bout de la chaîne aldéhyde, entre deux C cétone ; –COOH (carboxyle) acide carboxylique.',
   });
   Object.assign(O.TEXTES, { pasUnGroupe: 'il faut un atome O', groupeOublie: 'repère les atomes O' });
   Object.assign(O.CONFUSIONS, {
-    cetone: [['cetone', 'aldehyde', 'Le C du C=O est entre deux C (il ne porte pas de H) : famille des <b>cétones</b>.'], ['alcool', 'alcool', 'Le O est lié au C par une double liaison : C=O, groupe <b>carbonyle</b>.'], ['acide', 'acide', 'Il n\'y a pas de OH sur ce C : ce n\'est pas un groupe carboxyle.']],
-    acide: [['alcool', 'alcool', 'Acide ≠ alcool : le OH est sur un C qui porte aussi un =O ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['cetone', 'cetone', 'Acide ≠ cétone : le C du C=O porte aussi un OH ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['aldehyde', 'aldehyde', 'Acide ≠ aldéhyde : le C du C=O porte un OH, pas seulement un H ; ensemble, c\'est un groupe <b>carboxyle</b>.']],
+    cetone: [['cetone', 'aldehyde', 'Le C du C=O est entre deux C (il ne porte pas de H) : famille des <b>cétones</b>.'], ['alcool', 'alcool', 'Le O est lié au C par une double liaison : C=O, groupe <b>carbonyle</b>.'], ['acide', 'acide', 'Il n\'y a pas de OH sur ce C : ce n\'est pas un groupe carboxyle.']],
+    acide: [['alcool', 'alcool', 'Acide ≠ alcool : le OH est sur un C qui porte aussi un =O ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['cetone', 'cetone', 'Acide ≠ cétone : le C du C=O porte aussi un OH ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['aldehyde', 'aldehyde', 'Acide ≠ aldéhyde : le C du C=O porte un OH, pas seulement un H ; ensemble, c\'est un groupe <b>carboxyle</b>.']],
   });
 
   /* ============================================================
@@ -254,7 +254,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = (vue && p.correction ? p.correction : (p.solution || p.correction)) || (vue && p.type === 'perso' ? '<p>La réponse est affichée ci-dessus.</p>' : '');
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -287,8 +287,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -300,7 +300,7 @@
       const q = qs[idx];
       window.NOM.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -320,7 +320,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -335,10 +335,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -527,7 +527,7 @@
      ============================================================ */
   const EC = { developpee: 'Développée', semi: 'Semi-développée', topo: 'Topologique' };
   // lien vers une vidéo (facultative), juste avant la notion qu'elle explique
-  const video = (url, texte, apres) => `<div class="callout nom-video"><p>▶ <b>Vidéo (facultative)</b> : <a href="${url}" target="_blank" rel="noopener">${texte}</a></p>${apres ? `<p class="nom-avert">${apres}</p>` : ''}</div>`;
+  const video = (url, texte, apres) => `<div class="callout nom-video"><p>▶ <b>Vidéo (facultative)</b> : <a href="${url}" target="_blank" rel="noopener">${texte}</a></p>${apres ? `<p class="nom-avert">${apres}</p>` : ''}</div>`;
   // une molécule dans une petite carte, avec un titre et un nom (en couleurs si n = nommer(…))
   function molHTML(s, op) {
     op = op || {};
@@ -582,16 +582,16 @@
   }
   function diagBrute(v, m, op) {
     const s = compter(v), e = compter(O.formuleBrute(m));
-    if (!s) return 'Écris la formule brute avec les symboles des atomes et leur nombre : C, puis H, puis les autres (exemple : C5H12O).';
+    if (!s) return 'Écris la formule brute avec les symboles des atomes et leur nombre : C, puis H, puis les autres (exemple : C5H12O).';
     const ec = (op && op.ecriture) || 'topo';
-    if ((s.C || 0) !== e.C) return `Tu as compté ${s.C || 0} C : il y en a ${(s.C || 0) < e.C ? 'plus' : 'moins'}.${ec === 'topo' ? ' En topologique, chaque sommet et chaque bout de trait est un C.' : ''}`;
-    if ((s.H || 0) !== (e.H || 0)) return ec === 'topo' ? 'Compte les H : en topologique, les H des C ne sont pas dessinés. Chaque C a 4 liaisons : les H complètent (4 − nombre de traits).' : 'Compte les H de chaque groupe (CH₃ : 3 H, CH₂ : 2 H…), sans oublier ceux des OH, NH₂… et ceux des écritures abrégées (C₂H₅ : 5 H).';
-    for (const x of Object.keys(e)) if ((s[x] || 0) !== e[x]) return `Compte les atomes ${x} : il y en a ${e[x]}.`;
+    if ((s.C || 0) !== e.C) return `Tu as compté ${s.C || 0} C : il y en a ${(s.C || 0) < e.C ? 'plus' : 'moins'}.${ec === 'topo' ? ' En topologique, chaque sommet et chaque bout de trait est un C.' : ''}`;
+    if ((s.H || 0) !== (e.H || 0)) return ec === 'topo' ? 'Compte les H : en topologique, les H des C ne sont pas dessinés. Chaque C a 4 liaisons : les H complètent (4 − nombre de traits).' : 'Compte les H de chaque groupe (CH₃ : 3 H, CH₂ : 2 H…), sans oublier ceux des OH, NH₂… et ceux des écritures abrégées (C₂H₅ : 5 H).';
+    for (const x of Object.keys(e)) if ((s[x] || 0) !== e[x]) return `Compte les atomes ${x} : il y en a ${e[x]}.`;
     for (const x of Object.keys(s)) if (!e[x]) return `Il n'y a pas d'atome ${x} dans cette molécule.`;
     return 'Écris d\'abord C, puis H, puis les autres atomes dans l\'ordre alphabétique.';
   }
-  const partieBrute = (m, op) => Object.assign({ type: 'texte', label: 'Formule brute :', reponses: [O.formuleBrute(mol(m))], casse: true, largeur: 150,
-    affiche: O.formuleBrute(mol(m)), diag: v => diagBrute(v, mol(m), op), solution: `<p>Formule brute : <b>${O.formuleBrute(mol(m), { html: true })}</b>.</p>` }, op && op.partie);
+  const partieBrute = (m, op) => Object.assign({ type: 'texte', label: 'Formule brute :', reponses: [O.formuleBrute(mol(m))], casse: true, largeur: 150,
+    affiche: O.formuleBrute(mol(m)), diag: v => diagBrute(v, mol(m), op), solution: `<p>Formule brute : <b>${O.formuleBrute(mol(m), { html: true })}</b>.</p>` }, op && op.partie);
 
   /* ---------- Molécules à plusieurs groupes (ex. 2, atelier « entourer ») ----------
      Seulement des groupes hydroxyle, carbonyle et carboxyle (programme de 1re), en semi-développée.
@@ -613,7 +613,7 @@
     const noms = gs.some(g => g.classe === 'phénol')
       ? [...new Set(gs.filter(g => g.classe !== 'phénol').map(g => g.cle))].map(cle => {
         const ns = gs.map((g, k) => (g.cle === cle && g.classe !== 'phénol' ? k + 1 : 0)).filter(Boolean);
-        return Object.assign(O.partieNommerGroupe(cle, `Nomme le groupe entouré n° ${ns.join(' et ')} et donne sa famille.`, 'n° ' + ns.join(' et ')), { solution: `<p>Groupe n° ${ns.join(' et ')} : <b>${O.FAMILLES[cle].nomGroupe}</b> (${O.FAMILLES[cle].familles}). ${x.note || ''}</p>` });
+        return Object.assign(O.partieNommerGroupe(cle, `Nomme le groupe entouré n° ${ns.join(' et ')} et donne sa famille.`, 'n° ' + ns.join(' et ')), { solution: `<p>Groupe n° ${ns.join(' et ')} : <b>${O.FAMILLES[cle].nomGroupe}</b> (${O.FAMILLES[cle].familles}). ${x.note || ''}</p>` });
       })
       : O.partiesNommerGroupes(m);
     return [ent].concat(noms);
@@ -671,20 +671,20 @@
     // les C de gauche à droite (puis de haut en bas)
     const Cs = m.atomes.map((a, i) => i).filter(i => m.atomes[i].el === 'C').sort((a, b) => sc.px[a].x - sc.px[b].x || sc.px[a].y - sc.px[b].y);
     const nomC = i => 'C' + (Cs.indexOf(i) + 1);
-    const dessinAide = O.dessinHTML(m, { ecriture: 'topo', echelle: { x: 60, y: 60 }, police: 18, marques: Cs, annotations: Cs.map(i => ({ i, t: nomC(i) })), label: 'Formule topologique : chaque C est repéré par un point' });
+    const dessinAide = O.dessinHTML(m, { ecriture: 'topo', echelle: { x: 60, y: 60 }, police: 18, marques: Cs, annotations: Cs.map(i => ({ i, t: nomC(i) })), label: 'Formule topologique : chaque C est repéré par un point' });
     const lignesH = Cs.map(i => {
       const nv = O.adjacence(m)[i].length, traits = O.somme(m, i), h = O.nbH(m, i), dbl = traits > nv;
       const quoi = nv === 1 ? 'bout de trait' : 'sommet';
-      return `<li><b>${nomC(i)}</b> (${quoi}) : ${traits} trait${traits > 1 ? 's' : ''}${dbl ? ' (une double liaison compte pour 2)' : ''} → 4 − ${traits} = <b>${h} H</b></li>`;
+      return `<li><b>${nomC(i)}</b> (${quoi}) : ${traits} trait${traits > 1 ? 's' : ''}${dbl ? ' (une double liaison compte pour 2)' : ''} → 4 − ${traits} = <b>${h} H</b></li>`;
     }).join('');
     const autres = m.atomes.map((a, i) => i).filter(i => m.atomes[i].el !== 'C');
-    const txtAutres = autres.length ? autres.map(i => { const h = O.nbH(m, i); return `<b>${O.etiquetteH(m.atomes[i].el, h, true)}</b> : 1 ${m.atomes[i].el}${h ? ` et ${h} H` : ''}`; }).join(' ; ') : 'aucun';
+    const txtAutres = autres.length ? autres.map(i => { const h = O.nbH(m, i); return `<b>${O.etiquetteH(m.atomes[i].el, h, true)}</b> : 1 ${m.atomes[i].el}${h ? ` et ${h} H` : ''}`; }).join(' ; ') : 'aucun';
     return `<div class="nom-aide"><p class="nom-aide-t">Aide pas à pas</p>
       <div class="nom-fig">${dessinAide}</div>
       <ol class="nom-aide-etapes">
-        <li><b>Compte les C.</b> Chaque sommet et chaque <b>bout de trait</b> est un atome de carbone : ils sont repérés par un point (C1, C2…).</li>
-        ${op.seulementC ? '' : `<li><b>Compte les H des C</b> (on ne les voit pas) : chaque C fait 4 liaisons, ses H complètent : <b>4 − nombre de traits</b>.<ul>${lignesH}</ul>Additionne-les.</li>
-        <li><b>Compte les autres atomes</b>, écrits avec leurs H : ${txtAutres}.</li>`}
+        <li><b>Compte les C.</b> Chaque sommet et chaque <b>bout de trait</b> est un atome de carbone : ils sont repérés par un point (C1, C2…).</li>
+        ${op.seulementC ? '' : `<li><b>Compte les H des C</b> (on ne les voit pas) : chaque C fait 4 liaisons, ses H complètent : <b>4 − nombre de traits</b>.<ul>${lignesH}</ul>Additionne-les.</li>
+        <li><b>Compte les autres atomes</b>, écrits avec leurs H : ${txtAutres}.</li>`}
       </ol></div>`;
   }
 
@@ -743,7 +743,7 @@
       });
       const gaz = LIGNES[r][7];
       const jusque = { He: 'à l\'hélium', Ne: 'au néon', Ar: 'à l\'argon', Kr: 'au krypton', Xe: 'au xénon' }[gaz];
-      res.innerHTML = `${x} : ${n} case${n > 1 ? 's' : ''} jusqu'${jusque} (${gaz}), gaz noble : <b>${x} fait ${n} liaison${n > 1 ? 's' : ''}</b>.`;
+      res.innerHTML = `${x} : ${n} case${n > 1 ? 's' : ''} jusqu'${jusque} (${gaz}), gaz noble : <b>${x} fait ${n} liaison${n > 1 ? 's' : ''}</b>.`;
       if (op.surChoix) op.surChoix(x, n);
     });
     return box;
@@ -804,41 +804,41 @@
      PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
      ============================================================ */
   const PLAN = [
-    { n: 1, titre: 'Représenter les molécules', desc: 'Combien de liaisons ; formules développée et semi-développée ; passer de l\'une à l\'autre', fiche: 'fiche_1',
+    { n: 1, titre: 'Représenter les molécules', desc: 'Combien de liaisons ; formules développée et semi-développée ; passer de l\'une à l\'autre', fiche: 'fiche_1',
       sousModules: true,
       parties: [
-        { nom: 'Combien de liaisons ?', slug: 'liaisons', cours: 'module_1a_cours', noms: { cours: 'Cours : combien de liaisons ?' } },
-        { nom: 'Formules développée et semi-développée', slug: 'ecritures', cours: 'module_1b_cours', noms: { cours: 'Cours : formules développée et semi-développée' } },
-        { nom: 'Prise en main de l\'outil de dessin', simulation: 'module_1_dessin', noms: { simulation: 'Atelier : prise en main de l\'outil de dessin des molécules' } },
-        { nom: 'Dessin libre', simulation: 'module_1_libre', noms: { simulation: 'Atelier : dessin libre de molécules' } },
-        { nom: 'Changer d\'écriture', simulation: 'module_1_conversion', noms: { simulation: 'Atelier : changer d\'écriture' } },
+        { nom: 'Combien de liaisons ?', slug: 'liaisons', cours: 'module_1a_cours', noms: { cours: 'Cours : combien de liaisons ?' } },
+        { nom: 'Formules développée et semi-développée', slug: 'ecritures', cours: 'module_1b_cours', noms: { cours: 'Cours : formules développée et semi-développée' } },
+        { nom: 'Prise en main de l\'outil de dessin', simulation: 'module_1_dessin', noms: { simulation: 'Atelier : prise en main de l\'outil de dessin des molécules' } },
+        { nom: 'Dessin libre', simulation: 'module_1_libre', noms: { simulation: 'Atelier : dessin libre de molécules' } },
+        { nom: 'Changer d\'écriture', simulation: 'module_1_conversion', noms: { simulation: 'Atelier : changer d\'écriture' } },
         { nom: 'Représenter les molécules', questions: 'module_1_questions' }] },
     { n: 2, titre: 'Nommer les alcanes', desc: 'Les dix alcanes linéaires, nommer un alcane ramifié et le dessiner à partir de son nom, alcanes cycliques', fiche: 'fiche_2',
       sousModules: true,
       parties: [
-        { nom: 'Les alcanes à chaîne linéaire', slug: 'lineaires', cours: 'module_2a_cours', noms: { cours: 'Cours : les alcanes à chaîne linéaire' } },
-        { nom: 'Nommer un alcane ramifié', slug: 'ramifie', cours: 'module_2b_cours', noms: { cours: 'Cours : nommer un alcane ramifié' } },
-        { nom: 'Du nom à la formule', slug: 'formule', cours: 'module_2c_cours', noms: { cours: 'Cours : du nom à la formule' } },
-        { nom: 'Les alcanes cycliques', slug: 'cycliques', cours: 'module_2d_cours', noms: { cours: 'Cours : les alcanes cycliques' } },
-        { nom: 'Nommer un alcane', simulation: 'module_2_nommer', noms: { simulation: 'Atelier : nommer un alcane' } },
-        { nom: 'Dessiner un alcane', simulation: 'module_2_dessiner', noms: { simulation: 'Atelier : dessiner un alcane' } },
+        { nom: 'Les alcanes à chaîne linéaire', slug: 'lineaires', cours: 'module_2a_cours', noms: { cours: 'Cours : les alcanes à chaîne linéaire' } },
+        { nom: 'Nommer un alcane ramifié', slug: 'ramifie', cours: 'module_2b_cours', noms: { cours: 'Cours : nommer un alcane ramifié' } },
+        { nom: 'Du nom à la formule', slug: 'formule', cours: 'module_2c_cours', noms: { cours: 'Cours : du nom à la formule' } },
+        { nom: 'Les alcanes cycliques', slug: 'cycliques', cours: 'module_2d_cours', noms: { cours: 'Cours : les alcanes cycliques' } },
+        { nom: 'Nommer un alcane', simulation: 'module_2_nommer', noms: { simulation: 'Atelier : nommer un alcane' } },
+        { nom: 'Dessiner un alcane', simulation: 'module_2_dessiner', noms: { simulation: 'Atelier : dessiner un alcane' } },
         { nom: 'Nommer les alcanes', questions: 'module_2_questions' }] },
-    { n: 3, titre: 'Les familles', desc: 'Alcools, aldéhydes, cétones, acides carboxyliques : entourer et nommer le groupe caractéristique, nommer et dessiner les molécules', fiche: 'fiche_3',
+    { n: 3, titre: 'Les familles', desc: 'Alcools, aldéhydes, cétones, acides carboxyliques : entourer et nommer le groupe caractéristique, nommer et dessiner les molécules', fiche: 'fiche_3',
       sousModules: true,
       parties: [
-        { nom: 'Alcools, aldéhydes, cétones, acides carboxyliques', slug: 'familles', cours: 'module_3a_cours', noms: { cours: 'Cours : alcools, aldéhydes, cétones, acides carboxyliques' } },
-        { nom: 'Nommer alcools, aldéhydes, cétones, acides carboxyliques', slug: 'nommer', cours: 'module_3b_cours', noms: { cours: 'Cours : nommer alcools, aldéhydes, cétones, acides carboxyliques' } },
-        { nom: 'Entourer les groupes', simulation: 'module_3_entourer', noms: { simulation: 'Atelier : entourer les groupes' } },
-        { nom: 'Nommer une molécule', simulation: 'module_3_nommer', noms: { simulation: 'Atelier : nommer une molécule' } },
-        { nom: 'Dessiner à partir du nom', simulation: 'module_3_dessiner', noms: { simulation: 'Atelier : dessiner une molécule à partir de son nom' } },
+        { nom: 'Alcools, aldéhydes, cétones, acides carboxyliques', slug: 'familles', cours: 'module_3a_cours', noms: { cours: 'Cours : alcools, aldéhydes, cétones, acides carboxyliques' } },
+        { nom: 'Nommer alcools, aldéhydes, cétones, acides carboxyliques', slug: 'nommer', cours: 'module_3b_cours', noms: { cours: 'Cours : nommer alcools, aldéhydes, cétones, acides carboxyliques' } },
+        { nom: 'Entourer les groupes', simulation: 'module_3_entourer', noms: { simulation: 'Atelier : entourer les groupes' } },
+        { nom: 'Nommer une molécule', simulation: 'module_3_nommer', noms: { simulation: 'Atelier : nommer une molécule' } },
+        { nom: 'Dessiner à partir du nom', simulation: 'module_3_dessiner', noms: { simulation: 'Atelier : dessiner une molécule à partir de son nom' } },
         { nom: 'Les familles', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Exercices', desc: 'Cinq exercices guidés pas à pas', exercices: 'module_4', exNom: 'Exercices 1 à 5', nbEx: 5 },
-    { n: 5, titre: 'Pour aller plus loin : la formule topologique', desc: 'Hors programme, pour te préparer à la terminale : lire une formule topologique, passer d\'une écriture à l\'autre', fiche: 'fiche_5',
+    { n: 5, titre: 'Pour aller plus loin : la formule topologique', desc: 'Hors programme, pour te préparer à la terminale : lire une formule topologique, passer d\'une écriture à l\'autre', fiche: 'fiche_5',
       sousModules: true,
       parties: [
-        { nom: 'La formule topologique', slug: 'topologique', cours: 'module_5a_cours', noms: { cours: 'Cours : la formule topologique' } },
-        { nom: 'Passer d\'une écriture à l\'autre', slug: 'passer', cours: 'module_5b_cours', noms: { cours: 'Cours : passer d\'une écriture à l\'autre' } },
-        { nom: 'Les trois écritures', simulation: 'module_5_conversion', noms: { simulation: 'Atelier : changer d\'écriture (les trois écritures)' } },
+        { nom: 'La formule topologique', slug: 'topologique', cours: 'module_5a_cours', noms: { cours: 'Cours : la formule topologique' } },
+        { nom: 'Passer d\'une écriture à l\'autre', slug: 'passer', cours: 'module_5b_cours', noms: { cours: 'Cours : passer d\'une écriture à l\'autre' } },
+        { nom: 'Les trois écritures', simulation: 'module_5_conversion', noms: { simulation: 'Atelier : changer d\'écriture (les trois écritures)' } },
         { nom: 'La formule topologique', questions: 'module_5_questions' }] },
   ];
   window.SOM.init({ nom: 'Nomenclature (Structure des entités organiques)', id: 'nomenclature-1re', cleEx: 'nomenclature-1re-exercices', plan: PLAN, flashcards: true });

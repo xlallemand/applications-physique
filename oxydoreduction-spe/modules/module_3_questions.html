@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 : questions sur l'équation d'une réaction — Oxydoréduction</title>
+<title>Module 3 : questions sur l'équation d'une réaction — Oxydoréduction</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="../../assets/molecules.css">
@@ -40,7 +40,7 @@ const eqn = x => `<p class="ox-eqn">${x}</p>`;
 const REACTIONS = [['Cr2O7', 'Fe3'], ['MnO4', 'I2'], ['H2O2', 'Fe3'], ['NO3', 'Cu'], ['Cu', 'Al'], ['MnO4', 'Cl2'], ['Cr2O7', 'I2'], ['O2e', 'Fe3'],
   ['Fe3', 'I2'], ['Ag', 'Cu'], ['I2', 'S4O6'], ['H2O2', 'I2'], ['NO3', 'Ag'], ['Cl2', 'Fe3'], ['MnO4', 'Fe3']];
 const SIMPLIFIER = [['MnO4', 'CO2'], ['MnO4', 'O2'], ['MnO4', 'SO4'], ['Cr2O7', 'SO4'], ['MnO4', 'Ald'], ['H2O2', 'Ald']];
-const enonce = p => `<p>Réaction entre ${R(h(C[p[0]].ox))} et ${R(h(C[p[1]].red))}. Demi-équations des couples :</p>` +
+const enonce = p => `<p>Réaction entre ${R(h(C[p[0]].ox))} et ${R(h(C[p[1]].red))}. Demi-équations des couples :</p>` +
   eqn(melanger([DEMI.solution(C[p[0]]).html, DEMI.solution(C[p[1]]).html]).join('<br>'));
 const opt = (p, x) => Object.assign({ a: C[p[0]], b: C[p[1]], serie: true, aides: 'payant' }, x);
 
@@ -53,7 +53,7 @@ function qSens(p, k, inverser) {
   const c = C[p[k]];
   return { theme: 'Dans le sens de la réaction', enonce: `<p>Réaction entre ${R(h(C[p[0]].ox))} et ${R(h(C[p[1]].red))}.</p>`,
     parties: [DEMI.partie({ couple: c, serie: true, mode: 'libre', sens: k ? 'ox' : 'red', reactif: true, aides: 'payant', inverser,
-      q: `Écris la demi-équation du couple ${couple(c)} dans le sens de la réaction : le réactif à gauche du signe =.${inverser ? ' Le bouton « ⇄ Inverser » échange les deux membres.' : ''}` })] };
+      q: `Écris la demi-équation du couple ${couple(c)} dans le sens de la réaction : le réactif à gauche du signe =.${inverser ? ' Le bouton « ⇄ Inverser » échange les deux membres.' : ''}` })] };
 }
 /* ---------- multiplier (outil) ---------- */
 const qMultiplier = p => ({ theme: 'Égaliser les électrons', enonce: enonce(p), parties: [REAC.partieMultiplier(opt(p))] });
@@ -67,13 +67,13 @@ function qAutre(p) {
 function qBonCouple(d) {
   const a = C[d.p[0]], b = C[d.p[1]], X = d.x ? b.red : a.ox, G = d.x ? a.ox : b.red;
   return { theme: 'Le bon couple',
-    enonce: `<p>Réaction entre ${R(h(G))} (couple ${couple(d.x ? a : b)}) et ${R(h(X))}. ${h(X)} appartient à deux couples : il est oxydant dans l'un, réducteur dans l'autre.</p>`,
+    enonce: `<p>Réaction entre ${R(h(G))} (couple ${couple(d.x ? a : b)}) et ${R(h(X))}. ${h(X)} appartient à deux couples : il est oxydant dans l'un, réducteur dans l'autre.</p>`,
     parties: [REAC.partieBonCouple({ a, b, x: d.x, leurre: C[d.leurre], ordre: hasard(['ab', 'ba']) })] };
 }
 /* ---------- toute la réaction dans l'outil compact ---------- */
 const qReaction = p => ({ theme: 'Écrire l\'équation d\'une réaction',
   consigne: `Écris l'équation de la réaction entre ${R(h(C[p[0]].ox))} et ${R(h(C[p[1]].red))}.`,
-  enonce: `<p>Couples : ${couple(C[p[0]])} et ${couple(C[p[1]])}.</p>`,
+  enonce: `<p>Couples : ${couple(C[p[0]])} et ${couple(C[p[1]])}.</p>`,
   parties: [REAC.partie({ a: C[p[0]], b: C[p[1]], serie: true, niveau: 2, ordre: hasard(['ab', 'ba']) })] });
 
 // tirage : 10 questions, chacune sur une réaction différente quand c'est possible
@@ -90,11 +90,11 @@ function tirage() {
 OX.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Écrire l\'équation d\'une réaction',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : repérer les réactifs, écrire une demi-équation dans le sens de la réaction, égaliser les électrons, trouver le second réactif (quand un seul est donné, puis quand il appartient à deux couples), puis écrire l\'équation de deux réactions.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : repérer les réactifs, écrire une demi-équation dans le sens de la réaction, égaliser les électrons, trouver le second réactif (quand un seul est donné, puis quand il appartient à deux couples), puis écrire l\'équation de deux réactions.</p>',
   aidesPayantes: true,
   questions: tirage,
   revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_4.html', label: 'Module 4 : entraînement →' },
+  suite: { href: 'module_4.html', label: 'Module 4 : entraînement →' },
 });
 OX.menu('module_3_questions');
 </script>

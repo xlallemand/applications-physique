@@ -217,7 +217,7 @@
         // manipulation préalable non faite
         const manque = q.prealable ? q.prealable() : null;
         if (manque) {
-          retour.innerHTML = `<div class="callout-accent"><b>Avant de répondre :</b> ${manque}</div>`;
+          retour.innerHTML = `<div class="callout-accent"><b>Avant de répondre :</b> ${manque}</div>`;
           secouer(retour);
           return;
         }
@@ -237,7 +237,7 @@
         if (ok) {
           const bravo = typeof q.bravo === 'function' ? q.bravo() : q.bravo;
           boutons.forEach(b => { b.disabled = true; });
-          retour.innerHTML = `<div class="callout-success"><p><b class="pa-ok">✓ Exact !</b> ${bravo}</p></div>`;
+          retour.innerHTML = `<div class="callout-success"><p><b class="pa-ok">✓ Exact !</b> ${bravo}</p></div>`;
           faites.push({ texte: q.court || q.texte, resume: typeof q.resume === 'function' ? q.resume() : q.resume, bravo });
           if (q.apres) q.apres();
           const fin = n === questions.length - 1;
@@ -391,17 +391,17 @@
      Sommaire de toute l'application : modules → pages (Activité, Cours, Questions, Fiche).
      ============================================================ */
   const PLAN = [
-    { n: 1, titre: 'La valeur efficace', desc: 'Pourquoi la puissance reçue vaut U<sub>eff</sub> × I<sub>eff</sub> ; l\'énergie, aire sous la courbe p(t)', fiche: 'fiche_1',
+    { n: 1, titre: 'La valeur efficace', desc: 'Pourquoi la puissance reçue vaut U<sub>eff</sub> × I<sub>eff</sub> ; l\'énergie, aire sous la courbe p(t)', fiche: 'fiche_1',
       parties: [{ nom: 'La valeur efficace', cours: 'module_1', noms: { cours: 'Activité' } }] },
     { n: 2, titre: 'Comprendre la puissance active', desc: 'Déphasage entre u et i, P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ, pertes en ligne', fiche: 'fiche_2',
       parties: [{ nom: 'La puissance active', cours: 'module_2', noms: { cours: 'Activité' } }] },
-    { n: 3, titre: 'Mesurer un déphasage', desc: 'Qui est en avance, u ou i ? φ = 2π × Δt / T, mesures à la règle', fiche: 'fiche_3',
+    { n: 3, titre: 'Mesurer un déphasage', desc: 'Qui est en avance, u ou i ? φ = 2π × Δt / T, mesures à la règle', fiche: 'fiche_3',
       parties: [{ nom: 'Mesurer un déphasage', cours: 'module_3_cours', questions: 'module_3_questions' }] },
     { n: 4, titre: 'La puissance active en exercices', desc: 'Schéma de conversion, puissances apparente, active, utile et perdue, facteur de puissance', fiche: 'fiche_4',
       parties: [{ nom: 'La puissance active en exercices', cours: 'module_4_cours', questions: 'module_4_exercices', noms: { questions: 'Exercices' } }] },
   ];
   // (pa.js est chargé après ph.js et lgtools.js : cette configuration remplace la leur)
-  window.SOM.init({ nom: 'Chapitre 3 : Puissances active et apparente', id: 'puissance-active', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 3 : Puissances active et apparente', id: 'puissance-active', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
 

@@ -221,7 +221,7 @@
         <div id="${P}data-wrap" class="pile-donnees-c"></div>
       </div>
 
-      <!-- 1. SCHÉMA : étiquettes, schéma, vérification du schéma -->
+      <!-- 1. SCHÉMA : étiquettes, schéma, vérification du schéma -->
       <div class="pile-bloc">
         ${titreBloc(1, 'Schéma de la pile')}
         <div class="pile-banque">
@@ -235,7 +235,7 @@
         <div id="${P}hints-schema" class="pile-retour"></div>
       </div>
 
-      <!-- 2. DEMI-PILES : étiquettes, deux colonnes, vérification des demi-piles -->
+      <!-- 2. DEMI-PILES : étiquettes, deux colonnes, vérification des demi-piles -->
       <div class="pile-bloc">
         ${titreBloc(2, 'Demi-piles')}
         <div class="pile-banque">
@@ -509,7 +509,7 @@
       s += fleche(cx - 8, SCH.yI, cx - 8 - Lion, SCH.yI, 'ps-fl-ion', 'm-ion') + fleche(cx + 8, SCH.yI, cx + 8 + Lion, SCH.yI, 'ps-fl-ion', 'm-ion');
       // noms des demi-piles
       s += `<text class="ps-t2" x="${r(xg)}" y="${SCH.yN}">Demi-pile gauche</text><text class="ps-t2" x="${r(xd)}" y="${SCH.yN}">Demi-pile droite</text>`;
-      return `<svg class="pile-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Schéma d'une pile : deux demi-piles, gauche et droite, reliées par un pont salin et par un circuit extérieur avec un ${app} ; les cases à compléter sont posées sur le schéma.">${s}</svg>`;
+      return `<svg class="pile-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Schéma d'une pile : deux demi-piles, gauche et droite, reliées par un pont salin et par un circuit extérieur avec un ${app} ; les cases à compléter sont posées sur le schéma.">${s}</svg>`;
     }
 
     // position de chaque case du schéma : [gauche, haut, largeur, hauteur] en px

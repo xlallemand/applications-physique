@@ -28,10 +28,10 @@
     const ca = parseFloat(String(correct).replace(',', '.'));
     const tolerance = isDecimal ? 0.000001 : 0;
     if (!isNaN(ua) && Math.abs(ua - ca) <= tolerance) {
-      result.innerHTML = '✓ Correct ! 🎉';
+      result.innerHTML = '✓ Correct ! 🎉';
       result.style.color = '#166534';
     } else {
-      result.innerHTML = '✗ Incorrect. La réponse est : ' + correct;
+      result.innerHTML = '✗ Incorrect. La réponse est : ' + correct;
       result.style.color = '#991b1b';
     }
   }
@@ -41,10 +41,10 @@
     const userN = parseInt(document.getElementById(idN).value, 10);
     const result = document.getElementById(resultId);
     if (Math.abs(userA - correctA) < 0.01 && userN === correctN) {
-      result.innerHTML = '✓ Correct ! 🎉';
+      result.innerHTML = '✓ Correct ! 🎉';
       result.style.color = '#166534';
     } else {
-      result.innerHTML = `✗ Incorrect. La réponse est : ${String(correctA).replace('.', ',')} × 10<sup>${correctN}</sup>`;
+      result.innerHTML = `✗ Incorrect. La réponse est : ${String(correctA).replace('.', ',')} × 10<sup>${correctN}</sup>`;
       result.style.color = '#991b1b';
     }
   }
@@ -68,10 +68,10 @@
     const cVal = correctCoeff * Math.pow(10, correctExp);
     const ok = Math.abs(uVal - cVal) < Math.abs(cVal) * 1e-9 + 1e-30;
     if (ok) {
-      result.innerHTML = '✓ Correct ! 🎉';
+      result.innerHTML = '✓ Correct ! 🎉';
       result.style.color = '#166534';
     } else {
-      result.innerHTML = `✗ Incorrect. La réponse est : ${String(correctCoeff).replace('.', ',')} × 10<sup>${correctExp}</sup>`;
+      result.innerHTML = `✗ Incorrect. La réponse est : ${String(correctCoeff).replace('.', ',')} × 10<sup>${correctExp}</sup>`;
       result.style.color = '#991b1b';
     }
   }

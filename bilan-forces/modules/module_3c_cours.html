@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : tension d'un fil — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 4 / 6</span>
+    <h2 class="er-titre">Tension d'un fil</h2>
+    <p class="er-contexte">Un fil, une corde, un câble ou un ressort qui touche le système exerce une force de contact : la <b>tension</b> <span class="vec-nom">T</span>, dirigée <b>le long du fil</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 4 du module 3 (2de) : tension d'un fil (d'une corde, d'un
+   ressort) : le long du fil, vers le point d'attache (un fil ne peut que
+   tirer), depuis le point d'accroche ; exemple de la masse au ressort ;
+   « À toi » : le pendule (BF.bilan arrêté au tracé), sens de la tension.
+   ============================================================ */
+const { hasard, exemple } = COURS;
+const { o, nomV, sceneRemplie, diagrammeDe, bilan, SITUATIONS } = BF;
+const figs = s => `<div class="bf-noms-figs"><div class="bf-do-cadre">${diagrammeDe(s)}</div><div class="bf-sc-cadre">${sceneRemplie(s)}</div></div>`;
+const CAS = [['Une lampe est suspendue au plafond par un câble vertical.', 'la force exercée par le câble sur la lampe', 'haut', 'Le câble retient la lampe : il tire vers le plafond.'],
+  ['Un enfant tire un traîneau avec une corde horizontale, vers la droite.', 'la force exercée par la corde sur le traîneau', 'droite', 'La corde tire le traîneau vers l\'enfant : vers la droite.'],
+  ['Un remorqueur tire un bateau avec un câble horizontal, vers la gauche.', 'la force exercée par le câble sur le bateau', 'gauche', 'Le câble tire le bateau vers le remorqueur : vers la gauche.']];
+const OPTS = [o('haut', 'verticale, vers le haut'), o('bas', 'verticale, vers le bas'), o('droite', 'horizontale, vers la droite'), o('gauche', 'horizontale, vers la gauche')];
+
+/* ---------- 1. La tension d'un fil ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. La tension d\'un fil');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> Un fil tendu (une corde, un câble, un ressort) exerce une force de contact : la <b>tension</b> ${nomV('T')}.</p>
+        <ul class="er-liste"><li>point d'application : le point d'accroche du fil sur le système ;</li><li>direction : celle du <b>fil</b> ;</li><li>sens : <b>vers le point d'attache</b> (un fil ne peut que tirer).</li></ul></div>
+    </div>
+    ${exemple(`<p>${SITUATIONS.ressort.enonce}</p>${figs(SITUATIONS.ressort)}<p>Le ressort touche la masse : une bulle, une force, ${nomV('T')}, depuis le point d'accroche A, verticale, vers le haut (vers la potence).</p>`)}`);
+  const cas = hasard(CAS);
+  c_.aToi(carte, [Object.assign({ titre: 'Le pendule' }, bilan(SITUATIONS.pendule, { jusqua: 'trace' })),
+    { titre: 'Une autre tension', enonce: `<p>${cas[0]}</p>`, parties: [{ type: 'choix', q: `Quelles sont la direction et le sens de ${cas[1]} ?`, options: OPTS, bonne: cas[2], melanger: false, colonne: true,
+      indice: 'Un fil tire le système le long du fil, vers ce qui le retient ou le tire.', solution: `<p>${cas[3]}</p>` }] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Tension ${nomV('T')} d'un fil (corde, câble, ressort) : depuis le point d'accroche, le long du fil, vers le point d'attache. Un fil ne peut que tirer.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3e_cours.html">Cours : force de l'air →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#tension">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+BF.menu('module_3c_cours');
+</script>
+</body>
+</html>

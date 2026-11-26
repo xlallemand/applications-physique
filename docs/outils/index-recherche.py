@@ -12,14 +12,22 @@ Usage (depuis la racine du dépôt) :
 
 Sources lues (rien d'autre n'est modifié) :
   - la liste APPS de index.html (racine) : dossiers des applications ;
-  - le PLAN de chaque application (premier fichier modules/*.js qui le
-    déclare) : modules, parties, pages et leurs noms ;
+  - le PLAN de chaque application : modules, parties, pages et leurs noms ;
+    il est pris dans le fichier modules/*.js qui le déclare ET appelle
+    SOM.init avec l'id de l'application (id: '<dossier>'), sinon dans le
+    premier fichier qui le déclare (un moteur copié d'une autre application,
+    comme puissance-active/modules/pa-moteur.js, garde le PLAN de celle-ci) ;
   - la première phrase de chaque page (.er-contexte, sinon
     <meta name="description">, sinon le premier paragraphe) : texte cherché.
 Les textes recopiés reçoivent les espaces insécables de typo.py (« Atelier : … »
 s'affiche correctement sur le portail même si le PLAN l'a oubliée).
 Les titres, descriptions et mots-clés des applications ne sont pas recopiés :
 le portail les lit directement dans APPS.
+
+Page externe ↗ d'un PLAN ({ nom, externe: { app, page, nom } } : module à faire
+situé dans une autre application, charte §5) : elle n'est PAS indexée dans
+l'application qui la cite (elle l'est déjà dans la sienne, sous son propre nom) ;
+un module dont toutes les pages sont externes n'a donc aucune page dans l'index.
 
 Type de chaque page (pastilles « Manipuler » et « Fiches » du portail,
 libellé des résultats) : voir type_page() et EXCEPTIONS ci-dessous.
@@ -57,7 +65,6 @@ EXCEPTIONS = {
     'double-periodicite': 'simulateur',
     'banc-optique': 'simulateur',
     'montage-electrique/module_1a_manip': 'simulateur',       # prise en main du simulateur de montage
-    'principe-dynamique/module_2_simulation': 'atelier',      # « Atelier : bilan des forces » (page d'exemple)
     'periode-frequence/module_2_manip': 'atelier',            # mesurer T et calculer f
     'titrage-ph/module_3a_equivalence': 'atelier',            # repérer le volume équivalent
 }
@@ -248,17 +255,23 @@ def premiere_phrase(chemin):
 # Construction de l'index
 # ---------------------------------------------------------------------------
 def plan_de(dossier):
-    """PLAN de l'application (None si elle n'en a pas), et le fichier qui le déclare."""
+    """PLAN de l'application (None si elle n'en a pas), et le fichier qui le déclare :
+    celui qui appelle aussi SOM.init avec l'id de l'application, sinon le premier."""
     rep = os.path.join(RACINE, dossier, 'modules')
     if not os.path.isdir(rep):
         return None, None
+    candidats = []
     for f in sorted(os.listdir(rep)):
         if not f.endswith('.js'):
             continue
         texte = open(os.path.join(rep, f), encoding='utf-8').read()
         if re.search(r'\bPLAN\s*=\s*\[', texte):
-            return litteral_apres(texte, r'\bPLAN\s*=\s*\['), f
-    return None, None
+            candidats.append((f, texte))
+    if not candidats:
+        return None, None
+    sien = re.compile(r'SOM\.init\(\{[^}]*\bid\s*:\s*[\'"]' + re.escape(dossier) + r'[\'"]')
+    f, texte = next((c for c in candidats if sien.search(c[1])), candidats[0])
+    return litteral_apres(texte, r'\bPLAN\s*=\s*\['), f
 
 
 def libelle(partie, nature, module):
@@ -289,6 +302,7 @@ def construire():
                 pages.append({'k': k, 'ty': 'exercices', 'l': m.get('exNom') or NOMS['exercices'], 'c': 'exercices',
                               'd': premiere_phrase(os.path.join(RACINE, d, 'modules', k + '.html'))})
             for pt in m.get('parties') or []:
+                # page externe ↗ (module situé dans une autre application) : déjà indexée dans la sienne
                 for nature in ORDRE:
                     k = pt.get(nature)
                     if not k:

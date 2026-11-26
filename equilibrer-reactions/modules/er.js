@@ -233,7 +233,7 @@
       return `<div class="er-card">
           <span class="er-badge">${opts.badge}</span>
           <h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${questions.length} · Score : <b data-a="score">${score} pt${score > 1 ? 's' : ''}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${questions.length} · Score : <b data-a="score">${score} pt${score > 1 ? 's' : ''}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
         </div>`;
     }
@@ -243,10 +243,10 @@
           <h2 class="er-titre">${opts.titre}</h2>
           ${opts.intro}
           <div class="cle" style="margin:14px 0">
-            <p><b class="cle-titre">Barème</b> · 10 réactions, de difficulté croissante, notées sur 20 :</p>
+            <p><b class="cle-titre">Barème</b> · 10 réactions, de difficulté croissante, notées sur 20 :</p>
             <ul class="er-liste">
-              <li><b>2 points</b> si la réaction est équilibrée du premier coup ;</li>
-              <li><b>1 point</b> si tu y arrives après au moins une erreur ;</li>
+              <li><b>2 points</b> si la réaction est équilibrée du premier coup ;</li>
+              <li><b>1 point</b> si tu y arrives après au moins une erreur ;</li>
               <li><b>0 point</b> si tu affiches la réponse.</li>
             </ul>
           </div>
@@ -263,7 +263,7 @@
       app.innerHTML = entete() + `<div class="er-card" data-a="q">
           <p class="er-q-nom">${q.nom}</p>
           <p class="er-consigne">Équilibre la réaction en ajustant les nombres stœchiométriques.</p>
-          ${avecAide ? '<div data-a="switch"></div>' : (aide && idx === aide ? `<p class="er-note">À partir de cette question, il n'y a plus d'aide dessinée : compte les atomes avec le calcul <b>nombre stœchiométrique × indice</b>.</p>` : '')}
+          ${avecAide ? '<div data-a="switch"></div>' : (aide && idx === aide ? `<p class="er-note">À partir de cette question, il n'y a plus d'aide dessinée : compte les atomes avec le calcul <b>nombre stœchiométrique × indice</b>.</p>` : '')}
           <div data-a="reaction"></div>
           <div data-a="retour"></div>
           <div class="er-actions" data-a="actions">
@@ -302,7 +302,7 @@
         const eq = equationHTML(q.r, q.p, reaction.coefs);
         if (v.equilibree && v.minimale) {
           const p = erreur ? 1 : 2;
-          terminer(p, `<div class="callout-success er-retour"><p><b class="er-ok">${erreur ? 'C\'est juste !' : 'Bravo, juste du premier coup !'}</b> +${p} point${p > 1 ? 's' : ''}</p>
+          terminer(p, `<div class="callout-success er-retour"><p><b class="er-ok">${erreur ? 'C\'est juste !' : 'Bravo, juste du premier coup !'}</b> +${p} point${p > 1 ? 's' : ''}</p>
             <p class="er-eq">${eq}</p></div>`);
           return;
         }
@@ -316,16 +316,16 @@
         } else {
           const liste = v.faux.map(e => `<b>${e}</b>`).join(', ').replace(/, ([^,]*)$/, ' et $1');
           msg = `<p><b class="er-ko">Pas encore équilibrée.</b> Les atomes ${v.faux.length > 1 ? 'des éléments' : 'de l\'élément'} ${liste} ne sont pas aussi nombreux dans les réactifs que dans les produits.</p>
-            <p>Compte-les de chaque côté de la flèche : nombre stœchiométrique × indice.</p>`;
+            <p>Compte-les de chaque côté de la flèche : nombre stœchiométrique × indice.</p>`;
         }
-        if (premiere) msg += `<p class="er-petit">Corrige ta réponse : cette question peut encore rapporter 1 point.</p>`;
+        if (premiere) msg += `<p class="er-petit">Corrige ta réponse : cette question peut encore rapporter 1 point.</p>`;
         $('retour').innerHTML = `<div class="callout-danger er-retour">${msg}</div>`;
         $('reaction').classList.remove('er-secoue'); void $('reaction').offsetWidth; $('reaction').classList.add('er-secoue');
       };
       $('reponse').onclick = () => {
         if (fini) return;
         reaction.fixer(q.c);
-        terminer(0, `<div class="callout er-retour"><p><b>Réponse :</b> 0 point pour cette question.</p>
+        terminer(0, `<div class="callout er-retour"><p><b>Réponse :</b> 0 point pour cette question.</p>
           <p class="er-eq">${equationHTML(q.r, q.p, q.c)}</p></div>`);
       };
     }
@@ -335,13 +335,13 @@
       window.SOM.marquer({ note: Math.round(score / max * 20 * 2) / 2 });   // meilleure note sur 20 (sommaire, accueil)
       let msg;
       if (score === max) msg = 'Tu sais équilibrer ces réactions.';
-      else if (pct >= 70) msg = 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.';
-      else if (pct >= 50) msg = 'Pas mal ! Recommence pour progresser : les réactions changent à chaque fois.';
+      else if (pct >= 70) msg = 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.';
+      else if (pct >= 50) msg = 'Pas mal ! Recommence pour progresser : les réactions changent à chaque fois.';
       else msg = 'Continue à t\'entraîner. Tu peux revoir le module 2 pour la méthode.';
       app.innerHTML = `<div class="er-card er-fin">
           <span class="er-badge">${opts.badge}</span>
-          <h2 class="er-titre">Entraînement terminé !</h2>
-          ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+          <h2 class="er-titre">Entraînement terminé !</h2>
+          ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
           <div class="er-score">${score} / ${max}</div>
           <p class="er-score-pct">${pct} %</p>
           <p class="er-contexte">${msg}</p>
@@ -391,7 +391,7 @@
     el.classList.add('er-cpt');
     el.innerHTML = `<div data-c="switch"></div>
       <div data-c="espece"></div>
-      <p class="er-cpt-q">Nombre d'atomes de chaque élément :</p>
+      <p class="er-cpt-q">Nombre d'atomes de chaque élément :</p>
       <div class="er-reps" data-c="reps"></div>
       <div data-c="retour"></div>
       <div class="er-actions" data-c="actions"><button type="button" class="btn-primary" data-c="verifier">Vérifier</button></div>`;
@@ -415,12 +415,12 @@
       $('reps').appendChild(box);
       return { sel, box, el: a.el, n: coef * a.n };
     });
-    const calculs = liste => liste.map(x => `<li><b>${x.el}</b> : ${calculHTML(f, coef, x.el)} atome${x.n > 1 ? 's' : ''}</li>`).join('');
+    const calculs = liste => liste.map(x => `<li><b>${x.el}</b> : ${calculHTML(f, coef, x.el)} atome${x.n > 1 ? 's' : ''}</li>`).join('');
     function reussir(silencieux) {
       fini = true;
       sels.forEach(x => { x.sel.fixer(x.n); x.sel.activer(false); x.box.classList.remove('ko'); x.box.classList.add('ok'); });
       $('actions').innerHTML = '';
-      $('retour').innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">${silencieux ? 'Réponse' : 'Bravo !'}</b></p><ul class="er-calculs">${calculs(sels)}</ul></div>`;
+      $('retour').innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">${silencieux ? 'Réponse' : 'Bravo !'}</b></p><ul class="er-calculs">${calculs(sels)}</ul></div>`;
     }
     $('verifier').onclick = () => {
       if (fini) return;
@@ -431,7 +431,7 @@
       const noms = faux.map(x => `<b>${x.el}</b>`).join(', ').replace(/, ([^,]*)$/, ' et $1');
       let html = `<p><b class="er-ko">Pas tout à fait.</b> Vérifie le nombre d'atomes de ${noms}.</p>`;
       if (erreurs === 1) html += cfg.regle ? `<p>${cfg.regle}</p>` : '';
-      else html += `<p>Voici le calcul :</p><ul class="er-calculs">${calculs(faux)}</ul><p class="er-petit">Règle les flèches sur ces valeurs, puis vérifie.</p>`;
+      else html += `<p>Voici le calcul :</p><ul class="er-calculs">${calculs(faux)}</ul><p class="er-petit">Règle les flèches sur ces valeurs, puis vérifie.</p>`;
       $('retour').innerHTML = `<div class="callout-danger er-retour">${html}</div>`;
       $('reps').classList.remove('er-secoue'); void $('reps').offsetWidth; $('reps').classList.add('er-secoue');
     };
@@ -446,7 +446,7 @@
     const v = verifier(reactifs, produits, coefs);
     if (v.equilibree && v.minimale) return { ok: true, html: '' };
     if (v.equilibree) {
-      return { ok: false, html: `L'équation est équilibrée, mais il faut les <b>plus petits nombres entiers possibles</b> : tous tes nombres peuvent être divisés par ${coefs.reduce(pgcd)}.` };
+      return { ok: false, html: `L'équation est équilibrée, mais il faut les <b>plus petits nombres entiers possibles</b> : tous tes nombres peuvent être divisés par ${coefs.reduce(pgcd)}.` };
     }
     const el = (ordre || v.faux).find(e => v.faux.includes(e)) || v.faux[0];
     const b = v.bilan.find(x => x.el === el);
@@ -454,8 +454,8 @@
     const especes = cote.filter(f => nb(f, el) > 0).map(f => `<b>${formuleHTML(f)}</b>`).join(' ou ');
     return {
       ok: false,
-      html: `Atomes de <b>${el}</b> : ${b.r} dans les réactifs, ${b.p} dans les produits. ` +
-        `Il en manque ${b.r > b.p ? 'dans les produits' : 'dans les réactifs'} : augmente le nombre stœchiométrique devant ${especes}.`,
+      html: `Atomes de <b>${el}</b> : ${b.r} dans les réactifs, ${b.p} dans les produits. ` +
+        `Il en manque ${b.r > b.p ? 'dans les produits' : 'dans les réactifs'} : augmente le nombre stœchiométrique devant ${especes}.`,
     };
   }
 
@@ -476,28 +476,28 @@
     const tPar = d.termes.find(t => t.m > 1);
     const E = `<b>${el}</b>`;
     if (tPar && coef > 1 && v === sansPar) {
-      return `Pour ${E}, n'oublie ni l'indice ${tPar.m} de la parenthèse, ni le nombre stœchiométrique ${coef} : ${calculHTML(f, coef, el)}.`;
+      return `Pour ${E}, n'oublie ni l'indice ${tPar.m} de la parenthèse, ni le nombre stœchiométrique ${coef} : ${calculHTML(f, coef, el)}.`;
     }
     if (tPar && coef > 1 && v === par && v === coef * sansPar) {
-      return `Pour ${E}, il faut multiplier par l'indice ${tPar.m} de la parenthèse <b>et</b> par le nombre stœchiométrique ${coef} : ${calculHTML(f, coef, el)}.`;
+      return `Pour ${E}, il faut multiplier par l'indice ${tPar.m} de la parenthèse <b>et</b> par le nombre stœchiométrique ${coef} : ${calculHTML(f, coef, el)}.`;
     }
     if (coef > 1 && v === par) {
-      return `Pour ${E}, tu as compté les atomes d'<b>une seule</b> molécule. Le nombre stœchiométrique ${coef} multiplie toute la molécule : ${coef} × ${par}.`;
+      return `Pour ${E}, tu as compté les atomes d'<b>une seule</b> molécule. Le nombre stœchiométrique ${coef} multiplie toute la molécule : ${coef} × ${par}.`;
     }
     if (coef > 1 && v === par + coef) {
-      return `Pour ${E}, tu as additionné le nombre stœchiométrique et l'indice : on les <b>multiplie</b>.`;
+      return `Pour ${E}, tu as additionné le nombre stœchiométrique et l'indice : on les <b>multiplie</b>.`;
     }
     if (tPar && v === coef * sansPar) {
       return `Pour ${E}, l'indice ${tPar.m} écrit après la parenthèse porte sur <b>tout</b> ce qu'elle contient, donc aussi sur ${el}.`;
     }
     if (d.termes.length > 1 && d.termes.some(t => v === coef * t.n * t.m)) {
-      return `${E} apparaît à plusieurs endroits de la formule : additionne tous ses atomes.`;
+      return `${E} apparaît à plusieurs endroits de la formule : additionne tous ses atomes.`;
     }
     if (d.termes.length === 1 && par === 1) {
-      return `${E} n'a pas d'indice : il compte pour 1 atome par molécule${coef > 1 ? `, donc ${coef} × 1 = ${coef}` : ''}.`;
+      return `${E} n'a pas d'indice : il compte pour 1 atome par molécule${coef > 1 ? `, donc ${coef} × 1 = ${coef}` : ''}.`;
     }
     if (d.termes.length === 1 && !tPar && v === coef) {
-      return `L'indice ${par} est écrit juste après ${E} : il porte sur ${el}${coef > 1 ? `, puis on multiplie par ${coef}` : ''}.`;
+      return `L'indice ${par} est écrit juste après ${E} : il porte sur ${el}${coef > 1 ? `, puis on multiplie par ${coef}` : ''}.`;
     }
     return '';
   }
@@ -543,14 +543,14 @@
   function partieCompter(cfg) {
     const f = cfg.formule, coef = cfg.coef || 1;
     const comp = analyser(f).map(a => ({ el: a.el, n: coef * a.n }));
-    const calculs = liste => liste.map(x => `<li><b>${x.el}</b> : ${calculHTML(f, coef, x.el)} atome${x.n > 1 ? 's' : ''}</li>`).join('');
+    const calculs = liste => liste.map(x => `<li><b>${x.el}</b> : ${calculHTML(f, coef, x.el)} atome${x.n > 1 ? 's' : ''}</li>`).join('');
     return {
       type: 'perso', q: cfg.q,
       solution: `<ul class="er-calculs">${calculs(comp)}</ul>`,
       monter(zone, api) {
         const mem = cfg.memoire || {};
         const box = creer('div', 'er-cpt', `<div data-c="switch"></div><div data-c="espece"></div>
-          <p class="er-cpt-q">Nombre d'atomes de chaque élément :</p><div class="er-reps" data-c="reps"></div>`);
+          <p class="er-cpt-q">Nombre d'atomes de chaque élément :</p><div class="er-reps" data-c="reps"></div>`);
         zone.appendChild(box);
         const $ = a => box.querySelector(`[data-c="${a}"]`);
         const dessins = dessinsDepart(cfg, mem);
@@ -595,7 +595,7 @@
           let h = `Vérifie le nombre d'atomes de ${enListe(faux.map(x => `<b>${x.el}</b>`))}. ${uniques.join(' ')}`;
           if (raisons.some(r => !r) && cfg.regle) h += ' ' + cfg.regle;
           // à partir de la 2e erreur, le calcul des éléments faux
-          if (erreurs >= 2) h += `<br>Le calcul : ${faux.map(x => `<b>${x.el}</b> : ${calculHTML(f, coef, x.el)}`).join(' ; ')}.`;
+          if (erreurs >= 2) h += `<br>Le calcul : ${faux.map(x => `<b>${x.el}</b> : ${calculHTML(f, coef, x.el)}`).join(' ; ')}.`;
           api.erreur(h);
           secouer($('reps'));
         }
@@ -613,7 +613,7 @@
     const fh = formuleHTML(f);
     return {
       type: 'perso', q: cfg.q,
-      solution: `<p class="crs-calc">${bon} ${fh} : ${bon} × ${n} = <span class="c">${cfg.cible} atomes ${el}</span></p>`,
+      solution: `<p class="crs-calc">${bon} ${fh} : ${bon} × ${n} = <span class="c">${cfg.cible} atomes ${el}</span></p>`,
       monter(zone, api) {
         const mem = cfg.memoire || {};
         const box = creer('div', null, '<div data-c="switch"></div><div data-c="r"></div>');
@@ -635,9 +635,9 @@
           secouer(r.el);
           const at = k * n > 1 ? 'atomes' : 'atome';
           if (k === cfg.cible) {
-            api.erreur(`Tu as écrit ${k} molécules : ${k} × ${n} = ${k * n} atomes ${el}. Chaque molécule ${fh} contient déjà ${n} atomes ${el} (l'indice).`);
+            api.erreur(`Tu as écrit ${k} molécules : ${k} × ${n} = ${k * n} atomes ${el}. Chaque molécule ${fh} contient déjà ${n} atomes ${el} (l'indice).`);
           } else {
-            api.erreur(`Avec ${k > 1 ? k + ' ' : ''}${fh}, il y a ${k} × ${n} = ${k * n} ${at} ${el}. Il en faut ${cfg.cible} : ${k * n < cfg.cible ? 'augmente' : 'diminue'} le nombre stœchiométrique.`);
+            api.erreur(`Avec ${k > 1 ? k + ' ' : ''}${fh}, il y a ${k} × ${n} = ${k * n} ${at} ${el}. Il en faut ${cfg.cible} : ${k * n < cfg.cible ? 'augmente' : 'diminue'} le nombre stœchiométrique.`);
           }
         }
         act.querySelector('button').onclick = valider;
@@ -719,9 +719,9 @@
       parties: [{ nom: 'Compter les atomes', cours: 'module_1' }] },
     { n: 2, titre: 'Comment équilibrer une réaction', desc: 'Conservation des atomes, nombres stœchiométriques, la méthode sur trois réactions', fiche: 'fiche_2',
       parties: [{ nom: 'Comment équilibrer', cours: 'module_2' }] },
-    { n: 3, titre: 'Entraînement : réactions faciles', desc: '10 réactions de difficulté croissante, notées sur 20',
+    { n: 3, titre: 'Entraînement : réactions faciles', desc: '10 réactions de difficulté croissante, notées sur 20',
       parties: [{ nom: 'Réactions faciles', entrainement: 'module_3' }] },
-    { n: 4, titre: 'Entraînement : réactions moins faciles', desc: 'Combustions, grands nombres stœchiométriques, parenthèses, notées sur 20',
+    { n: 4, titre: 'Entraînement : réactions moins faciles', desc: 'Combustions, grands nombres stœchiométriques, parenthèses, notées sur 20',
       parties: [{ nom: 'Réactions moins faciles', entrainement: 'module_4' }] },
   ];
   // (er.js est aussi chargé par « Combustions », dont le moteur remplace ensuite cette configuration)

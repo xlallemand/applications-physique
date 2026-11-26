@@ -139,7 +139,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         ret.innerHTML = sol || vue
           ? `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b></p>${sol ? `<div>${sol}</div>` : ''}</div>`
@@ -172,8 +172,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · 10 questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · 10 questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -185,7 +185,7 @@
       const q = qs[idx];
       window.RP.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -203,7 +203,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -218,10 +218,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -355,7 +355,7 @@
       if (it.bas) { h += cell(r0 + 2, c, '', 'rp-lv' + (it.bas.double ? ' double' : ''), sous); h += atome(k + ':b', it.bas.t, r0 + 3, c, false, sous); }
     });
     // (outil « entourer » : sans le nom de la molécule, qui donnerait sa famille)
-    const desc = `Formule semi-développée${m.nom && !o.boutons ? ' : ' + m.nom : ''}`;
+    const desc = `Formule semi-développée${m.nom && !o.boutons ? ' : ' + m.nom : ''}`;
     return `<div class="rp-defile"><div class="rp-mol${o.boutons ? ' rp-mol-outil' : ''}"${o.entoure ? ` data-entoure="${m.cle || ''}"` : ''} role="${o.boutons ? 'group' : 'img'}" aria-label="${desc}">${h}</div></div>`;
   }
 
@@ -418,7 +418,7 @@
   }
   // nom et famille de chaque groupe entouré
   function legende(m) {
-    return `<ul class="rp-legende">${groupes(m).map(g => `<li><i>${g.n}</i> <b>${NOMS[g.type].groupe}</b> (${NOMS[g.type].formule}) : ${NOMS[g.type].famille}</li>`).join('')}</ul>`;
+    return `<ul class="rp-legende">${groupes(m).map(g => `<li><i>${g.n}</i> <b>${NOMS[g.type].groupe}</b> (${NOMS[g.type].formule}) : ${NOMS[g.type].famille}</li>`).join('')}</ul>`;
   }
   // formule avec ses groupes entourés, puis la légende
   const corrigee = m => `${formule(m, { entoure: true })}${legende(m)}`;
@@ -475,7 +475,7 @@
         }
         act.querySelector('button').onclick = () => {
           if (fige || api.fini()) return;
-          if (!choisis.size) { secouer(grille); api.message('Touche les atomes à entourer : ils se marquent. Touche-les à nouveau pour les libérer.'); return; }
+          if (!choisis.size) { secouer(grille); api.message('Touche les atomes à entourer : ils se marquent. Touche-les à nouveau pour les libérer.'); return; }
           const ok = choisis.size === attendus.size && [...choisis].every(x => attendus.has(x));
           if (ok) { fermer(); api.reussi(); return; }
           secouer(grille);
@@ -483,20 +483,20 @@
           const intrus = [...choisis].find(id => !attendus.has(id));
           if (intrus) {
             const t = pcs.find(x => x.id === intrus).t;
-            if (!/O/.test(t)) { api.erreur(`${ecrire(t)} ne contient que des atomes de <b>carbone</b> et d'<b>hydrogène</b> : ce n'est pas un groupe caractéristique. Un groupe caractéristique contient au moins un atome qui n'est ni C ni H (ici, l'oxygène O).`); return; }
+            if (!/O/.test(t)) { api.erreur(`${ecrire(t)} ne contient que des atomes de <b>carbone</b> et d'<b>hydrogène</b> : ce n'est pas un groupe caractéristique. Un groupe caractéristique contient au moins un atome qui n'est ni C ni H (ici, l'oxygène O).`); return; }
           }
           // groupe carboxyle entouré en partie
           const partiel = gs.find(g => g.type === 'carboxyle' && g.pieces.some(x => choisis.has(x)) && !g.pieces.every(x => choisis.has(x)));
           if (partiel) {
             const ohSeul = partiel.pieces.filter(x => choisis.has(x)).every(x => estOH(pcs.find(y => y.id === x).t));
             api.erreur(ohSeul
-              ? `Ce OH est lié à un atome C qui porte aussi un atome O par une <b>double liaison</b> : C, =O et OH forment ensemble un <b>groupe carboxyle</b>. Entoure les trois.`
-              : 'Le groupe carboxyle est formé de <b>trois parties liées entre elles</b> : l\'atome C, l\'atome O lié par une double liaison et le OH. Entoure-les toutes.');
+              ? `Ce OH est lié à un atome C qui porte aussi un atome O par une <b>double liaison</b> : C, =O et OH forment ensemble un <b>groupe carboxyle</b>. Entoure les trois.`
+              : 'Le groupe carboxyle est formé de <b>trois parties liées entre elles</b> : l\'atome C, l\'atome O lié par une double liaison et le OH. Entoure-les toutes.');
             return;
           }
           const oublie = gs.find(g => !g.pieces.some(x => choisis.has(x)));
-          if (oublie) { api.erreur(`Il manque ${gs.length > 1 ? 'au moins un' : 'le'} groupe caractéristique : repère tous les atomes d'oxygène O de la molécule.`); return; }
-          api.erreur('Entoure seulement les atomes des groupes caractéristiques : ceux qui contiennent l\'oxygène.');
+          if (oublie) { api.erreur(`Il manque ${gs.length > 1 ? 'au moins un' : 'le'} groupe caractéristique : repère tous les atomes d'oxygène O de la molécule.`); return; }
+          api.erreur('Entoure seulement les atomes des groupes caractéristiques : ceux qui contiennent l\'oxygène.');
         };
         return {
           montrer() {
@@ -521,12 +521,12 @@
       return fq.choix(`Nomme le groupe ${ns.length > 1 ? 'entouré ' + listeN(ns) + ' (ils sont identiques)' : 'entouré ' + listeN(ns)} et sa famille.`, COMBOS, type, {
         colonne: true,
         indices: {
-          [autre]: type === 'hydroxyle' ? 'Ce groupe est −OH seul, lié à un carbone qui ne porte pas de =O : c\'est un groupe <b>hydroxyle</b>.'
-            : 'Ce groupe contient un C lié à un =O <b>et</b> à un OH : c\'est un groupe <b>carboxyle</b>.',
+          [autre]: type === 'hydroxyle' ? 'Ce groupe est −OH seul, lié à un carbone qui ne porte pas de =O : c\'est un groupe <b>hydroxyle</b>.'
+            : 'Ce groupe contient un C lié à un =O <b>et</b> à un OH : c\'est un groupe <b>carboxyle</b>.',
           hydroxyleFaux: 'Le groupe hydroxyle −OH donne la famille des <b>alcools</b>.',
           carboxyleFaux: 'Le groupe carboxyle donne la famille des <b>acides carboxyliques</b>.',
         },
-        solution: `<p>Groupe ${listeN(ns)} : <b>${NOMS[type].groupe}</b> (${NOMS[type].formule}), ${NOMS[type].famille}.</p>`,
+        solution: `<p>Groupe ${listeN(ns)} : <b>${NOMS[type].groupe}</b> (${NOMS[type].formule}), ${NOMS[type].famille}.</p>`,
       });
     });
   }
@@ -546,23 +546,23 @@
       danger: 'peut provoquer ou aggraver un incendie (il fait brûler les autres produits)',
       precaution: 'tenir éloigné des produits combustibles (qui peuvent brûler)' },
     { id: 'gaz-sous-pression', nom: 'Gaz sous pression', dessin: 'une bouteille de gaz', type: 'physique',
-      danger: 'peut exploser sous l\'effet de la chaleur ; un gaz très froid peut brûler la peau',
+      danger: 'peut exploser sous l\'effet de la chaleur ; un gaz très froid peut brûler la peau',
       precaution: 'tenir à l\'abri de la chaleur et du soleil' },
     { id: 'corrosif', nom: 'Corrosif', dessin: 'des gouttes qui rongent une surface et une main', type: 'sante',
-      danger: 'ronge la peau, les yeux et les métaux : brûlures graves',
+      danger: 'ronge la peau, les yeux et les métaux : brûlures graves',
       precaution: 'porter des gants et des lunettes de protection' },
     { id: 'toxique', nom: 'Toxicité aiguë', dessin: 'une tête de mort sur deux os croisés', type: 'sante',
-      danger: 'empoisonne rapidement, même en petite quantité (avalé, respiré ou au contact de la peau) : peut tuer',
+      danger: 'empoisonne rapidement, même en petite quantité (avalé, respiré ou au contact de la peau) : peut tuer',
       precaution: 'éviter tout contact, ne pas respirer, travailler sous une hotte' },
     { id: 'nocif-irritant', nom: 'Nocif ou irritant', dessin: 'un point d\'exclamation', type: 'sante',
-      danger: 'irrite la peau, les yeux ou les voies respiratoires ; nocif à forte dose',
+      danger: 'irrite la peau, les yeux ou les voies respiratoires ; nocif à forte dose',
       precaution: 'porter des gants et des lunettes, ne pas respirer les vapeurs' },
     { id: 'danger-sante', nom: 'Danger pour la santé', dessin: 'un buste avec une étoile sur la poitrine', type: 'sante',
-      danger: 'effets graves, souvent à long terme : cancer, modification de l\'ADN, atteinte des organes, des poumons ou de la fertilité',
-      precaution: 'éviter toute exposition : gants, lunettes, hotte' },
+      danger: 'effets graves, souvent à long terme : cancer, modification de l\'ADN, atteinte des organes, des poumons ou de la fertilité',
+      precaution: 'éviter toute exposition : gants, lunettes, hotte' },
     { id: 'danger-environnement', nom: 'Danger pour l\'environnement', dessin: 'un arbre mort et un poisson', type: 'environnement',
       danger: 'toxique pour les êtres vivants, surtout dans l\'eau',
-      precaution: 'ne pas jeter à l\'évier ni dans la nature : récupérer dans un bidon de déchets' },
+      precaution: 'ne pas jeter à l\'évier ni dans la nature : récupérer dans un bidon de déchets' },
   ];
   const PICTO = id => PICTOS.find(x => x.id === id);
   // pictogrammes faciles à confondre (mauvais choix des questions)
@@ -577,32 +577,32 @@
   function picto(id, op) {
     op = op || {};
     const p = PICTO(id), t = op.taille || 72;
-    const img = `<img class="rp-picto" src="../../assets/pictogrammes/${id}.png" alt="${op.alt || 'pictogramme : ' + p.dessin}" width="${t}" height="${t}">`;
+    const img = `<img class="rp-picto" src="../../assets/pictogrammes/${id}.png" alt="${op.alt || 'pictogramme : ' + p.dessin}" width="${t}" height="${t}">`;
     return op.legende ? `<figure class="rp-picto-fig">${img}<figcaption>${p.nom}</figcaption></figure>` : img;
   }
 
   // questions sur un pictogramme (parties 'choix') : sa signification, son image, la précaution à prendre
-  const nomPicto = x => `« ${PICTO(x).nom} »`;
-  const ficheP = id => `<div class="rp-pictos-ligne">${picto(id, { legende: true })}</div><p><b>${PICTO(id).nom}</b> : ${PICTO(id).danger}.</p>`;
+  const nomPicto = x => `« ${PICTO(x).nom} »`;
+  const ficheP = id => `<div class="rp-pictos-ligne">${picto(id, { legende: true })}</div><p><b>${PICTO(id).nom}</b> : ${PICTO(id).danger}.</p>`;
   function partieSens(id, q) {
     const l = [id].concat(PROCHES[id]);
-    return fq.choix(q || 'Que signifie ce pictogramme ?', l.map(x => o(x, PICTO(x).nom)), id, {
+    return fq.choix(q || 'Que signifie ce pictogramme ?', l.map(x => o(x, PICTO(x).nom)), id, {
       indices: Object.fromEntries(PROCHES[id].map(x => [x, `Le pictogramme ${nomPicto(x)} montre ${PICTO(x).dessin}. Regarde bien le dessin.`])),
       solution: ficheP(id) });
   }
   function partieImage(id, q) {
     const l = melanger([id].concat(PROCHES[id]));
-    return fq.choix(q || `Quel pictogramme signifie ${nomPicto(id)} ?`, l.map(x => o(x, picto(x, { taille: 64 }))), id, {
+    return fq.choix(q || `Quel pictogramme signifie ${nomPicto(id)} ?`, l.map(x => o(x, picto(x, { taille: 64 }))), id, {
       images: true, colonne: false,
       indices: Object.fromEntries(PROCHES[id].map(x => [x, `Ce pictogramme (${PICTO(x).dessin}) signifie ${nomPicto(x)}.`])),
       solution: ficheP(id) });
   }
   function partiePrecaution(id, q) {
     const P = PICTO(id), autres = melanger(PICTOS.filter(x => x.type !== P.type)).slice(0, 2);
-    return fq.choix(q || 'Quelle précaution faut-il prendre ?', [o(id, P.precaution)].concat(autres.map(x => o(x.id, x.precaution))), id, {
+    return fq.choix(q || 'Quelle précaution faut-il prendre ?', [o(id, P.precaution)].concat(autres.map(x => o(x.id, x.precaution))), id, {
       colonne: true,
       indices: Object.fromEntries(autres.map(x => [x.id, `Cette précaution correspond au pictogramme ${nomPicto(x.id)}, pas à ${nomPicto(id)}.`])),
-      solution: `${ficheP(id)}<p>Précaution : <b>${P.precaution}</b>.</p>` });
+      solution: `${ficheP(id)}<p>Précaution : <b>${P.precaution}</b>.</p>` });
   }
 
   /* ---------- Plan de l'application et navigation (voir assets/sommaire.js) ---------- */

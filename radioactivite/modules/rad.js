@@ -394,7 +394,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || (note && typeof note === 'string')) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${typeof note === 'string' ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -429,8 +429,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -442,7 +442,7 @@
       const q = qs[idx];
       window.RAD.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -462,7 +462,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -477,10 +477,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -670,15 +670,15 @@
       // diagnostic : A et Z inversés, puis somme des A, puis somme des Z
       const inv = cases.find(ca => ca.k === 'A' && vals.get(ca) === ca.x.Z && cases.some(u => u.x === ca.x && u.k === 'Z' && vals.get(u) === ca.x.A));
       let h;
-      if (inv) h = 'Tu as inversé A et Z : A, en haut, est le nombre de <b>nucléons</b> ; Z, en bas, le nombre de <b>protons</b>.';
+      if (inv) h = 'Tu as inversé A et Z : A, en haut, est le nombre de <b>nucléons</b> ; Z, en bas, le nombre de <b>protons</b>.';
       else {
         for (const k of ['A', 'Z']) {
           const faux = cases.find((ca, j) => ca.k === k && !ok[j]);
           if (!faux) continue;
           const ici = faux.c, autre = ici === 'g' ? 'd' : 'g', nomCote = ici === 'g' ? 'à gauche' : 'à droite', nomAutre = ici === 'g' ? 'à droite' : 'à gauche';
           const voulu = somme(autre, k, vals), obtenu = somme(ici, k, vals);
-          h = `Conservation de ${k === 'A' ? 'A (nombre de nucléons)' : 'Z (nombre de charge)'} : la somme des ${k} ${nomCote} doit valoir <b>${signe(voulu)}</b>, comme ${nomAutre}. Avec tes nombres, elle vaut ${sommeTxt(ici, k, vals)} = ${signe(obtenu)}.`;
-          if (k === 'Z' && cotes[ici].some(x => x !== 'γ' && x.s === 'e')) h += ' Attention au signe : l\'électron compte pour Z = −1, le positron pour Z = +1.';
+          h = `Conservation de ${k === 'A' ? 'A (nombre de nucléons)' : 'Z (nombre de charge)'} : la somme des ${k} ${nomCote} doit valoir <b>${signe(voulu)}</b>, comme ${nomAutre}. Avec tes nombres, elle vaut ${sommeTxt(ici, k, vals)} = ${signe(obtenu)}.`;
+          if (k === 'Z' && cotes[ici].some(x => x !== 'γ' && x.s === 'e')) h += ' Attention au signe : l\'électron compte pour Z = −1, le positron pour Z = +1.';
           break;
         }
       }
@@ -693,14 +693,14 @@
       const x = symbole, part = typeDe(x);
       grille = el('div', 'rad-choixs');
       if (part) {
-        grille.innerHTML = `<p class="rad-choixs-t">Quelle particule a A = ${x.A} et Z = ${signe(x.Z)} ?</p><div class="ph-choix">${
+        grille.innerHTML = `<p class="rad-choixs-t">Quelle particule a A = ${x.A} et Z = ${signe(x.Z)} ?</p><div class="ph-choix">${
           Object.keys(PARTICULES).map(k => `<button type="button" class="btn-secondary" data-k="${k}">${nucDe(PARTICULES[k])}&nbsp; ${PARTICULES[k].nom}</button>`).join('')}</div>`;
       } else {
         // extrait de 12 éléments consécutifs contenant Z (à une place au hasard)
         const nb = 12, debut = Math.max(1, Math.min(ELEMENTS.length - nb, x.Z - entre(2, nb - 3)));
         let cases12 = '';
         for (let z = debut; z < debut + nb; z++) cases12 += `<button type="button" class="rad-elt" data-z="${z}" aria-label="${nomDe(z)}, Z = ${z}"><span class="rad-elt-z">${z}</span><span class="rad-elt-s">${symboleDe(z)}</span><span class="rad-elt-n">${nomDe(z)}</span></button>`;
-        grille.innerHTML = `<p class="rad-choixs-t">Extrait de la classification : trouve l'élément de numéro atomique Z = ${x.Z}.</p><div class="rad-elts">${cases12}</div>`;
+        grille.innerHTML = `<p class="rad-choixs-t">Extrait de la classification : trouve l'élément de numéro atomique Z = ${x.Z}.</p><div class="rad-elts">${cases12}</div>`;
       }
       suite.appendChild(grille);
       grille.querySelectorAll('button').forEach(b => {
@@ -711,8 +711,8 @@
           b.classList.add('faux'); b.disabled = true;
           if (part) {
             const p = PARTICULES[b.dataset.k];
-            api.erreur(`${nucDe(p)} a A = ${p.A} et Z = ${signe(p.Z)}. Compare avec les nombres trouvés : A = ${x.A} et Z = ${signe(x.Z)}.`);
-          } else api.erreur(`${cap(nomDe(+b.dataset.z))} a pour numéro atomique Z = ${b.dataset.z}. C'est Z (le nombre de protons) qui fixe l'élément : cherche Z = ${x.Z}.`);
+            api.erreur(`${nucDe(p)} a A = ${p.A} et Z = ${signe(p.Z)}. Compare avec les nombres trouvés : A = ${x.A} et Z = ${signe(x.Z)}.`);
+          } else api.erreur(`${cap(nomDe(+b.dataset.z))} a pour numéro atomique Z = ${b.dataset.z}. C'est Z (le nombre de protons) qui fixe l'élément : cherche Z = ${x.Z}.`);
         };
       });
       setTimeout(() => grille.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
@@ -808,10 +808,10 @@
       }
       // diagnostics ciblés
       const d = [];
-      if (faux.includes('N')) d.push(v.N === l.A + l.Z ? 'Neutrons = A − Z (nucléons moins protons), pas A + Z.' : v.N === l.A ? 'A compte tous les nucléons : pour les seuls neutrons, retire les Z protons.' : 'Nombre de neutrons = A − Z.');
-      if (faux.includes('A')) d.push(inc.includes('N') ? 'A est écrit dans le nom de l\'isotope (oxygène 16 : A = 16) et en haut du symbole.' : 'A = nombre de protons + nombre de neutrons.');
-      if (faux.includes('Z')) d.push('Z est fixé par l\'élément : tous les isotopes d\'un même élément ont le même Z.');
-      if (faux.includes('n') || faux.includes('s')) d.push(`C'est Z qui fixe l'élément${inc.includes('Z') ? '' : ` : cherche celui de numéro atomique Z = ${l.Z}`}${opts.donnees ? ' (voir les données)' : ''}.`);
+      if (faux.includes('N')) d.push(v.N === l.A + l.Z ? 'Neutrons = A − Z (nucléons moins protons), pas A + Z.' : v.N === l.A ? 'A compte tous les nucléons : pour les seuls neutrons, retire les Z protons.' : 'Nombre de neutrons = A − Z.');
+      if (faux.includes('A')) d.push(inc.includes('N') ? 'A est écrit dans le nom de l\'isotope (oxygène 16 : A = 16) et en haut du symbole.' : 'A = nombre de protons + nombre de neutrons.');
+      if (faux.includes('Z')) d.push('Z est fixé par l\'élément : tous les isotopes d\'un même élément ont le même Z.');
+      if (faux.includes('n') || faux.includes('s')) d.push(`C'est Z qui fixe l'élément${inc.includes('Z') ? '' : ` : cherche celui de numéro atomique Z = ${l.Z}`}${opts.donnees ? ' (voir les données)' : ''}.`);
       api.erreur(`${faux.length > 1 ? 'Les cases en rouge sont fausses.' : 'La case en rouge est fausse.'} ${d.join(' ')}`);
       secouer(tr);
     }
@@ -942,7 +942,7 @@
       if (W === largeur && svg) return majDyn();
       largeur = W;
       G = geo(W, def);
-      figz.innerHTML = svgGraphe(G, def, '<g class="rad-dyn"></g>', 'Courbe de décroissance : place la valeur, puis va jusqu\'à la courbe');
+      figz.innerHTML = svgGraphe(G, def, '<g class="rad-dyn"></g>', 'Courbe de décroissance : place la valeur, puis va jusqu\'à la courbe');
       svg = figz.querySelector('svg'); dyn = svg.querySelector('.rad-dyn');
       brancher();
       majDyn();
@@ -1005,9 +1005,9 @@
       if (bVal) bVal.fermer();
       boutons();
       if (st.phase === 1) consigne.innerHTML = mode === 'demi'
-        ? `<b>1.</b> Lis la valeur initiale ${sym}<sub>0</sub> (à t = 0), puis place <b>${sym}<sub>0</sub>/2</b> sur l'axe vertical : glisse la poignée ou utilise ▲ ▼.`
-        : `<b>1.</b> Place la valeur <b>${def.cibleTxt || fmt(cible)}</b> sur l'axe vertical : glisse la poignée ou utilise ▲ ▼.`;
-      else if (st.phase === 2) consigne.innerHTML = '<b>2.</b> Reporte sur la courbe : glisse le point vers la droite jusqu\'à la courbe (ou ◀ ▶).';
+        ? `<b>1.</b> Lis la valeur initiale ${sym}<sub>0</sub> (à t = 0), puis place <b>${sym}<sub>0</sub>/2</b> sur l'axe vertical : glisse la poignée ou utilise ▲ ▼.`
+        : `<b>1.</b> Place la valeur <b>${def.cibleTxt || fmt(cible)}</b> sur l'axe vertical : glisse la poignée ou utilise ▲ ▼.`;
+      else if (st.phase === 2) consigne.innerHTML = '<b>2.</b> Reporte sur la courbe : glisse le point vers la droite jusqu\'à la courbe (ou ◀ ▶).';
       else consigne.innerHTML = '<b>3.</b> Reporte sur l\'axe des temps et lis la date.';
       if (st.phase < 3) {
         bVal = boutonValider(repz);
@@ -1028,9 +1028,9 @@
           const attendu = tc * rep.facteur, tol = (rep.tol != null ? rep.tol : def.x.fin * .6) * rep.facteur;
           if (Math.abs(v - attendu) <= tol) { ch.desactiver(true); bVal.fermer(); api.reussi(); return; }
           let h;
-          if (Math.abs(v - cible) < 1e-9 * Math.max(1, cible) || Math.abs(v - cible * rep.facteur) < 1e-9 * Math.max(1, cible)) h = 'Ça, c\'est la valeur sur l\'axe vertical : la date se lit sur l\'axe des temps (horizontal).';
-          else if (rep.facteur !== 1 && Math.abs(v - tc) <= tol / rep.facteur) h = `Attention à l'unité de l'axe des temps : ${def.x.titre}. Convertis en ${rep.unite}.`;
-          else if (mode === 'demi' && Math.abs(v - 2 * attendu) <= 2 * tol) h = `C'est la date où il reste ${sym}<sub>0</sub>/4 (deux demi-vies) : relis la date sous le point.`;
+          if (Math.abs(v - cible) < 1e-9 * Math.max(1, cible) || Math.abs(v - cible * rep.facteur) < 1e-9 * Math.max(1, cible)) h = 'Ça, c\'est la valeur sur l\'axe vertical : la date se lit sur l\'axe des temps (horizontal).';
+          else if (rep.facteur !== 1 && Math.abs(v - tc) <= tol / rep.facteur) h = `Attention à l'unité de l'axe des temps : ${def.x.titre}. Convertis en ${rep.unite}.`;
+          else if (mode === 'demi' && Math.abs(v - 2 * attendu) <= 2 * tol) h = `C'est la date où il reste ${sym}<sub>0</sub>/4 (deux demi-vies) : relis la date sous le point.`;
           else h = 'Lis la graduation sous le point, sur l\'axe des temps (compte les carreaux entre deux valeurs écrites).';
           api.erreur(h);
           secouer(d);
@@ -1055,7 +1055,7 @@
         return;
       }
       if (Math.abs(st.t - tc) <= def.x.fin * .75) { st.phase = 3; st.t = tc; api.effacer(); etape(); return; }
-      api.erreur(st.t < tc ? 'Le point n\'est pas encore sur la courbe : continue vers la droite.' : 'Tu as dépassé la courbe : reviens vers la gauche.');
+      api.erreur(st.t < tc ? 'Le point n\'est pas encore sur la courbe : continue vers la droite.' : 'Tu as dépassé la courbe : reviens vers la gauche.');
       secouer(figz);
     }
     if (window.ResizeObserver) new ResizeObserver(dessiner).observe(figz); else addEventListener('resize', dessiner);
@@ -1079,31 +1079,31 @@
      ============================================================ */
   const PLAN = [
     { n: 1, titre: 'Noyau et radioactivité', desc: 'Radioactivité naturelle et artificielle, symbole <sup>A</sup><sub>Z</sub>X d\'un noyau, isotopes', fiche: 'fiche_1',
-      parties: [{ nom: 'Noyau et radioactivité', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : qu\'est-ce que la radioactivité ?' } }] },
+      parties: [{ nom: 'Noyau et radioactivité', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : qu\'est-ce que la radioactivité ?' } }] },
     { n: 2, titre: 'Types de radioactivité et équations', desc: 'α, β<sup>−</sup>, β<sup>+</sup>, particule émise, conservation de A et de Z, rayonnement γ', fiche: 'fiche_2',
       sousModules: true,
       parties: [
-        { nom: 'Les trois types de radioactivité', slug: 'types', cours: 'module_2a_cours', noms: { cours: 'Cours : les trois types de radioactivité' } },
-        { nom: 'Équations de désintégration', slug: 'equations', cours: 'module_2b_cours', noms: { cours: 'Cours : équations de désintégration' } },
+        { nom: 'Les trois types de radioactivité', slug: 'types', cours: 'module_2a_cours', noms: { cours: 'Cours : les trois types de radioactivité' } },
+        { nom: 'Équations de désintégration', slug: 'equations', cours: 'module_2b_cours', noms: { cours: 'Cours : équations de désintégration' } },
         { nom: 'Types et équations', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Activité d\'un échantillon', desc: 'Désintégrations par seconde, becquerel, A = −dN/dt, conversions', fiche: 'fiche_3',
       parties: [{ nom: 'Activité', cours: 'module_3_cours', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Demi-vie', desc: 'Définition, N<sub>0</sub>/2<sup>n</sup>, lecture graphique de t<sub>1/2</sub>, âge d\'un échantillon', fiche: 'fiche_4',
       sousModules: true,
       parties: [
-        { nom: 'La demi-vie', slug: 'definition', cours: 'module_4a_cours', noms: { cours: 'Cours : la demi-vie' } },
-        { nom: 'Lecture graphique', slug: 'graphique', cours: 'module_4b_cours', noms: { cours: 'Cours : lire une demi-vie sur un graphique' } },
+        { nom: 'La demi-vie', slug: 'definition', cours: 'module_4a_cours', noms: { cours: 'Cours : la demi-vie' } },
+        { nom: 'Lecture graphique', slug: 'graphique', cours: 'module_4b_cours', noms: { cours: 'Cours : lire une demi-vie sur un graphique' } },
         { nom: 'Demi-vie', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Décroissance exponentielle et calcul de t', desc: 'N(t) = N<sub>0</sub> e<sup>−λt</sup>, A(t) = A<sub>0</sub> e<sup>−λt</sup>, isoler t avec ln', fiche: 'fiche_5',
       sousModules: true,
       parties: [
-        { nom: 'La loi de décroissance', slug: 'loi', cours: 'module_5a_cours', noms: { cours: 'Cours : la loi de décroissance' } },
-        { nom: 'Isoler t', slug: 'isoler', cours: 'module_5b_cours', noms: { cours: 'Cours : isoler t avec ln' } },
-        { nom: 'Calculer t', slug: 'calcul', cours: 'module_5c_cours', noms: { cours: 'Cours : calculer t' } },
+        { nom: 'La loi de décroissance', slug: 'loi', cours: 'module_5a_cours', noms: { cours: 'Cours : la loi de décroissance' } },
+        { nom: 'Isoler t', slug: 'isoler', cours: 'module_5b_cours', noms: { cours: 'Cours : isoler t avec ln' } },
+        { nom: 'Calculer t', slug: 'calcul', cours: 'module_5c_cours', noms: { cours: 'Cours : calculer t' } },
         { nom: 'Décroissance exponentielle', questions: 'module_5_questions' }] },
     { n: 6, titre: 'Exercices', desc: 'Exercices 7, 1, 2, 10, 11, 6 et 16 de la feuille, sujet de bac (cobalt 60), exercices 17, 18 et 19', exercices: 'module_6', exNom: 'Exercices de la feuille', nbEx: 11 },
   ];
-  window.SOM.init({ nom: 'Chapitre 12 : Radioactivité', id: 'radioactivite', cleEx: 'radioactivite-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 12 : Radioactivité', id: 'radioactivite', cleEx: 'radioactivite-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

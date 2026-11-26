@@ -1277,7 +1277,7 @@
     s.push(lab('tra', 3, 470, 132, 'middle'));
     s.push(lab('abs', 4, 300, 206, 'middle'));
     s.push('<text class="os-txt-pale" x="300" y="13" text-anchor="middle" font-size="16">paroi</text>');
-    return `<svg class="os-svg os-svg-paroi" viewBox="0 0 600 250" role="img" aria-label="Une onde sonore frappe une paroi : une partie est réfléchie, une partie absorbée par la paroi, une partie transmise de l'autre côté">${s.join('')}</svg>`;
+    return `<svg class="os-svg os-svg-paroi" viewBox="0 0 600 250" role="img" aria-label="Une onde sonore frappe une paroi : une partie est réfléchie, une partie absorbée par la paroi, une partie transmise de l'autre côté">${s.join('')}</svg>`;
   }
   const slot = id => `<span class="sc-slot" data-slot="${id}"><span class="sc-slot-ph">?</span></span>`;
   // schéma de la paroi à compléter : figure numérotée et une case par numéro
@@ -1366,7 +1366,7 @@
     { n: 4, titre: 'Audiogramme et atténuation', desc: 'Seuil d\'audibilité, seuil de la douleur, échelle logarithmique, perte d\'auditivité, atténuation par une paroi', fiche: 'fiche_4',
       sousModules: true,
       parties: [
-        { nom: 'Passer un audiogramme', simulation: 'module_4_simulation', noms: { simulation: 'Simulateur : passer un audiogramme' } },
+        { nom: 'Passer un audiogramme', simulation: 'module_4_simulation', noms: { simulation: 'Simulateur : passer un audiogramme' } },
         { nom: 'L\'audiogramme', slug: 'audiogramme', cours: 'module_4a_cours', noms: { cours: 'Cours : l\'audiogramme' } },
         { nom: 'Atténuation par une paroi', slug: 'attenuation', cours: 'module_4b_cours', noms: { cours: 'Cours : atténuation par une paroi' } },
         { nom: 'Audiogramme et atténuation', questions: 'module_4_questions' }] },

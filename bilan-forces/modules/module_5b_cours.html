@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : principe d'inertie — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 5 · COURS 2 / 2</span>
+    <h2 class="er-titre">Principe d'inertie</h2>
+    <p class="er-contexte">Quand les forces se <b>compensent</b>, le système est <b>immobile</b> ou en <b>mouvement rectiligne uniforme</b> : c'est le <b>principe d'inertie</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 5 (2de, d'après principe-dynamique, module 4,
+   cours 2, sans l'accélération) : forces qui se compensent ⇔ immobile ou
+   mouvement rectiligne uniforme ; sinon la vitesse change (valeur ou
+   direction). Exemple du parachutiste.
+   ============================================================ */
+const { melanger, exemple } = COURS;
+const { o, nomV, sceneRemplie, diagrammeDe, SITUATIONS } = BF;
+
+/* ---------- 1. Le principe d'inertie ---------- */
+const OPTS = [o('oui', 'les forces se compensent'), o('non', 'les forces ne se compensent pas')];
+const CAS = [
+  ['Un livre sur une table', 'Un livre est posé, immobile, sur une table.', 'oui', { non: 'Le livre est immobile : pense au principe d\'inertie.' }, 'Immobile : les forces se compensent.'],
+  ['Une voiture sur l\'autoroute', 'Une voiture roule en ligne droite à 130 km/h constants.', 'oui', { non: 'Mouvement rectiligne <b>uniforme</b> : pense au principe d\'inertie.' }, 'Mouvement rectiligne uniforme : les forces se compensent (la force motrice compense les frottements).'],
+  ['Une voiture qui freine', 'Une voiture freine en ligne droite.', 'non', { oui: 'La valeur de la vitesse change.' }, 'La voiture ralentit : sa vitesse change, les forces ne se compensent pas.'],
+  ['Un virage', 'Une moto prend un virage à vitesse constante.', 'non', { oui: 'Le mouvement n\'est pas rectiligne : la direction de la vitesse change.' }, 'Le mouvement n\'est pas rectiligne : les forces ne se compensent pas.'],
+  ['Une balle qui tombe', 'Une balle tombe de plus en plus vite.', 'non', { oui: 'La vitesse augmente.' }, 'La balle accélère : les forces ne se compensent pas (il n\'y a d\'ailleurs que le poids, si on néglige l\'air).'],
+];
+function etape1(c_) {
+  const carte = c_.carte('1. Le principe d\'inertie');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Principe d'inertie.</b> Dans un référentiel terrestre, si les forces qui s'exercent sur un système <b>se compensent</b>, il est <b>immobile</b> ou en <b>mouvement rectiligne uniforme</b> (ligne droite, vitesse constante). Et réciproquement.</p>
+        <p>Si les forces ne se compensent pas, la vitesse du système change : sa valeur, ou sa direction (virage).</p></div>
+    </div>
+    ${exemple(`<div class="bf-noms-figs"><div class="bf-do-cadre">${diagrammeDe(SITUATIONS.parachute)}</div><div class="bf-sc-cadre">${sceneRemplie(SITUATIONS.parachute)}</div></div><p>Le parachutiste descend en ligne droite à vitesse constante : d'après le principe d'inertie, ${nomV('P')} et ${nomV('Fair')} se compensent. La force de l'air (ses frottements) compense exactement le poids.</p>`)}`);
+  c_.aToi(carte, melanger(CAS).slice(0, 3).map(c => ({ titre: c[0], enonce: `<p>${c[1]}</p>`, parties: [{ type: 'choix', q: 'Que peut-on dire des forces qui s\'exercent sur le système ?', options: OPTS, bonne: c[2], melanger: false, indices: c[3], solution: `<p>${c[4]}</p>` }] })));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Principe d'inertie</b> : les forces se compensent ⇔ le système est immobile ou en mouvement rectiligne uniforme. Sinon, sa vitesse change (valeur ou direction).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5_questions.html">Questions →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_5.html#inertie">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+BF.menu('module_5b_cours');
+</script>
+</body>
+</html>

@@ -279,7 +279,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? 'Réponse' : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? 'Réponse' : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution;
         if (sol || vue || (note && typeof note === 'string')) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${typeof note === 'string' ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -314,8 +314,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup${opts.aidesPayantes ? ', sans afficher les aides' : ''} ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur${opts.aidesPayantes ? ' ou en affichant les aides' : ''} ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul>${opts.bareme || ''}</div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup${opts.aidesPayantes ? ', sans afficher les aides' : ''} ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur${opts.aidesPayantes ? ' ou en affichant les aides' : ''} ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul>${opts.bareme || ''}</div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -328,7 +328,7 @@
       window.OX.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       window.DragDrop && window.DragDrop.cleanupGhosts();
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -348,7 +348,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur ou une aide.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur ou une aide.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -363,10 +363,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -456,12 +456,12 @@
     oxyd: c => `${c.red} → ${c.ox} + ${nE(c.n)}`,                            // lue à l'envers : oxydation (idem)
     couple: c => `${c.ox} / ${c.red}`,
     // question « oxydant ou réducteur ? » ; capte : l'espèce X capte des électrons
-    choixRole: (X, capte) => ({ type: 'choix', q: `${X} est :`, melanger: false,
+    choixRole: (X, capte) => ({ type: 'choix', q: `${X} est :`, melanger: false,
       options: [{ id: 'ox', label: 'un oxydant' }, { id: 'red', label: 'un réducteur' }], bonne: capte ? 'ox' : 'red',
       indices: {
-        red: `${X} <b>capte</b> des électrons : c'est ce que fait un oxydant. Un réducteur, lui, en cède.`,
-        ox: `${X} <b>cède</b> des électrons : c'est ce que fait un réducteur. Un oxydant, lui, en capte.` },
-      solution: `<p>${X} ${capte ? 'capte' : 'cède'} des électrons : c'est un <b>${capte ? 'oxydant' : 'réducteur'}</b>.</p>` }),
+        red: `${X} <b>capte</b> des électrons : c'est ce que fait un oxydant. Un réducteur, lui, en cède.`,
+        ox: `${X} <b>cède</b> des électrons : c'est ce que fait un réducteur. Un oxydant, lui, en capte.` },
+      solution: `<p>${X} ${capte ? 'capte' : 'cède'} des électrons : c'est un <b>${capte ? 'oxydant' : 'réducteur'}</b>.</p>` }),
   };
 
   /* ---------- Méthode express : toute la méthode en une infographie ----------
@@ -481,8 +481,8 @@
   <section class="ox-info-bloc">
     ${tete('A', 'Les mots', 'Oxydant, réducteur, couple, réduction, oxydation')}
     <div class="ox-info-mots">
-      <div class="ox-info-tuile"><b>Oxydant</b>capte des électrons : ${Mn}, ${h('Cu^2+')}, ${Fe3}…</div>
-      <div class="ox-info-tuile"><b>Réducteur</b>cède des électrons : ${Fe2}, Zn, ${h('I^-')}…</div>
+      <div class="ox-info-tuile"><b>Oxydant</b>capte des électrons : ${Mn}, ${h('Cu^2+')}, ${Fe3}…</div>
+      <div class="ox-info-tuile"><b>Réducteur</b>cède des électrons : ${Fe2}, Zn, ${h('I^-')}…</div>
       <div class="ox-info-tuile"><b>Couple Ox / Red</b>Ox + n ${EL} = Red<br><small>les électrons du côté de l'oxydant</small></div>
       <div class="ox-info-tuile ox-info-sens"><b>Réduction et oxydation</b>
         <div class="ox-info-sch">
@@ -504,16 +504,16 @@
     ${tete('B', 'Écrire la demi-équation d\'un couple', `4 étapes, sur le couple ${Mn} / ${Mn2}`)}
     <ol class="ox-info-etapes">
       ${etape(1, 'Oxydant à gauche, réducteur à droite. Équilibrer les éléments autres que O et H <small>(un nombre devant l\'espèce, jamais un indice)</small>', `${Mn} = ${Mn2} &nbsp;<small>(1 Mn de chaque côté)</small>`)}
-      ${etape(2, `Équilibrer O : ajouter ${H2O} du côté où il en manque`, `${Mn} = ${Mn2} + ${c(`4&nbsp;${H2O}`)}`)}
-      ${etape(3, `Équilibrer H : ajouter ${HP} du côté où il en manque <small>(une molécule ${H2O} contient 2 H)</small>`, `${Mn} + ${c(`8&nbsp;${HP}`)} = ${Mn2} + 4&nbsp;${H2O}`)}
-      ${etape(4, `Équilibrer les charges : ajouter ${EL} du côté où la charge est la plus grande <small>(+7 contre +2 : 5 ${EL})</small>`, `${Mn} + 8&nbsp;${HP} + ${c(`5&nbsp;${EL}`)} = ${Mn2} + 4&nbsp;${H2O}`)}
+      ${etape(2, `Équilibrer O : ajouter ${H2O} du côté où il en manque`, `${Mn} = ${Mn2} + ${c(`4&nbsp;${H2O}`)}`)}
+      ${etape(3, `Équilibrer H : ajouter ${HP} du côté où il en manque <small>(une molécule ${H2O} contient 2 H)</small>`, `${Mn} + ${c(`8&nbsp;${HP}`)} = ${Mn2} + 4&nbsp;${H2O}`)}
+      ${etape(4, `Équilibrer les charges : ajouter ${EL} du côté où la charge est la plus grande <small>(+7 contre +2 : 5 ${EL})</small>`, `${Mn} + 8&nbsp;${HP} + ${c(`5&nbsp;${EL}`)} = ${Mn2} + 4&nbsp;${H2O}`)}
     </ol>
   </section>
   ${fleche}
   <section class="ox-info-bloc">
     ${tete('C', 'Écrire l\'équation de la réaction', `3 étapes, réaction entre ${Mn} et ${Fe2}`)}
     <ol class="ox-info-etapes">
-      ${etape(1, 'Entourer les réactifs dans les couples, puis écrire les deux demi-équations dans le bon sens : le réactif à gauche du signe =',
+      ${etape(1, 'Entourer les réactifs dans les couples, puis écrire les deux demi-équations dans le bon sens : le réactif à gauche du signe =',
         `${ent(Mn)} / ${Mn2} &nbsp; et &nbsp; ${Fe3} / ${ent(Fe2)}<br>${Mn} + 8&nbsp;${HP} + 5&nbsp;${EL} = ${Mn2} + 4&nbsp;${H2O} &nbsp;<small>(réduction)</small><br>${Fe2} = ${Fe3} + ${EL} &nbsp;<small>(oxydation)</small>`)}
       ${etape(2, 'Multiplier pour que les deux demi-équations échangent le même nombre d\'électrons', `1 × ( … 5&nbsp;${EL} … ) &nbsp; et &nbsp; ${c('5 ×')} ( ${Fe2} = ${Fe3} + ${EL} )`)}
       ${etape(3, `Additionner, puis simplifier les électrons (et les ${HP}, ${H2O} présents des deux côtés)`,
@@ -525,12 +525,12 @@
   <section class="ox-info-bloc">
     ${tete('!', 'Les pièges', 'à vérifier avant de valider')}
     <ul class="ox-info-pieges">
-      <li>Ne jamais changer un indice : ${h('Cr2O7^2-')} reste ${h('Cr2O7^2-')}.</li>
+      <li>Ne jamais changer un indice : ${h('Cr2O7^2-')} reste ${h('Cr2O7^2-')}.</li>
       <li>Une molécule ${H2O} contient 2 atomes H.</li>
-      <li>Un électron porte la charge −1 : une charge négative compte en moins.</li>
+      <li>Un électron porte la charge −1 : une charge négative compte en moins.</li>
       <li>Multiplier <b>toute</b> la demi-équation, pas seulement une espèce.</li>
       <li>Aucun électron dans l'équation de la réaction.</li>
-      <li>À la fin : autant d'atomes de chaque élément et la même charge de chaque côté.</li>
+      <li>À la fin : autant d'atomes de chaque élément et la même charge de chaque côté.</li>
     </ul>
   </section>
 </div>`;
@@ -564,21 +564,21 @@
       // quatre sous-modules de cours, puis les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Oxydant et réducteur', slug: 'oxred', cours: 'module_1a_cours', noms: { cours: 'Cours : oxydant et réducteur' } },
-        { nom: 'Couple et demi-équation', slug: 'couple', cours: 'module_1b_cours', noms: { cours: 'Cours : couple et demi-équation' } },
-        { nom: 'Oxydation et réduction', slug: 'oxydation', cours: 'module_1c_cours', noms: { cours: 'Cours : oxydation et réduction' } },
-        { nom: 'Réaction entre un oxydant et un réducteur', slug: 'reaction', cours: 'module_1d_cours', noms: { cours: 'Cours : réaction entre un oxydant et un réducteur' } },
+        { nom: 'Oxydant et réducteur', slug: 'oxred', cours: 'module_1a_cours', noms: { cours: 'Cours : oxydant et réducteur' } },
+        { nom: 'Couple et demi-équation', slug: 'couple', cours: 'module_1b_cours', noms: { cours: 'Cours : couple et demi-équation' } },
+        { nom: 'Oxydation et réduction', slug: 'oxydation', cours: 'module_1c_cours', noms: { cours: 'Cours : oxydation et réduction' } },
+        { nom: 'Réaction entre un oxydant et un réducteur', slug: 'reaction', cours: 'module_1d_cours', noms: { cours: 'Cours : réaction entre un oxydant et un réducteur' } },
         { nom: 'Oxydants, réducteurs et couples', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Équilibrer une demi-équation', desc: 'La méthode en 4 étapes : les éléments, O avec H<sub>2</sub>O, H avec H<sup>+</sup>, les charges avec les électrons', fiche: 'fiche_2',
+    { n: 2, titre: 'Équilibrer une demi-équation', desc: 'La méthode en 4 étapes : les éléments, O avec H<sub>2</sub>O, H avec H<sup>+</sup>, les charges avec les électrons', fiche: 'fiche_2',
       // deux sous-modules de cours, puis les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'La méthode en 4 étapes', slug: 'methode', cours: 'module_2a_cours', noms: { cours: 'Cours : la méthode en 4 étapes' } },
-        { nom: 'Équilibrer les charges', slug: 'charges', cours: 'module_2b_cours', noms: { cours: 'Cours : équilibrer les charges' } },
+        { nom: 'La méthode en 4 étapes', slug: 'methode', cours: 'module_2a_cours', noms: { cours: 'Cours : la méthode en 4 étapes' } },
+        { nom: 'Équilibrer les charges', slug: 'charges', cours: 'module_2b_cours', noms: { cours: 'Cours : équilibrer les charges' } },
         { nom: 'Équilibrer une demi-équation', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Écrire l\'équation d\'une réaction', desc: 'Les demi-équations dans le bon sens, égaliser les électrons, additionner et simplifier', fiche: 'fiche_3',
       parties: [{ nom: 'Écrire l\'équation d\'une réaction', cours: 'module_3_cours', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Écrire les réactions', desc: 'La méthode express en une infographie (progression rapide), puis 10 réactions : l\'aide diminue',
+    { n: 4, titre: 'Écrire les réactions', desc: 'La méthode express en une infographie (progression rapide), puis 10 réactions : l\'aide diminue',
       parties: [{ nom: 'Écrire les réactions', cours: 'module_4_cours', entrainement: 'module_4', noms: { cours: 'Méthode express' } }] },
   ];
   window.SOM.init({ nom: 'Oxydoréduction', id: 'oxydoreduction-spe', plan: PLAN, flashcards: true });

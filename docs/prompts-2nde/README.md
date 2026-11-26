@@ -22,9 +22,9 @@ Un fichier par application, numéroté dans l'ordre de développement conseillé
 | A01 | Chromatographie sur couche mince | `07-chromatographie.md` | `chromatographie/` | animation (espèces fictives), conclusions à piocher | **crée `CCM`** |
 | A14 | Réaliser un montage électrique | `08-montage-electrique.md` | `montage-electrique/` | méthode de la boucle principale, table réaliste et schéma | **crée `MONTAGE` et `ETAPES`** |
 | A16 | Lois de l'électricité et capteurs | `09-lois-electricite.md` | `lois-electricite/` | nœuds, mailles, loi d'Ohm, thermistance et photorésistance | `MONTAGE` ; `LG` |
-| A05 | Dissolution, dilution et échelle de teinte | `10-solutions.md` | `solutions/` | gestes des fiches méthode dans l'ordre, Fe<sup>3+</sup> et thiocyanate | **crée `PAILLASSE`** ; `ETAPES` |
+| A05 | Dissolution, dilution et échelle de teinte | `10-solutions.md` | `solutions/` | gestes des fiches méthode dans l'ordre, Fe<sup>3+</sup> et thiocyanate | **crée `PAILLASSE`** ; `ETAPES` ; `DILUTION` (commun avec la Terminale) |
 | A06 | Identifier une espèce chimique | `11-identifier-especes.md` | `identifier-especes/` | masse volumique, palier, tests des gaz et des ions | `PAILLASSE`, `ETAPES` ; `LG` |
-| A07 | Synthèse et montage à reflux | `12-synthese.md` | `synthese/` | acétate d'isoamyle, ampoule à décanter, CCM | `PAILLASSE`, `ETAPES`, `CCM` |
+| A07 | Synthèse et montage à reflux | `12-synthese.md` | `synthese/` | acétate d'isoamyle, ampoule à décanter, CCM | `PAILLASSE`, `ETAPES`, `CCM` ; `SYNTHESE` (commun avec la Terminale) |
 | A10 | Décrire un mouvement | `13-mouvement.md` | `mouvement/` | référentiels animés, pointage simplifié, vecteur vitesse | `VEC` ; règle de `LG` |
 
 ## Applications codées

@@ -106,7 +106,7 @@
     if (reste === 'flashcards') return { dossier, type: 'flashcards' };
     if (reste === 'succes') return { dossier, type: 'succes' };
     if (cle === 'combustions-exercices-faits') return { dossier, type: 'liste' };
-    if (cle === 'principe-dynamique-atelier') return { dossier, type: 'atelier' };
+    if (cle === 'principe-dynamique-atelier' || cle === 'bilan-forces-atelier') return { dossier, type: 'atelier' };
     if (cle === 'fractions-college-suivi' || cle === 'equations-college-suivi' || cle === 'equations-physique-mobile-suivi' || cle === 'calcul-numerique-suivi') return { dossier, type: 'suivi-competences' };
     if (cle === 'fractions-college-sauvegarde' || cle === 'equations-college-sauvegarde' || cle === 'equations-physique-mobile-sauvegarde' || cle === 'calcul-numerique-sauvegarde') return null;      // état de la sauvegarde propre à l'appareil : jamais copié
     return { dossier, type: 'inconnue' };
@@ -557,10 +557,10 @@
       '  <p>Ouverture du site… Si rien ne se passe, touche le bouton.</p>\n' +
       '  <a class="bouton" id="reprendre" href="' + echapper(lien) + '">Reprendre ma progression</a>\n' +
       '  <p>Il faut être connecté à Internet.</p>\n' +
-      '  <p>Ta progression est ajoutée au navigateur qui ouvre ce fichier : ouvre-le avec celui où tu travailles.</p>\n' +
+      '  <p>Ta progression est ajoutée au navigateur qui ouvre ce fichier : ouvre-le avec celui où tu travailles.</p>\n' +
       '  <h2>' + echapper(pluriel(apps.length, 'application')) + '</h2>\n' +
       '  <ul>' + apps.map(a => '<li>' + echapper(nomCourt(a)) + '</li>').join('') + '</ul>\n' +
-      '  <p class="aide">Si le bouton ne marche pas : va sur ' + echapper(SITE) + ', touche « Reprendre depuis un fichier », puis choisis ce fichier.</p>\n' +
+      '  <p class="aide">Si le bouton ne marche pas : va sur ' + echapper(SITE) + ', touche « Reprendre depuis un fichier », puis choisis ce fichier.</p>\n' +
       '</div>\n</main>\n' +
       '<script type="application/json" id="progression">' + json + '</script>\n' +
       '<script>location.replace(document.getElementById("reprendre").href);</script>\n' +
@@ -650,7 +650,7 @@
     return n;
   }
   const liste = (lignes, balise) => el(balise || 'ul', { class: 'prog-liste' }, lignes.map(l => el('li', null, l)));
-  const depliant = lignes => el('details', { class: 'prog-depliant' }, el('summary', null, 'Ça ne marche pas ?'), liste(lignes));
+  const depliant = lignes => el('details', { class: 'prog-depliant' }, el('summary', null, 'Ça ne marche pas ?'), liste(lignes));
 
   /* ---------- Marche à suivre (textes) ---------- */
   const CHOIX = [
@@ -664,28 +664,28 @@
   // Bloc « Retrouver ton fichier ici » : selon l'appareil et le navigateur actuels
   function lignesRetrouver(env) {
     const N = nomNav(env), L = [];
-    const dossier = 'Il est dans le dossier « **Téléchargements** ».';
+    const dossier = 'Il est dans le dossier « **Téléchargements** ».';
     if (env.famille === 'ordi') {
-      if (env.os === 'chromeos') L.push('Il est dans l\'appli « **Fichiers** », dossier « **Téléchargements** ».');
+      if (env.os === 'chromeos') L.push('Il est dans l\'appli « **Fichiers** », dossier « **Téléchargements** ».');
       else if (env.nav === 'chrome' || env.nav === 'edge') L.push(dossier + ' Pour le voir, clique sur l\'icône de téléchargement (flèche vers le bas) en haut à droite de ' + N + ', puis sur l\'icône de dossier à côté du fichier.');
       else if (env.nav === 'firefox') L.push(dossier + ' Pour le voir, clique sur la flèche de téléchargement en haut à droite de Firefox, puis sur l\'icône de dossier à côté du fichier.');
       else if (env.nav === 'safari') L.push(dossier + ' Pour le voir, clique sur le bouton de téléchargement (flèche vers le bas) en haut à droite de Safari, puis sur la loupe à côté du fichier.');
-      else L.push('Il est en général dans le dossier « **Téléchargements** ». La liste des téléchargements de ' + (N || 'ton navigateur') + ' le montre aussi.');
+      else L.push('Il est en général dans le dossier « **Téléchargements** ». La liste des téléchargements de ' + (N || 'ton navigateur') + ' le montre aussi.');
       L.push('Si le navigateur te demande où enregistrer le fichier, choisis un endroit que tu retrouveras (clé USB, Bureau).');
-      L.push('Sur un ordinateur du lycée, le dossier « Téléchargements » peut être vidé quand tu te déconnectes : copie le fichier sur ta clé USB ou dans ton espace de l\'ENT avant de partir.');
-      if (env.nav === 'chrome' || env.nav === 'edge') L.push('Si ' + N + ' signale un fichier dangereux, choisis « **Conserver** » : le fichier ne contient que ta progression.');
+      L.push('Sur un ordinateur du lycée, le dossier « Téléchargements » peut être vidé quand tu te déconnectes : copie le fichier sur ta clé USB ou dans ton espace de l\'ENT avant de partir.');
+      if (env.nav === 'chrome' || env.nav === 'edge') L.push('Si ' + N + ' signale un fichier dangereux, choisis « **Conserver** » : le fichier ne contient que ta progression.');
     } else if (env.famille === 'android') {
-      L.push('Une notification « **Téléchargement terminé** » apparaît.');
-      L.push('Le fichier est dans l\'appli « **Fichiers** » (« **Mes fichiers** » sur Samsung), dossier « **Téléchargements** » (parfois « **Download** »).');
-      if (env.nav === 'chrome' || env.nav === 'firefox') L.push('Dans ' + N + ', tu le retrouves aussi par le menu ⋮ › « **Téléchargements** ».');
-      if (env.nav === 'samsung') L.push('Dans Samsung Internet, tu le retrouves aussi par le menu ≡ › « **Téléchargements** ».');
+      L.push('Une notification « **Téléchargement terminé** » apparaît.');
+      L.push('Le fichier est dans l\'appli « **Fichiers** » (« **Mes fichiers** » sur Samsung), dossier « **Téléchargements** » (parfois « **Download** »).');
+      if (env.nav === 'chrome' || env.nav === 'firefox') L.push('Dans ' + N + ', tu le retrouves aussi par le menu ⋮ › « **Téléchargements** ».');
+      if (env.nav === 'samsung') L.push('Dans Samsung Internet, tu le retrouves aussi par le menu ≡ › « **Téléchargements** ».');
     } else if (env.famille === 'apple') {
-      const ou = '« **Fichiers** », dossier « **Téléchargements** » (dans « iCloud Drive » ou « Sur mon ' + appareilApple(env) + ' »)';
-      if (env.nav === 'safari') L.push('Safari te demande si tu veux télécharger le fichier : touche « **Télécharger** ».', 'Le fichier va dans l\'appli ' + ou + '.');
-      else if (env.nav === 'chrome') L.push('Chrome affiche une barre en bas de l\'écran : touche « **Ouvrir dans…** », puis « **Enregistrer dans Fichiers** ».', 'Choisis l\'appli ' + ou + '.');
+      const ou = '« **Fichiers** », dossier « **Téléchargements** » (dans « iCloud Drive » ou « Sur mon ' + appareilApple(env) + ' »)';
+      if (env.nav === 'safari') L.push('Safari te demande si tu veux télécharger le fichier : touche « **Télécharger** ».', 'Le fichier va dans l\'appli ' + ou + '.');
+      else if (env.nav === 'chrome') L.push('Chrome affiche une barre en bas de l\'écran : touche « **Ouvrir dans…** », puis « **Enregistrer dans Fichiers** ».', 'Choisis l\'appli ' + ou + '.');
       else L.push('Enregistre-le dans l\'appli ' + ou + '.');
     } else {
-      L.push('Il est en général dans le dossier « **Téléchargements** ». La liste des téléchargements de ' + (N || 'ton navigateur') + ' le montre aussi.');
+      L.push('Il est en général dans le dossier « **Téléchargements** ». La liste des téléchargements de ' + (N || 'ton navigateur') + ' le montre aussi.');
     }
     return L;
   }
@@ -693,13 +693,13 @@
   // Bloc « L'envoyer sur l'autre appareil »
   function lignesEnvoyer(env, cible) {
     const L = [], ordi = env.famille === 'ordi' || !env.famille;
-    if (ordi && cible === 'ordi') L.push('Une **clé USB** : copie le fichier dessus, puis branche-la sur l\'autre ordinateur.');
-    L.push('Ton **espace de stockage de l\'ENT**, **Google Drive**, **OneDrive** ou **iCloud Drive** : dépose le fichier. Sur l\'autre appareil, **télécharge-le** avant de l\'ouvrir : l\'aperçu de ces sites affiche du code ou une page vide, et ne restaure rien.');
-    L.push('Un **mail à toi-même**, avec le fichier en pièce jointe. Sur l\'autre appareil, télécharge la pièce jointe avant de l\'ouvrir. Certaines messageries refusent ou signalent les fichiers « .html » : si c\'est refusé, ' +
+    if (ordi && cible === 'ordi') L.push('Une **clé USB** : copie le fichier dessus, puis branche-la sur l\'autre ordinateur.');
+    L.push('Ton **espace de stockage de l\'ENT**, **Google Drive**, **OneDrive** ou **iCloud Drive** : dépose le fichier. Sur l\'autre appareil, **télécharge-le** avant de l\'ouvrir : l\'aperçu de ces sites affiche du code ou une page vide, et ne restaure rien.');
+    L.push('Un **mail à toi-même**, avec le fichier en pièce jointe. Sur l\'autre appareil, télécharge la pièce jointe avant de l\'ouvrir. Certaines messageries refusent ou signalent les fichiers « .html » : si c\'est refusé, ' +
       (ordi ? 'mets-le dans un dossier compressé (.zip) ou choisis une autre solution.' : 'choisis une autre solution.'));
     if ((env.os === 'mac' || env.famille === 'apple') && (cible === 'apple' || cible === 'ordi')) L.push('**AirDrop**, entre deux appareils Apple (iPhone, iPad, Mac).');
     if ((env.famille === 'android' && (cible === 'android' || cible === 'ordi')) || ((env.os === 'windows' || env.os === 'chromeos') && cible === 'android')) {
-      L.push('**Quick Share** (anciennement « Partage à proximité »), entre un appareil Android et un autre appareil Android, un PC Windows ou un Chromebook.');
+      L.push('**Quick Share** (anciennement « Partage à proximité »), entre un appareil Android et un autre appareil Android, un PC Windows ou un Chromebook.');
     }
     if (env.os === 'windows' && cible === 'ordi') L.push('Le **Partage de proximité** de Windows, entre deux PC Windows proches l\'un de l\'autre.');
     return L;
@@ -708,19 +708,19 @@
   // Bloc « L'ouvrir » : selon l'appareil où l'élève reprendra (famille), env si c'est cet appareil
   function contenuOuvrir(famille, ici, env) {
     const N = ici ? nomNav(env) : null;
-    const rienNeChange = 'Rien ne change : tu étais déjà plus loin sur ce navigateur. C\'est normal, on garde toujours le meilleur.';
-    const secours = 'Rien ne marche : va sur le site (' + SITE + '), « **Reprendre depuis un fichier** », puis choisis ton fichier.';
+    const rienNeChange = 'Rien ne change : tu étais déjà plus loin sur ce navigateur. C\'est normal, on garde toujours le meilleur.';
+    const secours = 'Rien ne marche : va sur le site (' + SITE + '), « **Reprendre depuis un fichier** », puis choisis ton fichier.';
     if (famille === 'ordi') {
       const mac = ici && env.os === 'mac';
       const raccourci = !ici ? 'Ctrl+O (Cmd+O sur Mac)' : mac ? 'Cmd+O' : 'Ctrl+O';
       return [
-        el('p', null, 'Double-clique sur le fichier. Il s\'ouvre dans ' + (N ? N : 'ton navigateur') + ', qui ouvre le site et affiche « **Progression restaurée** ». Il faut être connecté à Internet.'),
+        el('p', null, 'Double-clique sur le fichier. Il s\'ouvre dans ' + (N ? N : 'ton navigateur') + ', qui ouvre le site et affiche « **Progression restaurée** ». Il faut être connecté à Internet.'),
         depliant([
-          'Il s\'ouvre dans un autre logiciel (' + (mac ? 'TextEdit' : 'Bloc-notes') + ', Word…) : ' + (mac ? 'clic droit (ou Ctrl+clic)' : 'clic droit') + ' sur le fichier, « **Ouvrir avec** », puis ton navigateur. Ou fais glisser le fichier dans une fenêtre du navigateur.',
-          'Il s\'ouvre dans un autre navigateur que le tien : la progression irait dans celui-là. Ouvre-le avec le bon : « **Ouvrir avec** », ou ' + raccourci + ' dans ton navigateur, puis choisis le fichier.',
-          'La page « Ma progression » reste affichée : clique sur « **Reprendre ma progression** ».',
-          'Pas de connexion Internet : connecte-toi, puis rouvre le fichier.',
-          'La progression disparaît quand tu fermes le navigateur : tu es en navigation privée, ou le navigateur efface tout en se fermant. Utilise une fenêtre normale.',
+          'Il s\'ouvre dans un autre logiciel (' + (mac ? 'TextEdit' : 'Bloc-notes') + ', Word…) : ' + (mac ? 'clic droit (ou Ctrl+clic)' : 'clic droit') + ' sur le fichier, « **Ouvrir avec** », puis ton navigateur. Ou fais glisser le fichier dans une fenêtre du navigateur.',
+          'Il s\'ouvre dans un autre navigateur que le tien : la progression irait dans celui-là. Ouvre-le avec le bon : « **Ouvrir avec** », ou ' + raccourci + ' dans ton navigateur, puis choisis le fichier.',
+          'La page « Ma progression » reste affichée : clique sur « **Reprendre ma progression** ».',
+          'Pas de connexion Internet : connecte-toi, puis rouvre le fichier.',
+          'La progression disparaît quand tu fermes le navigateur : tu es en navigation privée, ou le navigateur efface tout en se fermant. Utilise une fenêtre normale.',
           rienNeChange,
           secours
         ])
@@ -729,17 +729,17 @@
     if (famille === 'android') {
       const nav = ici ? (N || 'ton navigateur') : 'Chrome (ou ton navigateur)';
       // autre chemin : la liste des téléchargements du navigateur (seulement quand on sait lequel)
-      const menu = !ici || env.nav === 'chrome' ? 'dans Chrome, menu ⋮ › « **Téléchargements** »'
-        : env.nav === 'samsung' ? 'dans Samsung Internet, menu ≡ › « **Téléchargements** »'
-        : env.nav === 'firefox' ? 'dans Firefox, menu ⋮ › « **Téléchargements** »' : null;
+      const menu = !ici || env.nav === 'chrome' ? 'dans Chrome, menu ⋮ › « **Téléchargements** »'
+        : env.nav === 'samsung' ? 'dans Samsung Internet, menu ≡ › « **Téléchargements** »'
+        : env.nav === 'firefox' ? 'dans Firefox, menu ⋮ › « **Téléchargements** »' : null;
       return [
-        el('p', null, 'Ouvre l\'appli « **Fichiers** » (« **Mes fichiers** » sur Samsung), dossier « **Téléchargements** », touche le fichier et choisis ' + nav + '. Il faut être connecté à Internet.'),
-        menu ? el('p', null, 'Autre chemin : ' + menu + ', puis touche le fichier.') : null,
+        el('p', null, 'Ouvre l\'appli « **Fichiers** » (« **Mes fichiers** » sur Samsung), dossier « **Téléchargements** », touche le fichier et choisis ' + nav + '. Il faut être connecté à Internet.'),
+        menu ? el('p', null, 'Autre chemin : ' + menu + ', puis touche le fichier.') : null,
         depliant([
-          'Il s\'ouvre dans un « lecteur HTML » ou affiche du texte : choisis « **Ouvrir avec** », puis ton navigateur.',
-          'La page « Ma progression » reste affichée : touche « **Reprendre ma progression** ».',
+          'Il s\'ouvre dans un « lecteur HTML » ou affiche du texte : choisis « **Ouvrir avec** », puis ton navigateur.',
+          'La page « Ma progression » reste affichée : touche « **Reprendre ma progression** ».',
           rienNeChange,
-          'Rien ne marche : va sur le site (' + SITE + '), « **Reprendre depuis un fichier** », puis choisis ton fichier dans « **Téléchargements** ».'
+          'Rien ne marche : va sur le site (' + SITE + '), « **Reprendre depuis un fichier** », puis choisis ton fichier dans « **Téléchargements** ».'
         ])
       ];
     }
@@ -748,21 +748,21 @@
       return [
         el('p', null, 'Deux façons, essaie-les dans l\'ordre. Il faut être connecté à Internet.'),
         liste([
-          'Appli « **Fichiers** », dossier « **Téléchargements** » : touche le fichier, puis « **Reprendre ma progression** ».',
-          'Si ça ne marche pas : ouvre le site dans ' + nav + ' (' + SITE + '), touche « **Reprendre depuis un fichier** », puis « **Parcourir** », et choisis ton fichier.'
+          'Appli « **Fichiers** », dossier « **Téléchargements** » : touche le fichier, puis « **Reprendre ma progression** ».',
+          'Si ça ne marche pas : ouvre le site dans ' + nav + ' (' + SITE + '), touche « **Reprendre depuis un fichier** », puis « **Parcourir** », et choisis ton fichier.'
         ], 'ol'),
         depliant([
-          !ici || env.nav === 'chrome' ? 'Tu travailles avec Chrome sur ' + (ici ? appareilApple(env) : 'iPhone ou iPad') + ' : utilise la façon 2 dans Chrome, sinon la progression irait dans Safari.' : null,
-          !ici || env.nav === 'safari' ? 'Safari efface la progression d\'un site que tu n\'ouvres pas pendant une semaine : enregistre un nouveau fichier à la fin de chaque séance.' : null,
+          !ici || env.nav === 'chrome' ? 'Tu travailles avec Chrome sur ' + (ici ? appareilApple(env) : 'iPhone ou iPad') + ' : utilise la façon 2 dans Chrome, sinon la progression irait dans Safari.' : null,
+          !ici || env.nav === 'safari' ? 'Safari efface la progression d\'un site que tu n\'ouvres pas pendant une semaine : enregistre un nouveau fichier à la fin de chaque séance.' : null,
           rienNeChange
         ].filter(Boolean))
       ];
     }
     // appareil inconnu : textes génériques
     return [
-      el('p', null, 'Ouvre le fichier avec ton navigateur : il ouvre le site et affiche « **Progression restaurée** ». Il faut être connecté à Internet.'),
+      el('p', null, 'Ouvre le fichier avec ton navigateur : il ouvre le site et affiche « **Progression restaurée** ». Il faut être connecté à Internet.'),
       depliant([
-        'La page « Ma progression » reste affichée : touche ou clique sur « **Reprendre ma progression** ».',
+        'La page « Ma progression » reste affichée : touche ou clique sur « **Reprendre ma progression** ».',
         rienNeChange,
         secours
       ])
@@ -844,7 +844,7 @@
     }
     if (!exp.apps.length) {
       return afficher('Enregistrer ma progression', el('p', null,
-        'Tu n\'as encore rien fait sur ce navigateur : il n\'y a rien à enregistrer pour l\'instant.'));
+        'Tu n\'as encore rien fait sur ce navigateur : il n\'y a rien à enregistrer pour l\'instant.'));
     }
     const env = detecter();
     etat.telecharge = false;
@@ -857,11 +857,11 @@
     const env = detecter(), N = nomNav(env);
     const intro = [
       el('p', null, 'Ta progression est gardée ' + (N ? 'dans **' + N + '**' : 'dans ce navigateur') + ', sur cet appareil. Pour la retrouver ailleurs, enregistre-la dans un fichier. Il suffira d\'ouvrir ce fichier avec un navigateur pour la reprendre.'),
-      el('p', null, 'Ouvrir un ancien fichier n\'efface jamais une progression plus récente : on garde toujours ton meilleur résultat.'),
-      el('p', { class: 'callout prog-resume' }, 'À enregistrer : **' + pluriel(exp.apps.length, 'application') + '** : ' + resumeNoms(exp.apps) + '.')
+      el('p', null, 'Ouvrir un ancien fichier n\'efface jamais une progression plus récente : on garde toujours ton meilleur résultat.'),
+      el('p', { class: 'callout prog-resume' }, 'À enregistrer : **' + pluriel(exp.apps.length, 'application') + '** : ' + resumeNoms(exp.apps) + '.')
     ];
     const choix = el('fieldset', { class: 'prog-choix' },
-      el('legend', null, 'Où vas-tu reprendre ton travail ?'),
+      el('legend', null, 'Où vas-tu reprendre ton travail ?'),
       CHOIX.map(c => el('label', { class: 'prog-option' },
         el('input', { type: 'radio', name: 'prog-cible', value: c.id, checked: etat.cible === c.id,
           onchange: () => { etat.cible = c.id; } }),
@@ -879,14 +879,14 @@
     if (!ici) blocs.push({ titre: 'L\'envoyer sur l\'autre appareil', corps: liste(lignesEnvoyer(env, etat.cible)) });
     blocs.push({
       titre: ici ? 'L\'ouvrir plus tard' : 'L\'ouvrir là-bas',
-      corps: [ici ? el('p', null, 'Garde ce fichier. Quand ta progression a disparu (historique effacé, autre navigateur), ouvre-le comme ceci :') : null,
+      corps: [ici ? el('p', null, 'Garde ce fichier. Quand ta progression a disparu (historique effacé, autre navigateur), ouvre-le comme ceci :') : null,
         contenuOuvrir(ici ? env.famille : etat.cible, ici, env)]
     });
     const corps = [
-      el('p', null, 'Ton fichier : **' + etat.nom + '**. La date dans son nom t\'aide à trouver le plus récent.'),
+      el('p', null, 'Ton fichier : **' + etat.nom + '**. La date dans son nom t\'aide à trouver le plus récent.'),
       blocs.map((b, i) => el('section', { class: 'prog-bloc' },
         el('h3', null, el('span', { class: 'prog-num', 'aria-hidden': 'true' }, String(i + 1)), b.titre), b.corps)),
-      el('p', { class: 'prog-encore' }, 'Rien n\'a été téléchargé ? ',
+      el('p', { class: 'prog-encore' }, 'Rien n\'a été téléchargé ? ',
         el('button', { type: 'button', class: 'btn-small', onclick: () => { telecharger(); } }, 'Télécharger à nouveau'))
     ];
     const titre = CHOIX.find(c => c.id === etat.cible).titre;
@@ -918,13 +918,13 @@
     if (b.etat === 'ok' && window.ACC && typeof ACC.rafraichir === 'function') ACC.rafraichir();
     if (b.etat === 'ok') {
       afficher('Progression restaurée.', [
-        b.maj.length ? el('p', null, '**Mises à jour** : ' + listeNoms(b.maj) + '.') : null,
-        b.deja.length ? el('p', null, '**Déjà plus avancées ici, restées telles quelles** : ' + listeNoms(b.deja) + '.') : null,
+        b.maj.length ? el('p', null, '**Mises à jour** : ' + listeNoms(b.maj) + '.') : null,
+        b.deja.length ? el('p', null, '**Déjà plus avancées ici, restées telles quelles** : ' + listeNoms(b.deja) + '.') : null,
         el('p', { class: 'callout' }, 'Elle est gardée ' + (N ? 'dans **' + N + '**' : 'dans ce navigateur') + ' sur cet appareil. Si tu travailles avec un autre navigateur, ouvre ton fichier avec lui.'),
-        env.nav === 'safari' ? el('p', null, 'Safari efface la progression d\'un site que tu n\'ouvres pas pendant une semaine : enregistre un nouveau fichier à la fin de chaque séance.') : null
+        env.nav === 'safari' ? el('p', null, 'Safari efface la progression d\'un site que tu n\'ouvres pas pendant une semaine : enregistre un nouveau fichier à la fin de chaque séance.') : null
       ]);
     } else if (b.etat === 'rien') {
-      afficher('Rien de nouveau', el('p', null, 'Ce fichier ne contient rien de plus que ce navigateur : tu étais déjà au même niveau ou plus loin.'));
+      afficher('Rien de nouveau', el('p', null, 'Ce fichier ne contient rien de plus que ce navigateur : tu étais déjà au même niveau ou plus loin.'));
     } else if (b.etat === 'stockage') {
       afficher('Progression non restaurée', el('p', null, 'Ce navigateur ne peut pas garder ta progression (navigation privée ou réglage). Ouvre ton fichier dans une fenêtre normale ou avec un autre navigateur.'));
     } else {

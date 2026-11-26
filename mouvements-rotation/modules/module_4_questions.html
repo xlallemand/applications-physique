@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 4 : questions sur les caractéristiques — Chapitre 8 : Mouvements de rotation</title>
+<title>Module 4 : questions sur les caractéristiques — Chapitre 8 : Mouvements de rotation</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="rot.css">
@@ -43,38 +43,38 @@ function genMoteur() {
   return { n0, nM, Tmax, Td, nP, TP, f, ch, x: { max: n0 + 200, pas: 200, sous: 100, nom: 'n (tr/min)' }, y: { max: Math.ceil((Tmax + 3) / 5) * 5, pas: 5, sous: 1 } };
 }
 const graphe = (m, lectures) => grapheFig({ x: m.x, y: Object.assign({ nom: NOM_TU }, m.y), courbes: [{ f: m.f, de: 0, a: m.n0, cls: 'moteur' }], lectures,
-  aria: `Caractéristique d'un moteur : ${m.Td} N·m au démarrage, sommet de ${m.Tmax} N·m à ${m.nM} tr/min, couple nul à ${m.n0} tr/min` });
+  aria: `Caractéristique d'un moteur : ${m.Td} N·m au démarrage, sommet de ${m.Tmax} N·m à ${m.nM} tr/min, couple nul à ${m.n0} tr/min` });
 const lireT = (q, label, v, autres) => fq.nombre(q, label, v, 'N·m', { signe: false, tol: .6,
-  diag: x => (x > 100 ? 'C\'est une fréquence : un couple se lit sur l\'axe <b>vertical</b>.' : (autres && autres(x)) || 'Trace des pointillés jusqu\'à l\'axe vertical et lis avec le quadrillage (1 carreau = 1 N·m).') });
+  diag: x => (x > 100 ? 'C\'est une fréquence : un couple se lit sur l\'axe <b>vertical</b>.' : (autres && autres(x)) || 'Trace des pointillés jusqu\'à l\'axe vertical et lis avec le quadrillage (1 carreau = 1 N·m).') });
 const lireN = (q, v, tol, autres) => fq.nombre(q, 'n =', v, 'tr/min', { signe: false, tol,
-  diag: x => (x < 50 ? 'C\'est un couple : une fréquence se lit sur l\'axe <b>horizontal</b>.' : (autres && autres(x)) || 'Trace des pointillés jusqu\'à l\'axe horizontal (1 carreau = 100 tr/min).') });
+  diag: x => (x < 50 ? 'C\'est un couple : une fréquence se lit sur l\'axe <b>horizontal</b>.' : (autres && autres(x)) || 'Trace des pointillés jusqu\'à l\'axe horizontal (1 carreau = 100 tr/min).') });
 
 /* ---------- Groupe 1 : lectures sur la caractéristique ---------- */
 function qCoupleMax() {
   const m = genMoteur();
   return { theme: 'Couple maximal', enonce: graphe(m),
     parties: [
-      lireT('Quel est le couple maximal de ce moteur ?', `${Tu} max =`, m.Tmax, x => (Math.abs(x - m.Td) < .6 ? 'C\'est le couple au démarrage : le couple maximal est le <b>sommet</b> de la courbe.' : '')),
-      Object.assign(lireN('Pour quelle fréquence de rotation est-il atteint ?', m.nM, 60, x => (Math.abs(x - m.n0) < 30 ? 'C\'est la fréquence à vide : descends du <b>sommet</b> vers l\'axe horizontal.' : '')),
-        { solution: `<p>Sommet de la courbe : ${Tu} max = ${m.Tmax} N·m pour n = ${fmt(m.nM)} tr/min.</p>` }),
+      lireT('Quel est le couple maximal de ce moteur ?', `${Tu} max =`, m.Tmax, x => (Math.abs(x - m.Td) < .6 ? 'C\'est le couple au démarrage : le couple maximal est le <b>sommet</b> de la courbe.' : '')),
+      Object.assign(lireN('Pour quelle fréquence de rotation est-il atteint ?', m.nM, 60, x => (Math.abs(x - m.n0) < 30 ? 'C\'est la fréquence à vide : descends du <b>sommet</b> vers l\'axe horizontal.' : '')),
+        { solution: `<p>Sommet de la courbe : ${Tu} max = ${m.Tmax} N·m pour n = ${fmt(m.nM)} tr/min.</p>` }),
     ] };
 }
 function qVide() {
   const m = genMoteur();
   return { theme: 'Fréquence de rotation à vide', enonce: graphe(m),
-    parties: [Object.assign(lireN('Quelle est la fréquence de rotation à vide de ce moteur ?', m.n0, 30, x => (Math.abs(x - m.nM) < 60 ? 'C\'est la fréquence du couple maximal : à vide, le couple est <b>nul</b>.' : x < 60 ? '' : 'À vide, T<sub>u</sub> = 0 : lis où la courbe coupe l\'axe horizontal.')),
-      { solution: `<p>À vide, ${Tu} = 0 : la courbe coupe l'axe horizontal à n = ${fmt(m.n0)} tr/min.</p>` })] };
+    parties: [Object.assign(lireN('Quelle est la fréquence de rotation à vide de ce moteur ?', m.n0, 30, x => (Math.abs(x - m.nM) < 60 ? 'C\'est la fréquence du couple maximal : à vide, le couple est <b>nul</b>.' : x < 60 ? '' : 'À vide, T<sub>u</sub> = 0 : lis où la courbe coupe l\'axe horizontal.')),
+      { solution: `<p>À vide, ${Tu} = 0 : la courbe coupe l'axe horizontal à n = ${fmt(m.n0)} tr/min.</p>` })] };
 }
 function qDemarrage() {
   const m = genMoteur();
   return { theme: 'Couple au démarrage', enonce: graphe(m),
-    parties: [Object.assign(lireT('Quel est le couple au démarrage de ce moteur ?', `${Tu} =`, m.Td, x => (Math.abs(x - m.Tmax) < .6 ? 'C\'est le couple maximal : au démarrage, n = 0 (sur l\'axe vertical).' : 'Au démarrage, n = 0 : lis la valeur de la courbe sur l\'axe vertical.')),
-      { solution: `<p>Au démarrage, n = 0 : ${Tu} = ${m.Td} N·m.</p>` })] };
+    parties: [Object.assign(lireT('Quel est le couple au démarrage de ce moteur ?', `${Tu} =`, m.Td, x => (Math.abs(x - m.Tmax) < .6 ? 'C\'est le couple maximal : au démarrage, n = 0 (sur l\'axe vertical).' : 'Au démarrage, n = 0 : lis la valeur de la courbe sur l\'axe vertical.')),
+      { solution: `<p>Au démarrage, n = 0 : ${Tu} = ${m.Td} N·m.</p>` })] };
 }
 function qCoupleA() {
   const m = genMoteur();
   return { theme: 'Lire un couple', enonce: `<p>Le moteur tourne à n = ${fmt(m.nP)} tr/min.</p>${graphe(m)}`,
-    parties: [Object.assign(lireT('Quel couple fournit-il ?', `${Tu} =`, m.TP), { solution: `<p>Pointillés verticaux depuis n = ${fmt(m.nP)} tr/min jusqu'à la courbe, puis horizontaux : ${Tu} = ${m.TP} N·m.</p>` })] };
+    parties: [Object.assign(lireT('Quel couple fournit-il ?', `${Tu} =`, m.TP), { solution: `<p>Pointillés verticaux depuis n = ${fmt(m.nP)} tr/min jusqu'à la courbe, puis horizontaux : ${Tu} = ${m.TP} N·m.</p>` })] };
 }
 
 /* ---------- Groupe 2 : point de fonctionnement ---------- */
@@ -95,17 +95,17 @@ function qPoint() {
 
 /* ---------- Groupe 3 : vocabulaire ---------- */
 const VOCAB = [
-  () => fq.choix('Au point de fonctionnement d\'un moteur et de sa charge :', [o('eg', `${Tu} = ${Tr}`), o('max', `${Tu} est maximal`), o('zero', `${Tu} = 0`), o('sup', `${Tu} > ${Tr}`)], 'eg',
+  () => fq.choix('Au point de fonctionnement d\'un moteur et de sa charge :', [o('eg', `${Tu} = ${Tr}`), o('max', `${Tu} est maximal`), o('zero', `${Tu} = 0`), o('sup', `${Tu} > ${Tr}`)], 'eg',
     { melanger: false, indices: { max: 'Le couple maximal est le sommet de la caractéristique du moteur, pas le point de fonctionnement.', zero: `${Tu} = 0, c'est le fonctionnement à vide (sans charge).`, sup: 'Le point de fonctionnement est sur les deux courbes à la fois.' },
-      solution: `<p>Le point de fonctionnement est l'intersection des deux caractéristiques : ${Tu} = ${Tr}.</p>` }),
-  () => fq.choix('La zone utile d\'un moteur se situe :', [o('ok', 'entre la fréquence nominale et la fréquence à vide'), o('dem', 'entre le démarrage et le couple maximal'), o('max', 'autour du couple maximal'), o('vide', 'au-delà de la fréquence à vide')], 'ok',
+      solution: `<p>Le point de fonctionnement est l'intersection des deux caractéristiques : ${Tu} = ${Tr}.</p>` }),
+  () => fq.choix('La zone utile d\'un moteur se situe :', [o('ok', 'entre la fréquence nominale et la fréquence à vide'), o('dem', 'entre le démarrage et le couple maximal'), o('max', 'autour du couple maximal'), o('vide', 'au-delà de la fréquence à vide')], 'ok',
     { melanger: false, colonne: true, indices: { dem: 'Au démarrage, le moteur n\'est pas dans son régime de fonctionnement normal.', max: 'La zone utile est sur la partie de la courbe qui <b>descend</b>.', vide: 'Au-delà de la fréquence à vide, le moteur ne fournit plus de couple.' },
       solution: '<p>La zone utile, meilleure zone de fonctionnement, est entre la fréquence nominale et la fréquence à vide.</p>' }),
-  () => fq.choix('Un moteur tourne « à vide ». Cela signifie que :', [o('ok', 'son couple utile est nul'), o('arret', 'il est à l\'arrêt'), o('max', 'il fournit son couple maximal'), o('nom', 'il tourne à sa fréquence nominale')], 'ok',
-    { melanger: false, colonne: true, indices: { arret: 'À vide, il tourne (et même à sa plus grande fréquence) : il n\'entraîne simplement aucune charge.', max: 'Sans charge, il n\'a aucun couple à fournir.', nom: 'La fréquence nominale est plus faible que la fréquence à vide.' },
-      solution: '<p>À vide, sans charge, T<sub>u</sub> = 0 : c\'est là que la caractéristique coupe l\'axe horizontal.</p>' }),
-  () => fq.choix('Quelles grandeurs sont écrites sur la plaque signalétique d\'un moteur ?', [o('ok', 'le couple maximal et la fréquence nominale'), o('vide', 'la fréquence à vide et le couple au démarrage'), o('pt', 'le point de fonctionnement')], 'ok',
-    { melanger: false, colonne: true, indices: { vide: 'Ces valeurs se lisent sur la caractéristique, mais ne sont pas celles qu\'on écrit sur le moteur.', pt: 'Le point de fonctionnement dépend de la charge entraînée : il n\'est pas écrit sur le moteur.' },
+  () => fq.choix('Un moteur tourne « à vide ». Cela signifie que :', [o('ok', 'son couple utile est nul'), o('arret', 'il est à l\'arrêt'), o('max', 'il fournit son couple maximal'), o('nom', 'il tourne à sa fréquence nominale')], 'ok',
+    { melanger: false, colonne: true, indices: { arret: 'À vide, il tourne (et même à sa plus grande fréquence) : il n\'entraîne simplement aucune charge.', max: 'Sans charge, il n\'a aucun couple à fournir.', nom: 'La fréquence nominale est plus faible que la fréquence à vide.' },
+      solution: '<p>À vide, sans charge, T<sub>u</sub> = 0 : c\'est là que la caractéristique coupe l\'axe horizontal.</p>' }),
+  () => fq.choix('Quelles grandeurs sont écrites sur la plaque signalétique d\'un moteur ?', [o('ok', 'le couple maximal et la fréquence nominale'), o('vide', 'la fréquence à vide et le couple au démarrage'), o('pt', 'le point de fonctionnement')], 'ok',
+    { melanger: false, colonne: true, indices: { vide: 'Ces valeurs se lisent sur la caractéristique, mais ne sont pas celles qu\'on écrit sur le moteur.', pt: 'Le point de fonctionnement dépend de la charge entraînée : il n\'est pas écrit sur le moteur.' },
       solution: '<p>Le couple maximal et la fréquence nominale sont écrits sur le moteur.</p>' }),
 ];
 function qVocab(k) { return { theme: 'Vocabulaire', parties: [VOCAB[k]()] }; }
@@ -119,10 +119,10 @@ function tirage() {
 ROT.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 4 · QUESTIONS', titre: 'Caractéristique d\'un moteur',
-  intro: '<p class="er-contexte">10 questions tirées au hasard, sur des caractéristiques à chaque fois différentes : couple maximal, fréquence à vide, couple au démarrage, point de fonctionnement, vocabulaire.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard, sur des caractéristiques à chaque fois différentes : couple maximal, fréquence à vide, couple au démarrage, point de fonctionnement, vocabulaire.</p>',
   questions: tirage,
   revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
 });
 ROT.menu('module_4_questions');
 </script>

@@ -46,9 +46,9 @@
 
   // encadrés des cas particuliers (sans la formule : elle se découvre plus loin)
   const CAS = {
-    0: '<p><b class="cle-titre">α = 0°.</b> La force tire dans le <b>sens du déplacement</b> : toute la force sert à faire avancer le chariot. Le travail est <b>moteur et maximal</b> : W = F × AB.</p>',
-    90: '<p><b class="cle-titre">α = 90°.</b> La force est <b>perpendiculaire au déplacement</b> : elle ne fait ni avancer ni reculer le chariot. Le travail est <b>nul</b> : W = 0.</p>',
-    180: '<p><b class="cle-titre">α = 180°.</b> La force tire dans le <b>sens contraire du déplacement</b> : elle freine le chariot. Le travail est <b>résistant et maximal en valeur absolue</b> : W = −F × AB, la perte d\'énergie est la plus grande possible.</p>',
+    0: '<p><b class="cle-titre">α = 0°.</b> La force tire dans le <b>sens du déplacement</b> : toute la force sert à faire avancer le chariot. Le travail est <b>moteur et maximal</b> : W = F × AB.</p>',
+    90: '<p><b class="cle-titre">α = 90°.</b> La force est <b>perpendiculaire au déplacement</b> : elle ne fait ni avancer ni reculer le chariot. Le travail est <b>nul</b> : W = 0.</p>',
+    180: '<p><b class="cle-titre">α = 180°.</b> La force tire dans le <b>sens contraire du déplacement</b> : elle freine le chariot. Le travail est <b>résistant et maximal en valeur absolue</b> : W = −F × AB, la perte d\'énergie est la plus grande possible.</p>',
   };
   const casDe = a => (a === 0 ? 0 : Math.abs(a) === 90 ? 90 : Math.abs(a) === 180 ? 180 : null);
 
@@ -132,7 +132,7 @@
       }
       // poignée du point B
       g += `<circle cx="${f1(xB)}" cy="${rail}" r="7" class="ec-pt-b"/><circle cx="${f1(xB)}" cy="${rail}" r="18" class="ec-poignee" data-p="B"><title>Fais glisser B</title></circle>`;
-      scene.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="ec-simu-svg" role="img" aria-label="Chariot tiré de A vers B par une force de ${F} N faisant un angle de ${alpha}° avec le déplacement ; AB = ${fmt(AB, 1)} m">${g}</svg>`;
+      scene.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="ec-simu-svg" role="img" aria-label="Chariot tiré de A vers B par une force de ${F} N faisant un angle de ${alpha}° avec le déplacement ; AB = ${fmt(AB, 1)} m">${g}</svg>`;
     }
     // lectures : W, nature, projection, jauge, réglages
     function lire() {
@@ -140,13 +140,13 @@
       $('[data-a="w"]').textContent = ecrireW(w);
       $('[data-a="nat"]').textContent = 'travail ' + nature(w);
       $('[data-a="nat"]').dataset.nat = nature(w);
-      $('[data-a="proj"]').textContent = `projection de la force sur le déplacement (en pointillés) : ${fmt(Math.round(F * cosd(alpha) * 10) / 10, 1)} N`;
+      $('[data-a="proj"]').textContent = `projection de la force sur le déplacement (en pointillés) : ${fmt(Math.round(F * cosd(alpha) * 10) / 10, 1)} N`;
       $('[data-a="jmin"]').textContent = (max ? '−' + fmt(max) : '0') + ' J';
       $('[data-a="jmax"]').textContent = (max ? '+' + fmt(max) : '0') + ' J';
       const p = max ? Math.abs(w) / max * 50 : 0, rempli = $('[data-a="rempli"]');
       rempli.style.width = p + '%';
       rempli.style.left = w < 0 ? (50 - p) + '%' : '50%';
-      $('[data-a="jauge"]').setAttribute('aria-label', `Jauge : ${w > 0 ? 'énergie fournie au chariot' : w < 0 ? 'énergie retirée au chariot' : 'aucune énergie échangée'}, ${ecrireW(Math.abs(w))} sur ${fmt(max)} J au plus`);
+      $('[data-a="jauge"]').setAttribute('aria-label', `Jauge : ${w > 0 ? 'énergie fournie au chariot' : w < 0 ? 'énergie retirée au chariot' : 'aucune énergie échangée'}, ${ecrireW(Math.abs(w))} sur ${fmt(max)} J au plus`);
       $('[data-a="vF"]').textContent = F + ' N';
       $('[data-a="vAB"]').textContent = fmt(AB, 1) + ' m';
       $('[data-a="va"]').textContent = String(etat.alpha).replace('-', '−') + '°';
@@ -218,9 +218,9 @@
       const duree = 2 * AB / (v0 + vB);
       const fin = () => {
         pos = AB; dessiner(); anim = null;
-        $('[data-a="etat"]').textContent = w > 1e-9 ? 'Le chariot a accéléré : la force lui a fourni de l\'énergie (travail moteur).'
-          : w < -1e-9 ? 'Le chariot a ralenti : la force lui a retiré de l\'énergie (travail résistant).'
-          : 'Le chariot garde la même vitesse : la force ne lui a ni fourni ni retiré d\'énergie (travail nul).';
+        $('[data-a="etat"]').textContent = w > 1e-9 ? 'Le chariot a accéléré : la force lui a fourni de l\'énergie (travail moteur).'
+          : w < -1e-9 ? 'Le chariot a ralenti : la force lui a retiré de l\'énergie (travail résistant).'
+          : 'Le chariot garde la même vitesse : la force ne lui a ni fourni ni retiré d\'énergie (travail nul).';
       };
       if (reduit()) { fin(); return; }
       $('[data-a="etat"]').textContent = 'Le chariot roule de A vers B…';
@@ -296,7 +296,7 @@
     return `<svg viewBox="0 0 400 260" class="ec-wagon-svg" aria-hidden="true">${g}</svg>`;
   }
   function wagonSchema() {
-    return `<div class="ec-wagon" role="group" aria-label="Wagon vu de dessus, tiré de A vers B par cinq personnages ; une bulle près de chacun">${wagonSVG()}
+    return `<div class="ec-wagon" role="group" aria-label="Wagon vu de dessus, tiré de A vers B par cinq personnages ; une bulle près de chacun">${wagonSVG()}
       ${PERSOS.map(q => `<div class="ec-bulle" style="left:${f1(q.bulle[0] / 4)}%;top:${f1(q.bulle[1] / 2.6)}%" aria-label="Bulle de F${q.n}">${window.EC.slot(q.id)}</div>`).join('')}</div>`;
   }
 
@@ -348,17 +348,17 @@
       g += `<circle cx="${f1(x)}" cy="${f1(y)}" r="8" class="ec-ch-mobile"/>`;
       const a = fleche(x, y, 0, 52, COUL.F);
       g += a.svg + nomSVG('F', a.x2 + 16, y + 6, COUL.F);
-      scene.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="ec-simu-svg" role="img" aria-label="Trajet ${actif} de A à B (${t.nom}) ; la force F de 10 N est horizontale, vers B">${g}</svg>`;
+      scene.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="ec-simu-svg" role="img" aria-label="Trajet ${actif} de A à B (${t.nom}) ; la force F de 10 N est horizontale, vers B">${g}</svg>`;
     }
     function afficher() {
       const t = TRAJETS[actif - 1], p = surTrajet(t, avance), w = FT * p.x;
       $('[data-a="w"]').textContent = fmt(Math.round(w * 10) / 10, 1).replace(/,0$/, '') + ' J';
-      if (!anim && !avance) { $('[data-a="alpha"]').textContent = `Trajet ${t.n} (${t.nom}) : appuie à nouveau pour le parcourir.`; return; }
+      if (!anim && !avance) { $('[data-a="alpha"]').textContent = `Trajet ${t.n} (${t.nom}) : appuie à nouveau pour le parcourir.`; return; }
       const ang = Math.round(Math.abs(Math.atan2(p.dy, p.dx) * 180 / Math.PI));
-      $('[data-a="alpha"]').innerHTML = ang === 90 ? 'α = 90° : <span class="vec-nom">F</span> est perpendiculaire au déplacement, <b>W ne change pas</b>.'
-        : ang === 0 ? 'α = 0° : <span class="vec-nom">F</span> est dans le sens du déplacement, <b>W augmente</b>.'
-        : ang === 180 ? 'α = 180° : <span class="vec-nom">F</span> est opposée au déplacement, <b>W diminue</b>.'
-        : `α ≈ ${ang}° : ${ang < 90 ? '<b>W augmente</b>, moins vite qu\'à 0°' : '<b>W diminue</b>'}.`;
+      $('[data-a="alpha"]').innerHTML = ang === 90 ? 'α = 90° : <span class="vec-nom">F</span> est perpendiculaire au déplacement, <b>W ne change pas</b>.'
+        : ang === 0 ? 'α = 0° : <span class="vec-nom">F</span> est dans le sens du déplacement, <b>W augmente</b>.'
+        : ang === 180 ? 'α = 180° : <span class="vec-nom">F</span> est opposée au déplacement, <b>W diminue</b>.'
+        : `α ≈ ${ang}° : ${ang < 90 ? '<b>W augmente</b>, moins vite qu\'à 0°' : '<b>W diminue</b>'}.`;
     }
     function finir() {
       const t = TRAJETS[actif - 1];
@@ -367,7 +367,7 @@
       faits.add(t.n);
       $(`[data-w="${t.n}"]`).textContent = fmt(FT * 1) + ' J';
       racine.querySelector(`[data-t="${t.n}"]`).classList.add('fait');
-      $('[data-a="alpha"]').innerHTML = `Trajet ${t.n} terminé : <b>W = ${fmt(FT)} J</b>.`;
+      $('[data-a="alpha"]').innerHTML = `Trajet ${t.n} terminé : <b>W = ${fmt(FT)} J</b>.`;
       if (opts.onTrajet) opts.onTrajet(t.n, FT);
       abonnes.forEach(f => f(faits));
     }
@@ -427,10 +427,10 @@
         function diag(i, v) {
           const [F, a, AB] = o.lignes[i], w = att[i];
           const ligne = `F = ${F} N, α = ${deg(a)}, AB = ${fmt(AB, 1)} m`;
-          if (w < 0 && Math.abs(v + w) <= .1) return `Ligne ${ligne} : la force tire vers l'arrière, le simulateur affiche un travail <b>négatif</b> (bouton ± pour le signe −).`;
-          if (Math.abs(w) > 1e-9 && Math.abs(v - F * AB) <= .1 && Math.abs(w - F * AB) > .1) return `Ligne ${ligne} : règle bien α = ${deg(a)} sur le simulateur ; W n'est plus égal à F × AB.`;
-          if (w === 0) return `Ligne ${ligne} : règle α = ${deg(a)} et regarde la jauge : la force ne fournit aucune énergie.`;
-          return `Ligne ${ligne} : règle le simulateur exactement sur ces valeurs, puis lis W sous le dessin.`;
+          if (w < 0 && Math.abs(v + w) <= .1) return `Ligne ${ligne} : la force tire vers l'arrière, le simulateur affiche un travail <b>négatif</b> (bouton ± pour le signe −).`;
+          if (Math.abs(w) > 1e-9 && Math.abs(v - F * AB) <= .1 && Math.abs(w - F * AB) > .1) return `Ligne ${ligne} : règle bien α = ${deg(a)} sur le simulateur ; W n'est plus égal à F × AB.`;
+          if (w === 0) return `Ligne ${ligne} : règle α = ${deg(a)} et regarde la jauge : la force ne fournit aucune énergie.`;
+          return `Ligne ${ligne} : règle le simulateur exactement sur ces valeurs, puis lis W sous le dessin.`;
         }
         function valider() {
           if (api.fini()) return;

@@ -764,14 +764,14 @@
     // dans les fils : électrons de l'anode vers la cathode (dessus), I en sens inverse (dessous)
     s += fl(135, 16, 225, ACC, 'a') + t(127, 21, 'e<sup>−</sup>', { a: 'end', s: 15, w: 800, c: ACCI });
     s += fl(225, 52, 135, INK, 'i') + t(233, 57, 'I', { a: 'start', s: 15, w: 800 });
-    s += t(180, 80, 'fils : des électrons', { s: 13, w: 600, c: INK2 });
+    s += t(180, 80, 'fils : des électrons', { s: 13, w: 600, c: INK2 });
     // dans le pont salin : anions vers l'anode (dedans), cations vers la cathode (dessous)
-    s += t(180, 182, 'pont salin : des ions', { s: 13, w: 600, c: INK2 });
+    s += t(180, 182, 'pont salin : des ions', { s: 13, w: 600, c: INK2 });
     s += fl(225, 198, 135, ACC, 'a') + t(233, 203, 'anions (−)', { a: 'start', s: 13, w: 700, c: ACCI });
     s += fl(135, 236, 225, INK, 'i') + t(127, 241, 'cations (+)', { a: 'end', s: 13, w: 700 });
     // les charges − tournent dans un sens (horaire), les charges + dans l'autre
     s += rot(152, 128, 19, true, ACC, 'a', '−') + rot(208, 128, 19, false, INK, 'i', '+');
-    const aria = 'Boucle du circuit d\'une pile : anode (borne −) à gauche, cathode (borne +) à droite. Dans les fils, les électrons vont de l\'anode vers la cathode et le courant I de la cathode vers l\'anode. Dans le pont salin, les anions vont vers l\'anode et les cations vers la cathode : les charges négatives tournent toutes dans un sens, les charges positives dans l\'autre.';
+    const aria = 'Boucle du circuit d\'une pile : anode (borne −) à gauche, cathode (borne +) à droite. Dans les fils, les électrons vont de l\'anode vers la cathode et le courant I de la cathode vers l\'anode. Dans le pont salin, les anions vont vers l\'anode et les cations vers la cathode : les charges négatives tournent toutes dans un sens, les charges positives dans l\'autre.';
     return `<div class="ox-charges">
       <div class="ox-charges-fig"><svg viewBox="0 0 360 252" class="ox-svg" role="img" aria-label="${aria}">${s}</svg></div>
       <div class="ox-charges-bloc">
@@ -865,7 +865,7 @@
       s += particule('at', A.red, A.ox, true);
       for (let i = 0; i < k; i++) s += particule('io io' + i, C.red, C.ox, false);
       for (let i = 0; i < L; i++) s += `<g class="el el${i}" opacity="0"><circle r="7" fill="${ACC}"/><text x="0" y="4.5" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">−</text></g>`;
-      zone.querySelector('.ox-anim-svg').innerHTML = `<svg viewBox="0 0 400 244" role="img" aria-label="Pile ${A.nom} – ${C.nom} : à l'électrode de ${A.nom}, un atome ${texte(A.red)} devient un ion ${texte(A.ox)} et laisse ${L} électrons, qui partent par le fil vers l'électrode de ${C.nom}, où des ions ${texte(C.ox)} les captent et se déposent.">${s}</svg>`;
+      zone.querySelector('.ox-anim-svg').innerHTML = `<svg viewBox="0 0 400 244" role="img" aria-label="Pile ${A.nom} – ${C.nom} : à l'électrode de ${A.nom}, un atome ${texte(A.red)} devient un ion ${texte(A.ox)} et laisse ${L} électrons, qui partent par le fil vers l'électrode de ${C.nom}, où des ions ${texte(C.ox)} les captent et se déposent.">${s}</svg>`;
       zone.querySelector('.ox-anim-eqs').innerHTML = `
         <div><p class="ox-anim-nom">Électrode de ${A.nom}</p><p class="ox-anim-demi">${A.red} = ${A.ox} + <span class="ox-anim-e eA">${nE(A.n)}</span></p>
           <p class="ox-anim-tag tA">électrons <b>produits</b> : ils <b>partent</b> de l'électrode</p></div>

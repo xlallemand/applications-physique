@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 : questions sur la longueur d'onde et la fréquence — Chapitre 19 : Ondes électromagnétiques</title>
+<title>Module 1 : questions sur la longueur d'onde et la fréquence — Chapitre 19 : Ondes électromagnétiques</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="oem.css">
@@ -48,7 +48,7 @@ function qFreq(theme, liste, u, ku, pre, kf) {
   const nb = hasard(liste), l = nb * ku, f = C / l / kf;
   return { theme, enonce: `<p>Une onde électromagnétique a pour longueur d'onde λ = ${fmt(nb)} ${u}.</p>`,
     parties: [fq.nombre(`Calcule sa fréquence f, en ${pre}.`, 'f =', f, pre, { rel: .01, signe: false, diag: v => OEM.diagFreq(v, l, nb, kf),
-      solution: calc(`${ku === 1 ? '' : `λ = ${fmt(nb)} ${u} = ${fmt(nb)} × ${p10(ku)} m ; `}f = ${fr('c', 'λ')} = ${fr(C8, ku === 1 ? fmt(nb) : fmt(nb) + ' × ' + p10(ku))} = ${sci(f * kf, 2)} Hz = ${c(fmt(+f.toPrecision(3)) + ' ' + pre)}`) })] };
+      solution: calc(`${ku === 1 ? '' : `λ = ${fmt(nb)} ${u} = ${fmt(nb)} × ${p10(ku)} m ; `}f = ${fr('c', 'λ')} = ${fr(C8, ku === 1 ? fmt(nb) : fmt(nb) + ' × ' + p10(ku))} = ${sci(f * kf, 2)} Hz = ${c(fmt(+f.toPrecision(3)) + ' ' + pre)}`) })] };
 }
 const qFreqM = () => qFreq('f à partir de λ (m)', [3, 2, .5, 1.5, 6, .75, 10], 'm', 1, 'MHz', 1e6);
 const qFreqCm = () => (Math.random() < .6 ? qFreq('f à partir de λ (cm)', [3, 6, 12, 15, 30, 1], 'cm', 1e-2, 'GHz', 1e9) : qFreq('f à partir de λ (mm)', [5, 3, 10], 'mm', 1e-3, 'GHz', 1e9));
@@ -64,7 +64,7 @@ function qDomaineF() {
   return { theme: 'Domaine à partir de la fréquence', enonce: `<p>Une onde électromagnétique a pour fréquence f = ${t}.</p>`, parties: [
     { type: 'sci', q: 'Calcule d\'abord sa longueur d\'onde λ.', label: 'λ =', valeur: l, unite: 'm', rel: .02, cs: 2, diag: v => OEM.diagLambda(v, f, nb),
       solution: calc(`λ = ${fr('c', 'f')} = ${fr(C8, t.replace(' Hz', '').replace(' GHz', ' × 10<sup>9</sup>').replace('1,0 MHz', '1,0 × 10<sup>6</sup>'))} = ${c(sci(l, 2) + ' m')}`) },
-    OEM.partieDomaine(l, sci(l, 2) + ' m', 'Dans quel domaine est cette onde ?')] };
+    OEM.partieDomaine(l, sci(l, 2) + ' m', 'Dans quel domaine est cette onde ?')] };
 }
 function qPlacer() {
   const [v, t, g] = hasard([[1e8, '100 MHz', 'f'], [2.4e9, '2,4 GHz', 'f'], [5e14, '5 × 10<sup>14</sup> Hz', 'f'], [1e17, '10<sup>17</sup> Hz', 'f'], [200e3, '200 kHz', 'f'],
@@ -74,14 +74,14 @@ function qPlacer() {
 function qRelation() {
   if (Math.random() < .5) {
     const [k, mot] = hasard([[2, 'double'], [3, 'est multipliée par 3'], [10, 'est multipliée par 10']]);
-    return { theme: 'Relation entre λ et f', parties: [fq.choix(`Si la fréquence d'une onde électromagnétique ${mot}, sa longueur d'onde :`,
+    return { theme: 'Relation entre λ et f', parties: [fq.choix(`Si la fréquence d'une onde électromagnétique ${mot}, sa longueur d'onde :`,
       [o('ok', `est divisée par ${k}`), o('x', `est multipliée par ${k}`), o('id', 'ne change pas')], 'ok',
-      { melanger: false, indices: { x: 'λ = c / f : f est au dénominateur. Quand f augmente, λ diminue.', id: 'λ = c / f, et c ne change pas : λ dépend de f.' },
-        solution: `<p>λ = c / f : λ et f sont inversement proportionnelles. Si f est multipliée par ${k}, λ est divisée par ${k}.</p>` })] };
+      { melanger: false, indices: { x: 'λ = c / f : f est au dénominateur. Quand f augmente, λ diminue.', id: 'λ = c / f, et c ne change pas : λ dépend de f.' },
+        solution: `<p>λ = c / f : λ et f sont inversement proportionnelles. Si f est multipliée par ${k}, λ est divisée par ${k}.</p>` })] };
   }
-  return { theme: 'Relation entre λ et f', parties: [fq.choix('Quelle relation est juste ? (c : célérité, λ : longueur d\'onde, f : fréquence, T : période)',
+  return { theme: 'Relation entre λ et f', parties: [fq.choix('Quelle relation est juste ? (c : célérité, λ : longueur d\'onde, f : fréquence, T : période)',
     [o('ok', 'λ = c / f'), o('fc', 'λ = f / c'), o('cf', 'λ = c × f'), o('t', 'λ = c / T')], 'ok',
-    { indices: { fc: 'Vérifie les unités : (s<sup>−1</sup>) / (m·s<sup>−1</sup>) ne donne pas des mètres.', cf: 'c = λ × f, donc λ = c / f.', t: 'c = λ / T, donc λ = c × T (et non c / T).' },
+    { indices: { fc: 'Vérifie les unités : (s<sup>−1</sup>) / (m·s<sup>−1</sup>) ne donne pas des mètres.', cf: 'c = λ × f, donc λ = c / f.', t: 'c = λ / T, donc λ = c × T (et non c / T).' },
       solution: '<p>c = λ × f = λ / T, donc λ = c / f = c × T.</p>' })] };
 }
 
@@ -93,10 +93,10 @@ function tirage() {
 OEM.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 1 · QUESTIONS', titre: 'Longueur d\'onde et fréquence',
-  intro: '<p class="er-contexte">10 questions : calculer λ = c / f ou f = c / λ avec des préfixes, trouver le domaine d\'une onde, la placer sur l\'échelle. Donnée : c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup>.</p>',
+  intro: '<p class="er-contexte">10 questions : calculer λ = c / f ou f = c / λ avec des préfixes, trouver le domaine d\'une onde, la placer sur l\'échelle. Donnée : c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup>.</p>',
   questions: tirage,
   revoir: { href: 'module_1a_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_2a_cours.html', label: 'Module 2 : fréquences des télécommunications →' },
+  suite: { href: 'module_2a_cours.html', label: 'Module 2 : fréquences des télécommunications →' },
 });
 OEM.menu('module_1_questions');
 </script>

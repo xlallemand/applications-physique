@@ -569,7 +569,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -608,8 +608,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -621,7 +621,7 @@
       const q = qs[idx];
       window.ROT.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -641,7 +641,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -656,10 +656,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -827,8 +827,8 @@
     g += `<text x="${f1(x1 + 10)}" y="${f1(y1 + 5)}" class="rot-t-pt">M</text><text x="${f1(x1 + 26)}" y="${f1(y1 + 5)}" class="rot-t">(date t)</text>`;
     g += `<text x="${f1(x2 + 8)}" y="${f1(y2 - 12)}" class="rot-t-pt">M</text><text x="${f1(x2 + 24)}" y="${f1(y2 - 12)}" class="rot-t">(date t + Δt)</text>`;
     g += `<circle cx="${cx}" cy="${cy}" r="4" class="rot-pt"/><text x="${cx - 14}" y="${cy + 18}" class="rot-t-pt">O</text>`;
-    g += `<text x="${cx}" y="${cy + R + 22}" text-anchor="middle" class="rot-t">trajectoire : cercle de centre O, de rayon R</text>`;
-    return svg('0 -6 340 256', 'Cercle de centre O et de rayon R ; le point M passe de sa position à la date t à sa position à la date t plus delta t ; le rayon a tourné de l\'angle thêta ; la vitesse v est tangente au cercle', g);
+    g += `<text x="${cx}" y="${cy + R + 22}" text-anchor="middle" class="rot-t">trajectoire : cercle de centre O, de rayon R</text>`;
+    return svg('0 -6 340 256', 'Cercle de centre O et de rayon R ; le point M passe de sa position à la date t à sa position à la date t plus delta t ; le rayon a tourné de l\'angle thêta ; la vitesse v est tangente au cercle', g);
   }
 
   // Exercice 9 : manège de 10 m de diamètre (vu de dessus), enfant à 3 m de l'axe
@@ -843,7 +843,7 @@
     g += `<text x="${f1(cx + 30 * Math.cos(rad(40)) + 6)}" y="${f1(cy - 30 * Math.sin(rad(40)) + 16)}" class="rot-t-pt">3 m</text>`;
     g += `<circle cx="${cx}" cy="${cy}" r="5" class="rot-pt"/>` + arcFleche(cx, cy, R + 10, 200, 250);
     g += `<text x="${cx - 12}" y="${cy + 20}" class="rot-t">axe</text>`;
-    return svg('0 0 260 262', 'Manège vu de dessus, de diamètre 10 mètres ; un enfant est assis à 3 mètres de l\'axe', g, 'rot-doc-petit');
+    return svg('0 0 260 262', 'Manège vu de dessus, de diamètre 10 mètres ; un enfant est assis à 3 mètres de l\'axe', g, 'rot-doc-petit');
   }
 
   // Exercice 8 : positions successives A1 à A5 sur un demi-cercle de centre O (intervalles τ = 20 ms)
@@ -856,7 +856,7 @@
       g += `<circle cx="${f1(x)}" cy="${f1(y)}" r="5" class="rot-pt"/><text x="${f1(lx + (a === 180 ? -4 : a === 0 ? 4 : 0))}" y="${f1(a === 180 || a === 0 ? y + 22 : ly)}" text-anchor="middle" class="rot-t-pt">A<tspan dy="4" font-size="10.5">${i + 1}</tspan></text>`;
     });
     g += `<circle cx="${cx}" cy="${cy}" r="4" class="rot-pt"/><text x="${cx}" y="${cy + 22}" text-anchor="middle" class="rot-t-pt">O</text>`;
-    return svg('0 0 340 180', 'Demi-cercle de centre O : les positions A1, A2, A3, A4 et A5 sont régulièrement espacées, de A1 à gauche à A5 à droite', g, 'rot-doc-petit');
+    return svg('0 0 340 180', 'Demi-cercle de centre O : les positions A1, A2, A3, A4 et A5 sont régulièrement espacées, de A1 à gauche à A5 à droite', g, 'rot-doc-petit');
   }
 
   // Volant de diamètre 30 cm : une force tangente en haut (o.couple : et une force opposée en bas)
@@ -880,8 +880,8 @@
     }
     g += `<text x="${cx}" y="${cy + 34}" text-anchor="middle" class="rot-t-pt">O</text>`;
     g += arcFleche(cx, cy, R + 16, 120, 170);
-    const aria = o.couple ? 'Volant de diamètre 30 centimètres ; deux forces opposées, tangentes au volant, en haut et en bas ; leurs droites d\'action sont distantes de D égal 30 centimètres'
-      : 'Volant de diamètre 30 centimètres ; une force tangente au volant en haut ; le bras de levier d est le rayon, 15 centimètres';
+    const aria = o.couple ? 'Volant de diamètre 30 centimètres ; deux forces opposées, tangentes au volant, en haut et en bas ; leurs droites d\'action sont distantes de D égal 30 centimètres'
+      : 'Volant de diamètre 30 centimètres ; une force tangente au volant en haut ; le bras de levier d est le rayon, 15 centimètres';
     return svg('0 0 340 250', aria, g, 'rot-doc-petit');
   }
 
@@ -895,7 +895,7 @@
     g += `<circle cx="${(xa + xb) / 2}" cy="${cy}" r="6" class="rot-axe"/><text x="${(xa + xb) / 2}" y="${cy + 26}" text-anchor="middle" class="rot-t">axe de rotation</text>`;
     g += cote(xa, 46, xb, 46) + `<text x="${(xa + xb) / 2}" y="40" text-anchor="middle" class="rot-t-pt">D</text>`;
     g += `<text x="${xa - 6}" y="24" text-anchor="middle" class="rot-t">droite d'action</text><text x="${xb + 6}" y="24" text-anchor="middle" class="rot-t">droite d'action</text>`;
-    return svg('0 0 340 214', 'Couple de forces : deux forces de même intensité, de directions parallèles et de sens opposés ; leurs droites d\'action sont distantes de D ; l\'axe de rotation est entre les deux', g, 'rot-doc-petit');
+    return svg('0 0 340 214', 'Couple de forces : deux forces de même intensité, de directions parallèles et de sens opposés ; leurs droites d\'action sont distantes de D ; l\'axe de rotation est entre les deux', g, 'rot-doc-petit');
   }
 
   // Clé inclinée de α au-dessus de l'horizontale, force verticale vers le bas en A :
@@ -917,7 +917,7 @@
     g += `<text x="${f1((ax + ox) / 2 + 12)}" y="${f1((ay + oy) / 2 - 12)}" text-anchor="middle" class="rot-t-pt">${o.OA || 'OA'}</text>`;
     g += `<text x="${f1(ax - 16)}" y="${oy + 5}" class="rot-t-pt">H</text><text x="${ox + 6}" y="${oy + 26}" class="rot-t-pt">O</text>`;
     g += cote(ax, oy + 16, ox, oy + 16, 'rot-cote rot-cote-d') + `<text x="${f1((ax + ox) / 2)}" y="${oy + 34}" text-anchor="middle" class="rot-t-d">${o.d || 'd'}</text>`;
-    return svg('0 0 340 214', `Clé de longueur OA inclinée de ${fmt(al)} degrés au-dessus de l'horizontale ; force verticale vers le bas en A ; H est sur l'horizontale passant par O, à la verticale de A ; le bras de levier est d égal OH`, g, 'rot-doc-petit');
+    return svg('0 0 340 214', `Clé de longueur OA inclinée de ${fmt(al)} degrés au-dessus de l'horizontale ; force verticale vers le bas en A ; H est sur l'horizontale passant par O, à la verticale de A ; le bras de levier est d égal OH`, g, 'rot-doc-petit');
   }
 
   // Barre (clé en croix, tire-bouchon, clé à bougie) d'axe O au milieu ; force vers le bas à gauche,
@@ -934,7 +934,7 @@
     if (o.ptD) g += `<text x="${xb + 4}" y="${cy + 26}" class="rot-t-pt">${o.ptD}</text>`;
     g += cote(xa, cy + 92, xb, cy + 92) + `<text x="${cx}" y="${cy + 86}" text-anchor="middle" class="rot-t-pt">${o.long || ''}</text>`;
     if (o.titre) g += `<text x="${cx}" y="18" text-anchor="middle" class="rot-t">${o.titre}</text>`;
-    return svg('0 0 340 206', o.aria || 'Barre tournant autour de son milieu O ; une force vers le bas à une extrémité et une force vers le haut à l\'autre', g, 'rot-doc-petit');
+    return svg('0 0 340 206', o.aria || 'Barre tournant autour de son milieu O ; une force vers le bas à une extrémité et une force vers le haut à l\'autre', g, 'rot-doc-petit');
   }
 
   // Exercice 15 : barrière de parking mobile autour de O, centre de gravité G à 1,2 m ; o.poids : P⃗ dessiné
@@ -955,7 +955,7 @@
     g += arcFleche(ox, oy, R, 4, 18, 'rot-sens rot-sens-fort') + `<text x="${f1(bout(18)[0] - 12)}" y="${f1(bout(18)[1] + 4)}" text-anchor="end" class="rot-t-pt">sens 2</text>`;
     g += arcFleche(ox, oy, R, -4, -18, 'rot-sens rot-sens-fort') + `<text x="${f1(bout(-18)[0] - 12)}" y="${f1(bout(-18)[1] + 6)}" text-anchor="end" class="rot-t-pt">sens 1</text>`;
     if (o.poids) g += fl(xg, oy, xg, oy + 64, 'rot-f') + nomSVG('P', xg + 18, oy + 64);
-    return svg('0 0 360 200', 'Barrière de parking horizontale, mobile autour de l\'axe O ; son centre de gravité G est à 1,2 mètre de O ; sens 1 : l\'extrémité descend ; sens 2 : l\'extrémité monte' + (o.poids ? ' ; le poids P est vertical vers le bas, appliqué en G' : ''), g, 'rot-doc-petit');
+    return svg('0 0 360 200', 'Barrière de parking horizontale, mobile autour de l\'axe O ; son centre de gravité G est à 1,2 mètre de O ; sens 1 : l\'extrémité descend ; sens 2 : l\'extrémité monte' + (o.poids ? ' ; le poids P est vertical vers le bas, appliqué en G' : ''), g, 'rot-doc-petit');
   }
 
   /* ============================================================
@@ -976,7 +976,7 @@
     const fixe = o.fixe || {};
     let fini = false, joue = false, t0 = 0, raf = null;
     const d = el('div', 'rot-disque-outil');
-    d.innerHTML = `<div class="rot-disque-scene"><svg viewBox="0 0 280 280" class="rot-disque-svg" role="img" aria-label="Disque en rotation autour de son axe O ; le point P est à la distance R de l'axe"><g data-a="scene"></g></svg>
+    d.innerHTML = `<div class="rot-disque-scene"><svg viewBox="0 0 280 280" class="rot-disque-svg" role="img" aria-label="Disque en rotation autour de son axe O ; le point P est à la distance R de l'axe"><g data-a="scene"></g></svg>
         <div class="rot-disque-lect" aria-live="polite"></div></div>
       <div class="rot-reglages">
         ${fixe.omega ? '' : reglageHTML('omega', 'ω (rad/s)', .1, 10, .05, st.omega)}
@@ -1093,24 +1093,24 @@
   const FACTEURS = ['2π', 'π', '360'];
   function lignesFraction(o) {
     const N = o.valeur, S = fmt(N), pr = (x, y) => proche(x, y, .015);
-    const facteur = (k, verbe) => (k === 'π' ? `1 tour = <b>2π</b> rad (π rad, c'est un demi-tour) : on ${verbe} par 2π.`
-      : k === '360' ? `360 est le nombre de <b>degrés</b> dans un tour ; en radians, 1 tour = 2π rad : on ${verbe} par 2π.` : '');
+    const facteur = (k, verbe) => (k === 'π' ? `1 tour = <b>2π</b> rad (π rad, c'est un demi-tour) : on ${verbe} par 2π.`
+      : k === '360' ? `360 est le nombre de <b>degrés</b> dans un tour ; en radians, 1 tour = 2π rad : on ${verbe} par 2π.` : '');
     if (o.sens === 'trmin') {
       const w = N * DEUX_PI / 60;
       return [
         { debut: `${S} tr/min =`, jetons: [{ fr: [[{ n: 'a' }, ' tours'], [{ n: 'b' }, ' min']] }], v: { a: N, b: 1 },
           diag: x => (x.a === 1 && x.b === N ? 'Le nombre de tours va en haut (numérateur), la durée de 1 min en bas (dénominateur).'
-            : x.a !== N ? `En haut : le nombre de tours, ${S}.` : 'En bas : la durée, 1 min.') },
+            : x.a !== N ? `En haut : le nombre de tours, ${S}.` : 'En bas : la durée, 1 min.') },
         { debut: '=', jetons: [{ fr: [[{ n: 'c' }, ' × ', { c: 'k' }, ' rad'], [{ n: 'd' }, ' s']] }], v: { c: N, k: '2π', d: 60 },
-          diag: x => facteur(x.k, 'multiplie') || (pr(x.d, 1 / 60) ? '1 min = 60 s (et non 1/60 s) : en bas, on écrit 60 s.'
-            : x.d !== 60 ? '1 min = <b>60 s</b> : en bas, on écrit 60 s.' : `En haut : ${S} tours = ${S} × 2π rad.`) },
+          diag: x => facteur(x.k, 'multiplie') || (pr(x.d, 1 / 60) ? '1 min = 60 s (et non 1/60 s) : en bas, on écrit 60 s.'
+            : x.d !== 60 ? '1 min = <b>60 s</b> : en bas, on écrit 60 s.' : `En haut : ${S} tours = ${S} × 2π rad.`) },
         { debut: '≈', jetons: [{ n: 'e', rel: .01, aff: cs(w, 3) }, ' rad/s'], v: { e: w },
-          diag: x => (pr(x.e, N * DEUX_PI * 60) ? 'Les 60 s sont en bas : on <b>divise</b> par 60.'
+          diag: x => (pr(x.e, N * DEUX_PI * 60) ? 'Les 60 s sont en bas : on <b>divise</b> par 60.'
             : pr(x.e, N * Math.PI / 60) ? 'Un tour vaut 2π rad, pas π.'
             : pr(x.e, N / 60) ? 'N\'oublie pas de multiplier par 2π.'
-            : pr(x.e, N * 60 / DEUX_PI) ? `C'est l'inverse : calcule ${S} × 2π ÷ 60.`
-            : pr(x.e, N * 6) ? '360 donne des degrés : on veut des radians (2π).'
-            : pr(x.e, N * 60) ? 'Les 60 s sont en bas : on <b>divise</b> par 60 (et on multiplie par 2π).'
+            : pr(x.e, N * 60 / DEUX_PI) ? `C'est l'inverse : calcule ${S} × 2π ÷ 60.`
+            : pr(x.e, N * 6) ? '360 donne des degrés : on veut des radians (2π).'
+            : pr(x.e, N * 60) ? 'Les 60 s sont en bas : on <b>divise</b> par 60 (et on multiplie par 2π).'
             : `Calcule ${S} × 2π ÷ 60 à la calculatrice (touche π).`) },
       ];
     }
@@ -1118,13 +1118,13 @@
     return [
       { debut: `${S} rad/s =`, jetons: [{ fr: [[{ n: 'a' }, ' rad'], [{ n: 'b' }, ' s']] }], v: { a: N, b: 1 },
         diag: x => (x.a === 1 && x.b === N ? 'Les radians vont en haut (numérateur), la durée de 1 s en bas (dénominateur).'
-          : x.a !== N ? `En haut : ${S} rad.` : 'En bas : la durée, 1 s.') },
+          : x.a !== N ? `En haut : ${S} rad.` : 'En bas : la durée, 1 s.') },
       { debut: '=', jetons: [{ fr: [[{ n: 'c' }, ' / ', { c: 'k' }, ' tours'], ['1 / ', { n: 'd' }, ' min']] }], v: { c: N, k: '2π', d: 60 },
-        diag: x => facteur(x.k, 'divise') || (x.d === 1 ? '1 s = 1 / 60 min : en bas, on écrit 1 / 60 min.'
-          : x.d !== 60 ? '1 min = 60 s, donc 1 s = 1 / <b>60</b> min.' : `En haut : ${S} rad = ${S} / 2π tours.`) },
+        diag: x => facteur(x.k, 'divise') || (x.d === 1 ? '1 s = 1 / 60 min : en bas, on écrit 1 / 60 min.'
+          : x.d !== 60 ? '1 min = 60 s, donc 1 s = 1 / <b>60</b> min.' : `En haut : ${S} rad = ${S} / 2π tours.`) },
       { debut: `= ${S} × 60 / (2π) tr/min ≈`, jetons: [{ n: 'e', rel: .01, aff: fmt(Math.round(n)) }, ' tr/min'], v: { e: n },
         diag: x => (pr(x.e, N / DEUX_PI / 60) ? 'Diviser par 1/60, c\'est <b>multiplier</b> par 60.'
-          : pr(x.e, N * DEUX_PI * 60) || pr(x.e, N * DEUX_PI / 60) ? 'Un tour = 2π rad : on <b>divise</b> par 2π.'
+          : pr(x.e, N * DEUX_PI * 60) || pr(x.e, N * DEUX_PI / 60) ? 'Un tour = 2π rad : on <b>divise</b> par 2π.'
           : pr(x.e, N * 60 / Math.PI) ? 'Un tour vaut 2π rad, pas π.'
           : pr(x.e, N * 60) ? 'N\'oublie pas de diviser par 2π.'
           : `Calcule ${S} × 60 ÷ (2π) à la calculatrice.`) },
@@ -1138,7 +1138,7 @@
     // HTML des jetons ; les cases et boutons sont créés ensuite
     const html = t => t.map(j => (typeof j === 'string' ? `<span class="rot-frac-txt">${j}</span>`
       : j.n ? `<span data-case="${j.n}"></span>`
-      : j.c ? `<button type="button" class="rot-cycle" data-cycle="${j.c}" aria-label="Facteur : touche pour changer (2π, π ou 360)">?</button>`
+      : j.c ? `<button type="button" class="rot-cycle" data-cycle="${j.c}" aria-label="Facteur : touche pour changer (2π, π ou 360)">?</button>`
       : `<span class="fr"><span>${html(j.fr[0])}</span><span>${html(j.fr[1])}</span></span>`)).join('');
     const cases = t => t.reduce((l, j) => l.concat(j.n ? [j] : j.fr ? cases(j.fr[0]).concat(cases(j.fr[1])) : []), []);
     function rendre(k) {
@@ -1181,7 +1181,7 @@
       }
       for (const k of Object.keys(L.cycles)) {
         x[k] = L.cycles[k].textContent;
-        if (x[k] === '?') { secouer(L.el); api.message('Touche le bouton « ? » pour choisir le facteur (2π, π ou 360).'); return; }
+        if (x[k] === '?') { secouer(L.el); api.message('Touche le bouton « ? » pour choisir le facteur (2π, π ou 360).'); return; }
       }
       Object.keys(L.champs).forEach(k => { const j = L.champs[k].j; oks[k] = j.rel ? proche(x[k], L.v[k], j.rel) : Math.abs(x[k] - L.v[k]) < 1e-9; });
       Object.keys(L.cycles).forEach(k => { oks[k] = x[k] === L.v[k]; });
@@ -1284,14 +1284,14 @@
   }
   function figCle(o) {
     o = Object.assign({ L: .4, a: .2, beta: 90 }, o);
-    return `<svg viewBox="0 0 ${CLE.W} ${CLE.H}" class="rot-doc rot-cle-svg" role="img" aria-label="${o.aria || `Clé tournant autour de O ; force appliquée en A, à ${fmt(o.a * 100)} cm de O`}">${sceneCle(o, o)}</svg>`;
+    return `<svg viewBox="0 0 ${CLE.W} ${CLE.H}" class="rot-doc rot-cle-svg" role="img" aria-label="${o.aria || `Clé tournant autour de O ; force appliquée en A, à ${fmt(o.a * 100)} cm de O`}">${sceneCle(o, o)}</svg>`;
   }
   function cle(zone, o, api) {
     o = Object.assign({ L: .4, a: .1, beta: 120, F: 20 }, o);
     const st = { a: o.a, beta: o.beta };
     let fini = false, prise = null;
     const d = el('div', 'rot-cle-outil');
-    d.innerHTML = `<div class="rot-cle-scene"><svg viewBox="0 0 ${CLE.W} ${CLE.H}" class="rot-cle-svg rot-cle-actif" role="group" aria-label="Clé tournant autour de O : fais glisser le point A le long de la clé et la pointe de la force pour l'orienter"><g data-a="scene"></g></svg></div>
+    d.innerHTML = `<div class="rot-cle-scene"><svg viewBox="0 0 ${CLE.W} ${CLE.H}" class="rot-cle-svg rot-cle-actif" role="group" aria-label="Clé tournant autour de O : fais glisser le point A le long de la clé et la pointe de la force pour l'orienter"><g data-a="scene"></g></svg></div>
       <div class="rot-cle-lect" aria-live="polite"></div>
       <div class="rot-boutons rot-cle-boutons">
         <button type="button" class="btn-secondary" data-a="a-" aria-label="Rapprocher A de l'axe">← A</button>
@@ -1306,7 +1306,7 @@
       const dd = brasLevier(st.a, st.beta), M = o.F * dd, s = Math.sin(rad(st.beta));
       lect.innerHTML = `<p>OA = <b>${fmt(st.a * 100, 0)} cm</b> · bras de levier d = <b>${fmt(dd * 100, 1)} cm</b> = ${fmt(dd, 3)} m</p>
         <p class="rot-cle-m">M = F × d = ${fmt(o.F)} N × ${fmt(dd, 3)} m = <b>${fmt(M, 2)} N·m</b></p>
-        <p class="rot-gris">${dd <= .003 ? 'La droite d\'action passe par l\'axe O : d = 0, donc M = 0. La force ne fait pas tourner la clé.'
+        <p class="rot-gris">${dd <= .003 ? 'La droite d\'action passe par l\'axe O : d = 0, donc M = 0. La force ne fait pas tourner la clé.'
           : `La clé tourne dans le sens ${s > 0 ? '↺ (inverse des aiguilles d\'une montre)' : '↻ (des aiguilles d\'une montre)'}.`}</p>`;
       if (api) api.effacer();
     }
@@ -1485,7 +1485,7 @@
      les pointillés vers les axes le suivent. On ne lit pas de valeur : c'est l'élève qui lit. */
   function partiePoint(def, o) {
     return {
-      type: 'perso', q: o.q || 'Place le point de fonctionnement : fais glisser le point ● (ou utilise les flèches), puis valide.', solution: o.solution, outil: 'point', def, o,
+      type: 'perso', q: o.q || 'Place le point de fonctionnement : fais glisser le point ● (ou utilise les flèches), puis valide.', solution: o.solution, outil: 'point', def, o,
       monter(zone, api) {
         const st = { x: o.depart[0], y: o.depart[1] };
         const px = def.x.sous / 5, py = def.y.sous / 5;
@@ -1509,7 +1509,7 @@
           if (!W) return;
           largeur = W;
           G = geom(def, W);
-          box.innerHTML = `<svg viewBox="0 0 ${G.W} ${G.H}" width="${G.W}" class="ph-graphe rot-pt-svg" role="group" aria-label="${def.aria || 'Caractéristiques'} ; point à placer">${svgGraphe(def, G)}<g data-a="mobile">${mobile()}</g></svg>`;
+          box.innerHTML = `<svg viewBox="0 0 ${G.W} ${G.H}" width="${G.W}" class="ph-graphe rot-pt-svg" role="group" aria-label="${def.aria || 'Caractéristiques'} ; point à placer">${svgGraphe(def, G)}<g data-a="mobile">${mobile()}</g></svg>`;
         }
         const maj = () => { const m = box.querySelector('[data-a="mobile"]'); if (m) m.innerHTML = mobile(); api.effacer(); };
         const borner = () => {
@@ -1567,9 +1567,9 @@
           const [cx, cy] = o.cible, [tx, ty] = o.tol;
           if (Math.abs(st.x - cx) <= tx && Math.abs(st.y - cy) <= ty) { verrouiller(); api.reussi(); return; }
           const surM = o.moteur && Math.abs(st.y - o.moteur(st.x)) <= ty, surC = o.charge && Math.abs(st.y - o.charge(st.x)) <= ty;
-          api.erreur(surM && !surC ? 'Ton point est sur la caractéristique du <b>moteur</b>, mais pas sur celle de la <b>charge</b> : le point de fonctionnement est sur les deux courbes à la fois.'
-            : surC && !surM ? 'Ton point est sur la caractéristique de la <b>charge</b>, mais pas sur celle du <b>moteur</b> : le point de fonctionnement est sur les deux courbes à la fois.'
-            : 'Le point de fonctionnement est à l\'<b>intersection</b> des deux caractéristiques : place ton point là où les deux courbes se croisent.');
+          api.erreur(surM && !surC ? 'Ton point est sur la caractéristique du <b>moteur</b>, mais pas sur celle de la <b>charge</b> : le point de fonctionnement est sur les deux courbes à la fois.'
+            : surC && !surM ? 'Ton point est sur la caractéristique de la <b>charge</b>, mais pas sur celle du <b>moteur</b> : le point de fonctionnement est sur les deux courbes à la fois.'
+            : 'Le point de fonctionnement est à l\'<b>intersection</b> des deux caractéristiques : place ton point là où les deux courbes se croisent.');
           secouer(box);
         };
         return { montrer() { st.x = o.cible[0]; st.y = o.cible[1]; verrouiller(); } };
@@ -1596,7 +1596,7 @@
   const PLAN = [
     { n: 1, titre: 'Vitesse angulaire', desc: 'ω = θ / Δt, v = R × ω, période et fréquence, angle balayé', fiche: 'fiche_1',
       parties: [{ nom: 'Vitesse angulaire', cours: 'module_1_cours', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Convertir tr/min et rad/s', desc: '1 tour = 2π rad et 1 min = 60 s : la méthode de la fraction', fiche: 'fiche_2',
+    { n: 2, titre: 'Convertir tr/min et rad/s', desc: '1 tour = 2π rad et 1 min = 60 s : la méthode de la fraction', fiche: 'fiche_2',
       parties: [{ nom: 'Convertir tr/min et rad/s', cours: 'module_2_cours', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Moment d\'une force et couple', desc: 'M = F × d, bras de levier, force oblique, couple de forces M = F × D', fiche: 'fiche_3',
       parties: [{ nom: 'Moment d\'une force', slug: 'moment', cours: 'module_3a_cours' },
@@ -1605,7 +1605,7 @@
       parties: [{ nom: 'Caractéristique d\'un moteur', cours: 'module_4_cours', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 9, 8, 12, 11, 1, 2, 15, 16 et 17 de la feuille, guidés pas à pas', exercices: 'module_5', exNom: 'Exercices de la feuille', nbEx: 9 },
   ];
-  window.SOM.init({ nom: 'Chapitre 8 : Mouvements de rotation', id: 'mouvements-rotation', cleEx: 'mouvements-rotation-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 8 : Mouvements de rotation', id: 'mouvements-rotation', cleEx: 'mouvements-rotation-exercices', plan: PLAN });
   const menu = cle_ => window.SOM.menu(cle_);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

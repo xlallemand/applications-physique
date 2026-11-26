@@ -163,7 +163,7 @@
     function fraction(cote) {
       if (fige) return;
       const m = etat[cote];
-      if (m.den) { api.message('Ce membre est déjà une fraction : glisse une grandeur dans son dénominateur.'); return; }
+      if (m.den) { api.message('Ce membre est déjà une fraction : glisse une grandeur dans son dénominateur.'); return; }
       m.den = [];
       api.effacer();
       rendre();
@@ -175,7 +175,7 @@
       if (!m.den && m.num.length === 1 && m.num[0].carre) m.num[0].carre = false;       // √(v²) = v
       else if (tout.some(u => u.carre)) {
         const u = tout.find(x => x.carre);
-        api.message(`Pour rester simple, la racine carrée ne s'utilise que sur ${noms[u.id]}<sup>2</sup> seul : fais d'abord passer de l'autre côté ce qui l'accompagne.`);
+        api.message(`Pour rester simple, la racine carrée ne s'utilise que sur ${noms[u.id]}<sup>2</sup> seul : fais d'abord passer de l'autre côté ce qui l'accompagne.`);
         return;
       } else m.rac = true;
       api.effacer();
@@ -193,16 +193,16 @@
     const contient = (m, id) => m.num.concat(m.den || []).some(u => u.id === id);
     function diagnostic() {
       if (etat.gauche.den && !etat.gauche.den.length || etat.droite.den && !etat.droite.den.length)
-        return 'Un dénominateur est vide : glisse une grandeur dedans, ou supprime-le avec sa croix ✕.';
+        return 'Un dénominateur est vide : glisse une grandeur dedans, ou supprime-le avec sa croix ✕.';
       const r = rapports(etat, depart), ids = Object.keys(r), vals = ids.map(id => r[id]);
       // la racine appliquée à un seul membre : les rapports valent 1 et ½
       if (vals.some(v => egaux(v, 1)) && vals.some(v => egaux(v, .5)) || vals.some(v => egaux(v, -1)) && vals.some(v => egaux(v, -.5)))
-        return 'La racine carrée a été appliquée à un seul membre : applique-la aux deux membres, sinon l\'égalité n\'est plus vraie.';
+        return 'La racine carrée a été appliquée à un seul membre : applique-la aux deux membres, sinon l\'égalité n\'est plus vraie.';
       // grandeur passée de l'autre côté sans changer d'étage : rapport de signe contraire à la majorité
       const plus = vals.filter(v => v > 0).length, ref = plus >= vals.length - plus ? 1 : -1;
       const fausse = ids.find(id => Math.sign(r[id]) !== ref);
-      if (fausse) return `${noms[fausse]} a changé de côté sans changer d'étage : ce qui multiplie d'un côté (en haut) passe de l'autre côté en divisant (en bas), et inversement.`;
-      return 'L\'équation n\'est plus juste : clique sur ↺ Recommencer.';
+      if (fausse) return `${noms[fausse]} a changé de côté sans changer d'étage : ce qui multiplie d'un côté (en haut) passe de l'autre côté en divisant (en bas), et inversement.`;
+      return 'L\'équation n\'est plus juste : clique sur ↺ Recommencer.';
     }
     function verifier() {
       if (fige || api.fini()) return;
@@ -211,7 +211,7 @@
         vals.every(v => egaux(v, vals[0]) && !egaux(v, 0));
       if (!juste) { api.erreur(diagnostic()); return; }
       if (forme(etat) === forme(etapes[etapes.length - 1])) {
-        api.message('Fais d\'abord une manipulation : glisse une grandeur de l\'autre côté du signe =, ou un outil sur un membre.');
+        api.message('Fais d\'abord une manipulation : glisse une grandeur de l\'autre côté du signe =, ou un outil sur un membre.');
         return;
       }
       etapes.push(copie(etat));
@@ -220,10 +220,10 @@
       if (seule(g, c) && !g.num[0].carre && !contient(d, c)) { terminer(); api.reussi(); return; }
       const m = contient(g, c) ? g : d, avec = m.num.concat(m.den || []).filter(u => u.id !== c && u.id !== 'un').map(u => noms[u.id]);
       const carre = m.num.concat(m.den || []).some(u => u.id === c && u.carre);
-      let msg = 'Étape juste, continue !';
-      if (seule(d, c) && !d.num[0].carre) msg = `Étape juste. ${nomCible} est seule : inverse le sens de l'équation avec ⇄.`;
-      else if (!m.rac && !m.den && m.num.length === 1 && m.num[0].id === c) msg = `Étape juste. Il reste à supprimer le carré : glisse l'outil √ sur chaque membre de l'équation.`;
-      else if (avec.length) msg = `Étape juste. Continue : fais passer de l'autre côté ce qui accompagne ${nomCible}${carre ? '<sup>2</sup>' : ''} (${avec.join(', ')}).`;
+      let msg = 'Étape juste, continue !';
+      if (seule(d, c) && !d.num[0].carre) msg = `Étape juste. ${nomCible} est seule : inverse le sens de l'équation avec ⇄.`;
+      else if (!m.rac && !m.den && m.num.length === 1 && m.num[0].id === c) msg = `Étape juste. Il reste à supprimer le carré : glisse l'outil √ sur chaque membre de l'équation.`;
+      else if (avec.length) msg = `Étape juste. Continue : fais passer de l'autre côté ce qui accompagne ${nomCible}${carre ? '<sup>2</sup>' : ''} (${avec.join(', ')}).`;
       api.message(`<span class="eqe-ok">✓ ${msg}</span>`);
     }
     function terminer() {

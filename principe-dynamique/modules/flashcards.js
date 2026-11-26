@@ -1,8 +1,9 @@
 /* Flashcards de l'application « Chapitre 6 : Principe fondamental de la dynamique » (principe-dynamique)
    Cartes validées par l'enseignant le 2026-11-17 (docs/flashcards/principe-dynamique/ : relecture et données)
    Format : voir assets/revisions.js, REV.paquets ; figures : SVG autonomes (la page Révisions ne charge pas pfd.js).
-   Un paquet par cours ou sous-module de cours ; le sous-module 2b (diagramme objet-action) n'a pas de carte,
-   le module 5 (exercices) n'a pas de cours : pas de paquet. */
+   Un paquet par cours ou sous-module de cours ; le module 5 (exercices) n'a pas de cours : pas de paquet.
+   Module 2 : ses cours sont maintenant dans l'application « Bilan des forces » (page externe ↗) :
+   ses paquets (m2a à m2f) attendent le cours du module 1. */
 (function () {
   'use strict';
   /* ---------- Écriture (charte §7) ---------- */
@@ -87,7 +88,7 @@
               r: '<p>Mouvement <b>curviligne décéléré</b> (ou ralenti).</p><p>Trajectoire : une courbe quelconque. Positions de moins en moins espacées : la vitesse diminue.</p>' + fig(chrono(true)) }] },
       ] },
     /* ---------- Module 2 · Forces à distance, forces de contact ---------- */
-    { id: 'm2a', module: 2, titre: 'Forces à distance, forces de contact', apres: ['module_2a_cours'], cartes: [
+    { id: 'm2a', module: 2, titre: 'Forces à distance, forces de contact', apres: ['module_1_cours'], cartes: [
           { id: 'pfd-2a-distance', type: 'definition', competence: 'Définir une force à distance (les objets ne se touchent pas ; la flèche part du centre G)', faces: [
             { q: '<p>Qu\'est-ce qu\'une force à distance ? D\'où part sa flèche ?</p>',
               r: '<p>Une force exercée par un objet qui <b>ne touche pas</b> le système.</p><p>Sa flèche part du <b>centre G</b> du système. Diagramme objet-action : trait en pointillés.</p>' }] },
@@ -99,7 +100,7 @@
               r: `<ul><li>Le <b>poids</b> ${V('P')} : la Terre (toujours).</li><li>La <b>force magnétique</b> ${V('F', 'mag')} : un aimant.</li><li>La <b>force électrique</b> ${V('F', 'élec')} : un objet électrisé (frotté, chargé + ou −).</li></ul>` }] },
       ] },
     /* ---------- Module 2 · Force de l'air ---------- */
-    { id: 'm2c', module: 2, titre: 'Force de l\'air', apres: ['module_2c_cours'], cartes: [
+    { id: 'm2c', module: 2, titre: 'Force de l\'air', apres: ['module_1_cours'], cartes: [
           { id: 'pfd-2c-air', type: 'savoir', competence: 'Savoir quand on ne néglige pas la force de l\'air : frottements importants (grande vitesse, grande surface) ou poussée d\'Archimède importante (système très léger pour son volume)', faces: [
             { q: '<p>Dans quels deux cas ne néglige-t-on pas la force de l\'air ?</p>',
               r: `<ul><li>Ses <b>frottements</b> comptent : grande vitesse, grande surface (parachute, voiture rapide) → ${V('F', 'air')}.</li><li>Sa <b>poussée d'Archimède</b> compte : système très léger pour son volume (montgolfière, ballon d'hélium) → ${V('F', 'archi')}.</li></ul>` }] },
@@ -110,7 +111,7 @@
               r: `<p>La <b>poussée d'Archimède</b> ${V('F', 'archi')}.</p>` }] },
       ] },
     /* ---------- Module 2 · Poids ---------- */
-    { id: 'm2d', module: 2, titre: 'Poids', apres: ['module_2d_cours'], cartes: [
+    { id: 'm2d', module: 2, titre: 'Poids', apres: ['module_1_cours'], cartes: [
           { id: 'pfd-2d-poids', type: 'formule', competence: 'Calculer le poids : P = m × g (P en N, m en kg, g en N/kg)', faces: [
             { q: '<p>La formule qui donne le poids P ?</p>' + UNITES,
               r: formule('P = m × g') + unites('P en N · m en kg · g en N/kg') + '<p>g = 9,81 N/kg (10 N/kg si g n\'est pas donné).</p>' },
@@ -127,7 +128,7 @@
               r: '<p>Je <b>convertis la masse en kg</b> : je divise par 1 000.</p><p>Exemple : 400 g = 0,400 kg.</p>' }] },
       ] },
     /* ---------- Module 2 · Réaction du support ---------- */
-    { id: 'm2e', module: 2, titre: 'Réaction du support', apres: ['module_2e_cours'], cartes: [
+    { id: 'm2e', module: 2, titre: 'Réaction du support', apres: ['module_1_cours'], cartes: [
           { id: 'pfd-2e-reaction', type: 'savoir', competence: 'Donner toutes les caractéristiques de la réaction du support : R⃗ = R⃗N + f⃗, avec un dessin', faces: [
             { q: '<p>Quelle est la force exercée par un support sur le système ? Donne toutes ses caractéristiques.</p>',
               r: fig(REACTION) + formule(`${V('R')} = ${V('R', 'N')} + ${V('f')}`) + `<ul><li>${V('R', 'N')} : <b>perpendiculaire</b> au support, depuis le point de contact.</li><li>${V('f')} : frottements, <b>parallèles</b> au support, opposés au glissement.</li></ul>` }] },
@@ -143,7 +144,7 @@
               r: `<p>Les <b>frottements</b> ${V('f')}.</p>` }] },
       ] },
     /* ---------- Module 2 · Forces qui se compensent ---------- */
-    { id: 'm2f', module: 2, titre: 'Forces qui se compensent', apres: ['module_2f_cours'], cartes: [
+    { id: 'm2f', module: 2, titre: 'Forces qui se compensent', apres: ['module_1_cours'], cartes: [
           { id: 'pfd-2f-compensent', type: 'definition', competence: 'Définir des forces qui se compensent : leur somme vectorielle est nulle, Σ F⃗ = 0⃗', faces: [
             { q: '<p>Que veut dire « des forces se compensent » ?</p>',
               r: '<p>Leur <b>somme vectorielle est nulle</b> :</p>' + formule(`${SF} = ${NUL}`) + `<p>Exemple : palet d'air-hockey, ${V('R', 'N')} et ${V('P')}.</p>` }] },

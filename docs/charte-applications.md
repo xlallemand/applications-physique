@@ -50,7 +50,7 @@ Ne change ni le contenu scientifique ni les fonctionnalités propres à une appl
   - `desc` : une phrase courte (une ligne sur ordinateur, masquée sur téléphone) ;
   - `mots` : mots-clés de la recherche du portail, ceux qu'un élève peut taper et qui ne sont pas déjà dans le titre ou la description : notions, synonymes, unités, formules, sigles (`['demi-vie', 'becquerel', 'alpha']`). Les titres et descriptions des modules et des pages n'ont pas à y être : ils sont déjà dans l'index.
 - **Index de recherche du portail** : après l'ajout d'une application, et **à chaque changement d'un `PLAN`** (titre, description, parties, noms des pages), relancer `python3 docs/outils/index-recherche.py`, qui régénère `assets/recherche-index.js` (ne jamais modifier ce fichier à la main). Le type de chaque page y est fixé (pastilles « Manipuler » et « Fiches », voir §4 « Portail ») : une page `simulation` nommée « Simulateur… », « Animation : … » ou « Atelier : … » est rangée dans « Manipuler », une « Activité : … » (activité documentaire) ne l'est pas ; les autres écarts se déclarent dans `EXCEPTIONS` en tête du script.
-- Déclarer aussi ses pages dans `AVANCEMENT` de `assets/avancement.js` (avancement x/y du portail) : `'<dossier>': { pages: [...], ex }`, toutes les pages comptées du `PLAN` dans l'ordre et la somme des `nbEx`. **À mettre à jour à chaque changement du `PLAN`** : le total doit être la somme des compteurs `n/m` des modules de l'accueil de l'application.
+- Déclarer aussi ses pages dans `AVANCEMENT` de `assets/avancement.js` (avancement x/y du portail) : `'<dossier>': { pages: [...], ex }`, toutes les pages comptées du `PLAN` dans l'ordre et la somme des `nbEx`. Une page externe ↗ (§5) s'y écrit `'↗<app>/<page>'` (`'↗double-periodicite/index'`) et compte avec l'état de l'autre application. **À mettre à jour à chaque changement du `PLAN`** : le total doit être la somme des compteurs `n/m` des modules de l'accueil de l'application.
 - Un nouveau dessin d'en-tête s'ajoute dans `assets/hero.js` (objet `dessins` + liste commentée en tête de fichier).
 
 ## 3. Style visuel (design « Chambre à bulles »)
@@ -143,7 +143,7 @@ Toute page de simulation ou de manipulation (et toute nouvelle page de ce type) 
 
 ### Cours
 
-Cours **par étapes**, écrit avec le **moteur de cours commun** `assets/cours.js` (objet `COURS`, styles `assets/cours.css`, classes préfixées `crs-`) ; seules `cinematique/` (moteur `CIN`), `transport-electricite/` (`TE`), `ph/` et `puissance-active/` (`PH`) gardent leur propre moteur, de même présentation.
+Cours **par étapes**, écrit avec le **moteur de cours commun** `assets/cours.js` (objet `COURS`, styles `assets/cours.css`, classes préfixées `crs-`) ; seules `cinematique/` (moteur `CIN`), `transport-electricite/` (`TE`), `ph/` (`PH`) et `puissance-active/` (`PH`, copie dans `puissance-active/modules/pa-moteur.js`) gardent leur propre moteur, de même présentation.
 
 ```js
 const cours = new COURS.Cours(zone, [etape1, etape2, aRetenir], { cle });   // cle : clé du PLAN (application en une seule page)
@@ -260,6 +260,7 @@ SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
 ```
 
 - Types de pages d'une partie, dans cet ordre : `simulation`, `cours`, `exemple`, `questions`, `entrainement` (icônes `▸`, `C`, `Ex`, `Q`, `E`) ; fiche `≡`, exercices `#`. Chaque type vaut la clé de la page (nom du fichier sans `.html`).
+- **Page externe ↗** (type `externe`) : un module **à faire** qui se trouve dans une autre application, placé à son rang dans le parcours. Une partie `{ nom: 'Double périodicité', externe: { app: 'double-periodicite', page: 'index', nom: 'Simulateur : double périodicité', appNom: "Double périodicité d'une onde" } }` : `app` est le dossier de l'autre application, `page` la clé de la page dans **son** `PLAN` (ou `'index'` pour une application sans plan), `nom` le libellé, `appNom` (facultatif) le nom de l'autre application écrit en petit. Sommaire et accueil : icône ↗, lien `../../<app>/modules/<page>.html` (ou `../../<app>/index.html`) dans une **nouvelle fenêtre**, texte « ouvre l'application … dans une nouvelle fenêtre » pour les lecteurs d'écran. État lu dans `<app>-progression` (✓ ou note ; `'index'` : fait dès que l'application a été ouverte, ce que `SOM.menu('accueil')` enregistre pour une application sans plan), relu au retour sur la fenêtre. Elle compte dans `n/m`, dans le ✓ du module et dans `AVANCEMENT` ; jamais dans « Reprendre » ; pas indexée dans la recherche du portail pour l'application qui la cite (elle l'est dans la sienne). **Résumé très rapide de ce qu'il faut savoir faire** : le `desc` du module qui contient la page ↗ commence par « À savoir faire : » et dit en une phrase ce que l'élève doit savoir faire en sortant de l'autre application (modèle : module 2 de `principe-dynamique/`, « À savoir faire : le diagramme objet-action…, puis chaque force sur le schéma…, enfin : les forces se compensent-elles ? »). Un simple rappel facultatif reste un lien `ph-lien-app` dans le cours (ci-dessous).
 - `SOM.menu(cle)` dans chaque page : `'accueil'` → bandeau avec le lien vers le portail ; sinon le sommaire, page `cle` encadrée.
 - `SOM.accueil(zone)` sur l'accueil : lignes dépliables, carte « Reprendre ».
 - `SOM.marquer({ fait: true })` en fin de cours, `SOM.marquer({ note })` en fin de série (note sur 20, la meilleure est gardée).
@@ -326,7 +327,7 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 | `pages[<page>].note` | la plus haute |
 | `derniere` | celle du navigateur si elle existe, sinon celle du fichier |
 | `<dossier>-exercices[<id>]` | le meilleur résultat (`pts / max` le plus haut) |
-| `combustions-exercices-faits`, `principe-dynamique-atelier` | réunion, sans doublon |
+| `combustions-exercices-faits`, `principe-dynamique-atelier`, `bilan-forces-atelier` | réunion, sans doublon |
 | `equamath_v2` | `results` : l'entrée au meilleur `bestScore`, `attempts` le plus grand ; `xp` le plus grand ; `showKb` du navigateur |
 | `<dossier>-flashcards` | `ajouts` : réunion (date la plus ancienne) ; chaque carte : l'état **revu le plus récemment** (`v` le plus grand ; à égalité, `n` le plus grand ; une carte jamais revue perd contre une carte revue) ; une carte présente d'un seul côté est copiée |
 | `fractions-college-suivi`, `equations-college-suivi`, `equations-physique-mobile-suivi`, `calcul-numerique-suivi` (suivi des compétences) | réunion des questions de chaque compétence et des notes, sans doublon (même date) ; les 30 dernières questions par compétence, les 100 dernières notes |
@@ -347,7 +348,7 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 3. Un bloc **« À toi »** (`c.aToi` du moteur commun, `CIN.aToi` dans Cinématique) : une suite de petites questions du **même type que l'exemple**, de difficulté progressive, sans points. Il faut les réussir (ou afficher la réponse) pour que « Continuer → » apparaisse.
 4. Étape suivante. Le cours se termine par « À retenir ».
 
-Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous forme de questions à résoudre, la réponse affichée est suivie de **« ✍ Complète ton cours : … »** (ce qu'il doit recopier dans son cahier).
+Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous forme de questions à résoudre, la réponse affichée est suivie de **« Bilan : … »** (ce qu'il doit recopier dans son cahier).
 
 ### Bouton « Afficher tout le cours »
 

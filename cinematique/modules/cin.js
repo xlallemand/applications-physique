@@ -204,13 +204,13 @@
     u = u || ['i', 'j'];
     const ui = V.nomHTML(u[0]), uj = V.nomHTML(u[1]);
     return {
-      inverse: `tu as inversé les coordonnées : en haut le déplacement horizontal (selon ${ui}), en bas le déplacement vertical (selon ${uj}).`,
-      signeX: 'la 1<sup>re</sup> coordonnée a le mauvais signe : vers la droite elle est positive, vers la gauche négative.',
-      signeY: 'la 2<sup>de</sup> coordonnée a le mauvais signe : vers le haut elle est positive, vers le bas négative.',
-      signes: 'les deux coordonnées ont le mauvais signe (positif : vers la droite et vers le haut).',
-      y: 'la 1<sup>re</sup> coordonnée est juste, pas la 2<sup>de</sup> : compte les carreaux verticalement, de l\'origine à la pointe de la flèche.',
-      x: 'la 2<sup>de</sup> coordonnée est juste, pas la 1<sup>re</sup> : compte les carreaux horizontalement, de l\'origine à la pointe de la flèche.',
-      autre: 'compte les carreaux de l\'origine à la pointe de la flèche : d\'abord horizontalement, puis verticalement.',
+      inverse: `tu as inversé les coordonnées : en haut le déplacement horizontal (selon ${ui}), en bas le déplacement vertical (selon ${uj}).`,
+      signeX: 'la 1<sup>re</sup> coordonnée a le mauvais signe : vers la droite elle est positive, vers la gauche négative.',
+      signeY: 'la 2<sup>de</sup> coordonnée a le mauvais signe : vers le haut elle est positive, vers le bas négative.',
+      signes: 'les deux coordonnées ont le mauvais signe (positif : vers la droite et vers le haut).',
+      y: 'la 1<sup>re</sup> coordonnée est juste, pas la 2<sup>de</sup> : compte les carreaux verticalement, de l\'origine à la pointe de la flèche.',
+      x: 'la 2<sup>de</sup> coordonnée est juste, pas la 1<sup>re</sup> : compte les carreaux horizontalement, de l\'origine à la pointe de la flèche.',
+      autre: 'compte les carreaux de l\'origine à la pointe de la flèche : d\'abord horizontalement, puis verticalement.',
     }[code] || '';
   }
 
@@ -242,7 +242,7 @@
       if (oka && okb) { a.desactiver(true); b.desactiver(true); bVal.fermer(); api.reussi(); return; }
       a.el.classList.toggle('ko', !oka); b.el.classList.toggle('ko', !okb);
       let msg = p.diag && p.diag([va, vb]);
-      if (!msg && p.lecture && Number.isInteger(va) && Number.isInteger(vb)) msg = 'Pas tout à fait : ' + messageLecture(V.diagnostic([va, vb], p.valeurs), p.unites);
+      if (!msg && p.lecture && Number.isInteger(va) && Number.isInteger(vb)) msg = 'Pas tout à fait : ' + messageLecture(V.diagnostic([va, vb], p.valeurs), p.unites);
       api.erreur(msg || p.indice || 'Vérifie les coordonnées.');
       secouer(d);
     }
@@ -334,7 +334,7 @@
         api.message({
           vide: 'Écris le vecteur avec les touches.',
           sansUnite: `Chaque nombre doit être suivi d'un vecteur unitaire (${U}).`,
-          incomplet: `L'écriture est incomplète : il manque un vecteur unitaire (${U}) après un signe.`,
+          incomplet: `L'écriture est incomplète : il manque un vecteur unitaire (${U}) après un signe.`,
           colle: 'Sépare les termes par + ou −.',
           nombre: 'Un des nombres est mal écrit.',
         }[r.err]);
@@ -346,17 +346,17 @@
         const n = [];
         if (r.notes.has('zero')) n.push(`on n'écrit pas un terme nul (0 ${V.nomHTML(u[0])} ou 0 ${V.nomHTML(u[1])})`);
         if (r.notes.has('un')) n.push('on n\'écrit pas le coefficient 1');
-        if (r.notes.has('signes')) n.push(`« + ${MOINS} » s'écrit « ${MOINS} »`);
+        if (r.notes.has('signes')) n.push(`« + ${MOINS} » s'écrit « ${MOINS} »`);
         if (r.notes.has('double')) n.push('on regroupe les termes en un seul par vecteur unitaire');
         if (r.notes.has('ordre')) n.push(`on écrit d'habitude ${V.nomHTML(u[0])} en premier`);
-        api.reussi(false, n.length ? `Plus simplement : <b>${propre}</b> (${n.join(' ; ')}).` : '');
+        api.reussi(false, n.length ? `Plus simplement : <b>${propre}</b> (${n.join(' ; ')}).` : '');
         return;
       }
       let msg = p.diag && p.diag(r.c);
       if (!msg && Number.isInteger(r.c[0]) && Number.isInteger(r.c[1]) && p.lecture !== false) {
         const code = V.diagnostic(r.c, attendu);
         msg = {
-          inverse: `Tu as inversé : le nombre devant ${V.nomHTML(u[0])} est le déplacement horizontal, le nombre devant ${V.nomHTML(u[1])} le déplacement vertical.`,
+          inverse: `Tu as inversé : le nombre devant ${V.nomHTML(u[0])} est le déplacement horizontal, le nombre devant ${V.nomHTML(u[1])} le déplacement vertical.`,
           signeX: `Le terme en ${V.nomHTML(u[0])} a le mauvais signe.`,
           signeY: `Le terme en ${V.nomHTML(u[1])} a le mauvais signe.`,
           signes: 'Les deux termes ont le mauvais signe.',
@@ -433,14 +433,14 @@
       if (!faux.length && !vides.length) { bVal.fermer(); api.reussi(); return; }
       if (!faux.length) {
         secouer(d);
-        api.message(vides.length === res.length ? `Trace ${res.length > 1 ? 'les vecteurs' : 'le vecteur'} avant de valider.` : `Il reste à tracer : ${vides.map(x => V.nomHTML(x.v.nom)).join(', ')}.`);
+        api.message(vides.length === res.length ? `Trace ${res.length > 1 ? 'les vecteurs' : 'le vecteur'} avant de valider.` : `Il reste à tracer : ${vides.map(x => V.nomHTML(x.v.nom)).join(', ')}.`);
         return;
       }
       const maj = t => t.charAt(0).toUpperCase() + t.slice(1);
       // p.diag(vecteur, code) : message propre à la question (ou rien : message général)
       const msg = x => (p.diag && p.diag(x.v, x.code)) || V.message(x.code, r.o.unitaires || p.unites);
-      api.erreur(faux.map(x => (res.length > 1 ? `<b>${V.nomHTML(x.v.nom)}</b> : ${msg(x)}` : maj(msg(x)))).join('<br>') +
-        (vides.length ? `<br>Il reste aussi à tracer : ${vides.map(x => V.nomHTML(x.v.nom)).join(', ')}.` : '') +
+      api.erreur(faux.map(x => (res.length > 1 ? `<b>${V.nomHTML(x.v.nom)}</b> : ${msg(x)}` : maj(msg(x)))).join('<br>') +
+        (vides.length ? `<br>Il reste aussi à tracer : ${vides.map(x => V.nomHTML(x.v.nom)).join(', ')}.` : '') +
         (res.length > 1 && res.some(x => x.code === 'ok') ? '<br><span class="er-petit">Les vecteurs justes (en vert) sont bloqués.</span>' : ''));
       secouer(d);
     };
@@ -547,7 +547,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -586,8 +586,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -599,7 +599,7 @@
       const q = qs[idx];
       window.CIN.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -619,7 +619,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -634,10 +634,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       marquer({ note });
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -956,7 +956,7 @@
       const multi = s.m.parties && s.m.parties.length > 1;
       const ou = s.onglet === 'exercices' || s.onglet === 'fiche' || !multi ? NOMS_PAGES[s.onglet] : `${s.p.nom} · ${NOMS_PAGES[s.onglet]}`;
       racine.innerHTML =
-        `<div class="cin-barre"><button type="button" class="cin-ou" aria-expanded="false" aria-controls="cin-som" aria-label="Sommaire : module ${s.m.n}, ${ou}">` +
+        `<div class="cin-barre"><button type="button" class="cin-ou" aria-expanded="false" aria-controls="cin-som" aria-label="Sommaire : module ${s.m.n}, ${ou}">` +
         `<span class="cin-snum">${s.m.n}</span><span class="cin-ou-t"><small>${s.m.titre}</small><b>${ou}</b></span><span class="cin-ou-chev" aria-hidden="true">▾</span></button></div>` +
         '<div class="cin-barre-esp"></div><div class="cin-voile"></div>' +
         `<aside class="cin-som" id="cin-som" aria-label="Sommaire"><div class="cin-som-tete"><a class="cin-som-app" href="../index.html">Cinématique</a>` +

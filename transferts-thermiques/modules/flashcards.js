@@ -11,7 +11,7 @@
   const unites = s => `<p class="rev-unites">${s}</p>`;
   const KW = 'K·W<sup>−1</sup>', LAM = 'W·m<sup>−1</sup>·K<sup>−1</sup>';
   const UNITES = '<small>Unités de chaque grandeur</small>';
-  const QUOI = ' Que peux-tu calculer ? Avec quelle formule ?</p>';
+  const QUOI = ' Que peux-tu calculer ? Avec quelle formule ?</p>';
 
   /* ---------- Figure (SVG autonome : attributs de présentation) ---------- */
   // texte SVG avec indices _{…} et exposants ^{…} (tspan décalés, puis retour à la ligne de base)
@@ -63,7 +63,7 @@
       // ③ rayonnement vers des mains tendues
       onde(168) + onde(192) + onde(216) + mainOuverte('translate(368,192) scale(-.9,.9)') +
       pastille(274, 128, '1', 'conduction') + pastille(58, 150, '2', 'convection') + pastille(232, 246, '3', 'rayonnement');
-    return `<svg viewBox="0 0 400 266" width="400" height="266" role="img" aria-label="Feu de camp : conduction dans une tige tenue à la main, convection de l'air qui monte au-dessus du feu, rayonnement vers des mains tendues">` +
+    return `<svg viewBox="0 0 400 266" width="400" height="266" role="img" aria-label="Feu de camp : conduction dans une tige tenue à la main, convection de l'air qui monte au-dessus du feu, rayonnement vers des mains tendues">` +
       `<rect x="1" y="1" width="398" height="264" rx="14" fill="#f3f1ec"/>${s}</svg>`;
   }
   const pointe = (x, y, d) => `<polygon points="${x},${y} ${x - 12 * d},${y - 6} ${x - 12 * d},${y + 6}" fill="${ACC}"/>`;
@@ -87,105 +87,105 @@
   REV.paquets({ dossier: 'transferts-thermiques', titre: 'Chapitre 5 : Flux et transferts thermiques', court: 'Chapitre 5', matiere: 'physique' }, [
     /* ---------- Module 1 · Température et modes de transfert ---------- */
     { id: 'm1', module: 1, titre: 'Température et modes de transfert', apres: ['module_1_cours'], cartes: [
-        { id: 'tt-1-kelvin', type: 'formule', competence: 'Passer des °C aux kelvins : T (K) = θ (°C) + 273', faces: [
-          { q: '<p>La formule qui donne la température absolue T à partir de la température θ en degrés Celsius ?</p>' + UNITES,
-            r: formule('T = θ + 273') + unites('T en kelvins (K) ; θ en degrés Celsius (°C)') + '<p>Exemple : 20 °C → 293 K.</p>' }] },
-        { id: 'tt-1-zero', type: 'definition', competence: 'Définir le zéro absolu : 0 K = −273 °C, la température la plus basse possible', faces: [
-          { q: '<p>Qu\'est-ce que le zéro absolu ? Sa valeur en K et en °C ?</p>',
-            r: '<p>La <b>température la plus basse possible</b> : <b>0 K = −273 °C</b>.</p><p>Une température en kelvins n\'est donc jamais négative.</p>' },
-          { q: '<p>Comment s\'appelle la température la plus basse possible ? Sa valeur en K et en °C ?</p>',
-            r: '<p>Le <b>zéro absolu</b> : 0 K = −273 °C.</p>' }] },
-        { id: 'tt-1-conduction', type: 'definition', competence: 'Définir les trois modes de transfert : conduction, convection, rayonnement', faces: [
-          { q: '<p>Qu\'est-ce que la conduction ?</p>',
-            r: '<p>Un mode de transfert thermique <b>dans un solide, de proche en proche, sans déplacement de matière</b>.</p><p>Exemple : un mur, une tige chauffée à un bout.</p>' },
-          { q: '<p>Comment s\'appelle le transfert thermique dans un solide, de proche en proche, sans déplacement de matière ?</p>',
+        { id: 'tt-1-kelvin', type: 'formule', competence: 'Passer des °C aux kelvins : T (K) = θ (°C) + 273', faces: [
+          { q: '<p>La formule qui donne la température absolue T à partir de la température θ en degrés Celsius ?</p>' + UNITES,
+            r: formule('T = θ + 273') + unites('T en kelvins (K) ; θ en degrés Celsius (°C)') + '<p>Exemple : 20 °C → 293 K.</p>' }] },
+        { id: 'tt-1-zero', type: 'definition', competence: 'Définir le zéro absolu : 0 K = −273 °C, la température la plus basse possible', faces: [
+          { q: '<p>Qu\'est-ce que le zéro absolu ? Sa valeur en K et en °C ?</p>',
+            r: '<p>La <b>température la plus basse possible</b> : <b>0 K = −273 °C</b>.</p><p>Une température en kelvins n\'est donc jamais négative.</p>' },
+          { q: '<p>Comment s\'appelle la température la plus basse possible ? Sa valeur en K et en °C ?</p>',
+            r: '<p>Le <b>zéro absolu</b> : 0 K = −273 °C.</p>' }] },
+        { id: 'tt-1-conduction', type: 'definition', competence: 'Définir les trois modes de transfert : conduction, convection, rayonnement', faces: [
+          { q: '<p>Qu\'est-ce que la conduction ?</p>',
+            r: '<p>Un mode de transfert thermique <b>dans un solide, de proche en proche, sans déplacement de matière</b>.</p><p>Exemple : un mur, une tige chauffée à un bout.</p>' },
+          { q: '<p>Comment s\'appelle le transfert thermique dans un solide, de proche en proche, sans déplacement de matière ?</p>',
             r: '<p>La <b>conduction</b>.</p>' }] },
-        { id: 'tt-1-convection', type: 'definition', competence: 'Définir les trois modes de transfert : conduction, convection, rayonnement', faces: [
-          { q: '<p>Qu\'est-ce que la convection ?</p>',
-            r: '<p>Un mode de transfert thermique où un <b>fluide (air, eau) se déplace et transporte l\'énergie</b>.</p><p>Exemple : au-dessus d\'un radiateur, l\'air chaud monte.</p>' },
-          { q: '<p>Comment s\'appelle le transfert thermique par un fluide (air, eau) qui se déplace et transporte l\'énergie ?</p>',
+        { id: 'tt-1-convection', type: 'definition', competence: 'Définir les trois modes de transfert : conduction, convection, rayonnement', faces: [
+          { q: '<p>Qu\'est-ce que la convection ?</p>',
+            r: '<p>Un mode de transfert thermique où un <b>fluide (air, eau) se déplace et transporte l\'énergie</b>.</p><p>Exemple : au-dessus d\'un radiateur, l\'air chaud monte.</p>' },
+          { q: '<p>Comment s\'appelle le transfert thermique par un fluide (air, eau) qui se déplace et transporte l\'énergie ?</p>',
             r: '<p>La <b>convection</b>.</p>' }] },
-        { id: 'tt-1-rayonnement', type: 'definition', competence: 'Définir les trois modes de transfert : conduction, convection, rayonnement', faces: [
-          { q: '<p>Qu\'est-ce que le rayonnement ?</p>',
-            r: '<p>Un mode de transfert thermique <b>sans support matériel</b> : l\'énergie se propage même dans le vide.</p><p>Exemple : le Soleil chauffe la Terre ; la chaleur d\'un feu sur le visage.</p>' },
-          { q: '<p>Comment s\'appelle le transfert thermique sans support matériel, qui se fait même dans le vide ?</p>',
+        { id: 'tt-1-rayonnement', type: 'definition', competence: 'Définir les trois modes de transfert : conduction, convection, rayonnement', faces: [
+          { q: '<p>Qu\'est-ce que le rayonnement ?</p>',
+            r: '<p>Un mode de transfert thermique <b>sans support matériel</b> : l\'énergie se propage même dans le vide.</p><p>Exemple : le Soleil chauffe la Terre ; la chaleur d\'un feu sur le visage.</p>' },
+          { q: '<p>Comment s\'appelle le transfert thermique sans support matériel, qui se fait même dans le vide ?</p>',
             r: '<p>Le <b>rayonnement</b>.</p>' }] },
-        { id: 'tt-1-sens', type: 'savoir', competence: 'Donner le sens du transfert thermique : du chaud vers le froid', faces: [
-          { q: '<p>Dans quel sens se fait toujours un transfert thermique ? Quand s\'arrête-t-il ?</p>',
-            r: '<p><b>Du corps le plus chaud vers le corps le plus froid.</b></p><p>Il s\'arrête quand les deux corps sont à la même température. Le « froid » ne se transfère pas.</p>' }] },
-        { id: 'tt-1-feu', type: 'savoir', competence: 'Définir les trois modes de transfert : conduction, convection, rayonnement', faces: [
-          { q: '<p>Quels sont les trois modes de transfert thermique ? Comment interviennent-ils autour d\'un feu ?</p>',
-            r: fig(feu()) + '<p>① <b>Conduction</b> : la tige chauffe de proche en proche jusqu\'à la main.</p><p>② <b>Convection</b> : l\'air chauffé par le feu monte.</p><p>③ <b>Rayonnement</b> : les mains devant le feu chauffent, sans contact.</p>' }] },
+        { id: 'tt-1-sens', type: 'savoir', competence: 'Donner le sens du transfert thermique : du chaud vers le froid', faces: [
+          { q: '<p>Dans quel sens se fait toujours un transfert thermique ? Quand s\'arrête-t-il ?</p>',
+            r: '<p><b>Du corps le plus chaud vers le corps le plus froid.</b></p><p>Il s\'arrête quand les deux corps sont à la même température. Le « froid » ne se transfère pas.</p>' }] },
+        { id: 'tt-1-feu', type: 'savoir', competence: 'Définir les trois modes de transfert : conduction, convection, rayonnement', faces: [
+          { q: '<p>Quels sont les trois modes de transfert thermique ? Comment interviennent-ils autour d\'un feu ?</p>',
+            r: fig(feu()) + '<p>① <b>Conduction</b> : la tige chauffe de proche en proche jusqu\'à la main.</p><p>② <b>Convection</b> : l\'air chauffé par le feu monte.</p><p>③ <b>Rayonnement</b> : les mains devant le feu chauffent, sans contact.</p>' }] },
       ] },
 
     /* ---------- Module 2 · Flux thermique ---------- */
     { id: 'm2', module: 2, titre: 'Flux thermique', apres: ['module_2_cours'], cartes: [
-        { id: 'tt-2-flux', type: 'definition', competence: 'Définir le flux thermique Φ : une puissance, en W', faces: [
-          { q: '<p>Qu\'est-ce que le flux thermique Φ ? Unité ?</p>',
-            r: '<p>La <b>puissance thermique</b> qui traverse une paroi : l\'énergie qui la traverse chaque seconde.</p><p>Φ s\'exprime en <b>watts (W)</b>, comme toute puissance.</p>' },
-          { q: '<p>Comment s\'appelle la puissance thermique qui traverse une paroi ? Symbole, unité ?</p>',
+        { id: 'tt-2-flux', type: 'definition', competence: 'Définir le flux thermique Φ : une puissance, en W', faces: [
+          { q: '<p>Qu\'est-ce que le flux thermique Φ ? Unité ?</p>',
+            r: '<p>La <b>puissance thermique</b> qui traverse une paroi : l\'énergie qui la traverse chaque seconde.</p><p>Φ s\'exprime en <b>watts (W)</b>, comme toute puissance.</p>' },
+          { q: '<p>Comment s\'appelle la puissance thermique qui traverse une paroi ? Symbole, unité ?</p>',
             r: '<p>Le <b>flux thermique Φ</b>, en watts (W).</p>' }] },
         { id: 'tt-2-formule', type: 'formule', competence: 'Connaître la formule Φ = Q / Δt et les unités (W, J, s)', faces: [
-          { q: '<p>La formule qui donne le flux thermique Φ en fonction de l\'énergie thermique Q et de la durée Δt ?</p>' + UNITES,
-            r: formule('Φ = Q / Δt') + unites('Φ en W ; Q en J ; Δt en s') + '<p>C\'est P = E / Δt.</p>' },
-          { q: '<p>Données : l\'énergie thermique Q, en J, qui traverse une paroi pendant une durée Δt, en s.' + QUOI,
-            r: '<p>Le <b>flux thermique Φ</b>, en W :</p>' + formule('Φ = Q / Δt') }] },
-        { id: 'tt-2-energie', type: 'formule', competence: 'Connaître la formule Q = Φ × Δt : Δt en s donne des J, Δt en h donne des Wh', faces: [
-          { q: '<p>La formule qui donne l\'énergie thermique Q transférée à travers une paroi ?</p>' + UNITES,
-            r: formule('Q = Φ × Δt') + unites('Φ en W ; Δt en s : Q en J ; Δt en h : Q en Wh') + '<p>C\'est E = P × Δt.</p>' },
-          { q: '<p>Données : le flux thermique Φ, en W, qui traverse une paroi pendant une durée Δt, en s.' + QUOI,
-            r: '<p>L\'<b>énergie thermique Q</b> transférée, en J (en Wh si Δt est en h) :</p>' + formule('Q = Φ × Δt') }] },
+          { q: '<p>La formule qui donne le flux thermique Φ en fonction de l\'énergie thermique Q et de la durée Δt ?</p>' + UNITES,
+            r: formule('Φ = Q / Δt') + unites('Φ en W ; Q en J ; Δt en s') + '<p>C\'est P = E / Δt.</p>' },
+          { q: '<p>Données : l\'énergie thermique Q, en J, qui traverse une paroi pendant une durée Δt, en s.' + QUOI,
+            r: '<p>Le <b>flux thermique Φ</b>, en W :</p>' + formule('Φ = Q / Δt') }] },
+        { id: 'tt-2-energie', type: 'formule', competence: 'Connaître la formule Q = Φ × Δt : Δt en s donne des J, Δt en h donne des Wh', faces: [
+          { q: '<p>La formule qui donne l\'énergie thermique Q transférée à travers une paroi ?</p>' + UNITES,
+            r: formule('Q = Φ × Δt') + unites('Φ en W ; Δt en s : Q en J ; Δt en h : Q en Wh') + '<p>C\'est E = P × Δt.</p>' },
+          { q: '<p>Données : le flux thermique Φ, en W, qui traverse une paroi pendant une durée Δt, en s.' + QUOI,
+            r: '<p>L\'<b>énergie thermique Q</b> transférée, en J (en Wh si Δt est en h) :</p>' + formule('Q = Φ × Δt') }] },
         { id: 'tt-2-lien', type: 'savoir', competence: 'Relier Φ = Q / Δt et Q = Φ × Δt à P = E / Δt et E = P × Δt (mêmes formules, autres noms)', faces: [
-          { q: '<p>Φ = Q / Δt et Q = Φ × Δt : à quelles formules déjà connues correspondent-elles ?</p>',
-            r: '<p><b>P = E / Δt</b> et <b>E = P × Δt</b>.</p><p>Seuls les noms changent : le flux Φ est une puissance P, l\'énergie thermique Q est une énergie E.</p>' }] },
+          { q: '<p>Φ = Q / Δt et Q = Φ × Δt : à quelles formules déjà connues correspondent-elles ?</p>',
+            r: '<p><b>P = E / Δt</b> et <b>E = P × Δt</b>.</p><p>Seuls les noms changent : le flux Φ est une puissance P, l\'énergie thermique Q est une énergie E.</p>' }] },
       ] },
 
     /* ---------- Module 3 · Résistance thermique d'une paroi ---------- */
     { id: 'm3', module: 3, titre: 'Résistance thermique d\'une paroi', apres: ['module_3_cours'], cartes: [
         { id: 'tt-3-rth', type: 'definition', competence: 'Définir la résistance thermique R_th d\'une paroi, en K·W⁻¹', faces: [
-          { q: '<p>Qu\'est-ce que la résistance thermique R<sub>th</sub> d\'une paroi ? Unité ?</p>',
+          { q: '<p>Qu\'est-ce que la résistance thermique R<sub>th</sub> d\'une paroi ? Unité ?</p>',
             r: `<p>Une grandeur qui dit combien la paroi <b>résiste au transfert thermique</b>, en <b>${KW}</b>.</p><p>Plus R<sub>th</sub> est grande, meilleure est l'isolation et plus le flux est petit.</p>` },
-          { q: `<p>Comment s'appelle la grandeur, en ${KW}, qui dit combien une paroi résiste au transfert thermique ? Symbole ?</p>`,
+          { q: `<p>Comment s'appelle la grandeur, en ${KW}, qui dit combien une paroi résiste au transfert thermique ? Symbole ?</p>`,
             r: '<p>La <b>résistance thermique R<sub>th</sub></b>.</p>' }] },
-        { id: 'tt-3-lambda', type: 'definition', competence: 'Définir la conductivité thermique λ : petite pour un matériau isolant', faces: [
-          { q: '<p>Qu\'est-ce que la conductivité thermique λ ? Unité ?</p>',
-            r: `<p>Une grandeur du <b>matériau</b>, en ${LAM} : plus λ est grand, mieux le matériau conduit l'énergie.</p><p><b>λ petit : matériau isolant</b> (laine de verre, polystyrène, air immobile).</p>` },
-          { q: `<p>Comment s'appelle la grandeur d'un matériau, en ${LAM}, qui est petite pour un isolant ? Symbole ?</p>`,
+        { id: 'tt-3-lambda', type: 'definition', competence: 'Définir la conductivité thermique λ : petite pour un matériau isolant', faces: [
+          { q: '<p>Qu\'est-ce que la conductivité thermique λ ? Unité ?</p>',
+            r: `<p>Une grandeur du <b>matériau</b>, en ${LAM} : plus λ est grand, mieux le matériau conduit l'énergie.</p><p><b>λ petit : matériau isolant</b> (laine de verre, polystyrène, air immobile).</p>` },
+          { q: `<p>Comment s'appelle la grandeur d'un matériau, en ${LAM}, qui est petite pour un isolant ? Symbole ?</p>`,
             r: '<p>La <b>conductivité thermique λ</b>.</p>' }] },
         { id: 'tt-3-flux', type: 'formule', competence: 'Connaître la formule Φ = ΔT / R_th et les unités (W, K, K·W⁻¹)', faces: [
-          { q: '<p>La formule qui donne le flux thermique Φ à travers une paroi en fonction de l\'écart de température ΔT et de la résistance thermique R<sub>th</sub> ?</p>' + UNITES,
-            r: formule('Φ = ΔT / R<sub>th</sub>') + unites(`Φ en W ; ΔT = T<sub>chaud</sub> − T<sub>froid</sub> en K ; R<sub>th</sub> en ${KW}`) },
-          { q: `<p>Données : l'écart de température ΔT, en K, entre les deux faces d'une paroi et sa résistance thermique R<sub>th</sub>, en ${KW}.` + QUOI,
-            r: '<p>Le <b>flux thermique Φ</b> qui traverse la paroi, en W :</p>' + formule('Φ = ΔT / R<sub>th</sub>') }] },
+          { q: '<p>La formule qui donne le flux thermique Φ à travers une paroi en fonction de l\'écart de température ΔT et de la résistance thermique R<sub>th</sub> ?</p>' + UNITES,
+            r: formule('Φ = ΔT / R<sub>th</sub>') + unites(`Φ en W ; ΔT = T<sub>chaud</sub> − T<sub>froid</sub> en K ; R<sub>th</sub> en ${KW}`) },
+          { q: `<p>Données : l'écart de température ΔT, en K, entre les deux faces d'une paroi et sa résistance thermique R<sub>th</sub>, en ${KW}.` + QUOI,
+            r: '<p>Le <b>flux thermique Φ</b> qui traverse la paroi, en W :</p>' + formule('Φ = ΔT / R<sub>th</sub>') }] },
         { id: 'tt-3-resistance', type: 'formule', competence: 'Connaître la formule R_th = e / (λ × S) et les unités (m, m², W·m⁻¹·K⁻¹)', faces: [
-          { q: '<p>La formule qui donne la résistance thermique R<sub>th</sub> d\'une paroi en fonction de son épaisseur e, de sa surface S et de la conductivité thermique λ ?</p>' + UNITES,
-            r: formule('R<sub>th</sub> = e / (λ × S)') + unites(`e en m ; S en m<sup>2</sup> ; λ en ${LAM} ; R<sub>th</sub> en ${KW}`) },
-          { q: `<p>Données : l'épaisseur e d'une paroi, en m, sa surface S, en m<sup>2</sup>, et la conductivité thermique λ de son matériau, en ${LAM}.` + QUOI,
-            r: `<p>La <b>résistance thermique R<sub>th</sub></b> de la paroi, en ${KW} :</p>` + formule('R<sub>th</sub> = e / (λ × S)') }] },
-        { id: 'tt-3-isolerL', type: 'formule', competence: 'Connaître les formules qui isolent une grandeur : R = ΔT / Φ ; λ = e / (R × S) ; e = R × λ × S', faces: [
+          { q: '<p>La formule qui donne la résistance thermique R<sub>th</sub> d\'une paroi en fonction de son épaisseur e, de sa surface S et de la conductivité thermique λ ?</p>' + UNITES,
+            r: formule('R<sub>th</sub> = e / (λ × S)') + unites(`e en m ; S en m<sup>2</sup> ; λ en ${LAM} ; R<sub>th</sub> en ${KW}`) },
+          { q: `<p>Données : l'épaisseur e d'une paroi, en m, sa surface S, en m<sup>2</sup>, et la conductivité thermique λ de son matériau, en ${LAM}.` + QUOI,
+            r: `<p>La <b>résistance thermique R<sub>th</sub></b> de la paroi, en ${KW} :</p>` + formule('R<sub>th</sub> = e / (λ × S)') }] },
+        { id: 'tt-3-isolerL', type: 'formule', competence: 'Connaître les formules qui isolent une grandeur : R = ΔT / Φ ; λ = e / (R × S) ; e = R × λ × S', faces: [
           { q: '<p>À partir de la formule qui donne la résistance thermique R<sub>th</sub> en fonction de e, λ et S, exprime la conductivité thermique λ.</p>',
-            r: '<p>R<sub>th</sub> = e / (λ × S), donc :</p>' + formule('λ = e / (R<sub>th</sub> × S)') + unites(`λ en ${LAM} ; e en m ; R<sub>th</sub> en ${KW} ; S en m<sup>2</sup>`) }] },
-        { id: 'tt-3-isolerE', type: 'formule', competence: 'Connaître les formules qui isolent une grandeur : R = ΔT / Φ ; λ = e / (R × S) ; e = R × λ × S', faces: [
+            r: '<p>R<sub>th</sub> = e / (λ × S), donc :</p>' + formule('λ = e / (R<sub>th</sub> × S)') + unites(`λ en ${LAM} ; e en m ; R<sub>th</sub> en ${KW} ; S en m<sup>2</sup>`) }] },
+        { id: 'tt-3-isolerE', type: 'formule', competence: 'Connaître les formules qui isolent une grandeur : R = ΔT / Φ ; λ = e / (R × S) ; e = R × λ × S', faces: [
           { q: '<p>À partir de la formule qui donne la résistance thermique R<sub>th</sub> en fonction de e, λ et S, exprime l\'épaisseur e.</p>',
-            r: '<p>R<sub>th</sub> = e / (λ × S), donc :</p>' + formule('e = R<sub>th</sub> × λ × S') + unites(`e en m ; R<sub>th</sub> en ${KW} ; λ en ${LAM} ; S en m<sup>2</sup>`) }] },
-        { id: 'tt-3-sens', type: 'graphique', competence: 'Donner le flux et son sens en STI2D : Φ positif, ΔT = T_chaud − T_froid, sens à part (vers l\'intérieur quand il fait plus chaud dehors)', outils: ['calculatrice'], faces: [
-          { q: fig(bureau(null, 'Mur d\'un bureau climatisé : intérieur à 24 °C, extérieur à 34 °C ; résistance thermique 0,050 K·W⁻¹')) + '<p>Donne le sens du transfert et calcule Φ.</p><small>Φ compté positivement, comme en STI2D</small>',
-            r: fig(bureau({ sens: 2, txt: 'Φ = 200 W' }, 'Le même mur : flèche du flux de 200 W de l\'extérieur vers l\'intérieur')) +
-              '<p><b>De l\'extérieur vers l\'intérieur</b> : du chaud vers le froid.</p><p>ΔT = T<sub>ext</sub> − T<sub>int</sub> = 34 − 24 = 10 K ; Φ = 10 / 0,050 = <b>200 W</b>.</p>' }] },
+            r: '<p>R<sub>th</sub> = e / (λ × S), donc :</p>' + formule('e = R<sub>th</sub> × λ × S') + unites(`e en m ; R<sub>th</sub> en ${KW} ; λ en ${LAM} ; S en m<sup>2</sup>`) }] },
+        { id: 'tt-3-sens', type: 'graphique', competence: 'Donner le flux et son sens en STI2D : Φ positif, ΔT = T_chaud − T_froid, sens à part (vers l\'intérieur quand il fait plus chaud dehors)', outils: ['calculatrice'], faces: [
+          { q: fig(bureau(null, 'Mur d\'un bureau climatisé : intérieur à 24 °C, extérieur à 34 °C ; résistance thermique 0,050 K·W⁻¹')) + '<p>Donne le sens du transfert et calcule Φ.</p><small>Φ compté positivement, comme en STI2D</small>',
+            r: fig(bureau({ sens: 2, txt: 'Φ = 200 W' }, 'Le même mur : flèche du flux de 200 W de l\'extérieur vers l\'intérieur')) +
+              '<p><b>De l\'extérieur vers l\'intérieur</b> : du chaud vers le froid.</p><p>ΔT = T<sub>ext</sub> − T<sub>int</sub> = 34 − 24 = 10 K ; Φ = 10 / 0,050 = <b>200 W</b>.</p>' }] },
         { id: 'tt-3-unites', type: 'reflexe', competence: 'Convertir e et S en m et en m² avant de calculer R (cm, mm, cm²)', faces: [
-          { q: '<p>Une plaque a 4 cm d\'épaisseur et une surface de 100 cm<sup>2</sup>. Que fais-tu avant de calculer R = e / (λ × S) ?</p>',
-            r: '<p><b>Convertir e en m et S en m<sup>2</sup>.</b></p><p>e = 4 cm = 4 × 10<sup>−2</sup> m ; S = 100 cm<sup>2</sup> = 100 × (10<sup>−2</sup>)<sup>2</sup> = 100 × 10<sup>−4</sup> = 0,01 m<sup>2</sup>.</p>' }] },
+          { q: '<p>Une plaque a 4 cm d\'épaisseur et une surface de 100 cm<sup>2</sup>. Que fais-tu avant de calculer R = e / (λ × S) ?</p>',
+            r: '<p><b>Convertir e en m et S en m<sup>2</sup>.</b></p><p>e = 4 cm = 4 × 10<sup>−2</sup> m ; S = 100 cm<sup>2</sup> = 100 × (10<sup>−2</sup>)<sup>2</sup> = 100 × 10<sup>−4</sup> = 0,01 m<sup>2</sup>.</p>' }] },
       ] },
 
     /* ---------- Module 4 · Parois composées ---------- */
     { id: 'm4', module: 4, titre: 'Parois composées', apres: ['module_4_cours'], cartes: [
-        { id: 'tt-4-serie', type: 'formule', competence: 'Connaître la résistance d\'une paroi en couches accolées : R = R₁ + R₂ + R₃, même surface S', faces: [
-          { q: '<p>La formule qui donne la résistance thermique R d\'une paroi de trois couches accolées en fonction des résistances R<sub>1</sub>, R<sub>2</sub>, R<sub>3</sub> des couches ?</p>' + UNITES,
-            r: formule('R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub>') + unites(`toutes en ${KW} ; R<sub>i</sub> = e<sub>i</sub> / (λ<sub>i</sub> × S)`) + '<p>Toutes les couches ont la <b>même surface S</b>.</p>' },
-          { q: `<p>Données : les résistances thermiques R<sub>1</sub>, R<sub>2</sub> et R<sub>3</sub>, en ${KW}, de trois couches accolées d'une paroi.` + QUOI,
-            r: `<p>La <b>résistance thermique totale R</b> de la paroi, en ${KW} :</p>` + formule('R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub>') }] },
-        { id: 'tt-4-isolant', type: 'methode', competence: 'Calculer l\'épaisseur d\'isolant à ajouter : R_isolant = R visée − R des autres couches, puis e = R_isolant × λ × S', outils: ['crayon', 'calculatrice'], faces: [
-          { q: `<p>Un mur de béton de 10 m<sup>2</sup> a une résistance de 0,016 ${KW}. On veut R = 0,50 ${KW} avec de la laine de verre (λ = 0,040). Quelle épaisseur de laine ?</p><small>Démarche</small>`,
+        { id: 'tt-4-serie', type: 'formule', competence: 'Connaître la résistance d\'une paroi en couches accolées : R = R₁ + R₂ + R₃, même surface S', faces: [
+          { q: '<p>La formule qui donne la résistance thermique R d\'une paroi de trois couches accolées en fonction des résistances R<sub>1</sub>, R<sub>2</sub>, R<sub>3</sub> des couches ?</p>' + UNITES,
+            r: formule('R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub>') + unites(`toutes en ${KW} ; R<sub>i</sub> = e<sub>i</sub> / (λ<sub>i</sub> × S)`) + '<p>Toutes les couches ont la <b>même surface S</b>.</p>' },
+          { q: `<p>Données : les résistances thermiques R<sub>1</sub>, R<sub>2</sub> et R<sub>3</sub>, en ${KW}, de trois couches accolées d'une paroi.` + QUOI,
+            r: `<p>La <b>résistance thermique totale R</b> de la paroi, en ${KW} :</p>` + formule('R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub>') }] },
+        { id: 'tt-4-isolant', type: 'methode', competence: 'Calculer l\'épaisseur d\'isolant à ajouter : R_isolant = R visée − R des autres couches, puis e = R_isolant × λ × S', outils: ['crayon', 'calculatrice'], faces: [
+          { q: `<p>Un mur de béton de 10 m<sup>2</sup> a une résistance de 0,016 ${KW}. On veut R = 0,50 ${KW} avec de la laine de verre (λ = 0,040). Quelle épaisseur de laine ?</p><small>Démarche</small>`,
             r: `<ol><li>R<sub>laine</sub> = R − R<sub>béton</sub> = 0,50 − 0,016 = 0,484 ${KW}.</li><li>e = R<sub>laine</sub> × λ × S = 0,484 × 0,040 × 10 ≈ <b>0,19 m = 19 cm</b>.</li></ol>` }] },
       ] },
   ]);

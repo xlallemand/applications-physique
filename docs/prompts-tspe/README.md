@@ -1,6 +1,6 @@
 # Prompts des applications de Terminale spécialité
 
-Un fichier par chapitre ; les instructions communes sont dans `00-commun.md`, lu par chaque prompt.
+Un fichier par chapitre (`chapitre-NN.md`, NN = numéro du dossier du cours dans `Cours-TSpe`) et un fichier par application annexe ou outil commun. Les instructions communes, les outils partagés et **l'avancement** sont dans `00-commun.md`, lu par chaque prompt.
 
 ## Utilisation
 
@@ -8,24 +8,24 @@ Un fichier par chapitre ; les instructions communes sont dans `00-commun.md`, lu
 2. Écris seulement :
    > Lis `docs/prompts-tspe/chapitre-NN.md` et exécute-le.
 
-   Pour un chapitre en deux étapes (maquettes à valider, `00-commun.md` §5) :
+   Pour un chapitre en deux étapes (maquettes à valider, `00-commun.md` §8 : chapitres 12 et 15) :
    > Lis `docs/prompts-tspe/chapitre-NN.md` et exécute l'étape 1.
 
    puis, dans une nouvelle session, après avoir essayé les maquettes :
    > Lis `docs/prompts-tspe/chapitre-NN.md` et exécute l'étape 2. Maquette retenue : … Remarques : …
+3. Une session par prompt. La session travaille et pousse sur la branche `TSpe`, puis met à jour l'avancement (`00-commun.md` §10).
 
-## Chapitres
+## Ordre
 
-Le nom de chaque application est le titre du chapitre avec son numéro (celui de `competences.md`), le même dans l'application et dans le portail (`index.html`). Le dossier garde un nom court, sans numéro (`00-commun.md` §3).
+`outils-communs.md` d'abord. Puis les chapitres dans l'ordre ; une application annexe se fait avant le chapitre qui la cite :
 
-| Nom de l'application | Fichier | Dossier | Modules particuliers |
-|---|---|---|---|
-| Nomenclature | `chapitre-02.md` | `nomenclature/` | **en deux étapes** : maquettes puis application ; **moteur de dessin des molécules** `ORGA` (`assets/orga*.js`) |
+| Prompt annexe | Avant |
+|---|---|
+| `outils-communs.md` (éditeur d'équations partagé, pages externes ↗) | tous (en premier) |
+| `bilan-forces.md` | 07 |
+| `travail-force.md` | 09 |
+| `decroissance-radioactive.md` | 16 |
+| `gaz-parfait.md` | 17 |
+| `modele-oeil.md` | 19 |
 
-Les autres chapitres s'ajoutent à ce tableau quand leur cours est dans `Cours-TSpe` : un prompt par chapitre, sur le plan de `chapitre-02.md`.
-
-## Outils partagés
-
-Le premier chapitre qui a besoin d'un outil le crée dans `assets/` ; les suivants le réutilisent.
-
-- `assets/orga.js`, `assets/orga-dessin.js`, `assets/orga.css` (espace de noms `ORGA`) : molécules organiques (trois écritures, éditeur, groupes caractéristiques, nomenclature). Créé par le **chapitre 2**, à faire avant tout chapitre qui dessine des molécules (spectroscopie, acides et bases, titrages).
+Chapitres déjà faits : 2 (Nomenclature, avec `chapitre-02.md`) et 5 (Cinématique, sans prompt).

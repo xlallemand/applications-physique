@@ -22,7 +22,7 @@
   /* ---------- Plan de l'application (voir assets/sommaire.js) ---------- */
   const PLAN = [
     { n: 1, titre: 'Schéma de fonctionnement d\'une pile', desc: 'Anode et cathode, sens de circulation des charges dans les fils et dans le pont salin, sens de I et des e<sup>−</sup>, équation de la pile', fiche: 'fiche_1',
-      parties: [{ nom: 'Schéma d\'une pile', cours: 'module_1_cours', entrainement: 'module_1_pile', noms: { entrainement: 'Entraînement : schéma d\'une pile' } }] },
+      parties: [{ nom: 'Schéma d\'une pile', cours: 'module_1_cours', entrainement: 'module_1_pile', noms: { entrainement: 'Entraînement : schéma d\'une pile' } }] },
   ];
   // progression gardée dans le navigateur : localStorage « pile-progression »
   window.SOM.init({ nom: 'Schéma d\'une pile', id: 'pile', plan: PLAN });

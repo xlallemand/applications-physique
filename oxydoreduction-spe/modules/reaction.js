@@ -129,7 +129,7 @@
     const especes = [{ f: o.a.ox, reactif: true, de: o.a }, { f: o.a.red, de: o.a }, { f: o.b.ox, de: o.b }, { f: o.b.red, reactif: true, de: o.b }];
     return {
       type: 'perso', outil: 'reactifs', o,
-      q: o.q || 'Entoure les deux réactifs dans les couples : touche chacun d\'eux.',
+      q: o.q || 'Entoure les deux réactifs dans les couples : touche chacun d\'eux.',
       solution: o.solution != null ? o.solution
         : `<p>Les réactifs sont <span class="ox-entoure">${html(o.a.ox)}</span> (couple ${couple(o.a)}) et <span class="ox-entoure">${html(o.b.red)}</span> (couple ${couple(o.b)}).</p>`,
       monter(zone, api) {
@@ -152,11 +152,11 @@
         bVal.onclick = () => {
           if (api.fini()) return;
           const pris = especes.filter(x => bs.find(b => b.dataset.f === x.f).getAttribute('aria-pressed') === 'true');
-          if (pris.length !== 2) { secouer(box); api.message('Entoure exactement deux espèces : les deux réactifs, un dans chaque couple.'); return; }
+          if (pris.length !== 2) { secouer(box); api.message('Entoure exactement deux espèces : les deux réactifs, un dans chaque couple.'); return; }
           const faux = pris.find(x => !x.reactif);
           if (!faux) { terminer(); api.reussi(); return; }
           const r = faux.de === o.a ? o.a.ox : o.b.red;
-          api.erreur(`${html(faux.f)} n'est pas un réactif : dans cette réaction, il se forme à partir de ${html(r)}. Les réactifs sont les deux espèces mises en présence au départ : relis l'énoncé.`);
+          api.erreur(`${html(faux.f)} n'est pas un réactif : dans cette réaction, il se forme à partir de ${html(r)}. Les réactifs sont les deux espèces mises en présence au départ : relis l'énoncé.`);
           secouer(box);
         };
         return {
@@ -201,11 +201,11 @@
     const ox = o.donne === 'ox', R = roles(ox);
     const G = ox ? o.a.ox : o.b.red, X = ox ? o.b.red : o.a.ox;            // réactif donné, réactif à trouver
     const cG = ox ? o.a : o.b, cX = ox ? o.b : o.a;
-    const regle = `${html(G)} est un <b>${R.nom}</b> : il réagit avec un <b>${R.autre}</b>, celui de l'autre couple`;
+    const regle = `${html(G)} est un <b>${R.nom}</b> : il réagit avec un <b>${R.autre}</b>, celui de l'autre couple`;
     return {
       type: 'perso', outil: 'autre-reactif', o,
-      q: o.q || `${html(G)} est entouré : c'est un des deux réactifs. Touche l'autre réactif.`,
-      solution: `<p>${html(G)} est <b>${R.leNom}</b> du couple ${couple(cG)}. Un ${R.nom} réagit toujours avec un <b>${R.autre}</b> : l'autre réactif est ${R.leAutre} de l'autre couple, <span class="ox-entoure">${html(X)}</span> (couple ${couple(cX)}, écrit ${R.place}).</p>`,
+      q: o.q || `${html(G)} est entouré : c'est un des deux réactifs. Touche l'autre réactif.`,
+      solution: `<p>${html(G)} est <b>${R.leNom}</b> du couple ${couple(cG)}. Un ${R.nom} réagit toujours avec un <b>${R.autre}</b> : l'autre réactif est ${R.leAutre} de l'autre couple, <span class="ox-entoure">${html(X)}</span> (couple ${couple(cX)}, écrit ${R.place}).</p>`,
       monter(zone, api) {
         const box = el('div', 'ox-ent');
         zone.appendChild(box);
@@ -214,8 +214,8 @@
           : `<button type="button" class="ox-ent-b" data-f="${f}">${html(f)}</button>`)).join(BARRE)}</span>`).join('<span class="ox-ent-et">et</span>');
         const bs = Array.from(box.querySelectorAll('button.ox-ent-b'));
         const diag = b => (b.dataset.f === (ox ? o.a.red : o.b.ox)
-          ? `${html(b.dataset.f)} est dans le même couple que ${html(G)} : c'est l'espèce que ${html(G)} devient, pas un réactif. ${regle}.`
-          : `${html(b.dataset.f)} est un ${R.nom}, comme ${html(G)}. Un ${R.nom} ne réagit pas avec un autre ${R.nom} : il réagit avec un <b>${R.autre}</b>. Dans l'autre couple, ${R.leAutre} est écrit ${R.place} (Ox / Red).`);
+          ? `${html(b.dataset.f)} est dans le même couple que ${html(G)} : c'est l'espèce que ${html(G)} devient, pas un réactif. ${regle}.`
+          : `${html(b.dataset.f)} est un ${R.nom}, comme ${html(G)}. Un ${R.nom} ne réagit pas avec un autre ${R.nom} : il réagit avec un <b>${R.autre}</b>. Dans l'autre couple, ${R.leAutre} est écrit ${R.place} (Ox / Red).`);
         return choixUnique(bs, b => b.dataset.f === X, api, diag, box);
       },
     };
@@ -237,7 +237,7 @@
     return {
       type: 'perso', outil: 'bon-couple', o,
       q: o.q || `${html(X)} appartient à deux couples. Touche-le dans le couple où il réagit avec ${html(G)}.`,
-      solution: `<p>${html(G)} est un <b>${R.nom}</b> : il réagit avec un <b>${R.autre}</b>. Ici, ${html(X)} joue donc le rôle <b>${R.deAutre}</b> : on le prend dans le couple <span class="ox-entoure">${couple(cX)}</span>, où il est écrit ${R.place} (Ox / Red). Dans le couple ${couple(L)}, il est ${lAilleurs} : ce couple ne sert pas.</p>`,
+      solution: `<p>${html(G)} est un <b>${R.nom}</b> : il réagit avec un <b>${R.autre}</b>. Ici, ${html(X)} joue donc le rôle <b>${R.deAutre}</b> : on le prend dans le couple <span class="ox-entoure">${couple(cX)}</span>, où il est écrit ${R.place} (Ox / Red). Dans le couple ${couple(L)}, il est ${lAilleurs} : ce couple ne sert pas.</p>`,
       monter(zone, api) {
         const box = el('div', 'ox-ent');
         zone.appendChild(box);
@@ -246,7 +246,7 @@
           deux.map((c, i) => `<span class="ox-ent-c">${[c.ox, c.red].map(f => (f === X
             ? `<button type="button" class="ox-ent-b" data-i="${i}" aria-label="${texte(html(X))} dans le couple ${texte(couple(c))}">${html(f)}</button>` : fixeHTML(f))).join(BARRE)}</span>`).join('<span class="ox-ent-et">ou</span>');
         const bs = Array.from(box.querySelectorAll('button.ox-ent-b'));
-        const diag = () => `Dans le couple ${couple(L)}, ${html(X)} est <b>${lAilleurs}</b> (écrit ${placeL}). Or ${html(G)} est un <b>${R.nom}</b> : il réagit avec un <b>${R.autre}</b>. Prends ${html(X)} dans le couple où il est ${R.autre} (écrit ${R.place}).`;
+        const diag = () => `Dans le couple ${couple(L)}, ${html(X)} est <b>${lAilleurs}</b> (écrit ${placeL}). Or ${html(G)} est un <b>${R.nom}</b> : il réagit avec un <b>${R.autre}</b>. Prends ${html(X)} dans le couple où il est ${R.autre} (écrit ${R.place}).`;
         return choixUnique(bs, b => deux[+b.dataset.i] === cX, api, diag, box);
       },
     };
@@ -260,9 +260,9 @@
     const orA = r.A, orB = inverser(r.B);
     return {
       type: 'perso', outil: 'multiplier', o,
-      q: o.q || 'Par combien multiplies-tu chaque demi-équation pour qu\'elles échangent le même nombre d\'électrons ? Règle les nombres avec les flèches.',
+      q: o.q || 'Par combien multiplies-tu chaque demi-équation pour qu\'elles échangent le même nombre d\'électrons ? Règle les nombres avec les flèches.',
       solution: o.solution != null ? o.solution
-        : `<p>${r.mA} × ${r.nA} = ${r.mB} × ${r.nB} = ${r.L} électrons : on multiplie la demi-équation du couple ${couple(o.a)} par ${r.mA} et celle du couple ${couple(o.b)} par ${r.mB}.</p>`,
+        : `<p>${r.mA} × ${r.nA} = ${r.mB} × ${r.nB} = ${r.L} électrons : on multiplie la demi-équation du couple ${couple(o.a)} par ${r.mA} et celle du couple ${couple(o.b)} par ${r.mB}.</p>`,
       monter(zone, api) {
         const k = { A: 1, B: 1 };
         const box = el('div', 'ox-rx');
@@ -285,7 +285,7 @@
           });
           const a = box.querySelector('.ox-rx-aide'), eA = k.A * r.nA, eB = k.B * r.nB;
           a.classList.toggle('hidden', !ai.ouvert || fini);
-          a.innerHTML = eA === eB ? `☛ Les deux demi-équations échangent ${elec(eA)}.` : `☛ ${elec(eA)} d'un côté, ${elec(eB)} de l'autre : il en faut autant.`;
+          a.innerHTML = eA === eB ? `☛ Les deux demi-équations échangent ${elec(eA)}.` : `☛ ${elec(eA)} d'un côté, ${elec(eB)} de l'autre : il en faut autant.`;
         }
         const bVal = boutonValider(zone);
         const ai = aides(bVal.parentElement, o, api, maj);
@@ -295,9 +295,9 @@
           const eA = k.A * r.nA, eB = k.B * r.nB;
           if (eA === eB && eA === r.L) { terminer(); api.reussi(); return; }
           let m;
-          if (eA === eB) m = `Les électrons sont bien égaux (${eA} de chaque côté), mais prends les plus petits multiplicateurs : ${r.L} électrons suffisent.`;
-          else if (k.A === r.mB && k.B === r.mA) m = `Tu as échangé les multiplicateurs : avec tes valeurs, la première demi-équation échange ${elec(eA)} et la seconde ${elec(eB)}.`;
-          else m = `Avec tes valeurs, la demi-équation du couple ${couple(o.a)} échange ${elec(eA)} et celle du couple ${couple(o.b)} ${elec(eB)}. Il en faut autant : cherche le plus petit multiple commun de ${r.nA} et ${r.nB}.`;
+          if (eA === eB) m = `Les électrons sont bien égaux (${eA} de chaque côté), mais prends les plus petits multiplicateurs : ${r.L} électrons suffisent.`;
+          else if (k.A === r.mB && k.B === r.mA) m = `Tu as échangé les multiplicateurs : avec tes valeurs, la première demi-équation échange ${elec(eA)} et la seconde ${elec(eB)}.`;
+          else m = `Avec tes valeurs, la demi-équation du couple ${couple(o.a)} échange ${elec(eA)} et celle du couple ${couple(o.b)} ${elec(eB)}. Il en faut autant : cherche le plus petit multiple commun de ${r.nA} et ${r.nB}.`;
           api.erreur(m);
           secouer(box);
         };
@@ -316,22 +316,22 @@
     const { a, b } = r, F = r.finale;
     const reactifs = [a.ox, b.red], produits = [a.red, b.ox];
     const nom = f => html(f);
-    if (T.some(t => t.f === E)) return { msg: 'Les électrons ne figurent jamais dans l\'équation d\'une réaction : tous ceux que cède le réducteur sont captés par l\'oxydant. Égalise les électrons des deux demi-équations (multiplicateurs), puis additionne-les : ils se simplifient.' };
+    if (T.some(t => t.f === E)) return { msg: 'Les électrons ne figurent jamais dans l\'équation d\'une réaction : tous ceux que cède le réducteur sont captés par l\'oxydant. Égalise les électrons des deux demi-équations (multiplicateurs), puis additionne-les : ils se simplifient.' };
     const deux = T.find(t => T.some(u => u !== t && u.f === t.f && u.cote !== t.cote));
-    if (deux) return { msg: `${nom(deux.f)} figure des deux côtés de la flèche : simplifie-le, en retirant le même nombre de chaque côté.` };
+    if (deux) return { msg: `${nom(deux.f)} figure des deux côtés de la flèche : simplifie-le, en retirant le même nombre de chaque côté.` };
     const inconnu = T.find(t => !F.some(x => x.f === t.f));
-    if (inconnu) return { msg: `${nom(inconnu.f)} ne figure pas dans l'équation de cette réaction : additionne les deux demi-équations multipliées, puis simplifie ce qui figure des deux côtés.` };
+    if (inconnu) return { msg: `${nom(inconnu.f)} ne figure pas dans l'équation de cette réaction : additionne les deux demi-équations multipliées, puis simplifie ce qui figure des deux côtés.` };
     for (const x of F) {
       const t = T.find(u => u.f === x.f);
       const role = reactifs.includes(x.f) ? 'reactif' : produits.includes(x.f) ? 'produit' : null;
       if (!t) {
-        return { msg: role === 'reactif' ? `Il manque ${nom(x.f)} : c'est un réactif.` : role === 'produit' ? `Il manque ${nom(x.f)} : il se forme pendant la réaction.`
-          : `Il manque ${nom(x.f)} : additionne les deux demi-équations multipliées, puis simplifie ce qui figure des deux côtés.` };
+        return { msg: role === 'reactif' ? `Il manque ${nom(x.f)} : c'est un réactif.` : role === 'produit' ? `Il manque ${nom(x.f)} : il se forme pendant la réaction.`
+          : `Il manque ${nom(x.f)} : additionne les deux demi-équations multipliées, puis simplifie ce qui figure des deux côtés.` };
       }
       if (t.cote !== x.cote) {
-        return { msg: role === 'reactif' ? `${nom(x.f)} est un réactif : il s'écrit à gauche de la flèche.`
-          : role === 'produit' ? `${nom(x.f)} se forme pendant la réaction : c'est un produit, il s'écrit à droite de la flèche.`
-            : `${nom(x.f)} n'est pas du bon côté : dans la somme des deux demi-équations, il y en a davantage ${x.cote === 'g' ? 'à gauche' : 'à droite'}, c'est de ce côté qu'il en reste après simplification.` };
+        return { msg: role === 'reactif' ? `${nom(x.f)} est un réactif : il s'écrit à gauche de la flèche.`
+          : role === 'produit' ? `${nom(x.f)} se forme pendant la réaction : c'est un produit, il s'écrit à droite de la flèche.`
+            : `${nom(x.f)} n'est pas du bon côté : dans la somme des deux demi-équations, il y en a davantage ${x.cote === 'g' ? 'à gauche' : 'à droite'}, c'est de ce côté qu'il en reste après simplification.` };
       }
     }
     const faux = F.filter(x => T.find(u => u.f === x.f).coef !== x.coef);
@@ -344,14 +344,14 @@
     const ns = faux.find(x => (x.f === HP || x.f === EAU) && r.somme.filter(u => u.f === x.f).length > 1 && r.somme.some(u => u.f === x.f && u.coef === v(x.f)));
     if (ns) {
       const g = r.somme.find(u => u.f === ns.f && u.cote === 'g').coef, d = r.somme.find(u => u.f === ns.f && u.cote === 'd').coef;
-      return { msg: `Après l'addition, ${nom(ns.f)} figure des deux côtés de la flèche (${g} à gauche, ${d} à droite) : il faut simplifier.`, faux: fs };
+      return { msg: `Après l'addition, ${nom(ns.f)} figure des deux côtés de la flèche (${g} à gauche, ${d} à droite) : il faut simplifier.`, faux: fs };
     }
     // espèce d'un couple non multipliée
     const mult = f => ([a.ox, a.red].includes(f) ? r.mA : [b.ox, b.red].includes(f) ? r.mB : 1);
     const nm = faux.find(x => mult(x.f) > 1 && v(x.f) * mult(x.f) === x.coef);
     if (nm) {
       const c = [a.ox, a.red].includes(nm.f) ? a : b;
-      return { msg: `N'oublie pas de multiplier toute la demi-équation du couple ${couple(c)} : ${nom(nm.f)} est multiplié aussi.`, faux: fs };
+      return { msg: `N'oublie pas de multiplier toute la demi-équation du couple ${couple(c)} : ${nom(nm.f)} est multiplié aussi.`, faux: fs };
     }
     return { msg: `${faux.length > 1 ? 'Les nombres en rouge sont faux' : 'Le nombre en rouge est faux'}. Multiplie les deux demi-équations pour qu'elles échangent le même nombre d'électrons, additionne-les, puis simplifie ce qui figure des deux côtés.`, faux: fs };
   }
@@ -368,8 +368,8 @@
     return {
       type: 'perso', outil: mode, o,
       q: o.q || (mode === 'simplifier'
-        ? 'Voici la somme membre à membre des deux demi-équations multipliées. Simplifie : touche une espèce présente des deux côtés de la flèche (les électrons d\'abord).'
-        : 'Écris l\'équation de la réaction : règle le nombre stœchiométrique de chaque espèce.'),
+        ? 'Voici la somme membre à membre des deux demi-équations multipliées. Simplifie : touche une espèce présente des deux côtés de la flèche (les électrons d\'abord).'
+        : 'Écris l\'équation de la réaction : règle le nombre stœchiométrique de chaque espèce.'),
       solution: o.solution != null ? o.solution : `<p class="ox-eqn">${r.html}</p>`,
       monter(zone, api) { return mode === 'simplifier' ? simplifier(zone, api) : coefficients(zone, api); },
     };
@@ -389,14 +389,14 @@
       function rendre() {
         const m = c => trier(T.filter(t => t.cote === c)).map(terme).join('<span class="ox-plus">+</span>');
         box.innerHTML = `<div class="ox-rx-somme"><div class="ox-rx-membre">${m('g')}</div><span class="ox-rx-fl">→</span><div class="ox-rx-membre">${m('d')}</div></div>` +
-          (ai.ouvert && !fini ? `<p class="ox-rx-aide">☛ ${T.some(double) ? 'Les espèces surlignées figurent des deux côtés de la flèche.' : 'Plus aucune espèce ne figure des deux côtés : valide.'}</p>` : '');
+          (ai.ouvert && !fini ? `<p class="ox-rx-aide">☛ ${T.some(double) ? 'Les espèces surlignées figurent des deux côtés de la flèche.' : 'Plus aucune espèce ne figure des deux côtés : valide.'}</p>` : '');
         box.querySelectorAll('.ox-ts').forEach(b => {
           b.onclick = () => {
             if (fini || api.fini()) return;
             const t = T[+b.dataset.i];
             if (!reste(t)) return;
             const u = T.find(x => x !== t && x.f === t.f && x.cote !== t.cote && reste(x) > 0);
-            if (!u) { api.erreur(`${html(t.f)} ne figure que d'un seul côté de la flèche : on ne simplifie que ce qui est présent des deux côtés.`); secouer(b); return; }
+            if (!u) { api.erreur(`${html(t.f)} ne figure que d'un seul côté de la flèche : on ne simplifie que ce qui est présent des deux côtés.`); secouer(b); return; }
             const k = Math.min(reste(t), reste(u));
             t.barre += k; u.barre += k;
             api.effacer(); rendre();
@@ -415,8 +415,8 @@
         const d = T.find(t => t.f === E && double(t)) || T.find(double);
         if (!d) { terminer(); api.reussi(); return; }
         api.erreur(d.f === E
-          ? 'Les électrons figurent encore des deux côtés : ils doivent disparaître de l\'équation. Simplifie-les.'
-          : `${html(d.f)} figure encore des deux côtés de la flèche : simplifie-le.`);
+          ? 'Les électrons figurent encore des deux côtés : ils doivent disparaître de l\'équation. Simplifie-les.'
+          : `${html(d.f)} figure encore des deux côtés de la flèche : simplifie-le.`);
         secouer(box);
       };
       rendre();
@@ -515,13 +515,13 @@
     // consignes des étapes du mode guidé (texte, puis message une fois l'étape validée ou déjà faite)
     const ETAPES = [
       { titre: 'Les deux demi-équations, dans le sens de la réaction',
-        texte: `Écris chaque demi-équation avec le <b>réactif à gauche du signe =</b> : glisse les espèces de la réserve, puis règle les nombres avec les boutons ▲ ▼. Celle de ${html(o.a.ox)} est une réduction (électrons à gauche), celle de ${html(o.b.red)} une oxydation (électrons à droite). Une demi-équation juste est marquée « ✓ juste ».`,
+        texte: `Écris chaque demi-équation avec le <b>réactif à gauche du signe =</b> : glisse les espèces de la réserve, puis règle les nombres avec les boutons ▲ ▼. Celle de ${html(o.a.ox)} est une réduction (électrons à gauche), celle de ${html(o.b.red)} une oxydation (électrons à droite). Une demi-équation juste est marquée « ✓ juste ».`,
         fait: 'les deux demi-équations sont justes.', donne: 'les deux demi-équations sont écrites dans le sens de la réaction.' },
       { titre: 'Égaliser les électrons',
-        texte: 'Règle le <b>multiplicateur ×</b> de chaque demi-équation : les deux doivent échanger <b>le même nombre d\'électrons</b>, le plus petit possible.',
-        fait: `les deux demi-équations échangent ${elec(r.L)}.`, donne: `les demi-équations sont multipliées : elles échangent ${elec(r.L)}.` },
+        texte: 'Règle le <b>multiplicateur ×</b> de chaque demi-équation : les deux doivent échanger <b>le même nombre d\'électrons</b>, le plus petit possible.',
+        fait: `les deux demi-équations échangent ${elec(r.L)}.`, donne: `les demi-équations sont multipliées : elles échangent ${elec(r.L)}.` },
       { titre: 'L\'équation de la réaction',
-        texte: 'Additionne les deux demi-équations multipliées : glisse chaque espèce de la réserve du bon côté de la flèche et règle les nombres. Simplifie ce qui figure des deux côtés : il ne reste <b>aucun électron</b>.',
+        texte: 'Additionne les deux demi-équations multipliées : glisse chaque espèce de la réserve du bon côté de la flèche et règle les nombres. Simplifie ce qui figure des deux côtés : il ne reste <b>aucun électron</b>.',
         fait: 'l\'équation de la réaction est juste.' },
     ];
     const blocEtape = k => (guide && k <= jusqua ? `<div class="ox-rxo-g" data-e="${k}">
@@ -644,7 +644,7 @@
       if (avecE && k !== 'R') {
         const n = nbElec(k), tot = n * Q.m, autre = k === 'A' ? 'B' : 'A';
         const egal = tot > 0 && tot === nbElec(autre) * EQ[autre].m;
-        cpt.insertAdjacentHTML('beforeend', `<span class="ox-cpt${egal ? ' ok' : ''}"><b>électrons échangés</b> ${Q.m > 1 ? `${Q.m} × ${n} = ` : ''}${tot}${egal ? ' : autant que l\'autre' : ''}</span>`);
+        cpt.insertAdjacentHTML('beforeend', `<span class="ox-cpt${egal ? ' ok' : ''}"><b>électrons échangés</b> ${Q.m > 1 ? `${Q.m} × ${n} = ` : ''}${tot}${egal ? ' : autant que l\'autre' : ''}</span>`);
       }
     }
     // une équation vient de changer : messages effacés, aides à jour, étape contrôlée (mode guidé)
@@ -735,7 +735,7 @@
         const eA = EQ.A.m * r.nA, eB = EQ.B.m * r.nB;
         // électrons égaux mais trop nombreux : on le dit, sans compter d'erreur
         bloc(1).querySelector('.ox-rxo-g-m').innerHTML = eA === eB && eA > r.L
-          ? `Les deux demi-équations échangent ${elec(eA)} : c'est bien autant, mais prends les plus petits multiplicateurs possibles.` : '';
+          ? `Les deux demi-équations échangent ${elec(eA)} : c'est bien autant, mais prends les plus petits multiplicateurs possibles.` : '';
         if (eA === eB && eA === r.L) etapeFaite();
       } else if (etape === 2 && EQ.R.T.length && !diagReaction(r, EQ.R.T)) etapeFaite();
     }
@@ -761,7 +761,7 @@
         b.classList.toggle('avenir', k > etape);
         b.querySelector('.ox-rxo-g-n').textContent = k < etape ? '✓' : k + 1;
         b.querySelector('.ox-rxo-g-l').innerHTML = k < etape
-          ? (k < depart ? `<b>Étape ${k + 1} déjà faite</b> : ${ETAPES[k].donne}` : `<b>Étape ${k + 1} validée</b> : ${ETAPES[k].fait}`)
+          ? (k < depart ? `<b>Étape ${k + 1} déjà faite</b> : ${ETAPES[k].donne}` : `<b>Étape ${k + 1} validée</b> : ${ETAPES[k].fait}`)
           : `<b>Étape ${k + 1} · ${ETAPES[k].titre}</b>`;
         b.querySelector('.ox-rxo-g-x').innerHTML = k === etape ? ETAPES[k].texte : '';
         if (k !== etape) b.querySelector('.ox-rxo-g-m').innerHTML = '';
@@ -785,14 +785,14 @@
       if (k === 0) {
         return ordre.map(K => {
           const Q = EQ[K], inv = Q.sens === 'ox', T = reel(window.DEMI.solution(Q.cp).etapes[3], inv);
-          return `<p>Couple ${couple(Q.cp)} : le réactif ${html(inv ? Q.cp.red : Q.cp.ox)} va à gauche, c'est une ${inv ? 'oxydation' : 'réduction'}. Glisse à gauche du signe = : ${membre(T, 'g')} ; à droite : ${membre(T, 'd')}. Règle chaque nombre avec ▲ ▼ : ${window.DEMI.ecrire(T, '=')}.</p>`;
+          return `<p>Couple ${couple(Q.cp)} : le réactif ${html(inv ? Q.cp.red : Q.cp.ox)} va à gauche, c'est une ${inv ? 'oxydation' : 'réduction'}. Glisse à gauche du signe = : ${membre(T, 'g')} ; à droite : ${membre(T, 'd')}. Règle chaque nombre avec ▲ ▼ : ${window.DEMI.ecrire(T, '=')}.</p>`;
         }).join('');
       }
       // 2. les multiplicateurs : plus petit multiple commun des deux nombres d'électrons
       if (k === 1) {
         const n = K => (K === 'A' ? r.nA : r.nB), m = K => (K === 'A' ? r.mA : r.mB);
         const regle = K => `${m(K) > 1 ? 'règle' : 'laisse'} le multiplicateur de la demi-équation du couple ${couple(EQ[K].cp)} sur <b>${m(K)}</b> (${m(K)} × ${n(K)} = ${r.L})`;
-        return `<p>La demi-équation du couple ${couple(o.a)} échange ${elec(r.nA)}, celle du couple ${couple(o.b)} ${elec(r.nB)}. Le plus petit multiple commun de ${r.nA} et ${r.nB} est ${r.L} : ${ordre.map(regle).join(' ; ')}.</p>`;
+        return `<p>La demi-équation du couple ${couple(o.a)} échange ${elec(r.nA)}, celle du couple ${couple(o.b)} ${elec(r.nB)}. Le plus petit multiple commun de ${r.nA} et ${r.nB} est ${r.L} : ${ordre.map(regle).join(' ; ')}.</p>`;
       }
       // 3. l'équation : ce qui se simplifie dans la somme, puis chaque espèce et son nombre
       const nb = (f, c) => r.somme.filter(t => t.f === f && t.cote === c).reduce((x, t) => x + t.coef, 0);
@@ -800,10 +800,10 @@
         const g = nb(f, 'g'), d = nb(f, 'd');
         if (!g || !d) return '';
         if (g === d) return `Les ${kf(g, f)} de chaque côté se simplifient.`;
-        return `${kf(g, f)} à gauche et ${kf(d, f)} à droite : il en reste ${Math.abs(g - d)} ${g > d ? 'à gauche' : 'à droite'}.`;
+        return `${kf(g, f)} à gauche et ${kf(d, f)} à droite : il en reste ${Math.abs(g - d)} ${g > d ? 'à gauche' : 'à droite'}.`;
       }).filter(Boolean);
       return `<p>Additionne les deux demi-équations multipliées, puis simplifie. ${simpl.join(' ')}</p>
-        <p>Glisse à gauche de la flèche : ${membre(r.finale, 'g')} ; à droite : ${membre(r.finale, 'd')}. Règle chaque nombre avec ▲ ▼ : ${r.html}.</p>`;
+        <p>Glisse à gauche de la flèche : ${membre(r.finale, 'g')} ; à droite : ${membre(r.finale, 'd')}. Règle chaque nombre avec ▲ ▼ : ${r.html}.</p>`;
     }
     zone.querySelectorAll('.ox-rxo-g-aide').forEach(a => {
       const b = a.querySelector('button'), d = a.querySelector('.ox-rxo-g-ad'), k = +a.parentElement.dataset.e;
@@ -830,7 +830,7 @@
       $('.ox-rxo-valider').onclick = () => {
         if (fini || (api && api.fini())) return;
         if (!EQ.R.T.length) {
-          if (api) api.message('Écris l\'équation de la réaction : glisse les espèces de la réserve de chaque côté de la flèche, puis règle les nombres.');
+          if (api) api.message('Écris l\'équation de la réaction : glisse les espèces de la réserve de chaque côté de la flèche, puis règle les nombres.');
           secouer(ligne('R'));
           return;
         }

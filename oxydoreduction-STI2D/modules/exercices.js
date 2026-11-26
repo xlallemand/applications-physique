@@ -40,7 +40,7 @@
   const E = 'e<sup>−</sup>', H = 'H<sup>+</sup>', EAU = 'H<sub>2</sub>O';
   const calc = h => `<p class="ph-calc">${h}</p>`;
   const c = h => `<span class="c">${h}</span>`;
-  const donnees = l => `<p class="ph-donnees">Données : ${l.join(' ; ')}.</p>`;
+  const donnees = l => `<p class="ph-donnees">Données : ${l.join(' ; ')}.</p>`;
   // fabriques de parties
   const choix = (q, options, bonne, correction, opts) => Object.assign({ type: 'choix', q, options, bonne, correction, colonne: options.some(x => x.label.replace(/<[^>]+>/g, '').length > 24) }, opts);
   const nombre = (q, label, valeur, unite, correction, opts) => Object.assign({ type: 'nombre', q, label, valeur, unite, correction, signe: false, rel: .02 }, opts);

@@ -280,13 +280,13 @@
       const manque = k => (this.n(k) === 0 ? `il n'y a plus de ${fH(c.r[k])}` : `il faudrait ${c.c[k]} ${fH(c.r[k])}, il n'en reste que ${this.n(k)}`);
       const noms = lim.map(k => `<b>${fH(c.r[k])}</b>`);
       const tousNuls = c.r.every((_, k) => this.n(k) === 0);
-      msg.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">La réaction s'arrête</b> : ${lim.map(manque).join(' et ')}.</p>` +
+      msg.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">La réaction s'arrête</b> : ${lim.map(manque).join(' et ')}.</p>` +
         (lim.length > 1
-          ? `<p>${noms.slice(0, -1).join(', ')} et ${noms[noms.length - 1]} sont épuisés en même temps : ${lim.length > 2 ? 'ils sont tous' : 'les deux sont'} <b>réactifs limitants</b>. La réaction a eu lieu ${this.x} fois.</p>` +
-            (tousNuls ? `<p>Il ne reste aucun réactif : on dit que les réactifs ont été introduits dans les <b>proportions stœchiométriques</b>.</p>` : '')
+          ? `<p>${noms.slice(0, -1).join(', ')} et ${noms[noms.length - 1]} sont épuisés en même temps : ${lim.length > 2 ? 'ils sont tous' : 'les deux sont'} <b>réactifs limitants</b>. La réaction a eu lieu ${this.x} fois.</p>` +
+            (tousNuls ? `<p>Il ne reste aucun réactif : on dit que les réactifs ont été introduits dans les <b>proportions stœchiométriques</b>.</p>` : '')
           : `<p>${noms[0]} est le <b>réactif limitant</b>. La réaction a eu lieu ${this.x} fois.</p>`) + '</div>';
     } else if (this.x > 0) {
-      msg.innerHTML = `<p class="av-guide">À chaque fois : ${c.r.map((f, k) => `<b>−${c.c[k]}</b> ${fH(f)}`).join(', ')} ; ${c.p.map((f, j) => `<b>+${c.c[j + nR]}</b> ${fH(f)}`).join(', ')}.</p>`;
+      msg.innerHTML = `<p class="av-guide">À chaque fois : ${c.r.map((f, k) => `<b>−${c.c[k]}</b> ${fH(f)}`).join(', ')} ; ${c.p.map((f, j) => `<b>+${c.c[j + nR]}</b> ${fH(f)}`).join(', ')}.</p>`;
     } else msg.innerHTML = '';
   };
   Simulation.prototype.histo = function () {
@@ -390,11 +390,11 @@
       juste: (ex, k, w) => egal(w.valeur(), ex.cfg.n0[k]),
       solution: (ex, k, w) => w.fixer(ex.cfg.n0[k]),
       texte: (ex, k, w) => (w.vide && w.vide() ? '…' : isFinite(w.valeur()) ? fmt(w.valeur(), ex.cfg.mode) : '?'),
-      aide: () => "Recopie les quantités données dans l'énoncé. Au départ, il n'y a pas encore de produits : leur quantité est 0.",
+      aide: () => "Recopie les quantités données dans l'énoncé. Au départ, il n'y a pas encore de produits : leur quantité est 0.",
     },
     pont: {
       titre: 'À chaque fois que la réaction a lieu',
-      consigne: () => 'Combien de molécules disparaissent (−) ou apparaissent (+) à chaque fois que la réaction a lieu ?',
+      consigne: () => 'Combien de molécules disparaissent (−) ou apparaissent (+) à chaque fois que la réaction a lieu ?',
       saisies(ex) {
         return ex.k.esp.map((f, k) => ({ lab: fH(f), w: expression({ x: fH(f), onChange: () => ex.apercu('pont') }) }));
       },
@@ -405,28 +405,28 @@
     },
     cours: {
       titre: 'État en cours (avancement x)',
-      consigne: g => g ? 'Complète la ligne « en cours » : choisis le signe et le nombre devant x.' : 'État en cours',
+      consigne: g => g ? 'Complète la ligne « en cours » : choisis le signe et le nombre devant x.' : 'État en cours',
       saisies(ex) {
         return ex.k.esp.map((f, k) => ({ lab: fH(f), w: expression({ avant: fmt(ex.cfg.n0[k], ex.cfg.mode), onChange: () => ex.apercu('cours') }) }));
       },
       juste: (ex, k, w) => { const v = w.valeur(); return v.signe === ex.k.signe(k) && v.coef === ex.cfg.c[k]; },
       solution: (ex, k, w) => w.fixer({ signe: ex.k.signe(k), coef: ex.cfg.c[k] }),
       texte: (ex, k, w) => { const v = w.valeur(); return `${fmt(ex.cfg.n0[k], ex.cfg.mode)} ${v.signe || '?'} ${coefX(v.coef)}x`; },
-      aide: () => "Pour un réactif : n initial <b>−</b> nombre stœchiométrique × x. Pour un produit : n initial <b>+</b> nombre stœchiométrique × x.",
+      aide: () => "Pour un réactif : n initial <b>−</b> nombre stœchiométrique × x. Pour un produit : n initial <b>+</b> nombre stœchiométrique × x.",
     },
     hyp: {
       titre: 'Les deux hypothèses',
-      consigne: g => g ? 'Pour chaque réactif, suppose qu\'il est le réactif limitant : sa quantité finale est nulle. Calcule x<sub>max</sub>.' : 'Hypothèses',
+      consigne: g => g ? 'Pour chaque réactif, suppose qu\'il est le réactif limitant : sa quantité finale est nulle. Calcule x<sub>max</sub>.' : 'Hypothèses',
       saisies(ex) {
         return ex.cfg.r.map((f, k) => ({ lab: fH(f), w: champ(ex.cfg.mode, { label: 'xmax si ' + f + ' est limitant' }), hyp: true }));
       },
       juste: (ex, k, w) => egal(w.valeur(), ex.k.xm[k]),
       solution: (ex, k, w) => w.fixer(ex.k.xm[k]),
-      aide: () => "Si ce réactif est limitant, il est épuisé : n initial − nombre stœchiométrique × x<sub>max</sub> = 0, donc x<sub>max</sub> = n initial ÷ nombre stœchiométrique.",
+      aide: () => "Si ce réactif est limitant, il est épuisé : n initial − nombre stœchiométrique × x<sub>max</sub> = 0, donc x<sub>max</sub> = n initial ÷ nombre stœchiométrique.",
     },
     ratio: {
       // sansFormule : la formule n'est plus rappelée (fin de l'entraînement du module 7)
-      titre: ex => (ex.cfg.sansFormule ? 'Pour chaque réactif : valeur de x pour laquelle il serait épuisé' : 'Pour chaque réactif : n<sub>i</sub> ÷ nombre stœchiométrique'),
+      titre: ex => (ex.cfg.sansFormule ? 'Pour chaque réactif : valeur de x pour laquelle il serait épuisé' : 'Pour chaque réactif : n<sub>i</sub> ÷ nombre stœchiométrique'),
       consigne: g => g ? 'Calcule, pour chaque réactif, sa quantité initiale divisée par son nombre stœchiométrique.' : 'Rapports n<sub>i</sub> ÷ nombre stœchiométrique',
       saisies(ex) {
         return ex.cfg.r.map((f, k) => ({ lab: fH(f), w: champ(ex.cfg.mode, { label: 'rapport pour ' + f }), ratio: true }));
@@ -437,14 +437,14 @@
     },
     concl: {
       titre: 'Conclusion',
-      consigne: g => g ? 'Quel est le réactif limitant ? Quelle est la valeur de x<sub>max</sub> ?' : 'Réactif limitant et x<sub>max</sub>',
+      consigne: g => g ? 'Quel est le réactif limitant ? Quelle est la valeur de x<sub>max</sub> ?' : 'Réactif limitant et x<sub>max</sub>',
       saisies(ex) {
         return [{ lab: 'Réactif limitant', w: choix(ex.cfg.r.map(fH), () => ex.apercu('concl')), limitant: true },
           { lab: 'x<sub>max</sub>', w: champ(ex.cfg.mode, { label: 'xmax', onChange: () => ex.apercu('concl') }) }];
       },
       juste: (ex, k, w) => (k === 0 ? w.valeur() === ex.k.L : egal(w.valeur(), ex.k.xmax)),
       solution: (ex, k, w) => w.fixer(k === 0 ? ex.k.L : ex.k.xmax),
-      aide: () => "La réaction s'arrête dès qu'un réactif est épuisé : on garde la <b>plus petite</b> valeur de x<sub>max</sub>. Le réactif correspondant est le réactif limitant.",
+      aide: () => "La réaction s'arrête dès qu'un réactif est épuisé : on garde la <b>plus petite</b> valeur de x<sub>max</sub>. Le réactif correspondant est le réactif limitant.",
     },
     final: {
       titre: 'État final',
@@ -455,7 +455,7 @@
       juste: (ex, k, w) => egal(w.valeur(), ex.k.nf[k]),
       solution: (ex, k, w) => w.fixer(ex.k.nf[k]),
       texte: (ex, k, w) => (w.vide && w.vide() ? '…' : isFinite(w.valeur()) ? fmt(w.valeur(), ex.cfg.mode) : '?'),
-      aide: () => "Réactif : n final = n initial − nombre stœchiométrique × x<sub>max</sub>. Produit : n final = n initial + nombre stœchiométrique × x<sub>max</sub>. Le réactif limitant finit à 0.",
+      aide: () => "Réactif : n final = n initial − nombre stœchiométrique × x<sub>max</sub>. Produit : n final = n initial + nombre stœchiométrique × x<sub>max</sub>. Le réactif limitant finit à 0.",
     },
   };
 
@@ -516,7 +516,7 @@
       l.className = 'av-saisie' + (s.hyp || s.ratio ? ' av-saisie-carte' : '');
       if (s.hyp) {
         const f = c.r[k], n0 = fmt(c.n0[k], c.mode);
-        l.innerHTML = `<p class="av-hyp-t">Hypothèse ${k + 1}</p><p class="av-hyp-q">Si ${s.lab} est le réactif limitant :</p>` +
+        l.innerHTML = `<p class="av-hyp-t">Hypothèse ${k + 1}</p><p class="av-hyp-q">Si ${s.lab} est le réactif limitant :</p>` +
           (c.guide ? `<p class="av-hyp-calc">${n0} − ${coefX(c.c[k])}x<sub>max</sub> = 0</p>` : '') +
           `<p class="av-hyp-r"><span>x<sub>max</sub> =</span><span data-x="w"></span>${c.unite === 'mol' ? '<span>mol</span>' : ''}</p>`;
       } else if (s.ratio) {
@@ -571,7 +571,7 @@
     if (this.controler(id)) {
       z.dataset.faite = 1;
       this.figer(id);
-      ret.innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">C'est juste !</b>${this.messageReussite(id)}</p></div>`;
+      ret.innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">C'est juste !</b>${this.messageReussite(id)}</p></div>`;
       act.innerHTML = '';
       this.suite(id);
       return;
@@ -600,7 +600,7 @@
   Exercice.prototype.messageReussite = function (id) {
     const c = this.cfg, k = this.k, u = c.unite === 'mol' ? ' mol' : '';
     if (id === 'concl') {
-      return ` La plus petite valeur est x<sub>max</sub> = ${fmt(k.xmax, c.mode)}${u} : le réactif limitant est <b>${fH(c.r[k.L])}</b>.`;
+      return ` La plus petite valeur est x<sub>max</sub> = ${fmt(k.xmax, c.mode)}${u} : le réactif limitant est <b>${fH(c.r[k.L])}</b>.`;
     }
     if (id === 'final') return ` Le réactif limitant ${fH(c.r[k.L])} est entièrement consommé.`;
     return '';
@@ -621,7 +621,7 @@
     if (id === 'concl' && c.frise) animerFrise(this.zones.concl.querySelector('[data-x="frise"]'), this.murs, c.mode, () => {
       if (moi.fini) return;
       // la frise est redessinée à chaque image : l'ancienne légende a disparu, on met la nouvelle
-      moi.zones.concl.querySelector('[data-x="frise"]').insertAdjacentHTML('afterbegin', '<p class="av-frise-legende">L\'avancement part de 0 et s\'arrête au premier mur rencontré : c\'est x<sub>max</sub>.</p>');
+      moi.zones.concl.querySelector('[data-x="frise"]').insertAdjacentHTML('afterbegin', '<p class="av-frise-legende">L\'avancement part de 0 et s\'arrête au premier mur rencontré : c\'est x<sub>max</sub>.</p>');
       apres();
     });
     else apres();
@@ -639,7 +639,7 @@
       if (id === 'concl' && c.frise) {
         const f = z.querySelector('[data-x="frise"]');
         frise(f, this.murs, this.k.xmax, c.mode);
-        f.insertAdjacentHTML('afterbegin', '<p class="av-frise-legende">L\'avancement part de 0 et s\'arrête au premier mur rencontré : c\'est x<sub>max</sub>.</p>');
+        f.insertAdjacentHTML('afterbegin', '<p class="av-frise-legende">L\'avancement part de 0 et s\'arrête au premier mur rencontré : c\'est x<sub>max</sub>.</p>');
       }
       if (z.dataset.faite) return;
       z.dataset.faite = 1;
@@ -667,7 +667,7 @@
         return;
       }
       moi.erreurs++;
-      ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Pas encore.</b> À corriger : ${liste(faux.map(id => moi.titre(id).toLowerCase()))}.</p>` +
+      ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Pas encore.</b> À corriger : ${liste(faux.map(id => moi.titre(id).toLowerCase()))}.</p>` +
         faux.map(id => `<p>• ${moi.ETAPES[id].aide(moi)}</p>`).join('') + '</div>';
     };
     bas.querySelector('[data-x="voir"]').onclick = () => {
@@ -742,13 +742,13 @@
     let qs = [], idx = 0, score = 0, recap = [];
     function entete() {
       return `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-        <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${score} pt${score > 1 ? 's' : ''}</b></p>
+        <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${score} pt${score > 1 ? 's' : ''}</b></p>
         <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>`;
     }
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · 10 questions de difficulté croissante, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · 10 questions de difficulté croissante, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
     }
@@ -773,8 +773,8 @@
           app.querySelector('[data-a="score"]').textContent = score + ' pt' + (score > 1 ? 's' : '');
           const K = calculer(q);
           ret.innerHTML = vue
-            ? `<div class="callout er-retour"><p><b>Réponse affichée :</b> 0 point. Réactif limitant : ${fH(q.r[K.L])}, x<sub>max</sub> = ${fmt(K.xmax, q.mode)} mol.</p></div>`
-            : `<div class="callout-success er-retour"><p><b class="er-ok">${erreurs ? 'C\'est juste !' : 'Bravo, tout est juste du premier coup !'}</b> +${p} point${p > 1 ? 's' : ''}</p><p>Réactif limitant : ${fH(q.r[K.L])}, x<sub>max</sub> = ${fmt(K.xmax, q.mode)} mol.</p></div>`;
+            ? `<div class="callout er-retour"><p><b>Réponse affichée :</b> 0 point. Réactif limitant : ${fH(q.r[K.L])}, x<sub>max</sub> = ${fmt(K.xmax, q.mode)} mol.</p></div>`
+            : `<div class="callout-success er-retour"><p><b class="er-ok">${erreurs ? 'C\'est juste !' : 'Bravo, tout est juste du premier coup !'}</b> +${p} point${p > 1 ? 's' : ''}</p><p>Réactif limitant : ${fH(q.r[K.L])}, x<sub>max</sub> = ${fmt(K.xmax, q.mode)} mol.</p></div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
           const b = s.querySelector('button');
@@ -789,10 +789,10 @@
     function fin() {
       const max = qs.length * 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note: Math.round(score / max * 20 * 2) / 2 });   // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tu maîtrises le tableau d\'avancement.' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence : les questions changent à chaque fois.' : 'Continue à t\'entraîner. Tu peux revoir les modules précédents.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Entraînement terminé !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tu maîtrises le tableau d\'avancement.' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence : les questions changent à chaque fois.' : 'Continue à t\'entraîner. Tu peux revoir les modules précédents.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Entraînement terminé !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${score} / ${max}</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -848,8 +848,8 @@
   // Bilan d'un tableau : réactif limitant, x_max et état final (solution d'un « À toi »)
   function bilanHTML(q, mode, unite) {
     const K = calculer(q), u = unite === 'mol' ? ' mol' : '';
-    return `<p>Réactif limitant : <b>${fH(q.r[K.L])}</b> ; x<sub>max</sub> = ${fmt(K.xmax, mode)}${u}.</p>` +
-      `<p>État final : ${K.esp.map((s, j) => `${fH(s)} : ${fmt(K.nf[j], mode)}`).join(' ; ')}${unite === 'mol' ? ' (en mol)' : ' (en molécules)'}.</p>`;
+    return `<p>Réactif limitant : <b>${fH(q.r[K.L])}</b> ; x<sub>max</sub> = ${fmt(K.xmax, mode)}${u}.</p>` +
+      `<p>État final : ${K.esp.map((s, j) => `${fH(s)} : ${fmt(K.nf[j], mode)}`).join(' ; ')}${unite === 'mol' ? ' (en mol)' : ' (en molécules)'}.</p>`;
   }
 
   // Tableau guidé étape par étape dans un « À toi » : partie « perso » du moteur de cours.
@@ -927,17 +927,17 @@
   // Rapport n_initial ÷ nombre stœchiométrique (x_max si ce réactif est limitant)
   function diagRapport(v, n, c, f, mode) {
     const N = fmt(n, mode);
-    if (c > 1 && egal(v, n)) return `Tu as oublié de diviser par le nombre stœchiométrique de ${fH(f)} : ${N} ÷ ${c}.`;
-    if (c > 1 && egal(v, n * c)) return `Tu as multiplié par ${c} au lieu de diviser : ${N} ÷ ${c}.`;
-    if (egal(v, c / n)) return `Tu as calculé ${c} ÷ ${N}. C'est la quantité qu'on divise par le nombre stœchiométrique : ${N} ÷ ${c}.`;
-    if (mode === 'puissance' && puiss10(v / (n / c))) return 'Le nombre devant est juste, mais pas la puissance de 10. Si le nombre devant devient plus petit que 1, l\'exposant diminue de 1 : 0,50 × 10<sup>−2</sup> = 5,0 × 10<sup>−3</sup>.';
-    return `Pour ${fH(f)} : ${N} ÷ ${c}.`;
+    if (c > 1 && egal(v, n)) return `Tu as oublié de diviser par le nombre stœchiométrique de ${fH(f)} : ${N} ÷ ${c}.`;
+    if (c > 1 && egal(v, n * c)) return `Tu as multiplié par ${c} au lieu de diviser : ${N} ÷ ${c}.`;
+    if (egal(v, c / n)) return `Tu as calculé ${c} ÷ ${N}. C'est la quantité qu'on divise par le nombre stœchiométrique : ${N} ÷ ${c}.`;
+    if (mode === 'puissance' && puiss10(v / (n / c))) return 'Le nombre devant est juste, mais pas la puissance de 10. Si le nombre devant devient plus petit que 1, l\'exposant diminue de 1 : 0,50 × 10<sup>−2</sup> = 5,0 × 10<sup>−3</sup>.';
+    return `Pour ${fH(f)} : ${N} ÷ ${c}.`;
   }
   // Mauvais choix du réactif limitant k : la plus petite valeur de n ÷ c, pas la plus petite quantité
   function diagChoixLimitant(q, k, mode) {
-    const K = calculer(q), L = K.L, r = j => `${fH(q.r[j])} : ${fmt(q.n0[j], mode)} ÷ ${q.c[j]} = ${fmt(K.xm[j], mode)}`;
+    const K = calculer(q), L = K.L, r = j => `${fH(q.r[j])} : ${fmt(q.n0[j], mode)} ÷ ${q.c[j]} = ${fmt(K.xm[j], mode)}`;
     return (q.n0[k] < q.n0[L] ? `${fH(q.r[k])} est le moins abondant au départ, mais il faut tenir compte des nombres stœchiométriques. ` : '') +
-      `${r(k)} ; ${r(L)}. La réaction s'arrête au premier réactif épuisé : c'est la plus petite valeur qui compte.`;
+      `${r(k)} ; ${r(L)}. La réaction s'arrête au premier réactif épuisé : c'est la plus petite valeur qui compte.`;
   }
   // Quantités finales ; ks : espèces demandées (toutes par défaut), dans l'ordre des valeurs vs
   function diagFinal(vs, q, mode, ks) {
@@ -947,25 +947,25 @@
     if (i < 0) return '';
     const k = ks[i], v = vs[i], s = K.esp[k], c = q.c[k];
     if (k >= nR) {
-      if (c > 1 && egal(v, K.xmax)) return `${fH(s)} : tu as oublié le nombre stœchiométrique, ${c} × ${X}.`;
-      if (egal(v, -c * K.xmax)) return `${fH(s)} est un produit : sa quantité augmente, 0 + ${fois(c)}${X}.`;
-      return `${fH(s)} est un produit : n<sub>final</sub> = 0 + ${fois(c)}${X}.`;
+      if (c > 1 && egal(v, K.xmax)) return `${fH(s)} : tu as oublié le nombre stœchiométrique, ${c} × ${X}.`;
+      if (egal(v, -c * K.xmax)) return `${fH(s)} est un produit : sa quantité augmente, 0 + ${fois(c)}${X}.`;
+      return `${fH(s)} est un produit : n<sub>final</sub> = 0 + ${fois(c)}${X}.`;
     }
-    if (k === K.L) return `${fH(s)} est le réactif limitant : il est entièrement consommé, ${f(q.n0[k])} − ${fois(c)}${X} = 0.`;
-    if (c > 1 && egal(v, q.n0[k] - K.xmax)) return `${fH(s)} : tu as oublié le nombre stœchiométrique. Il en disparaît ${c} × ${X} = ${f(c * K.xmax)}.`;
-    if (egal(v, q.n0[k] + c * K.xmax)) return `${fH(s)} est un réactif : sa quantité diminue. On retire ${fois(c)}${X}.`;
-    if (egal(v, 0)) return `${fH(s)} est en excès : il en reste à la fin.`;
-    return `${fH(s)} : ${f(q.n0[k])} − ${fois(c)}${X}${mode === 'puissance' ? ' (écris les deux nombres avec le même exposant pour soustraire)' : ''}.`;
+    if (k === K.L) return `${fH(s)} est le réactif limitant : il est entièrement consommé, ${f(q.n0[k])} − ${fois(c)}${X} = 0.`;
+    if (c > 1 && egal(v, q.n0[k] - K.xmax)) return `${fH(s)} : tu as oublié le nombre stœchiométrique. Il en disparaît ${c} × ${X} = ${f(c * K.xmax)}.`;
+    if (egal(v, q.n0[k] + c * K.xmax)) return `${fH(s)} est un réactif : sa quantité diminue. On retire ${fois(c)}${X}.`;
+    if (egal(v, 0)) return `${fH(s)} est en excès : il en reste à la fin.`;
+    return `${fH(s)} : ${f(q.n0[k])} − ${fois(c)}${X}${mode === 'puissance' ? ' (écris les deux nombres avec le même exposant pour soustraire)' : ''}.`;
   }
   // Calculs détaillés (solutions) : rapports n ÷ c, puis état final
   function calculsRapports(q, mode) {
     const K = calculer(q);
-    return `<p class="crs-calc">${q.r.map((s, k) => `${fH(s)} : ${fmt(q.n0[k], mode)} ÷ ${q.c[k]} = <span class="c">${fmt(K.xm[k], mode)} mol</span>`).join('<br>')}</p>`;
+    return `<p class="crs-calc">${q.r.map((s, k) => `${fH(s)} : ${fmt(q.n0[k], mode)} ÷ ${q.c[k]} = <span class="c">${fmt(K.xm[k], mode)} mol</span>`).join('<br>')}</p>`;
   }
   function calculsFinal(q, mode, ks) {
     const K = calculer(q), nR = q.r.length, X = fmt(K.xmax, mode);
     ks = ks || K.esp.map((_, j) => j);
-    return `<p class="crs-calc">${ks.map(k => `${fH(K.esp[k])} : ${k < nR ? fmt(q.n0[k], mode) + ' − ' : '0 + '}${fois(q.c[k])}${X} = <span class="c">${fmt(K.nf[k], mode)} mol</span>`).join('<br>')}</p>`;
+    return `<p class="crs-calc">${ks.map(k => `${fH(K.esp[k])} : ${k < nR ? fmt(q.n0[k], mode) + ' − ' : '0 + '}${fois(q.c[k])}${X} = <span class="c">${fmt(K.nf[k], mode)} mol</span>`).join('<br>')}</p>`;
   }
 
   /* ---------- Parties d'« À toi » toutes faites (cours en mol) ---------- */
@@ -984,15 +984,15 @@
     const K = calculer(q);
     const indices = {};
     q.r.forEach((_, k) => { if (k !== K.L) indices[k] = diagChoixLimitant(q, k, mode); });
-    return { type: 'choix', q: 'Quel est le réactif limitant ?', melanger: false,
+    return { type: 'choix', q: 'Quel est le réactif limitant ?', melanger: false,
       options: q.r.map((s, k) => ({ id: k, label: fH(s) })), bonne: K.L, indices,
-      solution: `<p>La plus petite valeur est x<sub>max</sub> = ${fmt(K.xmax, mode)} mol : <b>${fH(q.r[K.L])}</b> est le réactif limitant.</p>` };
+      solution: `<p>La plus petite valeur est x<sub>max</sub> = ${fmt(K.xmax, mode)} mol : <b>${fH(q.r[K.L])}</b> est le réactif limitant.</p>` };
   }
   // Quantités à l'état final (ks : espèces demandées, toutes par défaut)
   function partieFinal(q, mode, question, ks) {
     const K = calculer(q);
     ks = ks || K.esp.map((_, j) => j);
-    const champs = ks.map(k => ({ lab: `${fH(K.esp[k])} :`, valeur: K.nf[k], unite: 'mol', aria: 'quantité finale de ' + K.esp[k] }));
+    const champs = ks.map(k => ({ lab: `${fH(K.esp[k])} :`, valeur: K.nf[k], unite: 'mol', aria: 'quantité finale de ' + K.esp[k] }));
     const diag = vs => diagFinal(vs, q, mode, ks), solution = calculsFinal(q, mode, ks);
     if (mode === 'puissance') return partieValeurs({ mode, q: question, champs, diag, solution });
     return { type: 'champs', q: question, champs: champs.map(c => ({ label: c.lab, valeur: c.valeur, unite: c.unite, signe: false, aria: c.aria })), diag, solution };
@@ -1012,7 +1012,7 @@
       parties: [{ nom: 'Avec des puissances de 10', cours: 'module_5' }] },
     { n: 6, titre: 'Entraînement', desc: 'Première · 10 tableaux avec des puissances de 10, notés sur 20',
       parties: [{ nom: 'Entraînement', entrainement: 'module_6' }] },
-    { n: 7, titre: 'Aller plus loin : sans tableau', desc: 'Première · n<sub>initial</sub> ÷ nombre stœchiométrique, puis l\'état final', fiche: 'fiche_7',
+    { n: 7, titre: 'Aller plus loin : sans tableau', desc: 'Première · n<sub>initial</sub> ÷ nombre stœchiométrique, puis l\'état final', fiche: 'fiche_7',
       parties: [{ nom: 'Sans tableau', cours: 'module_7', entrainement: 'module_7_entrainement' }] },
   ];
   window.SOM.init({ nom: 'Avancement d\'une réaction', id: 'avancement-reaction', plan: PLAN });

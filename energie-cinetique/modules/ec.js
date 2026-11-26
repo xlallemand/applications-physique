@@ -567,7 +567,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -606,8 +606,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -619,7 +619,7 @@
       const q = qs[idx];
       window.EC.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -639,7 +639,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -654,10 +654,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -840,7 +840,7 @@
     vals = vals || {};
     const fs = o.forces || ['P'], d = nomD(o), vides = Object.keys(vals).some(k => String(vals[k])[0] === '#');
     const role = vides ? 'role="group"' : 'role="img"';
-    const aria = o.aria || `Schéma : le système va de A à B ; forces ${fs.map(k => DESC_F[k]).join(', ')}`;
+    const aria = o.aria || `Schéma : le système va de A à B ; forces ${fs.map(k => DESC_F[k]).join(', ')}`;
     let g = '';
     if (o.sens === 'droite') {
       // sol, A et B, déplacement de A vers B ; le système en A et ses forces
@@ -861,8 +861,8 @@
       fs.forEach(k => { g += force(k, gx, gy, ANG[k], ['f', 'Fm'].includes(k) ? 52 : k === 'P' ? 36 : 42); });
       if (o.angles && fs.includes('Fm')) g += `<text x="${gx + 36}" y="${gy - 10}" text-anchor="middle" class="ec-sc-alpha">α = 0°</text>`;
       return `<div class="ec-sch ec-sch-h" ${role} aria-label="${aria}">
-        <div class="ec-sch-haut"><div class="ec-sch-col"><p class="ec-sch-pt">A : départ</p>${ligneDonnee('m', vals.m)}${ligneDonnee('v<sub>A</sub>', vals.vA)}</div>
-          <div class="ec-sch-col"><p class="ec-sch-pt">B : arrivée</p>${ligneDonnee('v<sub>B</sub>', vals.vB)}</div></div>
+        <div class="ec-sch-haut"><div class="ec-sch-col"><p class="ec-sch-pt">A : départ</p>${ligneDonnee('m', vals.m)}${ligneDonnee('v<sub>A</sub>', vals.vA)}</div>
+          <div class="ec-sch-col"><p class="ec-sch-pt">B : arrivée</p>${ligneDonnee('v<sub>B</sub>', vals.vB)}</div></div>
         <svg viewBox="0 0 360 148" class="ec-sc" aria-hidden="true">${g}</svg>
         <div class="ec-sch-bas">${ligneDonnee(d, vals.d)}</div></div>`;
     }
@@ -879,8 +879,8 @@
       : `<circle cx="${x}" cy="${yA}" r="9" class="ec-sc-sys"/>`;
     g += force('P', x, yA, 270, 46);
     if (o.angles) g += `<text x="${x + 14}" y="${yA + 38}" class="ec-sc-alpha">α = ${bas ? 0 : 180}°</text>`;
-    const haut = bas ? ['A : départ', 'v<sub>A</sub>', vals.vA] : ['B : sommet (arrivée)', 'v<sub>B</sub>', vals.vB];
-    const dessous = bas ? ['B : arrivée', 'v<sub>B</sub>', vals.vB] : ['A : départ', 'v<sub>A</sub>', vals.vA];
+    const haut = bas ? ['A : départ', 'v<sub>A</sub>', vals.vA] : ['B : sommet (arrivée)', 'v<sub>B</sub>', vals.vB];
+    const dessous = bas ? ['B : arrivée', 'v<sub>B</sub>', vals.vB] : ['A : départ', 'v<sub>A</sub>', vals.vA];
     return `<div class="ec-sch ec-sch-v" ${role} aria-label="${aria}">
       <svg viewBox="0 0 150 244" class="ec-sc" aria-hidden="true">${g}</svg>
       <div class="ec-sch-droite">
@@ -896,18 +896,18 @@
     opts = opts || {};
     const nd = nomD(o);
     const IND = {
-      m: 'La masse est celle du système : en kg (ou en g, à convertir).',
-      vA: 'v<sub>A</sub> est la vitesse au <b>départ</b>, en A. « Lâchée », « démarre » : v<sub>A</sub> = 0.',
-      vB: 'v<sub>B</sub> est la vitesse à l\'<b>arrivée</b>, en B. « S\'arrête », « s\'immobilise », « au sommet » : v<sub>B</sub> = 0.',
+      m: 'La masse est celle du système : en kg (ou en g, à convertir).',
+      vA: 'v<sub>A</sub> est la vitesse au <b>départ</b>, en A. « Lâchée », « démarre » : v<sub>A</sub> = 0.',
+      vB: 'v<sub>B</sub> est la vitesse à l\'<b>arrivée</b>, en B. « S\'arrête », « s\'immobilise », « au sommet » : v<sub>B</sub> = 0.',
       d: `${nd} est la ${nd === 'h' ? 'hauteur' : 'distance'} parcourue entre A et B, en mètres.`,
     };
     const cles = ['m', 'vA', 'vB', 'd'].filter(k => d[k] != null);
     const etiquettes = cles.map(k => ({ id: k, label: d[k] === '?' ? '?<span class="ec-replique"> (on la cherche)</span>' : d[k], cible: k,
-      indice: d[k] === '?' ? 'Le « ? » se place sur la grandeur que l\'on cherche.' : IND[k] }))
+      indice: d[k] === '?' ? 'Le « ? » se place sur la grandeur que l\'on cherche.' : IND[k] }))
       .concat((opts.intrus || []).map((x, i) => ({ id: 'intrus' + i, label: x.label, cible: null, indice: x.indice })));
     const vals = {};
     cles.forEach(k => { vals[k] = '#' + k; });
-    return { type: 'schema', q: opts.q || 'Fais le schéma : place les données de l\'énoncé (le « ? » sur la grandeur que l\'on cherche).',
+    return { type: 'schema', q: opts.q || 'Fais le schéma : place les données de l\'énoncé (le « ? » sur la grandeur que l\'on cherche).',
       titrePalette: 'Données de l\'énoncé', schema: schemaMvt(o, vals), etiquettes, solution: opts.solution, correction: opts.correction };
   }
 
@@ -926,18 +926,18 @@
     const lignes = (o.forces || ['P']).map(k => {
       const bon = angleDe(o, k), ind = {};
       [0, 90, 180].filter(a => a !== bon).forEach(a => {
-        ind[a] = k === 'f' ? 'Les frottements s\'opposent au mouvement : <span class="vec-nom">f</span> est dans le sens <b>contraire</b> du déplacement (α = 180°).'
-          : k === 'Fm' ? 'La force motrice fait avancer le système : elle est dans le <b>même sens</b> que le déplacement (α = 0°).'
-          : k === 'P' && vertical ? (a === 90 ? 'Le déplacement est vertical, comme le poids : ils ne sont pas perpendiculaires.'
-            : bon === 0 ? 'Le système descend et le poids est dirigé vers le bas : <b>même sens</b> (α = 0°).' : 'Le système monte et le poids est dirigé vers le bas : sens <b>contraires</b> (α = 180°).')
-          : k === 'P' ? 'Le poids est vertical et le déplacement horizontal : ils sont <b>perpendiculaires</b> (α = 90°).'
+        ind[a] = k === 'f' ? 'Les frottements s\'opposent au mouvement : <span class="vec-nom">f</span> est dans le sens <b>contraire</b> du déplacement (α = 180°).'
+          : k === 'Fm' ? 'La force motrice fait avancer le système : elle est dans le <b>même sens</b> que le déplacement (α = 0°).'
+          : k === 'P' && vertical ? (a === 90 ? 'Le déplacement est vertical, comme le poids : ils ne sont pas perpendiculaires.'
+            : bon === 0 ? 'Le système descend et le poids est dirigé vers le bas : <b>même sens</b> (α = 0°).' : 'Le système monte et le poids est dirigé vers le bas : sens <b>contraires</b> (α = 180°).')
+          : k === 'P' ? 'Le poids est vertical et le déplacement horizontal : ils sont <b>perpendiculaires</b> (α = 90°).'
           : 'La réaction est perpendiculaire au support, donc au déplacement (α = 90°).';
       });
       return { id: k, label: `${nomV(k)} <span class="ec-grille-desc">${DESC_F[k]}</span>`, bonne: String(bon), indices: ind, apres: `<p class="ec-expr">${exprTravail(o, k)}</p>` };
     });
     return { type: 'grille', q: opts.q || 'Pour chaque force, choisis l\'angle α entre la force et le déplacement A → B.',
       options: [o_('0', 'α = 0°'), o_('90', 'α = 90°'), o_('180', 'α = 180°')], lignes,
-      solution: opts.solution || '<p>Une force perpendiculaire au déplacement ne travaille pas : W = 0, sans calcul. Pour α = 180°, cos α = −1.</p>',
+      solution: opts.solution || '<p>Une force perpendiculaire au déplacement ne travaille pas : W = 0, sans calcul. Pour α = 180°, cos α = −1.</p>',
       correction: opts.correction };
   }
   // Choisir le théorème écrit pour la situation (avec les travaux remplacés)
@@ -961,13 +961,13 @@
     opts = opts || {};
     const G = '½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>A</sub><sup>2</sup>', Ginv = '½ m v<sub>A</sub><sup>2</sup> − ½ m v<sub>B</sub><sup>2</sup>';
     const vertical = o.sens !== 'droite';
-    return { type: 'choix', colonne: true, q: opts.q || 'Écris le théorème de l\'énergie cinétique pour cette situation : quelle égalité est juste ?',
+    return { type: 'choix', colonne: true, q: opts.q || 'Écris le théorème de l\'énergie cinétique pour cette situation : quelle égalité est juste ?',
       options: [o_('ok', `${G} = ${membreDroit(o)}`), o_('inv', `${Ginv} = ${membreDroit(o)}`), o_('signe', `${G} = ${membreDroit(o, 'signe')}`), o_('perp', `${G} = ${membreDroit(o, 'perp')}`)],
       bonne: 'ok',
       indices: {
-        inv: 'ΔE<sub>c</sub> = E<sub>c</sub>(B) − E<sub>c</sub>(A) : l\'état <b>final</b> moins l\'état <b>initial</b>.',
-        signe: vertical ? 'Regarde l\'angle entre le poids et le déplacement : même sens, W = m g h ; sens contraires, W = −m g h.' : 'Pour α = 180°, cos α = −1 : le travail des frottements est <b>négatif</b>.',
-        perp: vertical ? 'Le travail du poids est P × h = m × g × h : il faut multiplier par la hauteur.' : 'Le poids est perpendiculaire au déplacement : son travail est <b>nul</b>.',
+        inv: 'ΔE<sub>c</sub> = E<sub>c</sub>(B) − E<sub>c</sub>(A) : l\'état <b>final</b> moins l\'état <b>initial</b>.',
+        signe: vertical ? 'Regarde l\'angle entre le poids et le déplacement : même sens, W = m g h ; sens contraires, W = −m g h.' : 'Pour α = 180°, cos α = −1 : le travail des frottements est <b>négatif</b>.',
+        perp: vertical ? 'Le travail du poids est P × h = m × g × h : il faut multiplier par la hauteur.' : 'Le poids est perpendiculaire au déplacement : son travail est <b>nul</b>.',
       },
       solution: opts.solution, correction: opts.correction };
   }
@@ -998,7 +998,7 @@
     g += fleche(205, 120, 90, 90, COUL.port).svg + `<text x="215" y="36" class="ec-sc-lbl" style="fill:${COUL.port}">portance</text>`;
     g += fleche(100, 116, 180, 70, COUL.f).svg + `<text x="30" y="106" class="ec-sc-lbl" style="fill:${COUL.f}">traînée</text>`;
     g += trait(300, 196, 360, 196, 'ec-tr ec-tr-mvt') + `<text x="296" y="200" text-anchor="end" class="ec-sc-txt">sens de déplacement de l'avion</text>`;
-    return `<svg viewBox="0 0 380 210" class="ec-doc" role="img" aria-label="Aile d'avion : l'air passe vite au-dessus et lentement en dessous ; la pression est plus forte en dessous ; la portance est vers le haut, la traînée vers l'arrière">${g}</svg>`;
+    return `<svg viewBox="0 0 380 210" class="ec-doc" role="img" aria-label="Aile d'avion : l'air passe vite au-dessus et lentement en dessous ; la pression est plus forte en dessous ; la portance est vers le haut, la traînée vers l'arrière">${g}</svg>`;
   }
   // doc. 3 : le maître-couple, surface de l'avion vue de face
   function figMaitreCouple() {
@@ -1010,8 +1010,8 @@
     g += `<text x="85" y="114" text-anchor="middle" class="ec-sc-txt">vue de profil</text>`;
     // vue de face : surface exposée à l'air (en couleur)
     g += `<g class="ec-sc-face"><ellipse cx="290" cy="70" rx="15" ry="15"/><path d="M220,74 L360,74 L360,80 L220,80 Z M286,30 L294,30 L294,56 L286,56 Z M262,58 L318,58 L318,62 L262,62 Z"/></g>`;
-    g += `<text x="290" y="108" text-anchor="middle" class="ec-sc-txt">vue de face :</text><text x="290" y="124" text-anchor="middle" class="ec-sc-txt" style="font-weight:800">maître-couple S</text>`;
-    return `<svg viewBox="0 0 380 132" class="ec-doc" role="img" aria-label="Avion vu de profil, puis vu de face : la surface vue de face est le maître-couple S">${g}</svg>`;
+    g += `<text x="290" y="108" text-anchor="middle" class="ec-sc-txt">vue de face :</text><text x="290" y="124" text-anchor="middle" class="ec-sc-txt" style="font-weight:800">maître-couple S</text>`;
+    return `<svg viewBox="0 0 380 132" class="ec-doc" role="img" aria-label="Avion vu de profil, puis vu de face : la surface vue de face est le maître-couple S">${g}</svg>`;
   }
   // doc. 4 : coefficients de traînée Cx de quelques formes (l'air arrive de la gauche)
   function figFormes() {
@@ -1023,7 +1023,7 @@
     g += `<path d="M314,34 A24,24 0 0 0 314,82 Z" class="ec-sc-forme"/>` + cx(302, 100, 'demi-sphère', '0,42');
     g += `<path d="M66,156 Q66,136 90,136 Q130,138 176,156 Q130,174 90,176 Q66,176 66,156 Z" class="ec-sc-forme"/>` + cx(120, 196, 'corps profilé', '0,04');
     g += `<path d="M236,168 Q236,140 264,140 Q300,144 340,168 Z" class="ec-sc-forme"/>` + cx(288, 196, 'corps semi-profilé', '0,09');
-    return `<svg viewBox="0 0 380 216" class="ec-doc" role="img" aria-label="Coefficients de traînée : sphère 0,47 ; cube 1,05 ; demi-sphère 0,42 ; corps profilé 0,04 ; corps semi-profilé 0,09">${g}</svg>`;
+    return `<svg viewBox="0 0 380 216" class="ec-doc" role="img" aria-label="Coefficients de traînée : sphère 0,47 ; cube 1,05 ; demi-sphère 0,42 ; corps profilé 0,04 ; corps semi-profilé 0,09">${g}</svg>`;
   }
   // doc. 5 : traînée d'un corps profilé (S = 900 m²) en fonction de la vitesse, points de mesure et courbe
   // (valeurs lues sur le document : F ≈ 0,0271 × v² en kN) ; o.lectures : vitesses dont on trace la lecture
@@ -1055,7 +1055,7 @@
         const F = K_TRAINEE * v * v;
         s += `<path d="M${f1(X(v))},${h0 + Hh} V${f1(Y(F))} H${g0}" class="ph-lecture" fill="none"/>`;
       });
-      return `<svg viewBox="0 0 ${W} ${H}" width="${W}" class="ph-graphe" role="img" aria-label="Traînée d'un corps profilé en fonction de la vitesse : la courbe monte de plus en plus vite (parabole), de 0 à environ 1 560 kN pour 240 m/s">${s}</svg>`;
+      return `<svg viewBox="0 0 ${W} ${H}" width="${W}" class="ph-graphe" role="img" aria-label="Traînée d'un corps profilé en fonction de la vitesse : la courbe monte de plus en plus vite (parabole), de 0 à environ 1 560 kN pour 240 m/s">${s}</svg>`;
     });
   }
 
@@ -1073,7 +1073,7 @@
     g += force('RN', 160, 120, 90, 72) + force('f', 160, 120, 180, 44);
     const ang = 180 - Math.atan2(72, 44) * 180 / Math.PI, L = Math.hypot(72, 44);
     g += fleche(160, 120, ang, L, '#1c3782').svg + nomSVG('R', 104, 44, '#1c3782');
-    return `<svg viewBox="0 0 320 140" class="ec-doc ec-doc-petit" role="img" aria-label="Bloc qui glisse vers la droite : réaction normale verticale vers le haut, frottements vers la gauche, réaction R, somme des deux, oblique vers le haut et la gauche">${g}</svg>`;
+    return `<svg viewBox="0 0 320 140" class="ec-doc ec-doc-petit" role="img" aria-label="Bloc qui glisse vers la droite : réaction normale verticale vers le haut, frottements vers la gauche, réaction R, somme des deux, oblique vers le haut et la gauche">${g}</svg>`;
   }
   // travail d'une force : solide qui va de A à B, force F⃗ faisant l'angle α avec AB⃗
   // o = { alpha (degrés, 30 par défaut), nom ('F'), legende }
@@ -1088,7 +1088,7 @@
     if (a !== 0) g += `<path d="M${xA + R},${y} A${R},${R} 0 0 ${a > 0 ? 0 : 1} ${f1(xA + R * Math.cos(r))},${f1(y - R * Math.sin(r))}" class="ec-sc-arc"/>` +
       `<text x="${f1(xA + (R + 12) * Math.cos(r / 2))}" y="${f1(y - (R + 12) * Math.sin(r / 2) + 5)}" text-anchor="middle" class="ec-sc-alpha">α</text>`;
     g += force(o.nom || 'F', xA, y, a, 92);
-    return `<svg viewBox="0 0 320 140" class="ec-doc ec-doc-petit" role="img" aria-label="Le solide va de A à B ; la force F fait un angle alpha avec le déplacement">${g}</svg>`;
+    return `<svg viewBox="0 0 320 140" class="ec-doc ec-doc-petit" role="img" aria-label="Le solide va de A à B ; la force F fait un angle alpha avec le déplacement">${g}</svg>`;
   }
   // travail du poids sur une pente : o = { sens: 'descend' | 'monte' }
   // A est le départ : en haut pour une descente, en bas pour une montée
@@ -1107,8 +1107,8 @@
     g += `<text x="${arr[0] + (monte ? -6 : 8)}" y="${arr[1] + (monte ? -10 : 18)}" class="ec-sc-pt" text-anchor="${monte ? 'end' : 'start'}">B</text>`;
     g += `<text x="196" y="118" class="ec-sc-pt" text-anchor="middle">AB</text>`;
     g += force('P', x, y - 2, 270, 40);
-    g += `<text x="170" y="162" class="ec-sc-txt" text-anchor="middle">AB : longueur de la pente ; h : dénivelé</text>`;
-    return `<svg viewBox="0 0 340 170" class="ec-doc ec-doc-petit" role="img" aria-label="Pente de hauteur h ; le solide ${monte ? 'monte' : 'descend'} de A vers B ; le poids est vertical vers le bas">${g}</svg>`;
+    g += `<text x="170" y="162" class="ec-sc-txt" text-anchor="middle">AB : longueur de la pente ; h : dénivelé</text>`;
+    return `<svg viewBox="0 0 340 170" class="ec-doc ec-doc-petit" role="img" aria-label="Pente de hauteur h ; le solide ${monte ? 'monte' : 'descend'} de A vers B ; le poids est vertical vers le bas">${g}</svg>`;
   }
 
   /* ============================================================
@@ -1116,40 +1116,40 @@
      ============================================================ */
   const PLAN = [
     { n: 1, titre: 'Forces de frottement', desc: 'Frottements solides, traînée f<sub>x</sub> = ½ ρ v² S C<sub>x</sub>, portance', fiche: 'fiche_1',
-      parties: [{ nom: 'Forces de frottement', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : la traînée' } }] },
-    { n: 2, titre: 'Travail d\'une force', desc: 'W<sub>AB</sub>(<span class="vec-nom">F</span>) = F × AB × cos α ; travail moteur, résistant ou nul ; travail du poids', fiche: 'fiche_2',
+      parties: [{ nom: 'Forces de frottement', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : la traînée' } }] },
+    { n: 2, titre: 'Travail d\'une force', desc: 'W<sub>AB</sub>(<span class="vec-nom">F</span>) = F × AB × cos α ; travail moteur, résistant ou nul ; travail du poids', fiche: 'fiche_2',
       // le simulateur (activité de découverte), quatre sous-modules de cours, puis les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Simulateur', simulation: 'module_2_simulation', noms: { simulation: 'Simulateur : travail d\'une force' } },
-        { nom: 'Définition et formule', slug: 'travail', cours: 'module_2a_cours', noms: { cours: 'Cours : définition et formule' } },
-        { nom: 'Travail moteur, résistant ou nul', slug: 'signe', cours: 'module_2b_cours', noms: { cours: 'Cours : travail moteur, résistant ou nul' } },
-        { nom: 'Travail du poids', slug: 'poids', cours: 'module_2c_cours', noms: { cours: 'Cours : travail du poids' } },
-        { nom: 'Force perpendiculaire au déplacement', slug: 'perpendiculaire', cours: 'module_2d_cours', noms: { cours: 'Cours : force perpendiculaire au déplacement' } },
+        { nom: 'Simulateur', simulation: 'module_2_simulation', noms: { simulation: 'Simulateur : travail d\'une force' } },
+        { nom: 'Définition et formule', slug: 'travail', cours: 'module_2a_cours', noms: { cours: 'Cours : définition et formule' } },
+        { nom: 'Travail moteur, résistant ou nul', slug: 'signe', cours: 'module_2b_cours', noms: { cours: 'Cours : travail moteur, résistant ou nul' } },
+        { nom: 'Travail du poids', slug: 'poids', cours: 'module_2c_cours', noms: { cours: 'Cours : travail du poids' } },
+        { nom: 'Force perpendiculaire au déplacement', slug: 'perpendiculaire', cours: 'module_2d_cours', noms: { cours: 'Cours : force perpendiculaire au déplacement' } },
         { nom: 'Travail d\'une force', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Énergie cinétique', desc: 'E<sub>c</sub> = ½ m v², vitesse en m/s', fiche: 'fiche_3',
       // quatre sous-modules de cours, puis les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'L\'énergie cinétique', slug: 'energie-cinetique', cours: 'module_3a_cours', noms: { cours: 'Cours : l\'énergie cinétique' } },
-        { nom: 'Vitesse en km/h', slug: 'kmh', cours: 'module_3b_cours', noms: { cours: 'Cours : vitesse en km/h' } },
-        { nom: 'Retrouver la vitesse', slug: 'vitesse', cours: 'module_3c_cours', noms: { cours: 'Cours : retrouver la vitesse' } },
-        { nom: 'Si la vitesse double', slug: 'double', cours: 'module_3d_cours', noms: { cours: 'Cours : si la vitesse double' } },
+        { nom: 'L\'énergie cinétique', slug: 'energie-cinetique', cours: 'module_3a_cours', noms: { cours: 'Cours : l\'énergie cinétique' } },
+        { nom: 'Vitesse en km/h', slug: 'kmh', cours: 'module_3b_cours', noms: { cours: 'Cours : vitesse en km/h' } },
+        { nom: 'Retrouver la vitesse', slug: 'vitesse', cours: 'module_3c_cours', noms: { cours: 'Cours : retrouver la vitesse' } },
+        { nom: 'Si la vitesse double', slug: 'double', cours: 'module_3d_cours', noms: { cours: 'Cours : si la vitesse double' } },
         { nom: 'Énergie cinétique', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Théorème de l\'énergie cinétique', desc: 'ΔE<sub>c</sub> = Σ W, méthode avec schéma : chute, lancé vers le haut, freinage, distance d\'arrêt, démarrage', fiche: 'fiche_4',
+    { n: 4, titre: 'Théorème de l\'énergie cinétique', desc: 'ΔE<sub>c</sub> = Σ W, méthode avec schéma : chute, lancé vers le haut, freinage, distance d\'arrêt, démarrage', fiche: 'fiche_4',
       // l'énoncé puis cinq utilisations (sous-modules de cours), une seule série de questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Énoncé', slug: 'enonce', cours: 'module_4a_cours', noms: { cours: 'Cours : énoncé' } },
-        { nom: 'Chute', slug: 'chute', cours: 'module_4b_cours', noms: { cours: 'Utilisation : chute' } },
-        { nom: 'Lancé vers le haut', slug: 'lancer', cours: 'module_4c_cours', noms: { cours: 'Utilisation : lancé vers le haut' } },
-        { nom: 'Freinage', slug: 'freinage', cours: 'module_4d_cours', noms: { cours: 'Utilisation : freinage' } },
-        { nom: 'Distance d\'arrêt', slug: 'arret', cours: 'module_4e_cours', noms: { cours: 'Utilisation : distance d\'arrêt' } },
-        { nom: 'Démarrage', slug: 'demarrage', cours: 'module_4f_cours', noms: { cours: 'Utilisation : démarrage' } },
+        { nom: 'Énoncé', slug: 'enonce', cours: 'module_4a_cours', noms: { cours: 'Cours : énoncé' } },
+        { nom: 'Chute', slug: 'chute', cours: 'module_4b_cours', noms: { cours: 'Utilisation : chute' } },
+        { nom: 'Lancé vers le haut', slug: 'lancer', cours: 'module_4c_cours', noms: { cours: 'Utilisation : lancé vers le haut' } },
+        { nom: 'Freinage', slug: 'freinage', cours: 'module_4d_cours', noms: { cours: 'Utilisation : freinage' } },
+        { nom: 'Distance d\'arrêt', slug: 'arret', cours: 'module_4e_cours', noms: { cours: 'Utilisation : distance d\'arrêt' } },
+        { nom: 'Démarrage', slug: 'demarrage', cours: 'module_4f_cours', noms: { cours: 'Utilisation : démarrage' } },
         { nom: 'Théorème de l\'énergie cinétique', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 18 et 19 p. 98, guidés pas à pas', exercices: 'module_5', exNom: 'Exercices 18 et 19', nbEx: 2 },
   ];
-  window.SOM.init({ nom: 'Chapitre 7 : Théorème de l\'énergie cinétique', id: 'energie-cinetique', cleEx: 'energie-cinetique-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 7 : Théorème de l\'énergie cinétique', id: 'energie-cinetique', cleEx: 'energie-cinetique-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

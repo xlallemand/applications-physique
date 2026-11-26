@@ -41,7 +41,7 @@
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
         <span class="content-module-badge">${opts.badge}</span>
         <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-1">${opts.title}</h2>
-        <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${opts.idx + 1}/${opts.total} &middot; Score : <span class="score-badge">${opts.score} pt${opts.score > 1 ? 's' : ''}</span></p>
+        <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${opts.idx + 1}/${opts.total} &middot; Score : <span class="score-badge">${opts.score} pt${opts.score > 1 ? 's' : ''}</span></p>
         <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
       </div>`;
   }
@@ -64,10 +64,10 @@
     setTimeout(() => { if (isMax) ptConfetti(); }, 50);
     return `
       <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-        <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-2">${opts.title || 'Terminé !'}</h2>
-        ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Sans-faute !</p>` : ''}
+        <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-2">${opts.title || 'Terminé !'}</h2>
+        ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Sans-faute !</p>` : ''}
         <p class="pt-note">${String(note).replace('.', ',')} / 20</p>
-        <p class="text-lg text-gray-700 mb-4">Score : ${opts.score} / ${opts.max} points (${pct}%)</p>
+        <p class="text-lg text-gray-700 mb-4">Score : ${opts.score} / ${opts.max} points (${pct}%)</p>
         <button onclick="${opts.restartFn}" class="btn-primary">↺ Recommencer</button>
         ${nextHtml}
         ${recapHtml ? `<div class="text-sm font-bold text-gray-500 mt-6 mb-2 text-left">Détail des points</div>
@@ -378,7 +378,7 @@
         if (r.correct === r.total) {
           done1 = true;
           msg.style.color = '#166534';
-          msg.innerHTML = '✓ Tableau correct ! Reporte maintenant ces mêmes grandeurs dans la formule ci-dessous.';
+          msg.innerHTML = '✓ Tableau correct ! Reporte maintenant ces mêmes grandeurs dans la formule ci-dessous.';
           root.querySelector('#ptfBtn1').disabled = true;
           renderPhase2();
         } else {
@@ -394,7 +394,7 @@
       const div = document.createElement('div');
       div.className = 'pt-formula-phase';
       div.innerHTML = `
-        <p class="text-sm font-bold text-gray-500 mb-2 mt-4">Reporte les grandeurs dans la formule (les deux grandeurs du numérateur peuvent être posées dans n'importe quel ordre) :</p>
+        <p class="text-sm font-bold text-gray-500 mb-2 mt-4">Reporte les grandeurs dans la formule (les deux grandeurs du numérateur peuvent être posées dans n'importe quel ordre) :</p>
         <div class="pt-palette">${chipsHtml('_f')}</div>
         <div class="formula-line">? = ( ${ptSlot(nIds)} &times; ${ptSlot(nIds)} ) / ${ptSlot(dId)}</div>
         <div class="text-center mt-3"><button type="button" class="btn-primary" id="ptfBtn2">Vérifier la formule</button></div>
@@ -409,7 +409,7 @@
         if (r.correct === r.total) {
           done2 = true;
           msg.style.color = '#166534';
-          msg.textContent = '✓ Formule correcte !';
+          msg.textContent = '✓ Formule correcte !';
           div.querySelector('#ptfBtn2').disabled = true;
           if (opts.onDone) opts.onDone();
         } else {
@@ -529,7 +529,7 @@
       const piege = Object.keys(pl).map(nom => E[pl[nom]]).find(e => e && e.indice);
       if (piege) return piege.indice;
       const mal = Object.keys(pl).find(nom => colonnes[nom] && E[pl[nom]] && E[pl[nom]].unite !== colonnes[nom]);
-      if (mal) return `Chaque valeur va dans la colonne de son unité : « ${E[pl[mal]].label} » est en ${E[pl[mal]].unite}.`;
+      if (mal) return `Chaque valeur va dans la colonne de son unité : « ${E[pl[mal]].label} » est en ${E[pl[mal]].unite}.`;
       return indiceLigne || 'Sur une même ligne, on place deux valeurs qui vont ensemble.';
     };
   }

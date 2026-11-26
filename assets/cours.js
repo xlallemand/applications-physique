@@ -35,12 +35,12 @@
      'perso'   outil propre à l'application : p.monter(zone, api) → { montrer() }
                api.reussi(note) · api.erreur(diagnostic) · api.compterErreur() · api.effacer() · api.message(h)
      Toutes : p.q (question), p.solution (HTML affiché après la réponse,
-              par ex. « ✍ Complète ton cours : … »),
+              par ex. « Bilan : … »),
               p.aide (true : « Afficher la réponse » proposé tout de suite, pour un outil
               où aucune erreur n'est validée, comme une réaction réglée en direct).
 
    Outil propre à l'application qui doit se déplier avec « Afficher tout le cours »
-   (par ex. la démonstration étape par étape PH.demo de ph/modules/eq.js) :
+   (par ex. la démonstration étape par étape EQ.demo de assets/equations.js) :
      COURS.vivant(obj) l'inscrit (obj.deplier() sera appelé), COURS.oublier(obj) le retire.
    ============================================================ */
 (function () {
@@ -360,7 +360,7 @@
       function terminer(vue, note) {
         finie = true;
         aide.remove();
-        const titre = vue ? 'Réponse' : (etat.erreurs ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? 'Réponse' : (etat.erreurs ? 'C\'est juste.' : 'Juste !');
         ret.innerHTML = p.solution || vue || note
           ? `<div class="${vue ? 'callout' : 'callout-success'} er-retour crs-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${p.solution ? `<div>${p.solution}</div>` : ''}</div>`
           : '<p class="crs-ok">✓ Juste</p>';

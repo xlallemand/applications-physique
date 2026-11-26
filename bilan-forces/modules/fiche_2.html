@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Bilan des forces</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="bf.js"></script>
+<script src="situations.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Le diagramme objets-actions</h2>
+  </div>
+<!-- Fiche du module 2 : la méthode, l'exemple du ballon, trois bilans -->
+
+  <section class="er-card" id="methode">
+    <h3 class="cours-titre">La méthode du diagramme objet-action</h3>
+    <div class="cle"><p>À utiliser <b>partout</b> : elle liste toutes les forces, <b>sans en oublier et sans en inventer</b>. Inventaire des objets, sans oublier la Terre et le sol ; le <b>système</b> au centre, puis :</p>
+      <ul class="er-liste"><li>les <b>actions à distance</b> : la Terre (toujours), plus rarement un aimant ou un objet électrisé ; trait en <b>pointillés</b> ;</li>
+      <li><b>une bulle pour chaque objet en contact</b>, l'air compris ; trait <b>plein</b> ; chacun donne une force ;</li>
+      <li>trait <b>barré</b> : force négligeable. Le <b>nom de la force</b> s'écrit sur le trait.</li></ul>
+      <p>On dessine ensuite les forces sur le schéma : à distance depuis le centre G, de contact depuis le point de contact.</p></div>
+    <p class="cours-exemple-t">Exemple : le ballon de foot</p>
+    <div id="ballon"></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Trois bilans</h3>
+    <div class="bf-ballon" id="figs"></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_2_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_2_questions.html">Questions sur le diagramme objet-action</a>
+  </div>
+</div>
+
+<script>
+// exemple traité du ballon, puis trois bilans (diagramme objet-action au-dessus du dessin)
+const S = BF.SITUATIONS;
+document.getElementById('ballon').innerHTML = BF.ballonHTML();
+const trois = ['brique', 'ebonite', 'parachute'].map(id => S[id]), dos = BF.diagrammesDe(trois);
+document.getElementById('figs').innerHTML = trois.map((s, k) => `<figure><p class="bf-ballon-t">${s.titre}</p>${dos[k]}${BF.sceneRemplie(s)}</figure>`).join('');
+BF.menu('fiche_2');
+</script>
+</body>
+</html>
