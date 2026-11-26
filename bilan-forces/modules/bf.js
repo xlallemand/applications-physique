@@ -188,13 +188,16 @@
     return fmt(p.valeur);
   }
 
-  // Valeur numérique : p.label, p.valeur, p.tol (écart absolu) ou p.rel (écart relatif), p.unite, p.diag(v), p.indice
+  // icône calculatrice après l'unité (p.calc : valeur qui se calcule à la calculatrice, charte §7)
+  const CALC = '<span class="calc-icone" role="img" aria-label="À calculer à la calculatrice" title="À calculer à la calculatrice"></span>';
+  // Valeur numérique : p.label, p.valeur, p.tol (écart absolu) ou p.rel (écart relatif), p.unite, p.calc, p.diag(v), p.indice
   function pNombre(zone, p, api) {
     const d = el('div', 'ph-valeur');
     if (p.label) d.appendChild(el('span', 'ph-lab', p.label));
     const ch = champ({ signe: p.signe });
     d.appendChild(ch.el);
     if (p.unite) d.appendChild(el('span', 'ph-unite', p.unite));
+    if (p.calc) d.insertAdjacentHTML('beforeend', CALC);
     zone.appendChild(d);
     const bVal = boutonValider(zone);
     ch.input.addEventListener('input', () => api.effacer());
@@ -256,7 +259,7 @@
     };
   }
 
-  // Écriture scientifique a × 10ⁿ : p.label, p.valeur, p.unite, p.rel (écart relatif, 3 % par défaut), p.cs, p.diag(v)
+  // Écriture scientifique a × 10ⁿ : p.label, p.valeur, p.unite, p.calc, p.rel (écart relatif, 3 % par défaut), p.cs, p.diag(v)
   function pSci(zone, p, api) {
     const d = el('div', 'ph-valeur');
     if (p.label) d.appendChild(el('span', 'ph-lab', p.label));
@@ -265,6 +268,7 @@
     s.appendChild(a.el); s.appendChild(el('span', 'ph-x10', '× 10')); s.appendChild(n.el);
     d.appendChild(s);
     if (p.unite) d.appendChild(el('span', 'ph-unite', p.unite));
+    if (p.calc) d.insertAdjacentHTML('beforeend', CALC);
     zone.appendChild(d);
     const bVal = boutonValider(zone);
     [a, n].forEach(c => {
@@ -391,30 +395,35 @@
 
   /* ============================================================
      SÉRIE DE QUESTIONS NOTÉE SUR 20
-     opts = { app, badge, titre, intro, questions: () => [q], revoir, suite }
+     opts = { app, badge, titre, intro, questions: niv => [q], revoir, suite, niveaux }
      q = { theme, consigne, enonce, figure(zone), parties, bilan }
+     opts.niveaux = [{ id, nom }] (facultatif) : un bouton par niveau à la place
+     de « Commencer » ; questions(niv) reçoit l'id du niveau choisi.
      ============================================================ */
   function serie(opts) {
     const app = opts.app;
-    let qs = [], idx = 0, score = 0, recap = [];
+    let qs = [], idx = 0, score = 0, recap = [], niv = null;
+    const nomNiv = () => (opts.niveaux.find(n => n.id === niv) || {}).nom;
     const pts = v => `${v} pt${v > 1 ? 's' : ''}`;
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
         <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
           <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
-        <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
-      app.querySelector('[data-a="go"]').onclick = demarrer;
+        ${opts.niveaux ? `<p><b>Choisis ton niveau :</b></p><div class="er-actions bf-niveaux">${opts.niveaux.map(n => `<button type="button" class="btn-primary" data-niv="${n.id}">${n.nom} →</button>`).join('')}</div>`
+          : '<button type="button" class="btn-primary" data-a="go">Commencer →</button>'}</div>`;
+      if (opts.niveaux) app.querySelectorAll('[data-niv]').forEach(b => { b.onclick = () => { niv = b.dataset.niv; demarrer(); }; });
+      else app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
     }
-    function demarrer() { qs = opts.questions(); idx = 0; score = 0; recap = []; afficher(); }
+    function demarrer() { qs = opts.questions(niv); idx = 0; score = 0; recap = []; afficher(); }
 
     function afficher() {
       if (idx >= qs.length) return fin();
       const q = qs[idx];
       window.BF.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length}${niv ? ` · Niveau ${nomNiv()}` : ''} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -451,14 +460,16 @@
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
       const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
         : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>${niv ? `<p class="er-meta">Niveau ${nomNiv()}</p>` : ''}
         ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
+        ${niv ? '<button type="button" class="btn-secondary" data-a="niv">Changer de niveau</button>' : ''}
         ${opts.revoir ? `<a class="btn-secondary" style="text-decoration:none" href="${opts.revoir.href}">${opts.revoir.label}</a>` : ''}
         ${opts.suite ? `<a class="btn-primary" style="text-decoration:none" href="${opts.suite.href}">${opts.suite.label}</a>` : ''}</div></div>`;
       app.querySelector('[data-a="re"]').onclick = demarrer;
+      if (niv) app.querySelector('[data-a="niv"]').onclick = intro;
       window.scrollTo(0, 0);
       if (score === max) confettis();
     }
@@ -785,7 +796,8 @@
     });
     const aria = o.aria || `Diagramme objet-action du système ${sys} : ` + objets.map(ob => `${ob.nom}, ${ob.type === 'distance' ? 'action à distance' : ob.type === 'contact' ? 'action de contact' : 'type à choisir'}${ob.neglige ? ', force négligeable' : ''}`).join(' ; ');
     // o.cadre = [x0, x1] : cadre imposé (diagrammes côte à côte, à la même échelle)
-    const x0 = o.cadre ? o.cadre[0] : Math.max(0, Math.floor(xmin - 8)), x1 = o.cadre ? o.cadre[1] : Math.min(360, Math.ceil(xmax + 8));
+    // (un peu au-delà de 0 … 360 si une note dépasse : « (Archimède + frottements) »)
+    const x0 = o.cadre ? o.cadre[0] : Math.max(-60, Math.floor(xmin - 8)), x1 = o.cadre ? o.cadre[1] : Math.min(420, Math.ceil(xmax + 8));
     return `<svg viewBox="${x0} 0 ${x1 - x0} ${HD}" class="bf-do" style="max-width:${Math.round(440 * (x1 - x0) / 360)}px" role="img" aria-label="${aria}">${traits}${bulles}${noms}</svg>`;
   }
   // type d'action d'un acteur (l'air agit toujours par contact, même quand sa force est négligée)
@@ -814,7 +826,9 @@
       });
       const neglige = a.id === 'air' && !!s.air && s.air.neglige && (!etat || etat.air != null);
       return { nom: a.court || court(a.nom), type, neglige, forces,
-        note: a.id === 'air' && forces.length && s.air && s.air.cause === 'frottements' ? '(frottements)' : '' };
+        // note après les noms : « (frottements) » pour l'air ; a.note d'un acteur (huile : « (Archimède + frottements) »),
+        // une fois ses deux forces nommées
+        note: a.id === 'air' && forces.length && s.air && s.air.cause === 'frottements' ? '(frottements)' : a.note && forces.length > 1 ? a.note : '' };
     });
     return diagramme(s.sysCourt || court(s.systeme), objets, o);
   }
@@ -1501,7 +1515,7 @@
   /* ============================================================
      PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
      Le niveau de chaque page est écrit à la fin de son nom (« · 2de », « · 1re »,
-     « · Tle », « · 2de à Tle ») : dans le sommaire et sur l'accueil, il devient
+     « · Tle », « · 1re et Tle », « · 2de à Tle ») : dans le sommaire et sur l'accueil, il devient
      une pastille (BF.pastilles) ; rien n'est verrouillé.
      ============================================================ */
   const PLAN = [
@@ -1513,32 +1527,32 @@
         { nom: 'Modéliser une action par une force', questions: 'module_1_questions', noms: { questions: 'Questions · 2de' } }] },
     { n: 2, titre: 'Le diagramme objets-actions', desc: 'La méthode à suivre partout : actions à distance, objets en contact, force de l\'air, exemple du ballon de foot', fiche: 'fiche_2',
       parties: [{ nom: 'Le diagramme objets-actions', cours: 'module_2_cours', questions: 'module_2_questions', noms: { cours: 'Cours : méthode du diagramme objet-action · 2de à Tle', questions: 'Questions · 2de à Tle' } }] },
-    { n: 3, titre: 'Les forces usuelles', desc: 'Poids, réaction du support, tension d\'un fil, poussée d\'Archimède, force de l\'air, frottements solides', fiche: 'fiche_3',
+    { n: 3, titre: 'Les forces usuelles', desc: 'Poids, réaction du support sans frottements, frottements solides, tension d\'un fil, force de l\'air, poussée d\'Archimède', fiche: 'fiche_3',
       sousModules: true,
       parties: [
         { nom: 'Poids', slug: 'poids', cours: 'module_3a_cours', noms: { cours: 'Cours : poids · 2de' } },
-        { nom: 'Réaction du support', slug: 'reaction', cours: 'module_3b_cours', noms: { cours: 'Cours : réaction du support · 2de' } },
+        { nom: 'Réaction du support sans frottements', slug: 'reaction', cours: 'module_3b_cours', noms: { cours: 'Cours : réaction du support sans frottements · 2de' } },
+        { nom: 'Frottements solides', slug: 'frottements', cours: 'module_3f_cours', noms: { cours: 'Cours : frottements solides · 1re et Tle' } },
         { nom: 'Tension d\'un fil', slug: 'tension', cours: 'module_3c_cours', noms: { cours: 'Cours : tension d\'un fil · 2de' } },
-        { nom: 'Poussée d\'Archimède', slug: 'archimede', cours: 'module_3d_cours', noms: { cours: 'Cours : poussée d\'Archimède · Tle' } },
         { nom: 'Force de l\'air', slug: 'air', cours: 'module_3e_cours', noms: { cours: 'Cours : force de l\'air · 2de' } },
-        { nom: 'Frottements solides', slug: 'frottements', cours: 'module_3f_cours', noms: { cours: 'Cours : frottements solides · Tle' } },
+        { nom: 'Poussée d\'Archimède', slug: 'archimede', cours: 'module_3d_cours', noms: { cours: 'Cours : poussée d\'Archimède · Tle' } },
         { nom: 'Les forces usuelles', questions: 'module_3_questions', noms: { questions: 'Questions · 2de à Tle' } }] },
     { n: 4, titre: 'Centre de masse', desc: 'Système et milieu extérieur, centre de masse d\'un solide homogène ou non, mouvement du centre de masse', fiche: 'fiche_4',
-      parties: [{ nom: 'Centre de masse', cours: 'module_4_cours', questions: 'module_4_questions', noms: { cours: 'Cours : centre de masse · Tle', questions: 'Questions · Tle' } }] },
-    { n: 5, titre: 'Forces qui se compensent', desc: 'Forces qui se compensent, principe d\'inertie, somme des forces et variation de la vitesse', fiche: 'fiche_5',
+      parties: [{ nom: 'Centre de masse', cours: 'module_4_cours', questions: 'module_4_questions', noms: { cours: 'Cours : centre de masse · 2de', questions: 'Questions · 2de' } }] },
+    { n: 5, titre: 'Forces qui se compensent', desc: 'Forces qui se compensent, principe d\'inertie', fiche: 'fiche_5',
       sousModules: true,
       parties: [
         { nom: 'Forces qui se compensent', slug: 'compensation', cours: 'module_5a_cours', noms: { cours: 'Cours : forces qui se compensent · 2de' } },
         { nom: 'Principe d\'inertie', slug: 'inertie', cours: 'module_5b_cours', noms: { cours: 'Cours : principe d\'inertie · 2de' } },
-        { nom: 'Somme des forces et variation de la vitesse', slug: 'somme', cours: 'module_5c_cours', noms: { cours: 'Cours : somme des forces et variation de la vitesse · 1re' } },
-        { nom: 'Forces qui se compensent', questions: 'module_5_questions', noms: { questions: 'Questions · 2de et 1re' } }] },
+        { nom: 'Forces qui se compensent', questions: 'module_5_questions', noms: { questions: 'Questions · 2de à Tle' } }] },
     { n: 6, titre: 'Atelier : bilan des forces', desc: 'Toutes les situations, de la 2de à la Terminale, dans n\'importe quel ordre, puis une série de synthèse',
       parties: [{ nom: 'Bilan des forces', simulation: 'module_6_simulation', questions: 'module_6_questions', noms: { simulation: 'Atelier : bilan des forces · 2de à Tle', questions: 'Questions de synthèse · 2de à Tle' } }] },
   ];
-  window.SOM.init({ nom: 'Bilan des forces', id: 'bilan-forces', plan: PLAN });
+  // une autre application qui reprend ce moteur (forces-vitesse/) déclare son propre plan avant de charger ce fichier
+  if (!window.BF_AUTRE_PLAN) window.SOM.init({ nom: 'Bilan des forces', id: 'bilan-forces', plan: PLAN });
 
   // niveau écrit à la fin d'un nom (« Cours : poids · 2de ») → pastille, dans le sommaire et sur l'accueil
-  const RE_NIV = /\s·\s(2de à Tle|2de et 1re|2de|1re|Tle)\s*$/;
+  const RE_NIV = /\s·\s(2de à Tle|1re et Tle|2de|1re|Tle)\s*$/;
   function pastilles(racine) {
     if (!racine) return;
     const it = document.createTreeWalker(racine, NodeFilter.SHOW_TEXT), liste = [];

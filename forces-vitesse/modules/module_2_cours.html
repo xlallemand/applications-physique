@@ -3,22 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 5 : somme des forces et variation de la vitesse — Bilan des forces</title>
+<title>Module 2 : cours — Somme des forces et variation de la vitesse</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
-<link rel="stylesheet" href="bf.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="../../cinematique/modules/vecteurs.js"></script>
-<script src="bf.js"></script>
+<script src="fv.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
 <body>
 <div id="app-nav"></div>
 <div class="er-page">
   <div class="er-card">
-    <span class="er-badge">MODULE 5 · COURS 3 / 3</span>
+    <span class="er-badge">MODULE 2 · COURS</span>
     <h2 class="er-titre">Somme des forces et variation de la vitesse</h2>
     <p class="er-contexte">Quand les forces ne se compensent pas, leur <b>somme</b> Σ <span class="vec-nom">F</span> modifie la vitesse : la variation du vecteur vitesse <span class="vec-nom">Δv</span> a la <b>même direction</b> et le <b>même sens</b> que Σ <span class="vec-nom">F</span>.</p>
   </div>
@@ -28,10 +29,12 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
-   Sous-module 3 du module 5 (1re) : somme des forces dans un quadrillage
-   (BF.partieResultante, repère de cinematique/modules/vecteurs.js),
-   puis Δv⃗ (entre deux instants voisins) de même direction et de même sens
-   que Σ <span class="vec-nom">F</span> (BF.partieAcc avec nomVec 'Δv') ; m <span class="vec-nom">Δv</span> / Δt ≈ Σ <span class="vec-nom">F</span>.
+   Module 2 (1re ; moteur de bilan-forces/modules/bf.js) : somme des forces
+   dans un quadrillage (BF.partieResultante, repère de
+   cinematique/modules/vecteurs.js), puis Δv⃗ (entre deux instants voisins)
+   de même direction et de même sens que Σ F⃗ (BF.partieAcc avec nomVec
+   'Δv' ; Σ F⃗ à 45° : Δv⃗ peut s'arrêter sur plusieurs nœuds du quadrillage,
+   sa longueur n'a pas d'importance) ; m Δv⃗ / Δt ≈ Σ F⃗.
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
 const { o, nomV, partieResultante, partieAcc } = BF;
@@ -67,11 +70,12 @@ function etape2(c_) {
         <p class="crs-formule">m × ${DV} / Δt ≈ ${SF}</p><p>Plus la masse est grande, plus il faut de force pour changer la vitesse.</p></div>
     </div>
     ${exemple(`<p>Un skieur sans frottement : ${SF} = ${nomV('RN')} + ${nomV('P')} est dirigée vers le bas de la pente ; ${DV} aussi : le skieur va de plus en plus vite vers le bas de la pente.</p>`)}`);
-  const pp = [{ nom: 'F_1', coord: [0, 2] }, { nom: 'F_2', coord: [3, 0] }, { nom: 'F_3', coord: [0, -4] }];
+  // Σ F⃗ à 45° (2 ; −2) : Δv⃗ peut s'arrêter sur plusieurs nœuds du quadrillage, avec une autre longueur
+  const pp = [{ nom: 'F_1', coord: [0, 2] }, { nom: 'F_2', coord: [2, 0] }, { nom: 'F_3', coord: [0, -4] }];
   const cas = hasard(CAS);
   c_.aToi(carte, [
     { titre: 'Tracer <span class="vec-nom">Δv</span>', enonce: '<p>Trois forces s\'exercent sur un palet ; leur somme Σ <span class="vec-nom">F</span> est tracée en noir.</p>',
-      parties: [partieAcc({ forces: pp, etendue: 4, nomVec: 'Δv', q: `Trace la variation du vecteur vitesse ${DV} depuis G (sans souci d'échelle), puis valide.`, solution: `<p>${DV} a la même direction et le même sens que ${SF}.</p>` })] },
+      parties: [partieAcc({ forces: pp, etendue: 4, nomVec: 'Δv', q: `Trace la variation du vecteur vitesse ${DV} depuis G (sans souci d'échelle : sa longueur peut être différente de celle de ${SF}), puis valide.`, solution: `<p>${DV} a la même direction et le même sens que ${SF} ; sa longueur dépend de la masse et de la durée Δt.</p>` })] },
     { titre: 'Dans quel sens ?', enonce: `<p>${cas[0]}</p>`, parties: [{ type: 'choix', q: `Comment est dirigée la somme des forces ${SF} ?`, options: [o('avant', 'dans le sens du mouvement'), o('arriere', 'dans le sens opposé au mouvement'), o('nulle', 'elle est nulle')], bonne: cas[1], melanger: false,
       indice: `${SF} a la même direction et le même sens que ${DV} : la vitesse augmente-t-elle, diminue-t-elle, ou reste-t-elle constante ?`, solution: `<p>${cas[2]}</p>` }] },
   ]);
@@ -82,13 +86,13 @@ function etape2(c_) {
 function aRetenir(c_) {
   const carte = c_.carte('À retenir');
   c_.ajouter(carte, `<div class="cle"><p>${SF} : forces mises bout à bout. ${DV} (entre deux instants voisins) a la même direction et le même sens que ${SF} : m × ${DV} / Δt ≈ ${SF}.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5_questions.html">Questions →</a>
-      <a class="btn-secondary" style="text-decoration:none" href="fiche_5.html#somme">Fiche récapitulative</a></div>`);
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
   return carte;
 }
 
 new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
-BF.menu('module_5c_cours');
+BF.menu('module_2_cours');
 </script>
 </body>
 </html>

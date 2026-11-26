@@ -18,7 +18,7 @@
 <div id="app-nav"></div>
 <div class="er-page">
   <div class="er-card">
-    <span class="er-badge">MODULE 3 · COURS 4 / 6</span>
+    <span class="er-badge">MODULE 3 · COURS 6 / 6</span>
     <h2 class="er-titre">Poussée d'Archimède</h2>
     <p class="er-contexte">Un <b>fluide</b> (liquide ou gaz) qui entoure le système le pousse vers le haut : c'est la <b>poussée d'Archimède</b> <span class="vec-nom">F</span><sub>archi</sub>, une force de contact.</p>
   </div>
@@ -28,11 +28,12 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
-   Sous-module 4 du module 3 (Terminale) : poussée d'Archimède d'un fluide
+   Sous-module 6 du module 3 (Terminale) : poussée d'Archimède d'un fluide
    (liquide ou gaz) : verticale, vers le haut, depuis le centre de la partie
    immergée (G si le système est entièrement immergé) ; flotter, couler,
    monter. Exemple du bouchon ; « À toi » : la goutte dans l'huile
-   (BF.bilan arrêté au tracé), puis flotter ou couler.
+   (force de l'huile = poussée d'Archimède + frottement ; BF.bilan arrêté
+   aux noms), puis flotter ou couler.
    ============================================================ */
 const { hasard, exemple } = COURS;
 const { o, nomV, sceneRemplie, diagrammeDe, bilan, SITUATIONS } = BF;
@@ -52,7 +53,10 @@ function etape1(c_) {
     </div>
     ${exemple(`<p>${SITUATIONS.bouchon.enonce}</p>${figs(SITUATIONS.bouchon)}<p>L'eau touche le bouchon : une bulle, une force, ${nomV('Farchi')}, verticale, vers le haut. Le bouchon est immobile : la poussée d'Archimède compense le poids.</p>`)}`);
   const cas = hasard(CAS);
-  c_.aToi(carte, [Object.assign({ titre: 'La goutte dans l\'huile' }, bilan(SITUATIONS.goutte, { jusqua: 'trace' })),
+  // la goutte : l'huile exerce une seule action, dont la force se décompose en deux
+  const goutte = bilan(SITUATIONS.goutte, { jusqua: 'noms' });
+  goutte.enonce = `<div class="cle"><p>L'huile touche la goutte : <b>une seule action</b> de contact. La force de l'huile sur la goutte se <b>décompose</b> en deux forces : la poussée d'Archimède ${nomV('Farchi')} et une force de frottement ${nomV('f')} (l'huile freine la goutte). Dans le diagramme objet-action, la bulle « huile » porte donc deux noms : ${nomV('Farchi')} + ${nomV('f')}.</p></div>` + (goutte.enonce || '');
+  c_.aToi(carte, [Object.assign({ titre: 'La goutte dans l\'huile' }, goutte),
     { titre: 'Monter, flotter ou couler', enonce: `<p>${cas[0]}</p>`, parties: [{ type: 'choix', q: 'Compare la valeur de la poussée d\'Archimède à celle du poids :', options: [o('plus', 'F<sub>archi</sub> &gt; P'), o('egal', 'F<sub>archi</sub> = P'), o('moins', 'F<sub>archi</sub> &lt; P')], bonne: cas[1], melanger: false,
       indice: 'Le système monte, reste immobile ou coule ?', solution: `<p>${cas[2]}</p>` }] }]);
   return carte;
@@ -62,7 +66,7 @@ function etape1(c_) {
 function aRetenir(c_) {
   const carte = c_.carte('À retenir');
   c_.ajouter(carte, `<div class="cle"><p>Poussée d'Archimède ${nomV('Farchi')} d'un fluide : force de contact, <b>verticale, vers le haut</b>, depuis le centre de la partie immergée. Flotte si F<sub>archi</sub> = P, monte si F<sub>archi</sub> &gt; P, coule si F<sub>archi</sub> &lt; P.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3e_cours.html">Cours : force de l'air →</a>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur les forces usuelles →</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#archimede">Fiche récapitulative</a></div>`);
   return carte;
 }

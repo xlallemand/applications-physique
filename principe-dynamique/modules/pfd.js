@@ -1570,17 +1570,9 @@
   const PLAN = [
     { n: 1, titre: 'Référentiel et nature du mouvement', desc: 'Référentiel galiléen, décrire un mouvement en deux mots (trajectoire, vitesse)', fiche: 'fiche_1',
       parties: [{ nom: 'Référentiel et nature du mouvement', cours: 'module_1_cours', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Faire un bilan des forces', desc: 'Forces à distance et de contact, diagramme objet-action, force de l\'air, poids, réaction du support, forces qui se compensent', fiche: 'fiche_2',
-      // six sous-modules de cours, puis l'atelier (page « exemple » : entre les cours et les questions), les questions et la fiche
-      sousModules: true,
-      parties: [
-        { nom: 'Forces à distance, forces de contact', slug: 'distance', cours: 'module_2a_cours', noms: { cours: 'Cours : forces à distance, forces de contact' } },
-        { nom: 'Méthode du diagramme objet-action', slug: 'diagramme', cours: 'module_2b_cours', noms: { cours: 'Cours : méthode du diagramme objet-action' } },
-        { nom: 'Force de l\'air', slug: 'air', cours: 'module_2c_cours', noms: { cours: 'Cours : force de l\'air' } },
-        { nom: 'Poids', slug: 'poids', cours: 'module_2d_cours', noms: { cours: 'Cours : poids' } },
-        { nom: 'Réaction du support', slug: 'reaction', cours: 'module_2e_cours', noms: { cours: 'Cours : réaction du support' } },
-        { nom: 'Forces qui se compensent', slug: 'compensation', cours: 'module_2f_cours', noms: { cours: 'Cours : forces qui se compensent' } },
-        { nom: 'Bilan des forces', exemple: 'module_2_simulation', questions: 'module_2_questions', noms: { exemple: 'Atelier : bilan des forces' } }] },
+    { n: 2, titre: 'Faire un bilan des forces', desc: 'À savoir faire : le diagramme objet-action (actions à distance, objets qui touchent le système, force de l\'air négligeable ou non), puis chaque force sur le schéma (point de départ, direction, sens, nom : poids, réaction du support, frottements…), enfin : les forces se compensent-elles ?',
+      // page externe ↗ : l'atelier de l'application « Bilan des forces » (qui reprend et complète l'ancien module 2)
+      parties: [{ nom: 'Bilan des forces', externe: { app: 'bilan-forces', page: 'module_6_simulation', nom: 'Atelier : bilan des forces', appNom: 'Bilan des forces' } }] },
     { n: 3, titre: 'Accélération', desc: 'a = dv/dt ; a = Δv / Δt en m·s<sup>−2</sup>', fiche: 'fiche_3',
       // cinq sous-modules de cours, puis les questions et la fiche
       sousModules: true,

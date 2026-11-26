@@ -23,7 +23,7 @@
      propres, ou glisser depuis le point), 5. noms, 6. compensation.
    Règles et diagnostics : ceux de BF.bilan (BF.verif). « Afficher la
    réponse » est proposé après une erreur.
-   Terminale : bouton « R⃗ = R⃗ₙ + f⃗ » : la réaction de chaque support
+   1re et Terminale : bouton « R⃗ = R⃗ₙ + f⃗ » : la réaction de chaque support
    est dessinée (en noir, avec le parallélogramme) une fois le tracé fait.
 
    Situations réussies gardées dans le navigateur (clé bilan-forces-atelier) ;
@@ -58,7 +58,7 @@
           </div>
           <div class="bf-at-outils">
             <div class="bf-at-vue" role="group" aria-label="Figure affichée"><button type="button" data-vue="schema" aria-pressed="true">Schéma</button><button type="button" data-vue="do" aria-pressed="false">Diagramme</button></div>
-            <button type="button" class="bf-at-r" data-a="optR" aria-pressed="false" hidden><span class="vec-nom">R</span> = <span class="vec-nom">R</span><sub>N</sub> + <span class="vec-nom">f</span> <span class="bf-niv">Tle</span></button>
+            <button type="button" class="bf-at-r" data-a="optR" aria-pressed="false" hidden><span class="vec-nom">R</span> = <span class="vec-nom">R</span><sub>N</sub> + <span class="vec-nom">f</span> <span class="bf-niv">1re et Tle</span></button>
           </div>
           <div class="bf-at-figs" data-a="figs">
             <div class="bf-at-fig bf-at-sc" data-a="sc"></div>
@@ -156,7 +156,7 @@
     // après une validation, le message reste visible (téléphone : la figure est au-dessus du panneau)
     const voir = () => { if (tel.matches) setTimeout(() => $('msg').scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 60); };
 
-    /* ---------- option « R⃗ = R⃗ₙ + f⃗ » (Terminale) ---------- */
+    /* ---------- option « R⃗ = R⃗ₙ + f⃗ » (1re et Terminale) ---------- */
     let optR = false;
     $('optR').onclick = () => { optR = !optR; $('optR').setAttribute('aria-pressed', optR ? 'true' : 'false'); dessiner(); };
 
@@ -479,7 +479,7 @@
     function finie(z) {
       const k = suivante(), tous = ORDRE.every(id => lireFaits()[id]);
       z.innerHTML = `<p class="bf-at-bravo">✓ Situation réussie${tous ? ' : toutes les situations sont réussies !' : '.'}</p>
-        <p class="bf-at-q">Le diagramme objet-action et toutes les forces sont dessinés.${reactions(s).length ? ` En Terminale, touche « ${nomV('R')} = ${nomV('RN')} + ${nomV('f')} » pour voir la réaction de chaque support.` : ''}</p>`;
+        <p class="bf-at-q">Le diagramme objet-action et toutes les forces sont dessinés.${reactions(s).length ? ` En 1re et en Terminale, touche « ${nomV('R')} = ${nomV('RN')} + ${nomV('f')} » pour voir la réaction de chaque support.` : ''}</p>`;
       const a = blocEtapes.querySelector('[data-a="actions"]');
       a.innerHTML = `<button type="button" class="btn-primary" data-b="suite">Situation ${k + 1} →</button><button type="button" class="btn-small" data-b="re">↺ Refaire</button>`;
       a.querySelector('[data-b="suite"]').onclick = () => charger(k);

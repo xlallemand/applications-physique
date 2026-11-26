@@ -32,6 +32,8 @@
    vers le bas, depuis le centre de masse G ; puis le poids change avec le
    lieu (g sur la Lune), la masse non.
    ============================================================ */
+// icône calculatrice après l'unité (charte §7)
+const CALC = ' <span class="calc-icone" role="img" aria-label="À calculer à la calculatrice" title="À calculer à la calculatrice"></span>';
 const { fmt, hasard, exemple } = COURS;
 const { fr, proche, nomV } = BF;
 const c = h => `<span class="c">${h}</span>`;
@@ -49,13 +51,13 @@ function etape1(c_) {
   const m1 = hasard([60, 75, 1200, 2.5]), mg = hasard([46, 400, 250, 58]), P3 = hasard([981, 4905, 196.2, 1962]);
   c_.aToi(carte, [
     { titre: 'Un poids', enonce: `<p>Un objet a une masse m = ${fmt(m1)} kg.</p>`,
-      parties: [{ type: 'nombre', q: 'Calcule son poids (g = 9,81 N/kg, 3 chiffres significatifs).', label: 'P =', valeur: m1 * 9.81, unite: 'N', signe: false, rel: .01, affiche: fmt(r3(m1 * 9.81)),
+      parties: [{ type: 'nombre', q: 'Calcule son poids (g = 9,81 N/kg, 3 chiffres significatifs).', label: 'P =', valeur: m1 * 9.81, unite: 'N' + CALC, signe: false, rel: .01, affiche: fmt(r3(m1 * 9.81)),
         diag: v => proche(v, m1 / 9.81, .02) ? 'On multiplie : P = m × g.' : proche(v, m1 * 10, .02) ? 'Ici, prends g = 9,81 N/kg.' : 'P = m × g.', solution: `<p class="crs-calc">P = ${fmt(m1)} × 9,81 ≈ ${c(fmt(r3(m1 * 9.81)) + ' N')}</p>` }] },
     { titre: 'Une masse en grammes', enonce: `<p>Une balle a une masse de ${mg} g.</p>`,
-      parties: [{ type: 'nombre', q: 'Calcule son poids (g = 9,81 N/kg, 3 chiffres significatifs).', label: 'P =', valeur: mg / 1000 * 9.81, unite: 'N', signe: false, rel: .01, affiche: fmt(r3(mg / 1000 * 9.81)),
+      parties: [{ type: 'nombre', q: 'Calcule son poids (g = 9,81 N/kg, 3 chiffres significatifs).', label: 'P =', valeur: mg / 1000 * 9.81, unite: 'N' + CALC, signe: false, rel: .01, affiche: fmt(r3(mg / 1000 * 9.81)),
         diag: v => proche(v, mg * 9.81, .02) ? `Convertis la masse en kg : ${mg} g = ${fmt(mg / 1000)} kg.` : 'P = m × g, avec m en kg.', solution: `<p class="crs-calc">m = ${mg} g = ${fmt(mg / 1000)} kg ; P = ${fmt(mg / 1000)} × 9,81 ≈ ${c(fmt(r3(mg / 1000 * 9.81)) + ' N')}</p>` }] },
     { titre: 'Retrouver la masse', enonce: `<p>Un objet a un poids de ${fmt(P3)} N (g = 9,81 N/kg).</p>`,
-      parties: [{ type: 'nombre', q: 'Quelle est sa masse ?', label: 'm =', valeur: P3 / 9.81, unite: 'kg', signe: false, rel: .01,
+      parties: [{ type: 'nombre', q: 'Quelle est sa masse ?', label: 'm =', valeur: P3 / 9.81, unite: 'kg' + CALC, signe: false, rel: .01,
         diag: v => proche(v, P3 * 9.81, .02) ? 'P = m × g donc m = P / g : on divise.' : 'm = P / g.', solution: `<p class="crs-calc">P = m × g donc m = ${fr('P', 'g')} = ${fr(fmt(P3), '9,81')} = ${c(fmt(r3(P3 / 9.81)) + ' kg')}</p>` }] },
   ]);
   return carte;
@@ -73,7 +75,7 @@ function etape2(c_) {
     { titre: 'Sur la Lune', enonce: `<p>Un robot a une masse de ${m} kg sur Terre. On l'envoie sur la Lune (g<sub>Lune</sub> = 1,62 N/kg).</p>`,
       parties: [{ type: 'nombre', q: 'Quelle est sa masse sur la Lune ?', label: 'm =', valeur: m, unite: 'kg', signe: false, rel: .005,
           diag: v => proche(v, m * 1.62, .02) || proche(v, m / 6, .05) ? 'La masse ne change pas d\'un astre à l\'autre : c\'est le poids qui change.' : 'La masse est la même partout.', solution: `<p>La masse ne dépend pas du lieu : m = <span class="c">${m} kg</span>.</p>` },
-        { type: 'nombre', q: 'Calcule son poids sur la Lune (3 chiffres significatifs).', label: 'P =', valeur: m * 1.62, unite: 'N', signe: false, rel: .01, affiche: fmt(r3(m * 1.62)),
+        { type: 'nombre', q: 'Calcule son poids sur la Lune (3 chiffres significatifs).', label: 'P =', valeur: m * 1.62, unite: 'N' + CALC, signe: false, rel: .01, affiche: fmt(r3(m * 1.62)),
           diag: v => proche(v, m * 9.81, .02) ? 'Sur la Lune, g = 1,62 N/kg.' : 'P = m × g<sub>Lune</sub>.', solution: `<p class="crs-calc">P = ${m} × 1,62 ≈ ${c(fmt(r3(m * 1.62)) + ' N')}</p>` }] },
   ]);
   return carte;
@@ -83,7 +85,7 @@ function etape2(c_) {
 function aRetenir(c_) {
   const carte = c_.carte('À retenir');
   c_.ajouter(carte, `<div class="cle"><p class="crs-formule">P = m × g</p><p>P en N, m en kg, g = 9,81 N/kg sur Terre ; vertical, vers le bas, depuis le centre de masse G. La Terre est toujours dans le diagramme objet-action : le poids est dans tous les bilans. La masse ne dépend pas du lieu, le poids si.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : réaction du support →</a>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : réaction du support sans frottements →</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#poids">Fiche récapitulative</a></div>`);
   return carte;
 }

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions — Somme des forces et variation de la vitesse</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../bilan-forces/modules/bf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../cinematique/modules/vecteurs.js"></script>
+<script src="fv.js"></script>
+<script src="../../bilan-forces/modules/bf.js"></script>
+<script src="../../bilan-forces/modules/situations.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 2 : 10 questions : trois sommes de forces à tracer
+   (opposées, perpendiculaires, trois forces), deux Δv⃗ à tracer (Σ F⃗ à
+   45° : plusieurs longueurs possibles), deux sens de Σ F⃗ d'après la
+   variation de la vitesse, Δv⃗ d'après un bilan des forces tout fait
+   (situations de bilan-forces/modules/situations.js), rôle de la masse,
+   calcul de Δv avec m Δv / Δt ≈ Σ F.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, sceneRemplie, partieResultante, partieAcc, SITUATIONS: S } = BF;
+const SF = 'Σ <span class="vec-nom">F</span>', DV = '<span class="vec-nom">Δv</span>';
+const fs = l => l.map((c, i) => ({ nom: `F_${i + 1}`, coord: c }));
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+
+// sommes de forces (1 carreau = 1 N)
+const PAIRES = [[[-4, 0], [2, 0]], [[0, 3], [0, -1]], [[3, 0], [-1, 0]], [[0, -4], [0, 1]]];
+const PERP = [[[3, 0], [0, 2]], [[0, -3], [-2, 0]], [[-4, 0], [0, 1]], [[0, 3], [1, 0]]];
+const TRIPLES = [[[0, 2], [3, 0], [0, -4]], [[-2, 0], [0, 3], [4, 0]], [[0, -3], [-2, 0], [0, 1]]];
+// Σ F⃗ à 45° : Δv⃗ peut s'arrêter sur plusieurs nœuds du quadrillage (sa longueur n'a pas d'importance)
+const A45 = [[[0, 2], [2, 0], [0, -4]], [[-3, 0], [0, 1], [0, 2]], [[-4, 0], [2, 0], [0, -2]], [[0, -1], [3, 0], [0, 4]]];
+// sens de Σ F⃗ d'après la variation de la vitesse
+const SENS = [['Une voiture roule en ligne droite vers la droite et freine.', 'arriere', 'Elle ralentit : Δv est vers l\'arrière, donc Σ F aussi.'],
+  ['Un cycliste roule en ligne droite et accélère.', 'avant', 'Il accélère : Δv est vers l\'avant, donc Σ F aussi.'],
+  ['Un parachutiste descend verticalement à vitesse constante.', 'nulle', 'Mouvement rectiligne uniforme : Δv = 0, donc Σ F = 0.'],
+  ['Un ascenseur monte et ralentit avant de s\'arrêter à l\'étage.', 'arriere', 'Il ralentit : Δv est vers le bas, opposé au mouvement, donc Σ F aussi.'],
+  ['Un train roule en ligne droite à vitesse constante.', 'nulle', 'Mouvement rectiligne uniforme : Δv = 0, donc Σ F = 0.'],
+  ['Une pomme tombe de l\'arbre, de plus en plus vite.', 'avant', 'Elle accélère vers le bas : Δv est dans le sens du mouvement, donc Σ F aussi.']];
+// Δv⃗ d'après un bilan des forces tout fait
+const DIRS = { bas: 'verticale, vers le bas', haut: 'verticale, vers le haut', pente: 'parallèle à la pente, vers le bas de la pente', gauche: 'horizontale, vers la gauche', nul: 'aucune : Δv = 0' };
+const BILANS = [['balle', 'bas', 'Seul le poids s\'exerce : Σ F = P, verticale vers le bas ; Δv aussi (la balle monte de moins en moins vite).'],
+  ['poidsLance', 'bas', 'Seul le poids s\'exerce : Σ F = P, verticale vers le bas ; Δv aussi.'],
+  ['skieurSans', 'pente', 'R<sub>N</sub> et P ne se compensent pas : leur somme est parallèle à la pente, vers le bas ; Δv aussi.'],
+  ['glisse', 'pente', 'La brique va de plus en plus vite vers le bas de la pente : Σ F et Δv sont parallèles à la pente, vers le bas.'],
+  ['voitureFrein', 'gauche', 'Les réactions perpendiculaires compensent le poids ; il reste les frottements et la force de l\'air, vers l\'arrière (la gauche) : Σ F et Δv sont horizontales, vers la gauche.']];
+// Δv = Σ F × Δt / m : [m (kg), Σ F (N), Δt (s)]
+const CALCULS = [[2.0, 3.0, 0.50], [1200, 3600, 2.0], [0.40, 2.0, 0.10], [80, 120, 1.5], [5.0, 8.0, 0.25]];
+
+function somme(theme, l, sol) {
+  return { theme, enonce: `<p>${l.length === 2 ? 'Deux' : 'Trois'} forces s'exercent au point G (1 carreau = 1 N).</p>`, parties: [partieResultante({ forces: fs(l), etendue: 4, solution: `<p>${sol}</p>` })] };
+}
+function dv(l) {
+  return { theme: 'Variation de la vitesse', enonce: `<p>${l.length} forces s'exercent sur un palet ; leur somme ${SF} est tracée en noir.</p>`,
+    parties: [partieAcc({ forces: fs(l), etendue: 4, nomVec: 'Δv', q: `Trace ${DV} depuis G (sans souci d'échelle : sa longueur peut être différente de celle de ${SF}), puis valide.`, solution: `<p>${DV} a la même direction et le même sens que ${SF} ; sa longueur dépend de la masse et de la durée Δt.</p>` })] };
+}
+function sens(cas) {
+  return { theme: 'Sens de la somme des forces', enonce: `<p>${cas[0]}</p>`, parties: [fq.choix(`Comment est dirigée ${SF} ?`, [o('avant', 'dans le sens du mouvement'), o('arriere', 'dans le sens opposé au mouvement'), o('nulle', 'elle est nulle')], cas[1],
+    { melanger: false, indice: `${SF} a la même direction et le même sens que ${DV} : la vitesse augmente-t-elle, diminue-t-elle, ou reste-t-elle constante ?`, solution: `<p>${cas[2]}</p>` })] };
+}
+function bilan(cas) {
+  const s = S[cas[0]], opts = Object.keys(DIRS).map(k => o(k, DIRS[k]));
+  return { theme: 'Bilan des forces et variation de la vitesse', enonce: `<p>${s.enonce}</p><div class="bf-sc-cadre">${sceneRemplie(s)}</div><p>Toutes les forces qui s'exercent sur le système sont dessinées.</p>`,
+    parties: [fq.choix(`Quelle est la direction et le sens de ${DV}, entre deux instants voisins ?`, opts, cas[1], { melanger: false, colonne: true, indice: `Fais la somme des forces : ${DV} a la même direction et le même sens que ${SF}.`, solution: `<p>${cas[2]}</p>` })] };
+}
+function masse() {
+  const [k, nom] = hasard([[2, 'deux'], [3, 'trois']]);
+  return { theme: 'Rôle de la masse', enonce: `<p>Une même somme des forces ${SF} s'exerce pendant la même durée Δt sur deux chariots A et B. Le chariot B a une masse ${nom} fois plus grande que celle de A.</p>`,
+    parties: [fq.choix(`Compare les variations de vitesse Δv<sub>A</sub> et Δv<sub>B</sub> :`, [o('div', `Δv<sub>B</sub> = Δv<sub>A</sub> / ${k}`), o('egal', 'Δv<sub>B</sub> = Δv<sub>A</sub>'), o('mul', `Δv<sub>B</sub> = ${k} × Δv<sub>A</sub>`)], 'div',
+      { melanger: false, indices: { egal: 'La masse compte : m × Δv / Δt ≈ Σ F.', mul: 'Plus la masse est grande, plus il est difficile de changer la vitesse.' }, solution: `<p>m × Δv ≈ Σ F × Δt est le même pour les deux chariots : la masse est ${nom} fois plus grande, donc Δv est ${nom} fois plus petite.</p>` })] };
+}
+function calcul() {
+  const [m, F, t] = hasard(CALCULS), v = F * t / m;
+  return { theme: 'Calcul de Δv', enonce: `<p>Un système de masse m = ${fmt(m)} kg est soumis à une somme des forces de valeur Σ F = ${fmt(F)} N pendant Δt = ${fmt(t)} s.</p>`,
+    parties: [fq.nombre('Calcule la valeur de la variation de vitesse Δv (m × Δv / Δt ≈ Σ F).', 'Δv ≈', v, 'm/s', { signe: false, calc: true, rel: .02,
+      diag: x => (proche(x, F * m / t, .02) || proche(x, F / (m * t), .02) ? 'Isole Δv : Δv = Σ F × Δt / m.' : proche(x, F / m, .02) ? 'Tu as oublié de multiplier par Δt.' : 'Δv = Σ F × Δt / m.'),
+      solution: calc(`Δv = Σ F × Δt / m = ${fmt(F)} × ${fmt(t)} / ${fmt(m)} = ${c(fmt(+v.toPrecision(3)) + ' m/s')}`) })] };
+}
+
+function tirage() {
+  const qs = [somme('Somme de deux forces opposées', hasard(PAIRES), 'Forces opposées : on soustrait ; Σ <span class="vec-nom">F</span> est dans le sens de la plus grande.'),
+    somme('Somme de deux forces perpendiculaires', hasard(PERP), 'Forces perpendiculaires : Σ <span class="vec-nom">F</span> est la diagonale du rectangle.'),
+    somme('Somme de trois forces', hasard(TRIPLES), 'Les forces opposées se réduisent ; avec la force perpendiculaire, Σ <span class="vec-nom">F</span> est la diagonale du rectangle.')];
+  melanger(A45).slice(0, 2).forEach(l => qs.push(dv(l)));
+  melanger(SENS).slice(0, 2).forEach(cas => qs.push(sens(cas)));
+  qs.push(bilan(hasard(BILANS)), masse(), calcul());
+  return melanger(qs);
+}
+
+BF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Somme des forces et variation de la vitesse',
+  intro: '<p class="er-contexte">10 questions : sommes de forces à tracer, variation du vecteur vitesse à tracer, sens de la somme des forces, rôle de la masse, calcul de Δv.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'fiche_2.html', label: 'Fiche récapitulative →' },
+});
+BF.menu('module_2_questions');
+</script>
+</body>
+</html>

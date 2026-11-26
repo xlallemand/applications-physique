@@ -19,23 +19,17 @@
 
 <script>
 /* ============================================================
-   Série du module 5 (2de et 1re) : 10 questions : trois bilans tout faits
-   (les forces se compensent-elles ?), deux cas du principe d'inertie, deux
-   sommes de forces à tracer, <span class="vec-nom">Δv</span> à tracer, sens de Σ <span class="vec-nom">F</span>, caractéristiques
-   de deux forces qui se compensent.
+   Série du module 5 : 10 questions, au choix du niveau (2de, ou 1re et
+   Terminale) : cinq bilans tout faits sur des situations du niveau (les
+   forces se compensent-elles ?), quatre cas du principe d'inertie,
+   caractéristiques de deux forces qui se compensent.
    ============================================================ */
-const { o, fq, hasard, melanger, nomV, sceneRemplie, partieResultante, partieAcc, SITUATIONS: S, PARCOURS } = BF;
-const TOUTES = PARCOURS.map(id => S[id]).filter(s => s.comp);
-const SF = 'Σ <span class="vec-nom">F</span>', DV = '<span class="vec-nom">Δv</span>';
+const { o, fq, hasard, melanger, sceneRemplie, SITUATIONS: S, PARCOURS } = BF;
 const INERTIE = [['Un livre est posé, immobile, sur une table.', 'oui', 'Immobile : les forces se compensent.'], ['Une voiture roule en ligne droite à 90 km/h constants.', 'oui', 'Mouvement rectiligne uniforme : les forces se compensent.'],
   ['Une voiture freine en ligne droite.', 'non', 'La vitesse diminue : les forces ne se compensent pas.'], ['Une moto prend un virage à vitesse constante.', 'non', 'Le mouvement n\'est pas rectiligne : les forces ne se compensent pas.'],
   ['Un ascenseur monte à vitesse constante.', 'oui', 'Mouvement rectiligne uniforme : les forces se compensent.'], ['Une pomme tombe de plus en plus vite.', 'non', 'La vitesse augmente : les forces ne se compensent pas.']];
-const PAIRES = [[[-4, 0], [2, 0]], [[0, 3], [0, -1]], [[3, 0], [-1, 0]], [[0, -4], [0, 1]]];
-const TRIPLES = [[[0, 2], [3, 0], [0, -4]], [[-2, 0], [0, 3], [4, 0]], [[0, -3], [-2, 0], [0, 1]]];
-const fs = l => l.map((c, i) => ({ nom: `F_${i + 1}`, coord: c }));
 
-function compense() {
-  const s = hasard(TOUTES);
+function compense(s) {
   return { theme: 'Compensation', enonce: `<p>${s.enonce}</p><div class="bf-sc-cadre">${sceneRemplie(s)}</div>`,
     parties: [fq.choix(s.comp.q || 'Ces forces se compensent-elles ?', [o('oui', 'oui : leur somme est nulle'), o('non', 'non : leur somme n\'est pas nulle')], s.comp.bonne, { melanger: false, indice: s.comp.indice, solution: `<p>${s.comp.expl}</p>` })] };
 }
@@ -43,17 +37,14 @@ function inertie(c) {
   return { theme: 'Principe d\'inertie', enonce: `<p>${c[0]}</p>`, parties: [fq.choix('Que peut-on dire des forces qui s\'exercent sur le système ?', [o('oui', 'elles se compensent'), o('non', 'elles ne se compensent pas')], c[1],
     { melanger: false, indice: 'Principe d\'inertie : les forces se compensent ⇔ immobile ou mouvement rectiligne uniforme.', solution: `<p>${c[2]}</p>` })] };
 }
-function tirage() {
-  const qs = [];
-  const vus = [];
-  while (qs.length < 3) { const q = compense(); if (vus.indexOf(q.enonce) === -1) { vus.push(q.enonce); qs.push(q); } }
-  melanger(INERTIE).slice(0, 2).forEach(c => qs.push(inertie(c)));
-  qs.push({ theme: 'Somme des forces', enonce: '<p>Deux forces s\'exercent au point G (1 carreau = 1 N).</p>', parties: [partieResultante({ forces: fs(hasard(PAIRES)), etendue: 4, solution: '<p>Forces opposées : on soustrait ; Σ <span class="vec-nom">F</span> est dans le sens de la plus grande.</p>' })] });
-  qs.push({ theme: 'Somme des forces', enonce: '<p>Trois forces s\'exercent au point G (1 carreau = 1 N).</p>', parties: [partieResultante({ forces: fs(hasard(TRIPLES)), etendue: 4, solution: '<p>Les forces opposées se réduisent ; avec la force perpendiculaire, Σ <span class="vec-nom">F</span> est la diagonale du rectangle.</p>' })] });
-  qs.push({ theme: 'Variation de la vitesse', enonce: '<p>Trois forces s\'exercent sur un palet ; leur somme est tracée en noir.</p>', parties: [partieAcc({ forces: fs(hasard(TRIPLES)), etendue: 4, nomVec: 'Δv', q: `Trace ${DV} depuis G (sans souci d'échelle), puis valide.`, solution: `<p>${DV} a la même direction et le même sens que ${SF}.</p>` })] });
-  const [t, b, sol] = hasard([['Une voiture roule vers la droite et freine en ligne droite.', 'arriere', 'Elle ralentit : Σ <span class="vec-nom">F</span> est opposée au mouvement.'], ['Un cycliste roule vers la droite et accélère en ligne droite.', 'avant', 'Il accélère : Σ <span class="vec-nom">F</span> est dans le sens du mouvement.']]);
-  qs.push({ theme: 'Sens de la somme des forces', enonce: `<p>${t}</p>`, parties: [fq.choix(`Comment est dirigée ${SF} ?`, [o('avant', 'dans le sens du mouvement'), o('arriere', 'dans le sens opposé au mouvement'), o('nulle', 'elle est nulle')], b,
-    { melanger: false, indice: `${SF} a le même sens que ${DV}.`, solution: `<p>${sol}</p>` })] });
+// niv : '2de' (situations de 2de) ou 'sup' (situations de 1re et de Terminale)
+function tirage(niv) {
+  const sits = PARCOURS.map(id => S[id]).filter(s => s.comp && (niv === '2de' ? s.niv === '2de' : s.niv !== '2de'));
+  // cinq situations différentes, avec au moins un « oui » et un « non »
+  let cinq;
+  do { cinq = melanger(sits).slice(0, 5); } while (!cinq.some(s => s.comp.bonne === 'oui') || !cinq.some(s => s.comp.bonne === 'non'));
+  const qs = cinq.map(compense);
+  melanger(INERTIE).slice(0, 4).forEach(c => qs.push(inertie(c)));
   qs.push({ theme: 'Forces qui se compensent', parties: [fq.choix('Deux forces qui se compensent ont :', [o('ok', 'la même direction, des sens opposés, la même valeur'), o('sens', 'la même direction, le même sens, la même valeur'), o('val', 'la même direction, des sens opposés, des valeurs différentes'), o('dir', 'des directions perpendiculaires')], 'ok',
     { indices: { sens: 'Deux forces de même sens s\'ajoutent : leur somme n\'est pas nulle.', val: 'Si les valeurs sont différentes, la somme n\'est pas nulle.', dir: 'Deux forces perpendiculaires ne peuvent pas se compenser.' }, solution: '<p>Même direction, sens opposés, même valeur : leur somme est nulle.</p>' })] });
   return melanger(qs);
@@ -62,7 +53,8 @@ function tirage() {
 BF.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 5 · QUESTIONS', titre: 'Forces qui se compensent',
-  intro: '<p class="er-contexte">10 questions : les forces se compensent-elles, principe d\'inertie, somme des forces et variation de la vitesse.</p>',
+  intro: '<p class="er-contexte">10 questions : les forces se compensent-elles (bilans tout faits sur des situations de ton niveau), principe d\'inertie, caractéristiques de deux forces qui se compensent.</p>',
+  niveaux: [{ id: '2de', nom: '2de' }, { id: 'sup', nom: '1re ou Terminale' }],
   questions: tirage,
   revoir: { href: 'module_5a_cours.html', label: 'Revoir les cours' },
   suite: { href: 'module_6_simulation.html', label: 'Module 6 : atelier →' },

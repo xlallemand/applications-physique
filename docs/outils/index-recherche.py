@@ -65,7 +65,6 @@ EXCEPTIONS = {
     'double-periodicite': 'simulateur',
     'banc-optique': 'simulateur',
     'montage-electrique/module_1a_manip': 'simulateur',       # prise en main du simulateur de montage
-    'principe-dynamique/module_2_simulation': 'atelier',      # « Atelier : bilan des forces » (page d'exemple)
     'periode-frequence/module_2_manip': 'atelier',            # mesurer T et calculer f
     'titrage-ph/module_3a_equivalence': 'atelier',            # repérer le volume équivalent
 }
