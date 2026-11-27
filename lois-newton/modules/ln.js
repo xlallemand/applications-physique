@@ -142,9 +142,10 @@
     const cP = '#c2255c', cM = '#1971c2';
     let s = `<rect x="196" y="20" width="26" height="150" fill="#ebe8e1" stroke="${ENCRE2}" stroke-width="1.5"/>` +
       `<line x1="30" y1="170" x2="290" y2="170" stroke="${ENCRE}" stroke-width="2"/>` +
-      // la personne (bonhomme), bras tendus vers le mur
-      `<g stroke="${ENCRE}" stroke-width="3" stroke-linecap="round" fill="none"><circle cx="118" cy="52" r="13" fill="#fff"/><line x1="122" y1="65" x2="132" y2="112"/>` +
-      `<line x1="126" y1="80" x2="196" y2="88"/><line x1="128" y1="84" x2="196" y2="98"/><line x1="132" y1="112" x2="112" y2="168"/><line x1="132" y1="112" x2="150" y2="168"/></g>`;
+      // la personne (bonhomme), penchée vers l'avant : jambe arrière tendue, bras tendus jusqu'au mur
+      `<g stroke="${ENCRE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="160" cy="62" r="12" fill="#fff"/>` +
+      `<line x1="153" y1="73" x2="116" y2="124"/><line x1="148" y1="80" x2="196" y2="88"/><line x1="146" y1="84" x2="196" y2="98"/>` +
+      `<polyline points="116,124 84,168 96,168"/><polyline points="116,124 136,142 128,168 140,168"/></g>`;
     s += fl(196, 93, 262, 93, cP) + nom(240, 82, 'F', 'personne/mur', cP, { t: 14 });
     // la force du mur sur la personne part du même point de contact
     s += fl(196, 93, 130, 93, cM, { ep: 3 }) + nom(158, 124, 'F', 'mur/personne', cM, { t: 14 });

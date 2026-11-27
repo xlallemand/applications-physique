@@ -54,7 +54,27 @@
     return `<line x1="${x1}" y1="${y1}" x2="${x2 - 8 * c}" y2="${y2 - 8 * s}" class="bf-sc-mvt"/><path d="M${x2},${y2} L${(x2 - 9 * c - 4 * s).toFixed(1)},${(y2 - 9 * s + 4 * c).toFixed(1)} L${(x2 - 9 * c + 4 * s).toFixed(1)},${(y2 - 9 * s - 4 * c).toFixed(1)} Z" class="bf-sc-mvt-p"/>` +
       (t ? txt((x1 + x2) / 2, Math.min(y1, y2) - 7, t, 'middle') : '');
   }
+  // trajectoire parabolique en pointillés : y = y0 + p (x − x0) + a (x − x0)², de x1 à x2 (pointe de flèche au bout si fl)
+  function parab(x0, y0, p, a, x1, x2, fl) {
+    const y = x => y0 + p * (x - x0) + a * (x - x0) ** 2, d = x => p + 2 * a * (x - x0);
+    const r = Math.atan(d(x2)), c = Math.cos(r), sn = Math.sin(r), xe = fl ? x2 - 8 * c : x2;
+    const f = v => +v.toFixed(1);
+    let g = `<path d="M${f(x1)},${f(y(x1))} Q${f((x1 + xe) / 2)},${f(y(x1) + d(x1) * (xe - x1) / 2)} ${f(xe)},${f(y(xe))}" class="bf-sc-mvt"/>`;
+    if (fl) { const X = x2, Y = y(x2); g += `<path d="M${f(X)},${f(Y)} L${f(X - 9 * c - 4 * sn)},${f(Y - 9 * sn + 4 * c)} L${f(X - 9 * c + 4 * sn)},${f(Y - 9 * sn - 4 * c)} Z" class="bf-sc-mvt-p"/>`; }
+    return g;
+  }
   const main = (x, y) => `<path d="M${x},${y} q 8,-10 22,-8 l 26,2 q 6,1 6,6 q 0,5 -6,5 l -18,0 q 6,8 -2,12 l -24,0 q -8,-4 -4,-17 z" class="bf-sc-obj"/>`;
+  // membre (bras, jambe, tronc) : trait épais avec un contour ; sys : aux couleurs du système
+  const membre = (pts, l, sys) => {
+    const d = 'M' + pts.map(q => q.join(',')).join(' L'), c = sys ? ' sys' : '';
+    return `<path d="${d}" class="bf-sc-membre${c}" style="stroke-width:${l + 3}"/><path d="${d}" class="bf-sc-membre-in${c}" style="stroke-width:${l}"/>`;
+  };
+  // avant-bras et main qui pousse une boule, poignet replié vers l'arrière (lancer) : (x, y) point de contact
+  // paume-boule ; la boule (rayon 15) part dans la direction (90 − a)° au-dessus de l'horizontale ; lb : longueur de l'avant-bras
+  const brasPousse = (x, y, a, lb = 95) => `<g transform="translate(${x},${y}) rotate(${a})">${membre([[16, 8], [16, 8 + lb]], 14)}` +
+    `<path d="M25,9 Q26,1 19,-0.5 L8,0.6 Q2,1.2 -4,0.4 Q-10,-1 -13.5,-5.5 Q-16,-9 -18,-10 Q-22,-11 -22,-6 Q-21.5,1 -12,8 Q-6,12 4,12 L18,12 Q25,12 25,9 Z" class="bf-sc-obj"/>` +
+    `<path d="M14,1 Q13,-4 15.5,-8.5 Q18,-13 21,-11 Q23.5,-9 22,-4 Q21,0 19,2 Z" class="bf-sc-obj"/>` +
+    `<path d="M-5,5.5 Q-13,3.5 -18,-5" class="bf-sc-pli"/><path d="M-7,9 Q-15,7 -20.5,-1" class="bf-sc-pli"/></g>`;
   // plan incliné (pente de 25°), et points d'une figure posée dessus
   const A_INC = 25 * Math.PI / 180, U = [Math.cos(A_INC), Math.sin(A_INC)], N = [Math.sin(A_INC), -Math.cos(A_INC)];
   const P0 = [30, 80], AI = [P0[0] + 150 * U[0], P0[1] + 150 * U[1]];
@@ -64,10 +84,23 @@
   // longueurs : celle du poids (longueur par défaut des flèches), et ses composantes sur le plan incliné
   const LP = 58, L_RN_INC = +(LP * Math.cos(A_INC)).toFixed(1), L_F_INC = +(LP * Math.sin(A_INC)).toFixed(1);
   const SPEC_INC = [{ label: '⊥ perpendiculaire au support', court: '⊥ au support', ang: 65 }, { label: '∥ au support, vers le haut de la pente', court: '∥ vers le haut', ang: 155 }, { label: '∥ au support, vers le bas de la pente', court: '∥ vers le bas', ang: 335 }];
-  const skieur = () => {
-    const a = sur(-30, 0), b = sur(30, 0), k = sur(0, 4), h = sur(0, 30), t = sur(0, 38), m = sur(0, 22), bt = sur(14, 2);
-    return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" class="bf-sc-ski"/><line x1="${k[0]}" y1="${k[1]}" x2="${h[0]}" y2="${h[1]}" class="bf-sc-corps"/>` +
-      `<circle cx="${t[0]}" cy="${t[1]}" r="6.5" class="bf-sc-sys"/><line x1="${m[0]}" y1="${m[1]}" x2="${bt[0]}" y2="${bt[1]}" class="bf-sc-corps fin"/>`;
+  // skieur fléchi, tourné vers le bas de la pente (sens 1) ou vers le haut (sens −1, tiré par le téléski) ;
+  // main : position de la main (téléski : elle tient la perche), sinon il tient un bâton
+  // t0 : décalage du skieur le long de la pente
+  const skieur = (sens = 1, main, t0 = 0) => {
+    const s = (t, h) => sur(t0 + sens * t * 1.5, h * 1.5);
+    const che = s(0, 6), gen = sens > 0 ? s(2, 18) : s(6, 17), han = sens > 0 ? s(-7, 27) : s(2, 28);
+    const epa = sens > 0 ? s(-2, 42) : s(1, 44), tete = sens > 0 ? s(1, 51) : s(3, 53);
+    const mn = main || s(11, 30), cou = [(epa[0] + mn[0]) / 2 + 4, (epa[1] + mn[1]) / 2 + 6];
+    let g = `<path d="M${s(-30, 0)} L${s(26, 0)} Q${s(33, 0)} ${s(35, 5)}" class="bf-sc-ski"/>`;
+    g += membre([s(-3, 6), [gen[0] - 5, gen[1] + 1], [han[0] - 4, han[1]]], 9, true);
+    g += `<path d="M${s(-6, 1.5)} L${s(6, 1.5)} L${s(4, 10)} L${s(-3, 10)} Z" class="bf-sc-chaussure"/>`;
+    g += membre([che, gen, han], 10, true) + membre([han, epa], 16, true);
+    if (!main) g += `<line x1="${mn[0]}" y1="${mn[1]}" x2="${s(-18, 0.5)[0]}" y2="${s(-18, 0.5)[1]}" class="bf-sc-baton"/>`;
+    g += membre([epa, cou, mn], 8, true);
+    g += `<circle cx="${tete[0]}" cy="${tete[1]}" r="10" class="bf-sc-sys"/>` +
+      `<path d="M${tete[0] - 10.5},${tete[1] + 0.5} A10.5,10.5 0 0 1 ${tete[0] + 10.5},${tete[1] + 0.5} Z" class="bf-sc-casque"/>`;
+    return g;
   };
   const fil = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="bf-sc-fil"/>`;
   const support = (x, y, w) => `<rect x="${x}" y="${y}" width="${w}" height="10" class="bf-sc-obj"/>` + Array.from({ length: Math.floor(w / 12) }, (_, k) => `<line x1="${x + 6 + k * 12}" y1="${y}" x2="${x + k * 12}" y2="${y - 6}" class="bf-sc-hach"/>`).join('');
@@ -133,7 +166,7 @@
 
   /* ===== balle lancée ===== */
   S.balle = { id: 'balle', titre: 'Balle lancée', systeme: 'la balle', enonce: 'Une balle vient d\'être lancée vers le haut : elle a quitté la main. On néglige les frottements de l\'air.',
-    dessin: `<path d="M160,178 Q186,96 210,74" class="bf-sc-mvt"/>${main(118, 196)}<circle cx="220" cy="64" r="14" class="bf-sc-sys"/>${sol(20, 340, 226)}`,
+    dessin: `${parab(140, 114.9, -1, 1 / 220, 140, 207)}${brasPousse(129.4, 125.5, 45)}<circle cx="220" cy="64" r="14" class="bf-sc-sys"/>${sol(20, 340, 226)}`,
     points: { G: [220, 64] }, nomsPts: { G: 'centre de la balle' },
     acteurs: [TERRE, AIR], air: NEGL('L\'énoncé le dit : on néglige les frottements de l\'air (et la balle n\'est pas très légère pour son volume).'),
     distracteurs: [{ id: 'main', nom: 'la main', diag: 'La main ne touche plus la balle : elle n\'exerce plus de force.' }, { id: 'sol', nom: 'le sol', diag: 'Le sol ne touche pas la balle.' }],
@@ -222,10 +255,10 @@
 
   /* ===== voiture au démarrage ===== */
   S.voiture = { id: 'voiture', titre: 'Voiture au démarrage (traction avant)', systeme: 'la voiture', lf: 46, enonce: 'Une voiture à traction avant (les roues avant sont motrices) démarre vers la droite.',
-    dessin: `<path d="M58,192 L58,160 Q60,150 74,148 L122,144 L146,120 Q151,115 161,115 L228,115 Q238,115 246,122 L270,145 L296,150 Q306,152 306,165 L306,192 Z" class="bf-sc-sys"/>` +
-      `<path d="M152,124 L194,124 L194,142 L134,142 Z M202,124 L236,124 L254,142 L202,142 Z" class="bf-sc-vitre"/><circle cx="110" cy="192" r="18" class="bf-sc-roue"/><circle cx="250" cy="192" r="18" class="bf-sc-roue"/>${sol(20, 340, 210)}` +
+    dessin: `<path d="M302,192 L302,160 Q300,150 286,148 L238,144 L214,120 Q209,115 199,115 L132,115 Q122,115 114,122 L90,145 L64,150 Q54,152 54,165 L54,192 Z" class="bf-sc-sys"/>` +
+      `<path d="M208,124 L166,124 L166,142 L226,142 Z M158,124 L124,124 L106,142 L158,142 Z" class="bf-sc-vitre"/><circle cx="110" cy="192" r="18" class="bf-sc-roue"/><circle cx="250" cy="192" r="18" class="bf-sc-roue"/>${sol(20, 340, 210)}` +
       `${mvt(140, 70, 230, 70, '')}${txt(234, 74, 'démarre')}${txt(110, 234, 'arrière', 'middle')}${txt(250, 234, 'avant', 'middle')}`,
-    points: { G: [204, 150], B: [110, 210], A: [250, 210] }, nomsPts: { G: 'centre de gravité (moteur à l\'avant)', B: 'contact roue arrière-route', A: 'contact roue avant-route' },
+    points: { G: [188, 150], B: [110, 210], A: [250, 210] }, nomsPts: { G: 'centre de gravité (moteur à l\'avant)', B: 'contact roue arrière-route', A: 'contact roue avant-route' },
     acteurs: [TERRE, touche('route', 'la route', 'les roues'), Object.assign({}, AIR, { pourquoi: 'il touche la carrosserie et la freine (frottements)' })],
     air: { neglige: false, cause: 'frottements', raison: 'Une voiture a une grande surface face à l\'air, et sa vitesse augmente : les frottements de l\'air ne sont pas négligeables.', indice: 'Une voiture qui roule a une grande surface face à l\'air : ses frottements comptent.' },
     distracteurs: [{ id: 'moteur', nom: 'le moteur', diag: 'Le moteur fait partie de la voiture (le système) : il n\'exerce pas de force extérieure. C\'est la route qui pousse les roues motrices vers l\'avant.' },
@@ -252,13 +285,13 @@
     comp: { bonne: 'oui', expl: `Mouvement rectiligne uniforme : les forces se compensent (${nomV('P')} et ${nomV('RN')} ; ${nomV('F')} et ${nomV('f')}).`, indice: 'Le livre va en ligne droite à vitesse constante : pense au principe d\'inertie.' } };
 
   /* ===== skieur avec frottements (ajouté) ===== */
-  const G_SKI = sur(0, 20);
-  S.skieur = { id: 'skieur', titre: 'Skieur qui descend une piste, avec frottements', systeme: 'le skieur', enonce: 'Un skieur descend une piste droite en prenant de la vitesse. On néglige l\'action de l\'air.',
-    dessin: `${plan()}${skieur()}${txt(50, 214, 'piste')}`,
+  const G_SKI = sur(0, 30), K_SKI = 2;
+  S.skieur = { id: 'skieur', titre: 'Skieur qui descend une piste, avec frottements', systeme: 'le skieur', lf: LP * K_SKI, enonce: 'Un skieur descend une piste droite en prenant de la vitesse. On néglige l\'action de l\'air.',
+    dessin: `${plan()}${skieur(1)}${txt(50, 214, 'piste')}`,
     points: { G: G_SKI, A: AI.map(v => +v.toFixed(1)) }, nomsPts: { G: 'centre du skieur', A: 'contact skis-neige' },
     acteurs: [TERRE, touche('piste', 'la piste', 'les skis'), AIR], air: NEGL('L\'énoncé le dit : on néglige l\'action de l\'air.'),
     distracteurs: [{ id: 'teleski', nom: 'le téléski', diag: 'Le skieur a lâché le téléski : il ne le touche plus.' }],
-    forces: [POIDS, RN_INC('piste'), Object.assign(F_INC('piste'), { L: 14, diagDir: 'les frottements de la neige s\'opposent au glissement vers le bas : <b>parallèles au support, vers le haut de la pente</b>.' })],
+    forces: [POIDS, Object.assign(RN_INC('piste'), { L: L_RN_INC * K_SKI }), Object.assign(F_INC('piste'), { L: 14 * K_SKI, diagDir: 'les frottements de la neige s\'opposent au glissement vers le bas : <b>parallèles au support, vers le haut de la pente</b>.' })],
     speciales: SPEC_INC, nomsProposes: NOMS_BASE,
     comp: { bonne: 'non', expl: 'Le skieur accélère : les forces ne se compensent pas ; leur somme est dirigée vers le bas de la pente.', indice: 'Le skieur prend de la vitesse.' } };
 
@@ -285,11 +318,11 @@
     comp: { bonne: 'oui', expl: `${nomV('RN')} et ${nomV('P')} se compensent toujours : sans frottement, le palet glisse en ligne droite à vitesse constante.`, indice: 'Le support est horizontal, et il n\'y a pas de frottement.' } };
 
   /* ===== skieur sans frottements (cours) ===== */
-  S.skieurSans = { id: 'skieurSans', titre: 'Skieur sans frottements', systeme: 'le skieur', enonce: 'Un skieur descend une piste ; on néglige tous les frottements (neige et air).',
-    dessin: `${plan()}${skieur()}${txt(50, 214, 'piste')}`,
+  S.skieurSans = { id: 'skieurSans', titre: 'Skieur sans frottements', systeme: 'le skieur', lf: LP * K_SKI, enonce: 'Un skieur descend une piste ; on néglige tous les frottements (neige et air).',
+    dessin: `${plan()}${skieur(1)}${txt(50, 214, 'piste')}`,
     points: { G: G_SKI, A: AI.map(v => +v.toFixed(1)) }, nomsPts: { G: 'centre du skieur', A: 'contact skis-neige' },
     acteurs: [TERRE, touche('piste', 'la piste', 'les skis'), AIR], air: NEGL('L\'énoncé le dit : on néglige tous les frottements, ceux de l\'air compris.'),
-    forces: [POIDS, Object.assign(RN_INC('piste'), { noms: ['RN', 'R'], diagDir: 'sans frottement, la réaction du support est <b>perpendiculaire au support</b>.' })],
+    forces: [POIDS, Object.assign(RN_INC('piste'), { L: L_RN_INC * K_SKI, noms: ['RN', 'R'], diagDir: 'sans frottement, la réaction du support est <b>perpendiculaire au support</b>.' })],
     speciales: SPEC_INC, nomsProposes: NOMS_BASE,
     comp: { bonne: 'non', expl: `${nomV('RN')} et ${nomV('P')} n'ont pas la même direction : elles ne se compensent pas. Leur somme Σ <span class="vec-nom">F</span> = ${nomV('RN')} + ${nomV('P')} est dirigée vers le bas de la pente : le skieur accélère.`, indice: 'Regarde les directions des deux flèches.' } };
 
@@ -395,7 +428,9 @@
     nomsProposes: NOMS_TLE,
     comp: { bonne: 'oui', expl: `La valise est immobile : ${nomV('P')} et ${nomV('R')} se compensent.`, indice: 'La valise est immobile.' } };
   // main fermée sur la poignée, et le bras
-  const poing = (x, y) => `<path d="M${x - 4},${y - 70} L${x - 4},${y - 14}" class="bf-sc-bras"/><rect x="${x - 17}" y="${y - 16}" width="34" height="22" rx="9" class="bf-sc-obj"/>`;
+  const poing = (x, y) => membre([[x - 3, y - 76], [x, y - 14]], 13) +
+    `<path d="M${x - 16},${y - 10} Q${x - 16},${y - 19} ${x - 7},${y - 19} L${x + 9},${y - 19} Q${x + 17},${y - 19} ${x + 17},${y - 10} L${x + 17},${y + 2} Q${x + 17},${y + 9} ${x + 9},${y + 9} L${x - 9},${y + 9} Q${x - 16},${y + 9} ${x - 16},${y + 2} Z" class="bf-sc-obj"/>` +
+    `<path d="M${x - 8},${y + 1} L${x - 8},${y + 9} M${x},${y + 1} L${x},${y + 9} M${x + 8},${y + 1} L${x + 8},${y + 9} M${x - 13},${y - 4} Q${x},${y - 9} ${x + 13},${y - 4}" class="bf-sc-pli"/>`;
   S.valisePortee = { id: 'valisePortee', niv: '2de', titre: 'Valise portée', systeme: 'la valise', enonce: 'Une personne porte une valise par la poignée ; la valise est immobile, elle ne touche pas le sol.',
     dessin: `${sol(20, 340, 226)}${valise(120, 132)}${poing(180, 114)}${txt(200, 58, 'bras')}`,
     points: { G: [180, 167], A: [180, 110] }, nomsPts: { G: 'centre de la valise', A: 'contact avec la main (poignée)' },
@@ -408,11 +443,15 @@
     comp: { bonne: 'oui', expl: `La valise est immobile : ${nomV('P')} et ${nomV('Fmain')} se compensent.`, indice: 'La valise est immobile.' } };
 
   /* ===== lancer du poids (exercice 1) ===== */
+  // athlète juste après le lancer : jambe arrière tendue, bras de lancer tendu vers l'avant et le haut
+  const athlete = () => membre([[78, 176], [58, 202], [46, 224]], 9) + membre([[46, 224], [36, 224]], 6) +
+    membre([[84, 146], [66, 162], [54, 176]], 7) + membre([[78, 176], [96, 200], [94, 224]], 9) + membre([[94, 224], [106, 224]], 6) +
+    membre([[78, 176], [86, 144]], 15) + `<circle cx="93" cy="128" r="9" class="bf-sc-obj"/>` + membre([[86, 146], [100, 132], [110, 122]], 7);
   const boule = (x, y) => `<circle cx="${x}" cy="${y}" r="15" class="bf-sc-sys"/>`;
   S.poidsAvant = { id: 'poidsAvant', niv: '2de', titre: 'Lancer du poids : la boule dans la main', systeme: 'la boule', sysCourt: 'boule',
     enonce: 'Au lancer du poids, l\'athlète pousse la boule de métal (le « poids ») vers le haut et vers l\'avant pour la lancer ; elle est encore dans sa main.',
-    dessin: `<path d="M120,196 L172,124" class="bf-sc-bras"/>${main(168, 124)}${boule(200, 97)}${mvt(226, 72, 262, 36, '')}${txt(266, 40, 'poussée')}${txt(84, 214, 'bras de l\'athlète')}`,
-    points: { G: [200, 97], A: [200, 112] }, nomsPts: { G: 'centre de la boule', A: 'contact avec la main' },
+    dessin: `${brasPousse(189.4, 107.6, 45)}${boule(200, 97)}${mvt(226, 72, 262, 36, '')}${txt(266, 40, 'poussée')}${txt(84, 214, 'bras de l\'athlète')}`,
+    points: { G: [200, 97], A: [189.4, 107.6] }, nomsPts: { G: 'centre de la boule', A: 'contact avec la main' },
     acteurs: [TERRE, touche('main', 'la main', 'la boule'), AIR], air: NEGL(),
     distracteurs: [{ id: 'sol', nom: 'le sol', diag: 'La boule ne touche pas le sol.' }],
     forces: [POIDS, { acteur: 'main', type: 'contact', lib: 'force exercée par la main', pts: ['A'], angs: [45], noms: ['Fmain', 'F'],
@@ -422,7 +461,7 @@
     comp: { bonne: 'non', expl: `${nomV('P')} et ${nomV('Fmain')} n'ont pas la même direction : elles ne se compensent pas. La boule prend de la vitesse.`, indice: 'L\'athlète lance la boule : sa vitesse change.' } };
   S.poidsLance = { id: 'poidsLance', niv: '2de', titre: 'Lancer du poids : la boule vient d\'être lancée', systeme: 'la boule', sysCourt: 'boule',
     enonce: 'La boule vient de quitter la main de l\'athlète. On néglige l\'action de l\'air.',
-    dessin: `<path d="M70,170 Q130,70 206,64" class="bf-sc-mvt"/>${boule(220, 64)}${mvt(238, 62, 282, 66, '')}${sol(20, 340, 226)}${txt(30, 200, 'athlète')}<path d="M44,226 L44,184 M44,196 L68,172" class="bf-sc-bras"/>`,
+    dessin: `${parab(114, 118, -0.816, 0.002894, 114, 204)}${boule(220, 64)}${parab(114, 118, -0.816, 0.002894, 237, 326, true)}${sol(20, 340, 226)}${txt(70, 250, 'athlète', 'middle')}${athlete()}`,
     points: { G: [220, 64] }, nomsPts: { G: 'centre de la boule' },
     acteurs: [TERRE, AIR], air: NEGL('L\'énoncé le dit : on néglige l\'action de l\'air (et la boule de métal est lourde pour son volume).'),
     distracteurs: [{ id: 'main', nom: 'la main', diag: 'La main ne touche plus la boule : elle n\'exerce plus de force.' }, { id: 'sol', nom: 'le sol', diag: 'Le sol ne touche pas la boule.' }],
@@ -471,19 +510,21 @@
 
   /* ===== skieur tiré par un téléski (exercice 2) ===== */
   // la perche fait 45° avec l'horizontale ; longueurs : les forces se compensent (montée à vitesse constante)
-  const G_TS = sur(0, 20), C_TS = sur(-2, 28), A_TS = AI.map(v => +v.toFixed(1));
+  const T_TS = -45, K_TS = 2.3, G_TS = sur(T_TS, 30), C_TS = sur(T_TS - 3, 42), A_TS = sur(T_TS, 0);
   const BOUT = [+(C_TS[0] - 104 * Math.SQRT1_2).toFixed(1), +(C_TS[1] - 104 * Math.SQRT1_2).toFixed(1)];
-  S.teleski = { id: 'teleski', niv: 'Tle', titre: 'Skieur tiré par un téléski', systeme: 'le skieur',
+  // la main du skieur tient la perche, un peu au-dessus de l'accroche
+  const MAIN_TS = [+(C_TS[0] - 22 * Math.SQRT1_2).toFixed(1), +(C_TS[1] - 22 * Math.SQRT1_2).toFixed(1)];
+  S.teleski = { id: 'teleski', niv: 'Tle', titre: 'Skieur tiré par un téléski', systeme: 'le skieur', lf: LP * K_TS,
     enonce: 'Un skieur monte la piste vers la gauche, tiré par la perche d\'un téléski, à vitesse constante. On néglige l\'action de l\'air, pas les frottements de la neige.',
-    dessin: `${plan()}${skieur()}<line x1="${C_TS[0]}" y1="${C_TS[1]}" x2="${BOUT[0]}" y2="${BOUT[1]}" class="bf-sc-perche"/><circle cx="${C_TS[0]}" cy="${C_TS[1]}" r="4" class="bf-sc-obj"/>` +
+    dessin: `${plan()}${skieur(-1, MAIN_TS, T_TS)}<line x1="${C_TS[0]}" y1="${C_TS[1]}" x2="${BOUT[0]}" y2="${BOUT[1]}" class="bf-sc-perche"/><circle cx="${C_TS[0]}" cy="${C_TS[1]}" r="4" class="bf-sc-obj"/>` +
       `<line x1="20" y1="${(BOUT[1] + (20 - BOUT[0]) * Math.tan(A_INC)).toFixed(1)}" x2="${BOUT[0] + 60}" y2="${(BOUT[1] + 60 * Math.tan(A_INC)).toFixed(1)}" class="bf-sc-cable"/>` +
       `${txt(50, 214, 'piste')}${txt(BOUT[0] - 4, BOUT[1] + 26, 'perche', 'end')}`,
     points: { G: G_TS, A: A_TS, C: C_TS }, nomsPts: { G: 'centre du skieur', A: 'contact skis-neige', C: 'accroche de la perche' },
     acteurs: [TERRE, touche('piste', 'la piste', 'les skis'), touche('perche', 'la perche', 'le skieur'), AIR], air: NEGL('L\'énoncé le dit : on néglige l\'action de l\'air.'),
     distracteurs: [{ id: 'cable', nom: 'le câble du téléski', diag: 'Le câble ne touche pas le skieur : c\'est la perche qui le tire.' }],
-    forces: [POIDS, Object.assign(RN_INC('piste'), { L: 40.7 }),
-      Object.assign(F_INC('piste'), { angs: [335], L: 8, diagDir: 'les frottements de la neige s\'opposent au glissement : le skieur monte vers la gauche, <span class="vec-nom">f</span> est <b>parallèle au support, vers le bas de la pente</b>.' }),
-      { acteur: 'perche', type: 'contact', lib: 'force exercée par la perche', pts: ['C'], angs: [135], noms: ['Fperche', 'F', 'T'], L: 34.6,
+    forces: [POIDS, Object.assign(RN_INC('piste'), { L: 40.7 * K_TS }),
+      Object.assign(F_INC('piste'), { angs: [335], L: 8 * K_TS, diagDir: 'les frottements de la neige s\'opposent au glissement : le skieur monte vers la gauche, <span class="vec-nom">f</span> est <b>parallèle au support, vers le bas de la pente</b>.' }),
+      { acteur: 'perche', type: 'contact', lib: 'force exercée par la perche', pts: ['C'], angs: [135], noms: ['Fperche', 'F', 'T'], L: 34.6 * K_TS,
         diagDir: 'la perche tire le skieur <b>le long de la perche</b> : vers le haut et la gauche (à 45° de l\'horizontale).', diagPt: 'la perche touche le skieur au point C.',
         indNom: `La force exercée par la perche se note ${nomV('Fperche')}.` }],
     speciales: SPEC_INC, nomsProposes: ['P', 'RN', 'R', 'f', 'Fperche', 'Fair'],

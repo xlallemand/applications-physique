@@ -697,10 +697,17 @@
     });
     const dec = decalages(geo);
     let g = s.dessin;
+    // obstacles pour les noms des points : flèches (segments) et rectangles (noms, textes du dessin)
+    const segs = [], rects = [];
+    s.dessin.replace(/<text x="([\d.-]+)" y="([\d.-]+)"[^>]*?(?:text-anchor="(\w+)")?>([^<]*)<\/text>/g, (m, x, y, an, t) => {
+      const w = t.length * 6.3, x0 = an === 'middle' ? x - w / 2 : an === 'end' ? x - w : +x;
+      rects.push([x0, y - 10, x0 + w, +y + 2]);
+    });
     fs.forEach((f, i) => {
       if (!geo[i]) return;
       const p = s.points[f.pt], a = fleche(p[0], p[1], f.ang, f.etat, dec[i], f.L || s.lf, f.coul);
       g += a.svg;
+      segs.push([p[0] - a.s * dec[i], p[1] + a.c * dec[i], a.x2, a.y2]);
       // nom au-delà de la pointe, sur le côté ; une flèche décalée a son nom du côté du décalage
       // (f.cote = −1 : nom de l'autre côté, quand il gênerait un autre nom) ; une flèche
       // verticale décalée écarte son nom de toute sa demi-largeur, pour qu'il ne tombe pas
@@ -708,15 +715,42 @@
       const ecart = f.nom && dec[i] && Math.abs(a.s) > .7 ? Math.max(9, 5 + largeurNom(f.nom) / 2) : 9;
       const cote = (f.cote || (dec[i] < 0 ? -1 : 1)) * ecart;
       const lx = a.x2 + a.c * 15 - a.s * cote, ly = a.y2 + a.s * 15 + a.c * cote;
+      if (f.nom) { const w = largeurNom(f.nom) / 2; rects.push([lx - w, ly - 12, lx + w, ly + 10]); }
+      else if (f.num) rects.push([lx - 9, ly - 9, lx + 9, ly + 9]);
       if (f.nom) g += nomSVG(f.nom, lx, ly + 6, f.etat, f.coul);
       else if (f.num) g += `<g class="bf-num${f.etat ? ' ' + f.etat : ''}"${!f.etat && f.coul ? ` style="color:${f.coul}"` : ''}><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="8.5"/><text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="middle">${f.num}</text></g>`;
     });
     // dessins par-dessus les forces (réaction R⃗ = R⃗ₙ + f⃗ du support, en Terminale)
     if (o.dessus) g += o.dessus;
-    Object.keys(s.points).forEach(id => {
+    // nom de chaque point : la place la plus dégagée autour de lui (en haut à droite si elle est libre)
+    const vis = Object.keys(s.points).filter(id => o.points || (o.marques || []).includes(id));
+    vis.forEach(id => { const [x, y] = s.points[id]; rects.push([x - 5, y - 5, x + 5, y + 5]); });
+    const recouv = (a, b) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
+    const coupe = (b, q) => { for (let k = 0; k <= 20; k++) { const u = q[0] + (q[2] - q[0]) * k / 20, v = q[1] + (q[3] - q[1]) * k / 20; if (u > b[0] && u < b[2] && v > b[1] && v < b[3]) return 1; } return 0; };
+    const CAND = [[8, -7], [8, 14], [-17, -7], [-17, 14], [10, 4], [-19, 4], [-4, -11], [-4, 19]];
+    const placeNom = id => {
       const [x, y] = s.points[id];
+      if ((s.decPts || {})[id]) return s.decPts[id];                               // place imposée par la situation
+      let mieux = CAND[0], min = Infinity;
+      CAND.forEach(([dx, dy], k) => {
+        const b = [x + dx - 1, y + dy - 11, x + dx + 10, y + dy + 2];
+        let pen = k * 0.5 + (b[0] < 0 || b[2] > 360 || b[1] < 0 || b[3] > HS ? 100 : 0);
+        segs.forEach(q => { pen += 20 * coupe(b, q); });
+        rects.forEach(r => { pen += recouv(b, r); });
+        // le nom doit être nettement plus près de son point que de tout autre point
+        const cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, d0 = Math.hypot(cx - x, cy - y);
+        vis.forEach(j => { if (j !== id && Math.hypot(cx - s.points[j][0], cy - s.points[j][1]) < d0 + 6) pen += 40; });
+        if (pen < min) { min = pen; mieux = [dx, dy]; }
+      });
+      rects.push([x + mieux[0] - 1, y + mieux[1] - 11, x + mieux[0] + 10, y + mieux[1] + 2]);
+      return mieux;
+    };
+    const decNoms = {};
+    vis.forEach(id => { decNoms[id] = placeNom(id); });
+    Object.keys(s.points).forEach(id => {
       if (!o.points && !(o.marques || []).includes(id)) return;
-      g += `<circle cx="${x}" cy="${y}" r="4.5" class="bf-pt-m${o.actif === id ? ' actif' : ''}"/><text x="${x + 8}" y="${y - 7}" class="bf-pt-t">${id}</text>`;
+      const [x, y] = s.points[id], [dx, dy] = decNoms[id];
+      g += `<circle cx="${x}" cy="${y}" r="4.5" class="bf-pt-m${o.actif === id ? ' actif' : ''}"/><text x="${x + dx}" y="${y + dy}" class="bf-pt-t">${id}</text>`;
       if (o.points) g += `<circle cx="${x}" cy="${y}" r="20" class="bf-poignee" data-pt="${id}"/>`;
     });
     return `<svg viewBox="0 0 360 ${HS}" class="bf-sc" role="img" aria-label="${o.aria || s.titre}">${g}</svg>`;

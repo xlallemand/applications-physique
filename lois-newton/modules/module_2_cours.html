@@ -37,7 +37,7 @@
       référentiel qui tourne, ralentit ou accélère n'est pas galiléen.
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
-const { V, mur, terreLune, fl, nom, svg, txt, ENCRE, ENCRE2 } = LN;
+const { V, mur, terreLune, fl, nom, svg, txt, ENCRE, ENCRE2, ENCRE3 } = LN;
 const o = (id, label) => ({ id, label });
 const FAB = V('F', 'A/B'), FBA = V('F', 'B/A');
 
@@ -49,9 +49,14 @@ const PAIRES = [
 ];
 /* ---------- La main pousse une porte (« À toi » 3) ---------- */
 const C_MAIN = '#c2255c', C_PORTE = '#1971c2', C_P = '#2f9e44', C_R = '#e8590c';
-// bras tendu qui arrive au point de contact (xc, yc)
-const bras = (xc, yc) => `<line x1="70" y1="${yc - 12}" x2="${xc - 10}" y2="${yc}" stroke="${ENCRE}" stroke-width="3" stroke-linecap="round"/>` +
-  `<ellipse cx="${xc - 7}" cy="${yc}" rx="8" ry="6" fill="#f6dccb" stroke="${ENCRE}" stroke-width="2"/>`;
+// bras tendu (avec sa manche) qui arrive au point de contact (xc, yc) : paume à plat sur la porte, doigts vers le haut
+const PEAU = '#f6dccb';
+const bras = (xc, yc) => `<path d="M40,${yc - 6} L${xc - 46},${yc + 2} L${xc - 46},${yc + 18} L40,${yc + 12} Z" fill="#cfd8e6" stroke="${ENCRE}" stroke-width="1.5" stroke-linejoin="round"/>` +
+  `<path d="M${xc - 46},${yc + 3} L${xc - 16},${yc + 6} L${xc - 16},${yc + 16} L${xc - 46},${yc + 17} Z" fill="${PEAU}" stroke="${ENCRE}" stroke-width="1.5" stroke-linejoin="round"/>` +
+  // paume contre la porte, quatre doigts vers le haut, pouce vers l'arrière
+  `<path d="M${xc - 17},${yc + 17} L${xc - 17},${yc - 6} Q${xc - 17},${yc - 10} ${xc - 13},${yc - 11} L${xc - 12},${yc - 28} Q${xc - 12},${yc - 32} ${xc - 8},${yc - 32} L${xc - 3},${yc - 32} Q${xc},${yc - 32} ${xc},${yc - 28} L${xc},${yc + 14} Q${xc},${yc + 18} ${xc - 4},${yc + 18} Z" fill="${PEAU}" stroke="${ENCRE}" stroke-width="1.5" stroke-linejoin="round"/>` +
+  `<path d="M${xc - 17},${yc - 2} Q${xc - 27},${yc - 8} ${xc - 26},${yc - 14} Q${xc - 24},${yc - 18} ${xc - 18},${yc - 12}" fill="${PEAU}" stroke="${ENCRE}" stroke-width="1.5" stroke-linejoin="round"/>` +
+  `<path d="M${xc - 11},${yc - 24} L${xc - 11},${yc - 14} M${xc - 6},${yc - 26} L${xc - 6},${yc - 14}" stroke="${ENCRE3}" stroke-width="1" stroke-linecap="round"/>`;
 // porte vue de profil (panneau vertical)
 const porte = x => `<rect x="${x}" y="22" width="12" height="150" fill="#e9d8b8" stroke="${ENCRE2}" stroke-width="1.5"/>`;
 // contour en tirets d'un système
@@ -61,7 +66,7 @@ const sol = `<line x1="20" y1="172" x2="300" y2="172" stroke="${ENCRE}" stroke-w
 function figPaire() {
   const xc = 200, yc = 110;
   let s = sol + porte(xc) + bras(xc, yc) + contourPorte(xc);
-  s += `<ellipse cx="${xc - 8}" cy="${yc}" rx="18" ry="14" fill="none" stroke="${C_MAIN}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  s += `<ellipse cx="${xc - 10}" cy="${yc - 6}" rx="20" ry="30" fill="none" stroke="${C_MAIN}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
   s += fl(xc, yc, xc + 70, yc, C_PORTE, { ep: 3 }) + nom(xc + 64, yc - 14, 'F', 'main/porte', C_PORTE, { t: 14 });
   s += fl(xc, yc, xc - 70, yc, C_MAIN, { ep: 3 }) + nom(xc - 50, yc + 34, 'F', 'porte/main', C_MAIN, { t: 14 });
   s += txt(xc + 6, 194, 'système : la porte', { a: 'middle', c: C_PORTE }) + txt(xc - 78, 76, 'système : la main', { a: 'middle', c: C_MAIN });
