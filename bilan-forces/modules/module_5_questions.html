@@ -26,7 +26,8 @@
    compensent.
    Sommes de forces : en 2de, à lire (deux forces opposées de même valeur,
    quatre forces qui se compensent deux à deux : la somme est nulle) ; en 1re
-   et en Terminale, à tracer (deux forces opposées, trois forces).
+   et en Terminale, une à lire (quatre forces) et deux à tracer (deux forces
+   opposées, trois forces), avec trois cas du principe d'inertie au lieu de quatre.
    ============================================================ */
 const { o, fq, hasard, melanger, sceneRemplie, quadrillage, partieResultante, SITUATIONS: S, PARCOURS } = BF;
 const SF = 'Σ&nbsp;<span class="vec-nom">F</span>', NUL = '<span class="vec-nom">0</span>';
@@ -76,8 +77,9 @@ function tirage(niv) {
   do { trois = melanger(sits).slice(0, 3); } while (!trois.some(s => s.comp.bonne === 'oui') || !trois.some(s => s.comp.bonne === 'non'));
   const qs = trois.map(compense);
   if (niv === '2de') qs.push(sommeNulle(hasard(DEUX_NULLES)), sommeNulle(hasard(QUATRE_NULLES)));
-  else qs.push(sommeTracee(hasard(PAIRES)), sommeTracee(hasard(TRIPLES)));
-  melanger(INERTIE).slice(0, 4).forEach(c => qs.push(inertie(c)));
+  else qs.push(sommeNulle(hasard(QUATRE_NULLES)), sommeTracee(hasard(PAIRES)), sommeTracee(hasard(TRIPLES)));
+  // 10 questions : un cas d'inertie de moins en 1re et Tle (une somme de plus)
+  melanger(INERTIE).slice(0, niv === '2de' ? 4 : 3).forEach(c => qs.push(inertie(c)));
   qs.push({ theme: 'Forces qui se compensent', parties: [fq.choix('Deux forces qui se compensent ont :', [o('ok', 'la même direction, des sens opposés, la même valeur'), o('sens', 'la même direction, le même sens, la même valeur'), o('val', 'la même direction, des sens opposés, des valeurs différentes'), o('dir', 'des directions perpendiculaires')], 'ok',
     { indices: { sens: 'Deux forces de même sens s\'ajoutent : leur somme n\'est pas nulle.', val: 'Si les valeurs sont différentes, la somme n\'est pas nulle.', dir: 'Deux forces perpendiculaires ne peuvent pas se compenser.' }, solution: '<p>Même direction, sens opposés, même valeur : leur somme est nulle.</p>' })] });
   return melanger(qs);

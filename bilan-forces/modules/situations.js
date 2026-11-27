@@ -14,7 +14,7 @@
    BF.ballonHTML() : l'exemple traité (diagramme objet-action au-dessus
    de chaque dessin).
    Une situation :
-     { id, titre, niv ('2de' | '1re' | 'Tle'), systeme ('la brique'), sysCourt (nom dans le diagramme objet-action, facultatif),
+     { id, titre, niv ('2de' | 'sup' : 1re et Tle), systeme ('la brique'), sysCourt (nom dans le diagramme objet-action, facultatif),
        enonce, dessin (SVG, repère 360 × 240),
        points: { G: [x, y], A: […] }, nomsPts: { G: 'centre…' }, lf (longueur des flèches, facultatif),
        acteurs: [{ id, nom, pourquoi, manque, court }] (les actions à distance, puis les objets qui touchent),
@@ -570,15 +570,17 @@
     comp: { bonne: 'non', expl: 'La voiture ralentit : les forces ne se compensent pas ; leur somme est dirigée vers l\'arrière.', indice: 'La voiture freine : sa vitesse diminue.' } });
 
   /* ===== niveaux de l'atelier ===== */
-  const NIV = { '2de': ['valisePosee', 'brique', 'valisePortee', 'ressort', 'ballonAvant', 'ballonPendant', 'balle', 'poidsAvant', 'poidsLance', 'pendule'],
-    '1re': ['ballonApres', 'parachute', 'livre', 'aimants', 'ebonite', 'clou'],
-    Tle: ['palet', 'skieurSans', 'bouchon', 'helium', 'goutte', 'bateau', 'incline', 'livreIncline', 'glisse', 'skieur', 'teleski', 'voiture', 'voitureFrein', 'caravane'] };
+  // 2de : tout sauf les frottements solides et la poussée d'Archimède (le bouchon reste en 2de) ;
+  // 1re et Tle (sup) : les situations avec frottements solides ou poussée d'Archimède
+  const NIV = { '2de': ['valisePosee', 'brique', 'valisePortee', 'ressort', 'ballonAvant', 'ballonPendant', 'balle', 'poidsAvant', 'poidsLance', 'pendule',
+      'ballonApres', 'parachute', 'ebonite', 'palet', 'skieurSans', 'bouchon', 'caravane'],
+    sup: ['livre', 'aimants', 'clou', 'helium', 'goutte', 'bateau', 'incline', 'livreIncline', 'glisse', 'skieur', 'teleski', 'voiture', 'voitureFrein'] };
   Object.keys(NIV).forEach(n => NIV[n].forEach(id => { S[id].niv = n; }));
 
   window.BF.SITUATIONS = S;
   // ordre de l'atelier : par niveau, puis du plus simple au plus difficile
-  window.BF.NIVEAUX = [{ id: '2de', nom: '2de' }, { id: '1re', nom: '1re' }, { id: 'Tle', nom: 'Tle' }];
-  window.BF.PARCOURS = NIV['2de'].concat(NIV['1re'], NIV.Tle);
+  window.BF.NIVEAUX = [{ id: '2de', nom: '2de' }, { id: 'sup', nom: '1re et Tle' }];
+  window.BF.PARCOURS = NIV['2de'].concat(NIV.sup);
   window.BF.BALLON = BALLON;
   window.BF.ballonHTML = ballonHTML;
 })();

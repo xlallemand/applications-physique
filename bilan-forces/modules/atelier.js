@@ -4,7 +4,7 @@
    BF.atelier(zone) : toutes les situations de modules/situations.js
    (BF.PARCOURS : par niveau, puis du plus simple au plus difficile),
    chacune accessible à tout moment (pastilles numérotées, filtre de
-   niveau), sans points.
+   niveau : 2de, 1re et Tle), sans points.
 
    Écran (ordinateur) : à gauche, la situation (titre, énoncé), le schéma
    et le diagramme objet-action côte à côte (l'un sous l'autre si la place
@@ -174,7 +174,7 @@
       st = { etapes, etape: 'dist', dist: [], contacts: [], distOk: false, contactOk: false, air: null, erreurs: 0, sel: 0, fini: false,
         pos: s.forces.map(() => ({ pt: null, ang: null, etat: '', ok: false })), noms: s.forces.map(() => null), objets: melanger(verif.objets(s)) };
       $('num').textContent = `Situation ${k + 1} / ${ORDRE.length}`;
-      $('niv').textContent = s.niv;
+      $('niv').textContent = B.NIVEAUX.find(n => n.id === s.niv).nom;
       $('titre').textContent = s.titre;
       $('enonce').textContent = s.enonce || '';
       $('optR').hidden = !reactions(s).length;
