@@ -100,8 +100,8 @@ class ErreurJS(Exception):
 
 class LecteurJS:
     """Lit un littéral JS simple et le rend en objets Python.
-    Identifiants connus : true, false, null, LYCEE (les quatre niveaux du lycée)."""
-    CONSTANTES = {'true': True, 'false': False, 'null': None, 'LYCEE': ['2de', '1re', 'spe', 'sti']}
+    Identifiants connus : true, false, null, LYCEE (les cinq niveaux du lycée)."""
+    CONSTANTES = {'true': True, 'false': False, 'null': None, 'LYCEE': ['2de', '1re', '1sti', 'spe', 'sti']}
 
     def __init__(self, texte):
         self.s, self.i = texte, 0
