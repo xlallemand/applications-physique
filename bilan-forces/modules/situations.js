@@ -14,7 +14,7 @@
    BF.ballonHTML() : l'exemple traité (diagramme objet-action au-dessus
    de chaque dessin).
    Une situation :
-     { id, titre, niv ('2de' | '1re' | 'Tle'), systeme ('la brique'), sysCourt (nom dans le diagramme objet-action, facultatif),
+     { id, titre, niv ('2de' | 'sup' : 1re et Tle), systeme ('la brique'), sysCourt (nom dans le diagramme objet-action, facultatif),
        enonce, dessin (SVG, repère 360 × 240),
        points: { G: [x, y], A: […] }, nomsPts: { G: 'centre…' }, lf (longueur des flèches, facultatif),
        acteurs: [{ id, nom, pourquoi, manque, court }] (les actions à distance, puis les objets qui touchent),
@@ -180,9 +180,9 @@
     acteurs: [TERRE, { id: 'eau', nom: 'l\'eau', pourquoi: 'elle touche le bouchon (poussée d\'Archimède)', manque: 'L\'eau touche le bouchon : elle exerce une force de contact (elle le pousse vers le haut).' }, AIR],
     air: NEGL('La partie hors de l\'eau touche l\'air, mais la poussée d\'Archimède de l\'air est très faible devant celle de l\'eau : on néglige la force de l\'air.'),
     distracteurs: [{ id: 'recipient', nom: 'le récipient', diag: 'Le récipient ne touche pas le bouchon.' }],
-    forces: [POIDS, { acteur: 'eau', type: 'contact', lib: 'force exercée par l\'eau', pts: ['G', 'A'], angs: [90], noms: ['Farchi'], diagDir: 'la poussée d\'Archimède est <b>verticale, vers le haut</b>.', diagPt: 'l\'eau touche toute la partie immergée : on dessine la poussée depuis le centre G (ou le centre de la face immergée A).', indNom: `La force verticale vers le haut exercée par un fluide est la poussée d'Archimède ${nomV('Farchi')}.` }],
-    nomsProposes: NOMS_BASE,
-    comp: { bonne: 'oui', expl: `Le bouchon est immobile : ${nomV('P')} et ${nomV('Farchi')} se compensent.`, indice: 'Le bouchon est immobile.' } };
+    forces: [POIDS, { acteur: 'eau', type: 'contact', lib: 'force exercée par l\'eau (ou poussée d\'Archimède)', pts: ['G', 'A'], angs: [90], noms: ['Feau', 'Farchi'], diagDir: 'l\'eau pousse le bouchon <b>verticalement, vers le haut</b> (poussée d\'Archimède).', diagPt: 'l\'eau touche toute la partie immergée : on dessine la force depuis le centre G (ou le centre de la face immergée A).', indNom: `La force exercée par l'eau se note ${nomV('Feau')} (ou poussée d'Archimède ${nomV('Farchi')}).` }],
+    nomsProposes: NOMS_BASE.concat('Feau'),
+    comp: { bonne: 'oui', expl: `Le bouchon est immobile : ${nomV('P')} et ${nomV('Feau')} se compensent.`, indice: 'Le bouchon est immobile.' } };
 
   /* ===== goutte dans l'huile ===== */
   S.goutte = { id: 'goutte', titre: 'Goutte qui tombe dans l\'huile', systeme: 'la goutte', enonce: 'Une goutte de permanganate de potassium tombe dans l\'huile, à vitesse constante.',
@@ -570,15 +570,17 @@
     comp: { bonne: 'non', expl: 'La voiture ralentit : les forces ne se compensent pas ; leur somme est dirigée vers l\'arrière.', indice: 'La voiture freine : sa vitesse diminue.' } });
 
   /* ===== niveaux de l'atelier ===== */
-  const NIV = { '2de': ['valisePosee', 'brique', 'valisePortee', 'ressort', 'ballonAvant', 'ballonPendant', 'balle', 'poidsAvant', 'poidsLance', 'pendule'],
-    '1re': ['ballonApres', 'parachute', 'livre', 'aimants', 'ebonite', 'clou'],
-    Tle: ['palet', 'skieurSans', 'bouchon', 'helium', 'goutte', 'bateau', 'incline', 'livreIncline', 'glisse', 'skieur', 'teleski', 'voiture', 'voitureFrein', 'caravane'] };
+  // 2de : tout sauf les frottements solides et la poussée d'Archimède (le bouchon reste en 2de) ;
+  // 1re et Tle (sup) : les situations avec frottements solides ou poussée d'Archimède
+  const NIV = { '2de': ['valisePosee', 'brique', 'valisePortee', 'ressort', 'ballonAvant', 'ballonPendant', 'balle', 'poidsAvant', 'poidsLance', 'pendule',
+      'ballonApres', 'parachute', 'ebonite', 'palet', 'skieurSans', 'bouchon', 'caravane'],
+    sup: ['livre', 'aimants', 'clou', 'helium', 'goutte', 'bateau', 'incline', 'livreIncline', 'glisse', 'skieur', 'teleski', 'voiture', 'voitureFrein'] };
   Object.keys(NIV).forEach(n => NIV[n].forEach(id => { S[id].niv = n; }));
 
   window.BF.SITUATIONS = S;
   // ordre de l'atelier : par niveau, puis du plus simple au plus difficile
-  window.BF.NIVEAUX = [{ id: '2de', nom: '2de' }, { id: '1re', nom: '1re' }, { id: 'Tle', nom: 'Tle' }];
-  window.BF.PARCOURS = NIV['2de'].concat(NIV['1re'], NIV.Tle);
+  window.BF.NIVEAUX = [{ id: '2de', nom: '2de' }, { id: 'sup', nom: '1re et Tle' }];
+  window.BF.PARCOURS = NIV['2de'].concat(NIV.sup);
   window.BF.BALLON = BALLON;
   window.BF.ballonHTML = ballonHTML;
 })();

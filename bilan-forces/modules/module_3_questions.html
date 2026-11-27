@@ -22,11 +22,11 @@
    calcul du poids, masse à partir du poids, poids sur la Lune, réaction
    sans frottement, tension d'un fil, force de l'air, nom d'un vecteur force
    (situations du niveau, situations.js) ; en 1re et en Terminale, sens des
-   frottements et <span class="vec-nom">R</span> = <span class="vec-nom">R</span>ₙ + <span class="vec-nom">f</span> ; en Terminale, poussée d'Archimède.
+   frottements, <span class="vec-nom">R</span> = <span class="vec-nom">R</span>ₙ + <span class="vec-nom">f</span> et poussée d'Archimède.
    ============================================================ */
 const { o, fq, fmt, sci, hasard, melanger, proche, cap, nomV, scene, sceneRemplie, couleursForces, OPTS_AIR, bonneAir, REGLE_AIR, SITUATIONS: S, PARCOURS } = BF;
-// situations du niveau choisi (et des niveaux précédents) : fixées par tirage()
-const RANG = { '2de': 0, '1re': 1, Tle: 2 };
+// situations du niveau choisi : 2de → situations de 2de ; 1re, Tle → toutes (fixées par tirage())
+const RANG = { '2de': 0, '1re': 1, Tle: 1, sup: 1 };
 let TOUTES = PARCOURS.map(id => S[id]);
 const calc = h => `<p class="ph-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
@@ -104,8 +104,8 @@ const Q = {};
 QUESTIONS.forEach(f => { Q[f.name] = f; });
 const SORTES = {
   '2de': ['poids', 'masse', 'lune', 'reaction', 'tension', 'air', 'nom', 'tension', 'air', 'nom'],
-  '1re': ['poids', 'masse', 'reaction', 'tension', 'air', 'nom', 'frottements', 'frottements', 'decompose', 'nom'],
-  Tle: ['poids', 'lune', 'reaction', 'tension', 'archimede', 'archimede', 'air', 'nom', 'frottements', 'decompose'],
+  '1re': ['poids', 'masse', 'lune', 'reaction', 'tension', 'air', 'nom', 'frottements', 'decompose', 'archimede'],
+  Tle: ['poids', 'masse', 'lune', 'reaction', 'tension', 'archimede', 'air', 'nom', 'frottements', 'decompose'],
 };
 function tirage(niv) {
   TOUTES = PARCOURS.map(id => S[id]).filter(s => RANG[s.niv] <= RANG[niv]);
@@ -123,7 +123,7 @@ function tirage(niv) {
 BF.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Les forces usuelles',
-  intro: '<p class="er-contexte">10 questions : poids et masse, réaction du support, tension d\'un fil, force de l\'air, noms des forces ; en 1re et en Terminale, frottements solides ; en Terminale, poussée d\'Archimède.</p>',
+  intro: '<p class="er-contexte">10 questions : poids et masse, réaction du support, tension d\'un fil, force de l\'air, noms des forces ; en 1re et en Terminale, frottements solides et poussée d\'Archimède.</p>',
   niveaux: [{ id: '2de', nom: '2de' }, { id: '1re', nom: '1re' }, { id: 'Tle', nom: 'Terminale' }],
   questions: tirage,
   revoir: { href: 'module_3a_cours.html', label: 'Revoir les cours' },

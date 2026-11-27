@@ -562,8 +562,8 @@
      NOMS DES VECTEURS FORCES (HTML et SVG)
      ============================================================ */
   const V = (n, s) => `<span class="vec-nom">${n}</span>${s ? `<sub>${s}</sub>` : ''}`;
-  // F⃗archi : poussée d'Archimède (eau, huile, air…) ; F⃗air : force de l'air (ses frottements)
-  const NOMS = { P: ['P'], RN: ['R', 'N'], R: ['R'], f: ['f'], T: ['T'], Farchi: ['F', 'archi'], Fair: ['F', 'air'], Fm: ['F', 'm'], Fmag: ['F', 'mag'], Felec: ['F', 'élec'], Fpied: ['F', 'pied'], Fmain: ['F', 'main'], Fperche: ['F', 'perche'], Fvoiture: ['F', 'voiture'], F: ['F'] };
+  // F⃗archi : poussée d'Archimède (eau, huile, air…) ; F⃗eau : force exercée par l'eau (bouchon, tous niveaux) ; F⃗air : force de l'air (ses frottements)
+  const NOMS = { P: ['P'], RN: ['R', 'N'], R: ['R'], f: ['f'], T: ['T'], Farchi: ['F', 'archi'], Feau: ['F', 'eau'], Fair: ['F', 'air'], Fm: ['F', 'm'], Fmag: ['F', 'mag'], Felec: ['F', 'élec'], Fpied: ['F', 'pied'], Fmain: ['F', 'main'], Fperche: ['F', 'perche'], Fvoiture: ['F', 'voiture'], F: ['F'] };
   const nomV = k => V(...NOMS[k]);
   // ce que désigne chaque nom (diagnostic d'un nom mal choisi)
   const SENS_NOM = {
@@ -573,6 +573,7 @@
     f: `${nomV('f')} désigne les <b>frottements</b>.`,
     T: `${nomV('T')} est la <b>tension</b> d'un fil, d'un ressort ou d'une corde.`,
     Farchi: `${nomV('Farchi')} est la <b>poussée d'Archimède</b> exercée par un fluide (eau, huile, air…), verticale vers le haut.`,
+    Feau: `${nomV('Feau')} est la force exercée par l'<b>eau</b>.`,
     Fair: `${nomV('Fair')} est la force exercée par l'<b>air</b> (ses frottements).`,
     Fm: `${nomV('Fm')} est la <b>force motrice</b>.`,
     Fmag: `${nomV('Fmag')} est la force <b>magnétique</b> exercée par un aimant.`,
@@ -601,7 +602,7 @@
      orange, la réaction du support bleue…) ; si deux forces d'un même
      dessin ont la même couleur, la seconde prend une couleur libre.
      ============================================================ */
-  const COUL = { P: '#d9480f', RN: '#1971c2', R: '#1971c2', f: '#c2255c', T: '#5c940d', Farchi: '#0b7285', Fair: '#1098ad',
+  const COUL = { P: '#d9480f', RN: '#1971c2', R: '#1971c2', f: '#c2255c', T: '#5c940d', Farchi: '#0b7285', Feau: '#0b7285', Fair: '#1098ad',
     Fm: '#b35c00', F: '#b35c00', Fpied: '#5c940d', Fmain: '#5c940d', Fperche: '#5c940d', Fvoiture: '#b35c00', Fmag: '#862e9c', Felec: '#862e9c' };
   const COUL_LIBRES = ['#5c940d', '#862e9c', '#b35c00', '#c2255c', '#1971c2', '#0b7285', '#d9480f', '#1098ad'];
   const COUL_QUAD = ['#d9480f', '#1971c2', '#5c940d', '#862e9c'];      // <span class="vec-nom">F</span>₁, <span class="vec-nom">F</span>₂… dans le quadrillage
@@ -1576,7 +1577,7 @@
         { nom: 'Frottements solides', slug: 'frottements', cours: 'module_3f_cours', noms: { cours: 'Cours : frottements solides · 1re et Tle' } },
         { nom: 'Tension d\'un fil', slug: 'tension', cours: 'module_3c_cours', noms: { cours: 'Cours : tension d\'un fil · 2de' } },
         { nom: 'Force de l\'air', slug: 'air', cours: 'module_3e_cours', noms: { cours: 'Cours : force de l\'air · 2de' } },
-        { nom: 'Poussée d\'Archimède', slug: 'archimede', cours: 'module_3d_cours', noms: { cours: 'Cours : poussée d\'Archimède · Tle' } },
+        { nom: 'Poussée d\'Archimède', slug: 'archimede', cours: 'module_3d_cours', noms: { cours: 'Cours : poussée d\'Archimède · 1re et Tle' } },
         { nom: 'Les forces usuelles', questions: 'module_3_questions', noms: { questions: 'Questions · 2de à Tle' } }] },
     { n: 4, titre: 'Centre de masse', desc: 'Système et milieu extérieur, centre de masse d\'un solide homogène ou non, mouvement du centre de masse', fiche: 'fiche_4',
       parties: [{ nom: 'Centre de masse', cours: 'module_4_cours', questions: 'module_4_questions', noms: { cours: 'Cours : centre de masse · 2de', questions: 'Questions · 2de' } }] },
