@@ -4,6 +4,7 @@
    Coupe de l'œil (iris et pupille, cristallin, rétine) à côté du modèle de l'œil réduit
    (diaphragme, lentille convergente, écran) ; l'élève relie chaque partie de l'œil à son modèle
    (glisser l'étiquette, ou toucher l'étiquette puis l'élément du modèle).
+   Un seul écran, sans défilement : figures à gauche, panneau à droite (téléphone : figures en haut).
    ============================================================ */
 (function () {
   'use strict';
@@ -57,11 +58,26 @@
     return S;
   }
   function relier(carte, fini) {
-    carte.innerHTML = `<div class="mo-deux"><figure class="mo-vue"><figcaption>Coupe de l'œil</figcaption><div data-a="oeil"></div></figure>
-        <figure class="mo-vue"><figcaption>Œil réduit (modèle)</figcaption><div data-a="mod"></div></figure></div>
-      <p class="mo-aide-t">Glisse chaque étiquette sur l'élément du modèle qui lui correspond, ou touche une étiquette puis touche l'élément.</p>
-      <div class="mo-bac" data-a="bac"></div><div data-a="ret" aria-live="polite"></div>
-      <div class="mo-aide" hidden data-a="aide"><button type="button" class="btn-small">Afficher la réponse</button></div>`;
+    // un seul écran (comme le simulateur, vision.js) : les deux figures à gauche, le panneau à droite
+    // (téléphone : figures en haut, panneau dessous)
+    carte.innerHTML = `<div class="mo-vis">
+      <div class="er-card mo-vis-tete">
+        <div class="mo-entete-l"><span class="er-badge">MODULE 1 · MANIPULATION</span><h2 class="er-titre">Le modèle de l'œil réduit</h2></div>
+        <span data-plein></span>
+      </div>
+      <div class="mo-vis-corps mo-man-corps">
+        <div class="er-card mo-man-scene">
+          <figure class="mo-man-vue"><figcaption>Coupe de l'œil</figcaption><div class="mo-man-fig" data-a="oeil"></div></figure>
+          <figure class="mo-man-vue"><figcaption>Œil réduit (modèle)</figcaption><div class="mo-man-fig" data-a="mod"></div></figure>
+        </div>
+        <aside class="er-card mo-vis-panneau mo-man-panneau" aria-label="Relier">
+          <p class="mo-man-contexte">On modélise l'œil par un <b>œil réduit</b> : un <b>diaphragme</b>, une <b>lentille convergente</b> et un <b>écran</b>. Relie chaque partie de l'œil à son modèle.</p>
+          <p class="mo-aide-t">Glisse chaque étiquette sur l'élément du modèle qui lui correspond, ou touche une étiquette puis touche l'élément.</p>
+          <div class="mo-bac" data-a="bac"></div><div data-a="ret" aria-live="polite"></div>
+          <div class="mo-aide" hidden data-a="aide"><button type="button" class="btn-small">Afficher la réponse</button></div>
+        </aside>
+      </div>
+    </div>`;
     coupeOeil(carte.querySelector('[data-a="oeil"]'));
     const S = modeleOeil(carte.querySelector('[data-a="mod"]'));
     const ret = carte.querySelector('[data-a="ret"]'), aide = carte.querySelector('[data-a="aide"]');
@@ -105,8 +121,7 @@
   }
 
   function simulateurOeil(zone) {
-    zone.innerHTML = '<div class="er-card" data-a="p1"></div>';
-    relier(zone.querySelector('[data-a="p1"]'), () => SOM.marquer({ fait: true }));
+    relier(zone, () => SOM.marquer({ fait: true }));
   }
 
   Object.assign(MO, { simulateurOeil });
