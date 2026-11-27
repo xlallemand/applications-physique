@@ -250,11 +250,13 @@
     id = id || S.po.chemin;
     if (id === 'vh') return [[XA, zA], [XA, zB], [XB, zB]];
     if (id === 'hv') return [[XA, zA], [XB, zA], [XB, zB]];
-    // piste : pente régulière et trois bosses
-    const p = [], n = 60;
+    // piste : pente régulière et trois bosses ; celle du milieu est plus haute
+    // pour que le skieur remonte nettement (travail résistant sur la montée)
+    const p = [], n = 90;
     for (let i = 0; i <= n; i++) {
       const u = i / n, x = XA + (XB - XA) * u;
-      const z = zA + (zB - zA) * u + 15 * Math.pow(Math.sin(3 * Math.PI * u), 2) * (1 - 0.3 * u);
+      const haut = 15 * (1 - 0.3 * u) + 32 * Math.exp(-Math.pow((u - 0.5) / 0.12, 2));
+      const z = zA + (zB - zA) * u + haut * Math.pow(Math.sin(3 * Math.PI * u), 2);
       p.push([x, borne(z, 0, ZMAX)]);
     }
     return p;
