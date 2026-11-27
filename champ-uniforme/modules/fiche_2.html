@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="coord.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Coordonnées d'un vecteur</h2>
+  </div>
+
+  <section class="er-card" id="methode">
+    <h3 class="cours-titre">La méthode</h3>
+    <div class="cle"><ol class="cu-methode">
+      <li>Vecteur <b>porté par un axe</b> : coordonnée nulle sur l'autre axe, ± sa valeur sur le sien.</li>
+      <li>Vecteur <b>incliné</b> : triangle rectangle ; le côté <b>adjacent</b> à l'angle donne × cos, le côté <b>opposé</b> × sin (attention à l'angle repéré depuis la verticale).</li>
+      <li><b>Signe</b> : + si la projection va dans le sens de l'axe, − sinon.</li>
+    </ol></div>
+    <p>L'endroit où le vecteur est dessiné ne change pas ses coordonnées.</p>
+    <div id="trigo"></div>
+  </section>
+
+  <section class="er-card" id="exemples">
+    <h3 class="cours-titre">Exemples</h3>
+    <div class="cu-figs2" id="ex"></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_2_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_2_questions.html">Questions sur le module 2</a>
+  </div>
+</div>
+<script>
+/* exemples fixes : axe orienté vers le bas, angle depuis l'horizontale, angle depuis la verticale, plan incliné */
+const K = CU.coord;
+document.getElementById('trigo').outerHTML = CU.coord.encadreTrigo;   // lien vers le cours de trigonométrie (Cinématique)
+document.getElementById('ex').innerHTML = [
+  K.gen('axe', { vec: 'g', ax: ['x', 'y'], sx: 1, sy: -1, loin: false }),
+  K.gen('angleH', { vec: 'v0', ax: ['x', 'z'], sx: -1, sy: 1, loin: false, ang: 30, angNom: 'α', dh: 1, dv: 1 }),
+  K.gen('angleV', { vec: 'E', ax: ['x', 'y'], sx: 1, sy: 1, loin: true, ang: 25, angNom: 'θ', dh: 1, dv: -1 }),
+  K.gen('incline', { vec: 'P', beta: 30, desc: 1, pente: -1, long: false }),
+].map(s => `<div>${K.fig(s)}<p class="cu-coord">${K.nomV(s.vec)} ${CU.col(K.ecrire(s, s.coords[0]), K.ecrire(s, s.coords[1]))}</p></div>`).join('');
+CU.menu('fiche_2');
+</script>
+</body>
+</html>

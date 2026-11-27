@@ -43,7 +43,17 @@
      EQ.exercice({ eq, g, cible, valeurs, outils, parentheses, aides, messages, tuiles })
         → exercice pour EQ.monter, à partir de l'écriture compacte (eq), des libellés (g),
           de la grandeur à isoler (cible), des valeurs de test (valeurs() → { id: valeur }),
-          des outils de la réserve (outils, comme funcTools) ; tuiles : grandeurs en plus dans la réserve
+          des outils de la réserve (outils, comme funcTools) ; tuiles : grandeurs en plus dans la réserve ;
+        options de SIMPLIFICATION d'une expression (toutes facultatives, sans effet sur les autres exercices) :
+          remplacements: [{ id, par }]  outils « grandeur = expression » (par : écriture compacte), à déposer
+                                        sur la grandeur ; une fraction de grandeurs se répartit de part et
+                                        d'autre du trait (E = U / L : U prend la place de E, L passe de l'autre côté)
+          racineOuverte: true           un facteur (ou un dénominateur entier) glissé sur une racine y entre
+                                        au carré ; les grandeurs de la racine se glissent pour simplifier
+          simplifier: true              une grandeur glissée sur la même de l'autre côté du trait d'une même
+                                        fraction se simplifie (q² / q → q)
+          forme: 'v = sqrt([deux q U|m])'  forme finale attendue (ordre des facteurs indifférent) : fin de l'exercice
+          reserveSeule, objectif, consigne : réserve réduite aux outils ; textes au-dessus de l'équation
      EQ.partie(exercice, opts) → partie 'perso' du moteur de cours COURS (« À toi ») et des séries
         opts : { q, solution (HTML après la réponse), etapes (correction : étapes de EQ.demo), g }
         réussie quand la grandeur est isolée (api.reussi()), chaque erreur compte (api.compterErreur()).
@@ -474,6 +484,10 @@
 
   /* ---------- messages par défaut (EQ.MESSAGES), remplaçables par exercice.messages ---------- */
   const MESSAGES = {
+    MSG_DEDANS: "Sous la racine, une grandeur ne se déplace pas : on peut seulement la simplifier avec la même grandeur placée de l'autre côté du trait de fraction (glisse-la dessus).",
+    MSG_SIMPL: "On ne simplifie qu'une grandeur du numérateur avec la même grandeur au dénominateur d'une même fraction.",
+    MSG_ENTRER: "Seul un facteur qui multiplie la racine (dans le même membre) peut entrer sous la racine ; il y entre au carré.",
+    MSG_SUBST: "Dépose cet outil sur la grandeur {g} de l'équation, pour la remplacer.",
     MSG_MOVE: REGLES.MSG_MOVE, MSG_MOVE_FRAC: REGLES.MSG_MOVE_FRAC, MSG_INSERT: REGLES.MSG_INSERT,
     MSG_SUMTERM: REGLES.MSG_SUMTERM, MSG_FRAC: REGLES.MSG_FRAC, MSG_FRACDEN: REGLES.MSG_FRACDEN,
     MSG_FONCTION: EPT.MSG_FONCTION, MSG_PAREN: EPT.MSG_PAREN,
@@ -629,9 +643,14 @@
     // fraction s'y écrit en fraction (numérateur au-dessus du dénominateur), sauf
     // dans un exposant (enLigne) où elle reste en ligne (num/den) pour rester petite ;
     // une somme à plusieurs termes reçoit des parenthèses quand demandé
-    function renderInlineNode(node, staticMode, enLigne) {
+    // ouvert() : l'exercice permet d'agir dans une racine (entrer un facteur, simplifier, remplacer) ;
+    // path : chemin du nœud, donné seulement dans l'éditeur actif d'un tel exercice
+    const ouvert = () => !!(currentExercise && currentExercise.racineOuverte);
+    function renderInlineNode(node, staticMode, enLigne, path) {
+        if (staticMode || !ouvert()) path = null;
+        const sous = (n, suite) => renderInlineNode(n, staticMode, enLigne, path ? path + suite : null);
         if (node.kind === 'frac') {
-            const num = renderInlineNode(node.num, staticMode, enLigne), den = renderInlineNode(node.den, staticMode, enLigne);
+            const num = sous(node.num, '.num'), den = sous(node.den, '.den');
             if (enLigne) return `<span class="inline-frac">${num}<span class="inline-frac-slash">/</span>${den}</span>`;
             if (staticMode) return staticFracHtml(num, den);
             return `<span class="frac-wrap frac-fonction"><span class="frac-num-wrap">${num}</span><span class="frac-line"></span><span class="frac-den-wrap">${den}</span></span>`;
@@ -640,12 +659,12 @@
             const inner = node.terms.map((t, i) => {
                 const showSign = i > 0 || t.sign === -1;
                 const signChar = t.sign === -1 ? '−' : '+';
-                return (showSign ? `<span class="sum-sign">${signChar}</span>` : '') + renderInlineNode(t.node, staticMode, enLigne);
+                return (showSign ? `<span class="sum-sign">${signChar}</span>` : '') + sous(t.node, '.term' + i);
             }).join('');
             return `<span class="sum-wrap">${inner}</span>`;
         }
         if (node.kind === 'seq') {
-            return node.slots.map((s, i) => (i === 0 ? '' : '<span class="mult-sign">×</span>') + renderInlineNode(s, staticMode, enLigne)).join('');
+            return node.slots.map((s, i) => (i === 0 ? '' : '<span class="mult-sign">×</span>') + sous(s, '.' + i)).join('');
         }
         if (node.kind === 'simple') {
             // dans l'editeur actif : meme apparence qu'une tuile normale (pas de
@@ -657,22 +676,23 @@
             const tileClass = staticMode ? 'eq-tile-static' : 'eq-tile-locked';
             return node.items.map((it, idx) => {
                 const sep = (idx > 0 && !isOperatorTile(node.items[idx - 1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
-                return sep + `<span class="${tileClass}">${lab(it)}</span>`;
+                return sep + `<span class="${tileClass}"${path ? ` data-path="${path}" data-idx="${idx}"` : ''}>${lab(it)}</span>`;
             }).join('');
         }
-        if (node.kind === 'func') return renderFunc(node, staticMode, enLigne);
+        if (node.kind === 'func') return renderFunc(node, staticMode, enLigne, path);
         return renderStatic(node);
     }
     // une fonction et son contenu (racine, carré, cube, racine cubique, puissance de 10,
     // exponentielle, log, ln, sin, Arcsin) : les parenthèses d'une fonction nommée
     // prennent la hauteur de tout son contenu (sizeParens) ; l'exposant de 10 et de e
     // est écrit en haut, en petit
-    function renderFunc(node, staticMode, enLigne) {
-        const inner = (parens, ligne) => renderFuncInner(node.inner, parens, staticMode, ligne || enLigne);
+    function renderFunc(node, staticMode, enLigne, path) {
+        const pIn = path && !staticMode && ouvert() ? path + '.inner' : null;
+        const inner = (parens, ligne) => renderFuncInner(node.inner, parens, staticMode, ligne || enLigne, pIn);
         // exposant : parenthèses dès que le contenu n'est pas une seule grandeur
         const puiss = e => `<span class="func-wrap">${renderFuncInner(node.inner, 'tout', staticMode, enLigne)}<span class="func-exp">${e}</span></span>`;
         switch (node.fn) {
-            case 'sqrt': return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${inner(false)}</div></div>`;
+            case 'sqrt': return `<div class="sqrt-wrap"${pIn ? ` data-func-path="${path}"` : ''}><svg class="sqrt-hook"></svg><div class="sqrt-inner">${inner(false)}</div></div>`;
             case 'cbrt': return `<div class="sqrt-wrap"><span class="cbrt-index">3</span><svg class="sqrt-hook"></svg><div class="sqrt-inner">${inner(false)}</div></div>`;
             case 'sq':   return puiss('2');
             case 'cube': return puiss('3');
@@ -683,10 +703,10 @@
         }
         return `<span class="func-wrap"><span class="func-name">${FUNC_NAME[node.fn]}</span>${wrapParens(inner(false))}</span>`;
     }
-    function renderFuncInner(inner, parensIfSum, staticMode, enLigne) {
+    function renderFuncInner(inner, parensIfSum, staticMode, enLigne, path) {
         let n = inner;
-        while (n.kind === 'seq' && n.slots.length === 1) n = n.slots[0];
-        const html = renderInlineNode(n, staticMode, enLigne);
+        while (n.kind === 'seq' && n.slots.length === 1) { n = n.slots[0]; if (path) path += '.0'; }
+        const html = renderInlineNode(n, staticMode, enLigne, path);
         if (parensIfSum && n.kind === 'sum' && n.terms.length > 1) return wrapParens(html);
         // 'tout' (puissance) : parenthèses aussi autour d'une fraction ou d'un produit
         if (parensIfSum === 'tout' && (n.kind === 'frac' || n.kind === 'seq' || (n.kind === 'simple' && n.items.length > 1))) return wrapParens(html);
@@ -761,8 +781,8 @@
         if (node.kind === 'func') {
             // fonction qui multiplie d'autres facteurs (e^(λt) × N, (T/2π)² × g) : elle se déplace en bloc
             const par = path.split('.').slice(0, -1).join('.'), p = par && getNode(par);
-            if (p && p.kind === 'seq' && p.slots.length > 1) return `<span class="func-bloc" data-bloc-path="${path}">${renderFunc(node, false)}</span>`;
-            return renderFunc(node, false);
+            if (p && p.kind === 'seq' && p.slots.length > 1) return `<span class="func-bloc" data-bloc-path="${path}">${renderFunc(node, false, false, path)}</span>`;
+            return renderFunc(node, false, false, path);
         }
         // seq
         let html = '';
@@ -846,9 +866,15 @@
         // terme dans une fonction : on peut l'attraper, mais il ne bouge pas (message tout de suite),
         // sauf s'il fait partie d'un bloc qui, lui, se déplace (dénominateur, terme additif)
         zone.querySelectorAll('.eq-tile-locked').forEach(el => {
+            // racine ouverte (exercice de simplification) : la tuile se glisse sur une tuile identique (simplifier)
+            if (el.dataset.path) {
+                const n = getNode(el.dataset.path), it = n && n.items && n.items[+el.dataset.idx];
+                if (it) { enableTileDrag(el, { type:'move', dedans:true, from:el.dataset.path, idx:+el.dataset.idx, id:it.id, label:lab(it), item:Object.assign({}, it) }); return; }
+            }
             if (!el.closest('.den-draggable, .term-draggable, .sum-term-single, .func-bloc')) EPT.bloquer(el, msg('MSG_FONCTION'), afficherRefus);
         });
         zone.querySelectorAll('.func-bloc').forEach(el => {
+            if (ouvert()) return;     // racine ouverte : on agit sur ses tuiles, pas sur le bloc entier
             if (el.closest('.den-draggable, .term-draggable, .sum-term-single')) return;
             enableTileDrag(el, { type:'bloc', from: el.dataset.blocPath });
         });
@@ -1077,7 +1103,7 @@
         el.addEventListener('pointerdown', e => { startX = e.clientX; startY = e.clientY; });
         DragDrop.enable(el, {
             racine: part('ed-zone') || racine,   // défilement automatique : la ligne de l'équation de cet éditeur
-            zoneSelector: '.eq-tile, .slot-simple, .insert-zone, .eq-side, .sum-term',
+            zoneSelector: '.eq-tile, .eq-tile-locked[data-path], .sqrt-wrap[data-func-path], .slot-simple, .insert-zone, .eq-side, .sum-term',
             dragOverClass: 'drag-over',
             onStart: () => {
                 if (data.type === 'sumterm' || data.type === 'fracden') {
@@ -1130,6 +1156,19 @@
         return rawPath;
     }
     function handleZoneDrop(data, zone) {
+        if (data.type === 'subst') { processSubst(data, zone.closest('[data-idx]')); return; }
+        // un dénominateur entier glissé sur une racine ouverte : chacune de ses grandeurs y entre au carré
+        if (data.type === 'fracden' && ouvert() && zone.closest('.sqrt-wrap[data-func-path]')) { processEntrerDen(data.from, zone.closest('.sqrt-wrap[data-func-path]').dataset.funcPath); return; }
+        if (data.type === 'move' && currentExercise && (currentExercise.simplifier || currentExercise.racineOuverte)) {
+            const t = zone.closest('.eq-tile[data-idx], .eq-tile-locked[data-idx]');
+            if (t && currentExercise.simplifier && !(t.dataset.path === data.from && +t.dataset.idx === data.idx)) {
+                const n = getNode(t.dataset.path), it = n && n.items && n.items[+t.dataset.idx];
+                if (it && it.id === data.id) { processSimplif(data, t.dataset.path, +t.dataset.idx); return; }
+            }
+            const r = zone.closest('.sqrt-wrap[data-func-path]');
+            if (r && !data.dedans) { processEntrer(data, r.dataset.funcPath); return; }
+            if (data.dedans) { if (!(t && t.dataset.path === data.from)) afficherRefus(msg('MSG_DEDANS')); return; }
+        }
         if (data.type === 'sumterm') {
             const side = resolveSidePath(zone);
             if (side === 'left' || side === 'right') processSumTermDrop(side, data);
@@ -1159,6 +1198,176 @@
             return;
         }
         processDrop(zone.dataset.path, data);
+    }
+    /* ---------- remplacer, simplifier, entrer sous la racine (exercices qui l'activent) ---------- */
+    // fraction la plus proche d'un chemin de zone : { frac, niveau: 'num' | 'den' }, ou null
+    function fracDe(path) {
+        const p = path.split('.');
+        for (let i = p.length - 1; i > 0; i--) {
+            if (p[i] === 'num' || p[i] === 'den') return { frac: p.slice(0, i).join('.'), niveau: p[i] };
+            if (p[i] === 'inner' || /^term\d+$/.test(p[i])) return null;
+        }
+        return null;
+    }
+    const zoneVide = n => n.kind === 'simple' && n.items.length === 0;
+    const zoneUn = n => n.kind === 'simple' && n.items.length === 1 && n.items[0].id === 'one';
+    const sansPow1 = t => { if (t.pow === 1 || !t.pow) delete t.pow; return t; };
+    // zone simple où ajouter une tuile dans un nœud (lui-même, ou sa première zone simple)
+    function zoneSimple(path) {
+        const n = getNode(path);
+        if (!n) return null;
+        if (n.kind === 'simple') return path;
+        if (n.kind === 'seq') { const k = n.slots.findIndex(x => x.kind === 'simple'); if (k >= 0) return path + '.' + k; }
+        return null;
+    }
+    // ajoute une tuile à une zone : même grandeur déjà présente → les puissances s'ajoutent ; le 1 seul disparaît
+    function ajouterTuile(zp, t) {
+        const z = getNode(zp);
+        if (zoneUn(z)) z.items = [];
+        const m = z.items.find(x => x.id === t.id);
+        if (m) { m.pow = (m.pow || 1) + (t.pow || 1); sansPow1(m); } else z.items.push(sansPow1(Object.assign({}, t)));
+    }
+    // un facteur d'un produit disparaît (case vidée) ; seul facteur : il devient 1
+    function supprimerFacteur(path) {
+        const p = path.split('.'), last = p.pop(), par = getNode(p.join('.'));
+        if (par && par.kind === 'seq' && /^\d+$/.test(last) && par.slots.length > 1) par.slots.splice(+last, 1);
+        else setNode(path, simple([tile('one', '1')]));
+    }
+    // une fraction après un retrait : dénominateur vide → plus de fraction ; numérateur vide → 1
+    function nettoyerFrac(fp) {
+        const f = getNode(fp);
+        if (!f || f.kind !== 'frac') return;
+        if (zoneVide(f.den) || zoneUn(f.den)) { if (zoneVide(f.num) || zoneUn(f.num)) supprimerFacteur(fp); else setNode(fp, f.num); }
+        else if (zoneVide(f.num)) f.num = simple([tile('one', '1')]);
+    }
+    // une tuile quitte sa zone : la zone vide se range (fraction, facteur d'un produit)
+    function retirerTuile(path, idx) {
+        const z = getNode(path);
+        z.items.splice(idx, 1);
+        if (z.items.length) return;
+        const fd = fracDe(path);
+        if (fd && path === fd.frac + '.' + fd.niveau) nettoyerFrac(fd.frac);
+        else supprimerFacteur(path);
+    }
+    // simplifier : une grandeur du numérateur et la même au dénominateur d'une même fraction
+    function processSimplif(data, pathB, idxB) {
+        const fa = fracDe(data.from), fb = fracDe(pathB);
+        if (!fa || !fb || fa.frac !== fb.frac || fa.niveau === fb.niveau) { afficherRefus(msg('MSG_SIMPL')); return; }
+        const A = getNode(data.from).items[data.idx], B = getNode(pathB).items[idxB];
+        const pa = A.pow || 1, pb = B.pow || 1, k = Math.min(pa, pb), reste = pa - k || pb - k;
+        const ou = pa > pb ? fa.niveau : fb.niveau;
+        A.pow = pa - k; B.pow = pb - k;
+        // retirer d'abord les tuiles à puissance nulle (zones différentes : les indices ne se gênent pas)
+        const fp = fa.frac;
+        [[pathB, idxB, B], [data.from, data.idx, A]].forEach(([p, i, t]) => { if (t.pow === 0) { const z = getNode(p); z.items.splice(i, 1); } else sansPow1(t); });
+        const f = getNode(fp);
+        if (f && f.kind === 'frac') { if (zoneVide(f.num)) f.num = simple([tile('one', '1')]); if (zoneVide(f.den)) f.den = simple([tile('one', '1')]); nettoyerFrac(fp); }
+        showFeedback(`${A.label} simplifié${reste ? ` : il reste ${A.label}${reste > 1 ? (EXP[reste] || '<sup>' + reste + '</sup>') : ''} au ${ou === 'num' ? 'numérateur' : 'dénominateur'}` : ' : il disparaît du numérateur et du dénominateur'}.`, null);
+        refreshView();
+    }
+    // entrer sous la racine : un facteur du même produit y entre au carré (a √X = √(a² X))
+    function processEntrer(data, funcPath, silencieux) {
+        const fn = getNode(funcPath);
+        const p = funcPath.split('.'), parSeq = p.slice(0, -1).join('.');
+        const reste = data.from.startsWith(parSeq + '.') ? data.from.slice(parSeq.length + 1).split('.') : null;
+        if (!fn || fn.fn !== 'sqrt' || !reste || reste[0] === p[p.length - 1] || reste.some(x => x === 'inner' || /^term/.test(x))) { afficherRefus(msg('MSG_ENTRER')); return; }
+        const den = REGLES.level(data.from) === 'den';
+        const t = Object.assign({}, data.item); t.pow = (t.pow || 1) * 2;
+        // contenu de la racine : fraction (numérateur ou dénominateur), ou produit (qui devient une fraction pour un dénominateur)
+        let ip = funcPath + '.inner', I = getNode(ip);
+        while (I.kind === 'seq' && I.slots.length === 1) { ip += '.0'; I = I.slots[0]; }
+        let zp;
+        if (I.kind === 'frac') zp = zoneSimple(ip + (den ? '.den' : '.num'));
+        else if (den) { setNode(ip, frac(I.kind === 'simple' ? I : seq([I]), simple([]))); zp = ip + '.den'; }
+        else zp = zoneSimple(ip);
+        if (!zp) { afficherRefus(msg('MSG_ENTRER')); return; }
+        const zone = getNode(zp);
+        retirerTuile(data.from, data.idx);
+        // retirer a pu déplacer la racine (un facteur du produit a disparu) : on retrouve la zone par son nœud
+        zp = cheminDe(zone);
+        if (!zp) return;
+        ajouterTuile(zp, t);
+        if (silencieux) return;
+        showFeedback(`${data.item.label} entre sous la racine au carré : ${data.item.label} × √… = √(${data.item.label}² × …).`, null);
+        refreshView();
+    }
+    function processEntrerDen(fracPath, funcPath) {
+        const f = getNode(fracPath), fn = getNode(funcPath);
+        if (!f || f.kind !== 'frac' || f.den.kind !== 'simple' || !fn) { afficherRefus(msg('MSG_ENTRER')); return; }
+        const noms = [];
+        // les grandeurs une à une (le dénominateur se vide, la fraction se range) ; la racine est suivie par son nœud
+        while (true) {
+            const g = getNode(fracPath);
+            if (!g || g.kind !== 'frac' || g.den.kind !== 'simple' || !g.den.items.length || zoneUn(g.den)) break;
+            const it = g.den.items[0];
+            noms.push(it.label);
+            const k = cheminDe(fn);
+            if (!k) break;
+            processEntrer({ type:'move', from: fracPath + '.den', idx: 0, id: it.id, label: lab(it), item: Object.assign({}, it) }, k, true);
+            funcPath = cheminDe(fn);
+            if (getNode(fracPath) !== g) break;
+        }
+        showFeedback(`${noms.join(', ')} entre${noms.length > 1 ? 'nt' : ''} sous la racine au carré, au dénominateur.`, null);
+        refreshView();
+    }
+    // chemin d'un nœud dans l'équation (recherche par identité)
+    function cheminDe(cible) {
+        function voir(n, p) {
+            if (n === cible) return p;
+            if (!n || typeof n !== 'object') return null;
+            if (n.kind === 'seq') { for (let i = 0; i < n.slots.length; i++) { const r = voir(n.slots[i], p + '.' + i); if (r) return r; } }
+            else if (n.kind === 'frac') return voir(n.num, p + '.num') || voir(n.den, p + '.den');
+            else if (n.kind === 'func') return voir(n.inner, p + '.inner');
+            else if (n.kind === 'sum') { for (let i = 0; i < n.terms.length; i++) { const r = voir(n.terms[i].node, p + '.term' + i); if (r) return r; } }
+            return null;
+        }
+        return voir(state.left, 'left') || voir(state.right, 'right');
+    }
+    // remplacer une grandeur par une expression (outil de la réserve « t = … »)
+    function processSubst(data, el) {
+        const nomG = data.nom;
+        if (!el || !el.dataset.path) { afficherRefus(msg('MSG_SUBST').replace('{g}', nomG)); return; }
+        const path = el.dataset.path, idx = +el.dataset.idx, z = getNode(path), it = z && z.items && z.items[idx];
+        if (!it || it.id !== data.id) { afficherRefus(msg('MSG_SUBST').replace('{g}', nomG)); return; }
+        let R = JSON.parse(JSON.stringify(data.noeud));
+        while (R.kind === 'seq' && R.slots.length === 1) R = R.slots[0];
+        const p = it.pow || 1;
+        if (R.kind === 'frac' && R.num.kind === 'simple' && R.den.kind === 'simple') {
+            // fraction de grandeurs : le numérateur prend la place de la grandeur, le dénominateur passe de l'autre côté du trait
+            const puis = l => l.items.filter(x => x.id !== 'one').map(x => sansPow1(Object.assign({}, x, { pow: (x.pow || 1) * p })));
+            const fd = fracDe(path), enHaut = !fd || fd.niveau === 'num';
+            const ici = puis(enHaut ? R.num : R.den), la = puis(enHaut ? R.den : R.num);
+            z.items.splice(idx, 1, ...ici);
+            if (!z.items.length) z.items.push(tile('one', '1'));
+            if (la.length) {
+                if (fd) { const op = zoneSimple(fd.frac + (fd.niveau === 'num' ? '.den' : '.num')); la.forEach(t => { const o = getNode(op); if (zoneUn(o)) o.items = []; o.items.push(t); }); }
+                else setNode(path, frac(simple(z.items), simple(la)));
+            }
+        } else {
+            if (p !== 1) { afficherRefus(msg('MSG_SUBST').replace('{g}', nomG)); return; }
+            if (z.items.length === 1) setNode(path, R);
+            else {
+                z.items.splice(idx, 1);
+                const pp = path.split('.'), last = pp.pop(), par = getNode(pp.join('.'));
+                if (par && par.kind === 'seq' && /^\d+$/.test(last)) par.slots.splice(+last + 1, 0, R);
+                else setNode(path, seq([z, R]));
+            }
+        }
+        showFeedback(`${nomG} remplacé.`, null);
+        refreshView();
+    }
+    // forme d'une expression, indépendante de l'ordre des facteurs (fin d'un exercice de simplification)
+    function forme(n) {
+        while (n.kind === 'seq' && n.slots.length === 1) n = n.slots[0];
+        const tuiles = l => l.filter(i => i.id !== 'one').map(i => i.id + '^' + (i.pow || 1)).sort().join(',');
+        if (n.kind === 'simple') return 'S[' + tuiles(n.items) + ']';
+        if (n.kind === 'frac') return 'F(' + forme(n.num) + '/' + forme(n.den) + ')';
+        if (n.kind === 'func') return n.fn + (n.n || '') + '(' + forme(n.inner) + ')';
+        if (n.kind === 'sum') return 'Σ(' + n.terms.map(t => (t.sign < 0 ? '-' : '+') + forme(t.node)).sort().join('') + ')';
+        const t = [], autres = [];
+        n.slots.forEach(x => { while (x.kind === 'seq' && x.slots.length === 1) x = x.slots[0]; if (x.kind === 'simple') t.push(...x.items); else autres.push(forme(x)); });
+        const ts = tuiles(t);
+        return 'P(' + (ts ? ['S[' + ts + ']'] : []).concat(autres).sort().join('*') + ')';
     }
     function flipEquation() {
         if (resolved) return;
@@ -1494,6 +1703,16 @@
         enableTileDrag(el, { type:'tile', id:t.id, label:lab(t), item:Object.assign({}, t) });
         pal.appendChild(el);
     }
+    // outil « grandeur = expression » : se dépose sur la grandeur à remplacer
+    function addSubstPaletteTile(r) {
+        const pal = part('ed-palette');
+        if (!pal) return;
+        const el = document.createElement('div');
+        el.className = 'palette-tile palette-subst';
+        el.innerHTML = `<span class="eq-tile-static">${r.label}</span><span class="eq-sign">=</span>${renderStatic(r.noeud)}`;
+        enableTileDrag(el, { type:'subst', id:r.id, nom:r.label, noeud:r.noeud });
+        pal.appendChild(el);
+    }
     function addFracPaletteTile() {
         const pal = part('ed-palette');
         if (!pal) return;
@@ -1553,6 +1772,9 @@
         if (!pal || !currentExercise) return;
         pal.innerHTML = '';
         // les grandeurs effacées reviennent dans la réserve ; le 1 y est toujours
+        (currentExercise.remplacements || []).forEach(addSubstPaletteTile);
+        // réserve réduite aux outils de l'exercice (simplification d'une expression)
+        if (currentExercise.reserveSeule) { (currentExercise.funcTools || []).forEach(addFuncToolTile); crochets(pal); return; }
         const tuiles = (currentExercise.tiles || []).slice();
         if (!tuiles.some(t => t.id === 'one')) tuiles.push(tile('one', '1'));
         tuiles.filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0).forEach(addPaletteTile);
@@ -1706,7 +1928,9 @@
         state = { left: cfg.initialLeft(), right: cfg.initialRight() };
         // grandeur à isoler, rappelée en haut à gauche du cadre de résolution
         const iso = part('ed-isoler');
-        if (iso) iso.innerHTML = 'À isoler\u00a0: <b>' + etiquetteCible(cfg) + '</b>';
+        if (iso) iso.innerHTML = cfg.objectif || 'À isoler\u00a0: <b>' + etiquetteCible(cfg) + '</b>';
+        const ai = part('ed-aide-t');
+        if (ai && cfg.consigne) ai.innerHTML = cfg.consigne;
         annul.vider();
         history = [JSON.parse(JSON.stringify(state))];
         stepOneValidated = true;
@@ -1754,6 +1978,20 @@
         }
         history.push(JSON.parse(JSON.stringify(state)));
         renderHistory();
+
+        // exercice de simplification : fini quand l'équation a la forme attendue
+        if (currentExercise.forme) {
+            const fm = currentExercise.forme;
+            if (forme(state.left) === forme(fm.left) && forme(state.right) === forme(fm.right)) {
+                resolved = true; fin(); showFeedback('', true);
+                if (rappels.surResolu) rappels.surResolu();
+                return;
+            }
+            showFeedback(currentExercise.messages && currentExercise.messages.CONTINUE || "Étape correcte, continue !", true);
+            state = JSON.parse(JSON.stringify(state)); annul.vider(); refreshView();
+            if (rappels.surEtape) rappels.surEtape();
+            return;
+        }
 
         const target = currentExercise.targetId;
         const leftFull  = isFullyIsolatedSeq(state.left, target);
@@ -1829,6 +2067,11 @@
         terme: processSumTermDrop, den: processFracDenDrop, bloc: processBlocDrop, paren: processParenDrop, neg: negateSide,
         outil: applyFuncTool, effacer: deleteItem, effacerDen: deleteDen, effacerCase: deleteEmptySlot, inverser: flipEquation, verifier: verifyStep,
         annuler: annulerAction,
+        // remplacer, simplifier, entrer sous la racine (exercices qui les activent)
+        remplacer: (k, path, idx) => { const r = currentExercise.remplacements[k]; processSubst({ type:'subst', id:r.id, nom:r.label, noeud:r.noeud }, { dataset: { path, idx: String(idx) } }); },
+        simplifier: (pa, ia, pb, ib) => { const it = getNode(pa).items[ia]; processSimplif({ type:'move', from:pa, idx:ia, id:it.id, item:Object.assign({}, it) }, pb, ib); },
+        entrer: (pa, ia, funcPath) => { const it = getNode(pa).items[ia]; processEntrer({ type:'move', from:pa, idx:ia, id:it.id, label:lab(it), item:Object.assign({}, it) }, funcPath); },
+        forme,
         // remplace l'équation affichée (tests automatiques)
         charger: st => { state = JSON.parse(JSON.stringify(st)); resolved = false; refreshView(); },
         juste: () => equationJuste(state),
@@ -1982,6 +2225,11 @@
       initialLeft: () => cloner(eq.left), initialRight: () => cloner(eq.right),
       funcTools: o.outils || [], needsParenTool: !!o.parentheses,
       aides: o.aides, messages: o.messages,
+      // simplification d'une expression : remplacements { id, par: 'écriture compacte' }, racine ouverte,
+      // simplification num/den, forme finale attendue (écriture compacte), objectif et consigne affichés
+      remplacements: (o.remplacements || []).map(r => ({ id: r.id, label: o.g[r.id], noeud: membre(r.par, o.g) })),
+      racineOuverte: !!o.racineOuverte, simplifier: !!o.simplifier, reserveSeule: !!o.reserveSeule,
+      forme: o.forme ? lire(o.forme, o.g) : null, objectif: o.objectif, consigne: o.consigne,
     };
   }
 

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="coord.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 2 : 10 questions tirées au hasard (CU.coord).
+   Deux vecteurs portés par un axe, deux angles repérés depuis
+   l'horizontale, deux depuis la verticale, deux repères inclinés,
+   deux calculs numériques (signe compris). Les repères varient : axes
+   x, y ou x, z, sens de chaque axe, vecteur à l'origine ou ailleurs.
+   ============================================================ */
+const { melanger, hasard } = CU;
+const K = CU.coord;
+const THEMES = { axe: 'Vecteur porté par un axe', angleH: 'Angle repéré depuis l\'horizontale', angleV: 'Angle repéré depuis la verticale', incline: 'Repère incliné' };
+const litterale = type => { const s = K.gen(type); return { theme: THEMES[type], enonce: K.fig(s), parties: K.parties(s) }; };
+const numerique = () => { const s = K.gen(hasard(['angleH', 'angleV', 'incline'])), n = K.partiesNum(s); return { theme: 'Avec des valeurs', enonce: `${K.fig(s)}<p>${n.donnees}</p>`, parties: n.parties }; };
+
+CU.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Coordonnées d\'un vecteur',
+  intro: '<p class="er-contexte">10 questions : écrire les coordonnées d\'un vecteur dans des repères variés (axes x et y ou x et z, orientés dans un sens ou dans l\'autre, inclinés).</p>',
+  questions: () => melanger([litterale('axe'), litterale('axe'), litterale('angleH'), litterale('angleH'), litterale('angleV'), litterale('angleV'), litterale('incline'), litterale('incline'), numerique(), numerique()]),
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : chute libre →' },
+});
+CU.menu('module_2_questions');
+</script>
+</body>
+</html>

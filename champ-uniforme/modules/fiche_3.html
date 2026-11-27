@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Chute libre dans un champ de pesanteur uniforme</h2>
+  </div>
+
+  <section class="er-card" id="sans-vitesse">
+    <h3 class="cours-titre">La méthode : chute sans vitesse initiale</h3>
+    <p>Ce qui est à retenir, ce sont les étapes (et leur rédaction), pas les équations obtenues : elles changent avec le repère et les conditions initiales.</p>
+    <div id="methode"></div>
+  </section>
+
+  <section class="er-card" id="horizontale">
+    <h3 class="cours-titre">Vitesse initiale horizontale</h3>
+    <div id="fig-hor"></div>
+    <div class="cle"><p>Même méthode ; seules les conditions initiales changent. On obtient x(t) = v<sub>0</sub> t et y(t) = −½ g t<sup>2</sup> + h ; le mouvement est <b>plan</b>.</p>
+      <p><b>Trajectoire</b> : on isole t dans x(t) et on le remplace dans y(t) : parabole.</p></div>
+  </section>
+
+  <section class="er-card" id="quelconque">
+    <h3 class="cours-titre">Vitesse initiale quelconque</h3>
+    <div id="fig-tir"></div>
+    <div class="cle"><p><b>Coordonnées de <span class="vec-nom">v</span><sub>0</sub></b> : on projette ; côté adjacent à α → v<sub>0</sub> cos α, côté opposé → v<sub>0</sub> sin α.</p>
+      <p>On obtient x(t) = (v<sub>0</sub> cos α) t et y(t) = −½ g t<sup>2</sup> + (v<sub>0</sub> sin α) t + h.</p></div>
+  </section>
+
+  <section class="er-card" id="exploiter">
+    <h3 class="cours-titre">Étape 6 : traduire la question</h3>
+    <p>On regarde sur le schéma à quel endroit correspond la question, puis on le traduit dans l'une des équations établies (vitesse ou position).</p>
+    <div class="cle" id="trad"></div>
+    <p>v<sub>0</sub> = 5,0 m·s<sup>−1</sup>, α = 40°, h = 2,0 m : y<sub>max</sub> = 2,5 m ; t<sub>chute</sub> = 1,05 s ; d = 4,0 m.</p>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3a_cours.html">Revoir les cours</a>
+    <a class="btn-secondary" href="module_3_questions.html">Questions sur le module 3</a>
+  </div>
+<script>
+/* contenus écrits avec les outils de rédaction de cu.js (mêmes écritures que dans les cours) */
+const { V, fr, rac, newton, integ, ci, figCI, etapeM, trad, figTir } = CU;
+const t2 = 't<sup>2</sup>';
+document.getElementById('methode').innerHTML =
+  etapeM(1, 'Schéma de la situation, repère et conditions initiales', figCI(figTir({ h: 2, v0: 0, traj: false, W: 220, aria: 'Balle lâchée sans vitesse initiale à la hauteur h ; axe x horizontal, axe y vertical vers le haut, origine O au sol' }), ci({ v: ['0', '0'], p: ['0', 'h'] }))) +
+  etapeM(2, 'Bilan des forces', `<p>La balle n'est soumise qu'à son poids : Σ ${V('F', 'ext')} = ${V('P')} = m ${V('g')}.</p>`) +
+  etapeM(3, 'Seconde loi de Newton', `<p>${newton('la balle', `m ${V('g')}`, V('g'), ['a<sub>x</sub>(t) = 0', 'a<sub>y</sub>(t) = −g'])}</p>`) +
+  etapeM(4, 'Vitesse', integ('v', ['v<sub>x</sub>(t) = C<sub>1</sub>', 'v<sub>y</sub>(t) = −g t + C<sub>2</sub>'], ['C<sub>1</sub> = v<sub>x</sub>(0) = 0', 'C<sub>2</sub> = v<sub>y</sub>(0) = 0'], ['v<sub>x</sub>(t) = 0', 'v<sub>y</sub>(t) = −g t'])) +
+  etapeM(5, 'Position', integ('p', ['x(t) = C<sub>3</sub>', `y(t) = −${fr('1', '2')} g ${t2} + C<sub>4</sub>`], ['C<sub>3</sub> = x(0) = 0', 'C<sub>4</sub> = y(0) = h'], ['x(t) = 0', `y(t) = −${fr('1', '2')} g ${t2} + h`])) +
+  etapeM(6, 'Traduire la question', `${trad('Le sol (y = 0 sur le schéma)', 'y(t<sub>chute</sub>) = 0')}<p>−½ g t<sub>chute</sub><sup>2</sup> + h = 0 ⟺ t<sub>chute</sub> = ${rac(fr('2h', 'g'))}</p>`);
+document.getElementById('fig-hor').innerHTML = figCI(figTir({ h: 2, v0: 5, alpha: 0, aria: 'Balle lancée horizontalement depuis la hauteur h' }), ci({ v: ['v<sub>0</sub>', '0'], p: ['0', 'h'] }));
+document.getElementById('fig-tir').innerHTML = figCI(figTir({ h: 2, v0: 5, alpha: 40, sommet: 'v', chute: true, aria: 'Tir oblique : vitesse initiale faisant l\'angle alpha avec l\'horizontale, sommet S où la vitesse est horizontale, point de chute C' }), ci({ v: ['v<sub>0</sub> cos α', 'v<sub>0</sub> sin α'], p: ['0', 'h'] }));
+document.getElementById('trad').innerHTML = trad('Sommet S (vitesse horizontale)', 'v<sub>y</sub>(t<sub>S</sub>) = 0, puis y<sub>max</sub> = y(t<sub>S</sub>)') +
+  trad('Point de chute C (sol)', 'y(t<sub>chute</sub>) = 0 (second degré, racine positive), puis d = x(t<sub>chute</sub>)') +
+  trad('Vitesse en C', `v = ${rac('v<sub>x</sub><sup>2</sup> + v<sub>y</sub><sup>2</sup>')} à t<sub>chute</sub>`) +
+  trad('Cible (x<sub>cible</sub> ; y<sub>cible</sub>)', 'x(t) = x<sub>cible</sub> et y(t) = y<sub>cible</sub>, ou y(x<sub>cible</sub>) comparé à y<sub>cible</sub>');
+</script>
+</div>
+<script>
+CU.menu('fiche_3');
+</script>
+</body>
+</html>

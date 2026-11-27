@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : déviation d'une particule — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 4 / 4</span>
+    <h2 class="er-titre">Déviation d'une particule chargée</h2>
+    <p class="er-contexte">Selon le <b>signe de sa charge</b>, la particule est déviée vers une armature ou vers l'autre. À la sortie du condensateur, on calcule sa <b>déviation</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. q > 0 : parabole vers l'armature − ; q < 0 : vers l'armature +
+   2. La sortie du condensateur (méthode, pas de formule à retenir) :
+      schéma avec le point de sortie S, x = ℓ et z(ℓ) = z_S, trajectoire
+      rectiligne ensuite (poids négligé : aucune force)
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { V, fmt, cs, sci, sys, fr, MS, VM, CALC, condo, E_CH, M_E, svg, fl, nom, txt, COUL, ENCRE, ENCRE2, ENCRE3, etapeM, trad, aide6 } = CU;
+const o = (id, label) => ({ id, label });
+const t2 = 't<sup>2</sup>';
+
+// schéma de la sortie : électron entrant en O (v⃗₀ horizontale), armature du haut +, sortie en S (x = ℓ, z = z_S),
+// puis trajectoire rectiligne (tangente en S)
+function figSortie() {
+  const x0 = 46, L = 170, yh = 34, yb = 166, ym = 100, zs = 32, xe = x0 + L, xf = 352;
+  const k = zs / (L * L), pente = 2 * zs / L, Y = x => ym - k * x * x;
+  let s = '';
+  [[yh, '+'], [yb, '−']].forEach(([y, sg]) => {
+    s += `<rect x="${x0}" y="${y - 3}" width="${L}" height="6" rx="2" fill="#ebe8e1" stroke="${ENCRE2}" stroke-width="1.2"/>`;
+    for (let x = x0 + 20; x < xe; x += 44) s += txt(x, y < ym ? y - 8 : y + 18, sg, { g: 800, c: ENCRE, t: 15, a: 'middle' });
+  });
+  // repère
+  s += fl(x0, ym, xf, ym, ENCRE3, { ep: 1.1, lt: 7 }) + txt(xf - 2, ym + 14, 'x', { g: 800, c: ENCRE, t: 12, a: 'end' }) + fl(x0, ym, x0, yh + 8, ENCRE3, { ep: 1.1, lt: 7 }) + txt(x0 - 6, yh + 18, 'z', { g: 800, c: ENCRE, t: 12, a: 'end' });
+  s += fl(x0 + 70, ym + 18, x0 + 70, ym + 52, COUL.E, { ep: 2 }) + nom(x0 + 84, ym + 44, 'E', '', COUL.E, { t: 13 });
+  // trajectoire dans le condensateur (parabole) puis droite après S
+  let d = `M${x0},${ym}`;
+  for (let x = 4; x <= L; x += 4) d += `L${(x0 + x).toFixed(1)},${Y(x).toFixed(1)}`;
+  s += `<path d="${d}" fill="none" stroke="${COUL.traj}" stroke-width="2.2" stroke-dasharray="6 4"/>`;
+  s += `<line x1="${xe}" y1="${ym - zs}" x2="${xf - 20}" y2="${(ym - zs - pente * (xf - 20 - xe)).toFixed(1)}" stroke="${COUL.v}" stroke-width="2.4"/>`;
+  // particule, v⃗₀, point S
+  s += `<circle cx="${x0}" cy="${ym}" r="5" fill="${ENCRE}"/>` + txt(x0 - 6, ym + 16, 'O', { g: 800, c: ENCRE, t: 12, a: 'end' }) + fl(x0 + 6, ym, x0 + 44, ym, COUL.v, { ep: 2.2 }) + nom(x0 + 30, ym + 18, 'v', '0', COUL.v, { t: 12 });
+  s += `<circle cx="${xe}" cy="${ym - zs}" r="4" fill="${ENCRE}"/>` + txt(xe - 4, ym - zs - 8, 'S', { g: 800, c: ENCRE, t: 13, a: 'end' });
+  // cotes : ℓ (sous l'armature) et z_S
+  s += `<line x1="${xe}" y1="${ym - zs}" x2="${xe}" y2="${ym}" stroke="${ENCRE2}" stroke-dasharray="3 3"/>`;
+  s += fl(xe + 12, ym, xe + 12, ym - zs, ENCRE2, { ep: 1.2, lt: 6 }) + fl(xe + 12, ym - zs, xe + 12, ym, ENCRE2, { ep: 1.2, lt: 6 }) + txt(xe + 18, ym - zs / 2 + 4, 'z(ℓ) = z<tspan dy="3" font-size="9">S</tspan>', { g: 800, c: ENCRE, t: 12 });
+  s += fl(x0, yb + 34, xe, yb + 34, ENCRE2, { ep: 1.2, lt: 6 }) + fl(xe, yb + 34, x0, yb + 34, ENCRE2, { ep: 1.2, lt: 6 }) + txt((x0 + xe) / 2, yb + 30, 'ℓ', { g: 800, c: ENCRE, t: 13, a: 'middle' });
+  s += txt(xe + 6, yb + 38, 'sortie : x = ℓ', { g: 800, c: ENCRE, t: 12 });
+  // après S
+  s += txt(396, ym - 38, 'après S : droite', { g: 700, c: COUL.v, t: 11, a: 'end' }) + txt(396, ym - 24, '(P négligé,', { g: 600, c: ENCRE2, t: 10.5, a: 'end' }) + txt(396, ym - 11, 'aucune force)', { g: 600, c: ENCRE2, t: 10.5, a: 'end' });
+  return svg(400, 214, s, 'Électron entrant en O avec une vitesse horizontale entre deux armatures de longueur l ; il sort au point S d\'abscisse x = l et d\'ordonnée z(l) = zS ; après S, sa trajectoire est une droite, car il n\'est plus soumis à aucune force (poids négligé)');
+}
+
+/* ---------- 1. Le sens de la déviation ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Le sens de la déviation');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cu-figs2">${condo({ haut: '+', q: 1, ang: 35, aria: 'q positive : la parabole est tournée vers l\'armature négative' })}${condo({ haut: '+', q: -1, ang: 35, aria: 'q négative : la trajectoire part vers l\'armature positive' })}</div>
+      <div class="cle"><p><b>q > 0</b> : ${V('a')} a le sens de ${V('E')}, la parabole est tournée vers l'armature <b>−</b>. <b>q < 0</b> : la particule est déviée vers l'armature <b>+</b>.</p>
+        <p>Inverser la tension U (ou le signe de la charge) inverse le sens de la déviation.</p></div>
+    </div>
+    ${exemple('<p>Un faisceau d\'électrons passe entre deux armatures horizontales, celle du haut étant positive : il est dévié vers le haut.</p>')}`);
+  const haut = hasard(['+', '−']), q = hasard([1, -1]);
+  c.aToi(carte, [
+    { enonce: condo({ haut, q, traj: false, aria: `Particule ${q > 0 ? 'positive' : 'négative'} entrant entre les armatures ; l'armature du haut est ${haut === '+' ? 'positive' : 'négative'}` }),
+      parties: [{ type: 'choix', q: `Vers où cette particule (${q > 0 ? 'positive' : 'négative'}) est-elle déviée ?`, colonne: false, melanger: false, options: [o('h', 'vers le haut'), o('b', 'vers le bas'), o('n', 'elle n\'est pas déviée')],
+        bonne: (q > 0) === (haut === '+') ? 'b' : 'h', indices: { n: 'Elle subit la force q' + V('E') + ', perpendiculaire aux armatures.' }, indice: 'Charge positive : attirée par l\'armature − ; négative : par l\'armature +.',
+        solution: `<p>${q > 0 ? 'Charge positive, attirée par l\'armature −' : 'Charge négative, attirée par l\'armature +'}, qui est ${(q > 0) === (haut === '+') ? 'en bas' : 'en haut'}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La sortie du condensateur ---------- */
+function etape2(c) {
+  const carte = c.carte('2. La déviation à la sortie');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Un électron entre en O avec ${V('v', '0')} parallèle aux armatures, de longueur ℓ ; l'armature du haut est +. Les étapes 1 à 5 (cours précédent) donnent :</p>
+      <p class="crs-calc">${sys('x(t) = v<sub>0</sub> t', `z(t) = ${fr('eE', '2m')} ${t2}`)}</p>
+      ${figSortie()}
+      ${etapeM(6, 'Traduire la question : où sort l\'électron ?', `<p>Sur le schéma, il sort au point S, au bout des armatures.</p>
+        ${trad('Sortie S : bout des armatures', 'x(t<sub>S</sub>) = ℓ (équation de la position)')}
+        <p class="crs-calc">v<sub>0</sub> t<sub>S</sub> = ℓ ⟺ t<sub>S</sub> = ${fr('ℓ', 'v<sub>0</sub>')}</p>
+        ${trad('Déviation à la sortie : ordonnée de S', 'z<sub>S</sub> = z(t<sub>S</sub>)')}`)}
+      <div class="cle"><p>Ce qui compte : le <b>point de sortie</b> S sur le schéma, sa traduction <b>x = ℓ</b>, puis <b>z<sub>S</sub> = z(t<sub>S</sub>)</b>. L'expression de z<sub>S</sub> n'est pas à retenir : elle se retrouve en deux lignes.</p>
+        <p><b>Après S</b>, l'électron n'est soumis à aucune force (poids négligé, plus de champ) : d'après le principe d'inertie, sa trajectoire est une <b>droite</b>, parcourue à vitesse constante.</p></div>
+    </div>
+    ${exemple(`<p>v<sub>0</sub> = 2,0 × 10<sup>7</sup> ${MS}, E = 1,0 × 10<sup>4</sup> ${VM}, ℓ = 5,0 cm, m<sub>e</sub> = 9,11 × 10<sup>−31</sup> kg :</p>
+      <p class="crs-calc">t<sub>S</sub> = ${fr('5,0 × 10<sup>−2</sup>', '2,0 × 10<sup>7</sup>')} = 2,5 × 10<sup>−9</sup> s ; z<sub>S</sub> = ${fr('1,60 × 10<sup>−19</sup> × 1,0 × 10<sup>4</sup>', '2 × 9,11 × 10<sup>−31</sup>')} × (2,5 × 10<sup>−9</sup>)<sup>2</sup> = <span class="c">5,5 × 10<sup>−3</sup> m = 5,5 mm</span></p>`)}`);
+  const v0 = hasard([2.5e7, 3.0e7, 4.0e7]), E = hasard([1.5e4, 2.0e4]), l = hasard([4.0, 6.0]), ts = l / 100 / v0, z = E_CH * E * ts * ts / (2 * M_E);
+  c.aToi(carte, [
+    { titre: 'Pas à pas', enonce: `<p>Électron : v<sub>0</sub> = ${sci(v0, 2)} ${MS}, E = ${sci(E, 2)} ${VM}, armatures de longueur ℓ = ${fmt(l)} cm ; x(t) = v<sub>0</sub> t et z(t) = ${fr('eE', '2m')} ${t2}.</p>`,
+      parties: [{ type: 'choix', q: 'Quelle équation traduit « l\'électron sort du condensateur » ?', colonne: false, melanger: false, options: [o('ok', 'x(t<sub>S</sub>) = ℓ'), o('z', 'z(t<sub>S</sub>) = ℓ'), o('v', 'v<sub>z</sub>(t<sub>S</sub>) = 0')], bonne: 'ok',
+        indices: { z: 'ℓ est la longueur des armatures : elle se mesure le long de l\'axe x.', v: 'v<sub>z</sub> ne s\'annule pas : l\'électron est dévié de plus en plus.' }, indice: aide6('le point de sortie S', 'il est au bout des armatures'),
+        solution: '<p>S est au bout des armatures, à l\'abscisse ℓ : x(t<sub>S</sub>) = ℓ.</p>' },
+      { type: 'sci', q: 'Date de sortie t<sub>S</sub> (2 chiffres significatifs) :', label: 't<sub>S</sub> =', valeur: ts, cs: 2, unite: 's' + CALC,
+        diag: v => (Math.abs(v / (ts * 100) - 1) < .05 ? 'Convertis ℓ en mètres.' : 'v<sub>0</sub> t<sub>S</sub> = ℓ, donc t<sub>S</sub> = ℓ / v<sub>0</sub>.'), solution: `<p>t<sub>S</sub> = ${fr('ℓ', 'v<sub>0</sub>')} = ${fmt(l / 100)} / ${sci(v0, 2)} = ${sci(ts, 2)} s</p>` },
+      { type: 'nombre', q: 'Déviation z<sub>S</sub> = z(t<sub>S</sub>), en millimètres (2 chiffres significatifs) :', label: 'z<sub>S</sub> =', valeur: z * 1000, rel: .03, unite: 'mm' + CALC, signe: false,
+        diag: v => (Math.abs(v / (z * 1000) - 2) < .05 ? 'z(t) = eE t² / (2m) : il y a un 2 au dénominateur.' : 'Remplace t par t<sub>S</sub> dans z(t), puis convertis en mm.'),
+        solution: `<p>z<sub>S</sub> = 1,60 × 10<sup>−19</sup> × ${sci(E, 2)} × (${sci(ts, 2)})<sup>2</sup> / (2 × 9,11 × 10<sup>−31</sup>) = ${cs(z * 1000, 2)} mm</p>` },
+      { type: 'choix', q: 'Après la sortie du condensateur, le mouvement de l\'électron est :', colonne: false, melanger: false, options: [o('ok', 'rectiligne uniforme'), o('p', 'toujours parabolique'), o('arret', 'il s\'arrête')], bonne: 'ok',
+        indices: { p: 'Hors du condensateur, il n\'y a plus de champ électrique.', arret: 'Aucune force ne le freine : principe d\'inertie.' }, solution: '<p>Plus de force (poids négligé) : principe d\'inertie, mouvement rectiligne uniforme.</p>' }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>q > 0 : déviation vers l'armature − ; q < 0 : vers l'armature +.</p></div>
+    <div class="cle"><p><b>Sortie</b> : on repère le point de sortie S sur le schéma ; x(t<sub>S</sub>) = ℓ donne t<sub>S</sub>, puis z<sub>S</sub> = z(t<sub>S</sub>).</p></div>
+    <div class="cle"><p><b>Après S</b> : poids négligé, plus aucune force : mouvement rectiligne uniforme.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_simulation.html">Simulateur : déviation dans un condensateur →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_questions.html">Questions du module 4</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#deviation">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+CU.menu('module_4d_cours');
+</script>
+</body>
+</html>

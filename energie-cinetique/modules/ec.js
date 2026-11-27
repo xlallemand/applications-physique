@@ -597,6 +597,7 @@
   /* ============================================================
      SÉRIE DE QUESTIONS NOTÉE SUR 20
      opts = { app, badge, titre, intro, questions: () => [q], revoir, suite }
+       suite = { href, label, externe } ; externe : page d'une autre application (nouvelle fenêtre)
      q = { theme, consigne, enonce, figure(zone), parties, bilan }
      ============================================================ */
   function serie(opts) {
@@ -662,7 +663,7 @@
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
         ${opts.revoir ? `<a class="btn-secondary" style="text-decoration:none" href="${opts.revoir.href}">${opts.revoir.label}</a>` : ''}
-        ${opts.suite ? `<a class="btn-primary" style="text-decoration:none" href="${opts.suite.href}">${opts.suite.label}</a>` : ''}</div></div>`;
+        ${opts.suite ? `<a class="btn-primary" style="text-decoration:none" href="${opts.suite.href}"${opts.suite.externe ? ' target="_blank" rel="noopener"' : ''}>${opts.suite.label}</a>` : ''}</div></div>`;
       app.querySelector('[data-a="re"]').onclick = demarrer;
       window.scrollTo(0, 0);
       if (score === max) confettis();
@@ -1118,10 +1119,10 @@
     { n: 1, titre: 'Forces de frottement', desc: 'Frottements solides, traînée f<sub>x</sub> = ½ ρ v² S C<sub>x</sub>, portance', fiche: 'fiche_1',
       parties: [{ nom: 'Forces de frottement', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : la traînée' } }] },
     { n: 2, titre: 'Travail d\'une force', desc: 'W<sub>AB</sub>(<span class="vec-nom">F</span>) = F × AB × cos α ; travail moteur, résistant ou nul ; travail du poids', fiche: 'fiche_2',
-      // le simulateur (activité de découverte), quatre sous-modules de cours, puis les questions et la fiche
+      // le simulateur (application « Travail d'une force », page externe ↗), quatre sous-modules de cours, puis les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Simulateur', simulation: 'module_2_simulation', noms: { simulation: 'Simulateur : travail d\'une force' } },
+        { nom: 'Simulateur', externe: { app: 'travail-force', page: 'index', nom: 'Simulateur : travail d\'une force', appNom: 'Travail d\'une force' } },
         { nom: 'Définition et formule', slug: 'travail', cours: 'module_2a_cours', noms: { cours: 'Cours : définition et formule' } },
         { nom: 'Travail moteur, résistant ou nul', slug: 'signe', cours: 'module_2b_cours', noms: { cours: 'Cours : travail moteur, résistant ou nul' } },
         { nom: 'Travail du poids', slug: 'poids', cours: 'module_2c_cours', noms: { cours: 'Cours : travail du poids' } },

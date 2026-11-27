@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : accélérateur linéaire et applications — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 5 · COURS 2 / 2</span>
+    <h2 class="er-titre">Accélérateur linéaire et applications</h2>
+    <p class="er-contexte">Une seule très grande tension est difficile à produire : on fait passer la particule dans une <b>succession de condensateurs</b>, en <b>inversant la polarité</b> chaque fois qu'elle change de condensateur.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Succession de condensateurs, inversion de polarité ; n étages de
+      tension U accélèrent comme un seul condensateur de tension nU
+      (pas de formule de vₙ à retenir)
+   2. Applications illustrées (schémas simplifiés) : canon à électrons
+      (tube cathodique), CERN, radiothérapie, analyse d'œuvres d'art
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { V, fmt, cs, sci, fr, rac, MS, CALC, E_CH, M_P, M_E, svg, fl, nom, txt, COUL, ENCRE, ENCRE2, ENCRE3 } = CU;
+const o = (id, label) => ({ id, label });
+
+// trois condensateurs C₁, C₂, C₃ côte à côte (grilles percées) ; etat 1 : particule dans C₁ ; etat 2 : dans C₂, polarité inversée
+function chaine(etat) {
+  const X = [30, 110, 190, 270], s0 = etat === 1 ? 1 : -1;
+  let s = '';
+  X.forEach((x, k) => {
+    const sg = (k % 2 === 0 ? s0 : -s0) > 0 ? '+' : '−';
+    s += `<line x1="${x}" y1="20" x2="${x}" y2="66" stroke="${ENCRE2}" stroke-width="3"/><line x1="${x}" y1="80" x2="${x}" y2="126" stroke="${ENCRE2}" stroke-width="3"/>`;
+    s += txt(x, 16, sg, { g: 800, c: ENCRE, t: 14, a: 'middle' }) + txt(x, 142, sg, { g: 800, c: ENCRE, t: 14, a: 'middle' });
+  });
+  for (let k = 0; k < 3; k++) {
+    const vers = (k % 2 === 0 ? s0 : -s0) > 0 ? 1 : -1, xm = (X[k] + X[k + 1]) / 2;
+    s += fl(xm - 24 * vers, 40, xm + 24 * vers, 40, COUL.E, { ep: 2 }) + nom(xm, 33, 'E', '', COUL.E, { t: 12 }) + txt(xm, 112, `C${['₁', '₂', '₃'][k]}`, { g: 700, c: ENCRE2, t: 12, a: 'middle' });
+  }
+  const xp = etat === 1 ? 62 : 142;
+  s += `<line x1="16" y1="73" x2="290" y2="73" stroke="#c8c4bb" stroke-dasharray="3 3"/><circle cx="${xp}" cy="73" r="6" fill="#fff" stroke="${ENCRE}" stroke-width="1.8"/>` + txt(xp, 76.5, '+', { g: 800, c: ENCRE, t: 9, a: 'middle' });
+  s += fl(xp + 8, 92, xp + 38, 92, COUL.F, { ep: 2 }) + nom(xp + 23, 106, 'F', '', COUL.F, { t: 12 });
+  return svg(300, 150, s, etat === 1 ? 'La particule positive est dans le condensateur C1, où le champ est dirigé vers l\'avant : elle est accélérée' : 'La particule est passée dans C2 : la polarité a été inversée, le champ dans C2 est dirigé vers l\'avant, elle est de nouveau accélérée');
+}
+
+/* ---------- illustrations des applications (schémas simplifiés) ---------- */
+const GRIS = '#ebe8e1', FAISCEAU = '#d9480f';
+// tube cathodique : canon à électrons (filament, anode percée), plaques de déviation, écran et spot
+function figTube() {
+  let s = `<path d="M14,48 h100 l40,-30 h70 v104 h-70 l-40,-30 h-100 z" fill="${GRIS}" stroke="${ENCRE2}" stroke-width="1.2"/>`;
+  s += `<path d="M22,62 l5,-6 l5,6 l5,-6 l5,6" fill="none" stroke="${ENCRE}" stroke-width="1.6"/>` + txt(30, 106, 'filament', { t: 9, a: 'middle' });
+  s += `<rect x="58" y="52" width="4" height="16" fill="${ENCRE2}"/><rect x="58" y="72" width="4" height="16" fill="${ENCRE2}"/>` + txt(60, 40, 'anode', { t: 9, a: 'middle' });
+  s += `<rect x="86" y="56" width="30" height="4" fill="${ENCRE2}"/><rect x="86" y="80" width="30" height="4" fill="${ENCRE2}"/>` + txt(92, 106, 'plaques', { t: 9, a: 'middle' });
+  s += `<path d="M42,70 L86,70 Q116,70 220,40" fill="none" stroke="${FAISCEAU}" stroke-width="2" stroke-dasharray="5 3"/>`;
+  s += `<line x1="222" y1="18" x2="222" y2="122" stroke="${ENCRE}" stroke-width="3"/><circle cx="220" cy="40" r="4" fill="${FAISCEAU}"/>` + txt(232, 74, 'écran', { t: 9 });
+  return svg(264, 140, s, 'Tube cathodique : les électrons émis par un filament chauffé sont accélérés vers une anode percée, déviés entre deux plaques, puis frappent l\'écran en un point lumineux');
+}
+// CERN : accélérateur linéaire, puis anneaux de plus en plus grands
+function figCern() {
+  let s = `<circle cx="178" cy="68" r="56" fill="none" stroke="${ENCRE2}" stroke-width="3"/><circle cx="96" cy="94" r="24" fill="none" stroke="${ENCRE2}" stroke-width="2.4"/>`;
+  s += `<line x1="118" y1="86" x2="124" y2="84" stroke="${FAISCEAU}" stroke-width="2"/>` + txt(178, 64, 'grand anneau', { t: 9, a: 'middle' }) + txt(178, 77, '(LHC)', { t: 9, a: 'middle' }) + txt(96, 97, 'anneau', { t: 9, a: 'middle' });
+  for (let k = 0; k < 5; k++) s += `<rect x="${4 + k * 12}" y="122" width="8" height="10" fill="${GRIS}" stroke="${ENCRE2}"/>`;
+  s += fl(4, 127, 88, 127, FAISCEAU, { ep: 1.6, lt: 6 }) + `<path d="M88,127 Q96,127 96,119" fill="none" stroke="${FAISCEAU}" stroke-width="1.6"/>`;
+  s += txt(34, 146, 'accélérateur linéaire', { t: 9, a: 'middle' });
+  return svg(250, 152, s, 'Complexe du CERN : les particules sont d\'abord accélérées dans un accélérateur linéaire, puis injectées dans un anneau, puis dans un anneau beaucoup plus grand');
+}
+// radiothérapie : tête de l'accélérateur au-dessus du patient, faisceau vers la tumeur
+function figRadio() {
+  let s = `<rect x="90" y="8" width="70" height="34" rx="6" fill="${GRIS}" stroke="${ENCRE2}"/>` + txt(125, 29, 'accélérateur', { t: 9, a: 'middle' });
+  s += `<path d="M118,42 L111,90 L139,90 L132,42 z" fill="${FAISCEAU}" opacity=".25"/><line x1="125" y1="42" x2="125" y2="90" stroke="${FAISCEAU}" stroke-width="2" stroke-dasharray="5 3"/>`;
+  // table de traitement, puis le patient allongé sur le dos (tête sur un coussin, drap jusqu'aux épaules)
+  s += `<rect x="36" y="104" width="178" height="7" rx="3" fill="${ENCRE3}"/><rect x="88" y="111" width="8" height="12" fill="${ENCRE3}"/><rect x="156" y="111" width="8" height="12" fill="${ENCRE3}"/>`;
+  s += `<rect x="38" y="94" width="26" height="10" rx="5" fill="#ffffff" stroke="${ENCRE2}"/><circle cx="56" cy="88" r="9" fill="#f2d7c4" stroke="${ENCRE2}"/>`;
+  s += `<path d="M53,80 Q57,77 63,82" fill="none" stroke="${ENCRE2}" stroke-width="1.2"/><path d="M64,90 l4,1" stroke="${ENCRE2}"/>`;
+  s += `<path d="M66,104 L66,92 Q70,86 82,85 L108,84 Q124,82 138,85 L158,88 Q166,89 172,90 L196,91 Q202,86 206,88 Q209,92 206,104 Z" fill="#dbe6f4" stroke="${ENCRE2}" stroke-linejoin="round"/>`;
+  s += `<path d="M82,86 Q96,94 110,85" fill="none" stroke="${ENCRE3}" stroke-width="1"/><path d="M160,89 Q178,95 194,91" fill="none" stroke="${ENCRE3}" stroke-width="1"/>`;
+  s += `<circle cx="125" cy="94" r="4.5" fill="#b0177f"/>`;
+  s += txt(150, 128, 'tumeur visée', { t: 9 }) + `<line x1="148" y1="124" x2="128" y2="98" stroke="${ENCRE3}"/>` + txt(46, 128, 'patient', { t: 9 });
+  return svg(250, 140, s, 'Radiothérapie : un accélérateur linéaire d\'électrons placé au-dessus du patient produit un faisceau dirigé vers la tumeur');
+}
+// analyse d'une œuvre d'art : faisceau de protons sur un objet, détecteur des rayonnements émis
+function figArt() {
+  let s = `<rect x="8" y="58" width="80" height="22" rx="4" fill="${GRIS}" stroke="${ENCRE2}"/>` + txt(48, 73, 'accélérateur', { t: 9, a: 'middle' });
+  s += fl(88, 69, 155, 69, FAISCEAU, { ep: 2, lt: 7 }) + txt(118, 62, 'protons', { t: 9, a: 'middle' });
+  // amphore antique : col, anses, panse décorée de frises, pied sur un socle
+  const TERRE = '#d39a6a', BRUN = '#7a4523';
+  s += `<rect x="160" y="108" width="40" height="6" rx="1.5" fill="${GRIS}" stroke="${ENCRE2}"/>`;
+  s += `<path d="M168,34 L192,34 L190,39 L186,40 L186,48 Q205,56 203,74 Q201,92 186,100 L188,108 L172,108 L174,100 Q159,92 157,74 Q155,56 174,48 L174,40 L170,39 Z" fill="${TERRE}" stroke="${BRUN}" stroke-width="1.3" stroke-linejoin="round"/>`;
+  s += `<path d="M160,62 L200,62 M158,81 L202,81" stroke="${BRUN}" stroke-width="1.2"/>`;
+  s += `<path d="M161,66 l4,4 l4,-4 l4,4 l4,-4 l4,4 l4,-4 l4,4 l4,-4 l4,4" fill="none" stroke="${BRUN}" stroke-width="1"/>`;
+  s += `<path d="M160,77 L200,77" stroke="${BRUN}" stroke-width="0.8" stroke-dasharray="2 2"/>`;
+  s += `<path d="M174,42 Q160,40 163,55 M186,42 Q200,40 197,55" fill="none" stroke="${BRUN}" stroke-width="3" stroke-linecap="round"/>`;
+  s += txt(180, 126, 'objet d\'art', { t: 9, a: 'middle' });
+  // rayonnements émis au point d'impact, captés par le détecteur
+  s += `<path d="M155,66 q-3,-4 0,-7 t0,-7 t0,-7 t0,-7 M154,65 q-5,-1 -5,-6 t-5,-6 t-5,-6 t-5,-6" fill="none" stroke="${COUL.a}" stroke-width="1.3"/>`;
+  s += `<circle cx="157" cy="69" r="2.5" fill="${COUL.a}"/><rect x="114" y="20" width="44" height="17" rx="3" fill="${GRIS}" stroke="${ENCRE2}"/>` + txt(136, 14, 'détecteur', { t: 9, a: 'middle' });
+  return svg(250, 132, s, 'Analyse d\'une œuvre d\'art : un faisceau de protons issu d\'un accélérateur frappe l\'objet ; un détecteur analyse les rayonnements émis pour en déduire sa composition, sans l\'abîmer');
+}
+
+/* ---------- 1. La succession de condensateurs ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Une succession de condensateurs');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Les condensateurs sont accolés (armatures percées pour laisser passer la particule) et reliés à un générateur. Dans des condensateurs voisins, les champs sont de sens opposés.</p>
+      <div class="cu-figs2"><div>${chaine(1)}<p class="cu-petit">Particule positive dans C<sub>1</sub> : ${V('E')} vers l'avant, elle est accélérée.</p></div>
+        <div>${chaine(2)}<p class="cu-petit">Elle entre dans C<sub>2</sub> : on <b>inverse la polarité</b> du générateur (donc des armatures) pour qu'elle soit de nouveau accélérée.</p></div></div>
+      <div class="cle"><p><b class="cle-titre">Accélérateur linéaire.</b> Chaque fois que la particule « change de condensateur », la polarité est inversée : le champ qu'elle traverse est toujours dans le bon sens, elle est accélérée à chaque étage.</p>
+        <p>Chaque étage de tension U apporte la même énergie qU à la particule : après n étages, tout se passe comme si la particule avait traversé <b>un seul condensateur de tension n U</b> (on le justifiera simplement avec l'énergie). On accélère ainsi fortement avec des tensions relativement faibles.</p></div>
+    </div>
+    ${exemple(`<p>10 étages de 10 kV donnent la même vitesse qu'un seul condensateur de 100 kV. Pour un proton, on applique le résultat de la méthode du cours précédent avec U<sub>tot</sub> = 1,0 × 10<sup>5</sup> V :</p>
+      <p class="crs-calc">v = ${rac(fr('2 × 1,60 × 10<sup>−19</sup> × 1,0 × 10<sup>5</sup>', '1,67 × 10<sup>−27</sup>'))} = <span class="c">4,4 × 10<sup>6</sup> ${MS}</span></p>`)}`);
+  const n = hasard([4, 6, 8]), U = hasard([5.0e3, 2.0e4]), v = Math.sqrt(2 * n * E_CH * U / M_P);
+  c.aToi(carte, [
+    { titre: 'Après n étages', enonce: `<p>Un proton traverse ${n} étages de ${fmt(U / 1000)} kV chacun, en partant du repos.</p>`,
+      parties: [{ type: 'nombre', q: 'Tension du condensateur unique qui donnerait la même vitesse :', label: 'U<sub>tot</sub> =', valeur: n * U / 1000, tol: 1e-9, unite: 'kV', signe: false,
+        diag: x => (Math.abs(x - U / 1000) < 1e-9 ? `Ça, c'est la tension d'un seul étage : il y en a ${n}.` : `Chaque étage compte : ${n} × ${fmt(U / 1000)} kV.`), solution: `<p>U<sub>tot</sub> = ${n} × ${fmt(U / 1000)} = ${fmt(n * U / 1000)} kV</p>` },
+      { type: 'sci', q: 'Vitesse finale (2 chiffres significatifs) :', label: 'v =', valeur: v, cs: 2, unite: MS + CALC,
+        diag: x => (Math.abs(x / (v / Math.sqrt(n)) - 1) < .05 ? 'Ça, c\'est la vitesse après un seul étage : prends U<sub>tot</sub>.' : 'Comme pour un seul condensateur de tension U<sub>tot</sub> : v<sup>2</sup> = 2 e U<sub>tot</sub> / m<sub>p</sub>.'),
+        solution: `<p>v = ${rac(`2 × 1,60 × 10<sup>−19</sup> × ${sci(n * U, 1)} / 1,67 × 10<sup>−27</sup>`)} = ${sci(v, 2)} ${MS}</p>` }] },
+    { titre: 'Sans inversion ?', parties: [{ type: 'choix', q: 'Que se passerait-il si on n\'inversait pas la polarité quand la particule passe de C<sub>1</sub> à C<sub>2</sub> ?', colonne: true, melanger: false,
+      options: [o('ok', 'Elle serait freinée dans C<sub>2</sub>, puis repoussée en arrière.'), o('c', 'Elle continuerait à vitesse constante.'), o('a', 'Elle serait accélérée encore plus.')], bonne: 'ok',
+      indices: { c: 'Dans C<sub>2</sub>, le champ est vers l\'arrière : une force agit.', a: 'Le champ de C<sub>2</sub> est opposé à celui de C<sub>1</sub>.' }, solution: '<p>Le champ de C<sub>2</sub> s\'oppose au mouvement : elle perd dans C<sub>2</sub> ce qu\'elle a gagné dans C<sub>1</sub>.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Applications ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Applications des accélérateurs');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cu-applis">
+        <div class="cu-appli">${figTube()}<p><b>Canon à électrons</b> (tube cathodique des anciennes télévisions et des oscilloscopes) : des électrons émis par un filament chauffé sont accélérés par une tension de quelques kilovolts, puis déviés par des plaques (verticalement et horizontalement) pour atteindre un point de l'écran.</p></div>
+        <div class="cu-appli">${figCern()}<p><b>CERN</b> : les particules (protons, ions) sont d'abord accélérées dans des <b>accélérateurs linéaires</b>, puis injectées dans des anneaux de plus en plus grands, jusqu'au LHC (27 km de circonférence).</p></div>
+        <div class="cu-appli">${figRadio()}<p><b>Radiothérapie</b> : un accélérateur linéaire d'électrons produit un faisceau (ou des rayons X) dirigé vers la tumeur pour détruire les cellules cancéreuses.</p></div>
+        <div class="cu-appli">${figArt()}<p><b>Analyse d'œuvres d'art</b> : au Louvre, un accélérateur envoie des protons ou des particules α sur un objet ; les rayonnements émis révèlent sa composition sans l'abîmer.</p></div>
+      </div>
+      <p>Autres dispositifs : accélérateur de Van de Graaff, cyclotron, imprimante à jet d'encre (gouttes chargées déviées par un condensateur), expérience de Millikan (gouttelettes chargées en équilibre).</p>
+    </div>
+    ${exemple(`<p class="crs-calc">Électron d'un tube cathodique, U = 20 kV : v = ${rac(fr('2 × 1,60 × 10<sup>−19</sup> × 2,0 × 10<sup>4</sup>', '9,11 × 10<sup>−31</sup>'))} = <span class="c">8,4 × 10<sup>7</sup> ${MS}</span> (plus du quart de la vitesse de la lumière).</p>`)}`);
+  c.aToi(carte, [
+    { parties: [{ type: 'choix', q: 'Dans un tube cathodique, à quoi servent les plaques placées après le canon à électrons ?', colonne: true, melanger: false,
+      options: [o('ok', 'À dévier le faisceau d\'électrons, pour viser un point de l\'écran.'), o('a', 'À accélérer encore les électrons.'), o('s', 'À arrêter les électrons.')], bonne: 'ok',
+      indices: { a: 'Le champ entre ces plaques est perpendiculaire au faisceau.', s: 'Les électrons doivent atteindre l\'écran.' }, solution: '<p>Le champ perpendiculaire au faisceau courbe la trajectoire (déviation, module 4).</p>' }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Accélérateur linéaire : succession de condensateurs ; la polarité est inversée chaque fois que la particule change de condensateur, pour qu'elle soit toujours accélérée. n étages de tension U accélèrent comme un seul condensateur de tension n U.</p></div>
+    <div class="cle"><p>Applications : canon à électrons, accélérateurs linéaires du CERN, radiothérapie, analyse d'œuvres d'art.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5_simulation.html">Animation : accélérateur linéaire →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5_questions.html">Questions du module 5</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_5.html#pratique">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+CU.menu('module_5b_cours');
+</script>
+</body>
+</html>

@@ -63,6 +63,7 @@ NBSP = ' '
 EXCEPTIONS = {
     'decroissance-radioactive': 'simulateur',
     'double-periodicite': 'simulateur',
+    'travail-force': 'simulateur',
     'banc-optique': 'simulateur',
     'montage-electrique/module_1a_manip': 'simulateur',       # prise en main du simulateur de montage
     'periode-frequence/module_2_manip': 'atelier',            # mesurer T et calculer f
@@ -99,8 +100,8 @@ class ErreurJS(Exception):
 
 class LecteurJS:
     """Lit un littéral JS simple et le rend en objets Python.
-    Identifiants connus : true, false, null, LYCEE (les quatre niveaux du lycée)."""
-    CONSTANTES = {'true': True, 'false': False, 'null': None, 'LYCEE': ['2de', '1re', 'spe', 'sti']}
+    Identifiants connus : true, false, null, LYCEE (les cinq niveaux du lycée)."""
+    CONSTANTES = {'true': True, 'false': False, 'null': None, 'LYCEE': ['2de', '1re', '1sti', 'spe', 'sti']}
 
     def __init__(self, texte):
         self.s, self.i = texte, 0

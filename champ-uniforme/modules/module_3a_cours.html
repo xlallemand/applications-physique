@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : chute sans vitesse initiale — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/equations.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="cu.js"></script>
+<script src="../../assets/equations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 4</span>
+    <h2 class="er-titre">Chute sans vitesse initiale</h2>
+    <p class="er-contexte">Un objet en <b>chute libre</b> n'est soumis qu'à son <b>poids</b> : son accélération est le <b>champ de pesanteur</b> <span class="vec-nom">g</span>. Premier cas : l'objet est lâché sans vitesse initiale.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Champ de pesanteur uniforme : P⃗ = m g⃗, a⃗ = g⃗ en chute libre,
+      unités (N·kg⁻¹ = m·s⁻²)
+   2. Les étapes 1 à 5 de la méthode, rédigées comme la correction de
+      l'exercice 1 (repère x, y ; origine au sol ; h = 2,0 m)
+   3. Étape 6 : la balle touche le sol, y(t_chute) = 0 ; isoler t (éditeur EQ)
+   Ce qui est mis en valeur : schéma, conditions initiales, seconde loi,
+   a⃗ = g⃗, coordonnées des vecteurs, traduction de la question.
+   ============================================================ */
+const { exemple, hasard, melanger } = COURS;
+const { V, fmt, cs, sys, fr, rac, col, MS, MS2, CALC, figTir, newton, integ, ci, figCI, etapeM, trad, aide6 } = CU;
+const o = (id, label) => ({ id, label });
+const t2 = 't<sup>2</sup>';
+const G = 9.81;
+const FIG = () => figTir({ h: 2, v0: 0, traj: false, W: 220, aria: 'Balle lâchée sans vitesse initiale à la hauteur h ; axe x horizontal, axe y vertical vers le haut, origine O au sol' });
+
+/* ---------- 1. Le champ de pesanteur ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Le champ de pesanteur');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Près de la Terre, tout objet de masse m subit son poids : ${V('P')} = m ${V('g')}. Le vecteur ${V('g')} (champ de pesanteur) est <b>vertical, vers le bas</b>, de valeur g = 9,81 N·kg<sup>−1</sup>.</p>
+      <p>Dans une salle, ${V('g')} est le même partout : le champ est <b>uniforme</b>. À l'échelle de la Terre, il n'est pas uniforme : il est dirigé vers le centre de la Terre.</p>
+      <div class="cle"><p><b class="cle-titre">Chute libre.</b> Un objet en chute libre n'est soumis qu'à son poids (frottements et poussée d'Archimède négligés) : Σ ${V('F', 'ext')} = ${V('P')} = m ${V('g')}.</p>
+        <p>${newton('l\'objet', `m ${V('g')}`, V('g'))}</p>
+        <p class="crs-formule">${V('a')} = ${V('g')}</p>
+        <p>L'accélération ne dépend pas de la masse : g est aussi l'« accélération de la pesanteur », g = 9,81 ${MS2} (1 N·kg<sup>−1</sup> = 1 kg·${MS2}·kg<sup>−1</sup> = 1 ${MS2}, car 1 N = 1 kg·${MS2}).</p></div>
+    </div>
+    ${exemple(`<p>Une bille de 3 g et une balle de 500 g lâchées de la même hauteur, sans frottements : elles ont la même accélération ${V('g')}, les mêmes conditions initiales, donc le même mouvement. Elles touchent le sol en même temps.</p>`)}`);
+  const m = hasard([0.20, 2.0, 5.0, 70]);
+  c.aToi(carte, [
+    { titre: 'L\'accélération en chute libre', parties: [{ type: 'nombre', q: `Un objet de masse ${fmt(m)} kg est en chute libre (g = 9,81 N·kg<sup>−1</sup>). Que vaut son accélération ?`, label: 'a =', valeur: G, rel: .003, unite: MS2, signe: false,
+      diag: v => (Math.abs(v - G * m) < .01 * G * m ? 'Tu as calculé le poids P = m g (en N). L\'accélération vaut a = P / m = g.' : 'En chute libre, ' + V('a') + ' = ' + V('g') + ' : elle ne dépend pas de la masse.'),
+      solution: `<p>m ${V('a')} = m ${V('g')}, donc ${V('a')} = ${V('g')} : a = g = 9,81 ${MS2}, quelle que soit la masse.</p>` }] },
+    { titre: 'Les coordonnées de ' + V('g'), parties: [{ type: 'choix', q: `Dans un repère d'axe x horizontal et d'axe y vertical <b>vers le haut</b>, les coordonnées de ${V('g')} sont :`, colonne: false, melanger: false,
+      options: [o('ok', col('g<sub>x</sub> = 0', 'g<sub>y</sub> = −g')), o('p', col('g<sub>x</sub> = 0', 'g<sub>y</sub> = g')), o('x', col('g<sub>x</sub> = −g', 'g<sub>y</sub> = 0'))], bonne: 'ok',
+      indices: { p: V('g') + ' est vers le bas, l\'axe y vers le haut : la coordonnée est négative.', x: V('g') + ' est vertical : il n\'a de coordonnée que sur l\'axe vertical y.' },
+      solution: '<p>' + V('g') + ' est vertical (g<sub>x</sub> = 0), vers le bas alors que l\'axe y est vers le haut : g<sub>y</sub> = −g.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Les étapes 1 à 5 ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Équations horaires d\'une chute sans vitesse initiale');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>À t = 0, une balle de masse m est lâchée sans vitesse initiale d'une hauteur h. On l'assimile à un point M (son centre de gravité).</p>
+      ${etapeM(1, 'Schéma de la situation, repère et conditions initiales', `<p>Repère : axe x horizontal, axe y <b>vertical vers le haut</b>, origine O <b>au sol</b>, sous le point de départ.</p>${figCI(FIG(), ci({ v: ['0', '0'], p: ['0', 'h'] }))}`)}
+      ${etapeM(2, 'Bilan des forces', `<p>La balle n'est soumise qu'à son poids, donc Σ ${V('F', 'ext')} = ${V('P')} = m ${V('g')}.</p>`)}
+      ${etapeM(3, 'Seconde loi de Newton', `<p>${newton('la balle', `m ${V('g')}`, V('g'), ['a<sub>x</sub>(t) = 0', 'a<sub>y</sub>(t) = −g'])}</p>`)}
+      ${etapeM(4, 'Vitesse', integ('v', ['v<sub>x</sub>(t) = C<sub>1</sub>', 'v<sub>y</sub>(t) = −g t + C<sub>2</sub>'], ['C<sub>1</sub> = v<sub>x</sub>(0) = 0', 'C<sub>2</sub> = v<sub>y</sub>(0) = 0'], ['v<sub>x</sub>(t) = 0', 'v<sub>y</sub>(t) = −g t']))}
+      ${etapeM(5, 'Position', integ('p', ['x(t) = C<sub>3</sub>', `y(t) = −${fr('1', '2')} g ${t2} + C<sub>4</sub>`], ['C<sub>3</sub> = x(0) = 0', 'C<sub>4</sub> = y(0) = h'], ['x(t) = 0', `y(t) = −${fr('1', '2')} g ${t2} + h`]))}
+      <div class="cle"><p>Les constantes viennent toujours des <b>conditions initiales</b> écrites à côté du schéma : C<sub>1</sub> et C<sub>2</sub> de ${V('v')}(0), C<sub>3</sub> et C<sub>4</sub> de ${V('OM')}(0). Avec un autre repère (axe y vers le bas, origine au point de départ…), les équations changent, la méthode reste la même.</p></div>
+    </div>
+    ${exemple(`<p>Avec h = 2,0 m et g = 9,81 ${MS2} : y(t) = −4,905 ${t2} + 2,0. À t = 0,30 s :</p>
+      <p class="crs-calc">y = −4,905 × 0,30<sup>2</sup> + 2,0 = <span class="c">1,6 m</span> ; v<sub>y</sub> = −9,81 × 0,30 = <span class="c">−2,9 ${MS}</span> (négative : la balle descend)</p>`)}`);
+  const h = hasard([1.5, 3.0, 5.0, 10]);
+  c.aToi(carte, [
+    { titre: 'Les constantes', enonce: `<p>Une pierre est lâchée sans vitesse initiale d'une hauteur h = ${fmt(h)} m (axe x horizontal, axe y vertical vers le haut, origine au sol).</p>`,
+      parties: [{ type: 'choix', q: 'En intégrant, v<sub>y</sub>(t) = −g t + C<sub>2</sub>. Que vaut C<sub>2</sub> ?', colonne: false, melanger: false, options: [o('ok', 'C<sub>2</sub> = v<sub>y</sub>(0) = 0'), o('h', `C<sub>2</sub> = ${fmt(h)} m`), o('g', 'C<sub>2</sub> = −g')], bonne: 'ok',
+        indices: { h: 'h est une position initiale (elle sert pour C<sub>4</sub>), pas une vitesse.', g: '−g est l\'accélération.' }, indice: 'Lis les conditions initiales : v<sub>y</sub>(0).',
+        solution: '<p>À t = 0 : v<sub>y</sub>(0) = −g × 0 + C<sub>2</sub> = C<sub>2</sub>, et la pierre est lâchée sans vitesse : C<sub>2</sub> = 0.</p>' },
+      { type: 'choix', q: `En intégrant, y(t) = −${fr('1', '2')} g ${t2} + C<sub>4</sub>. Que vaut C<sub>4</sub> ?`, colonne: false, melanger: false, options: [o('ok', `C<sub>4</sub> = y(0) = ${fmt(h)} m`), o('z', 'C<sub>4</sub> = 0'), o('m', `C<sub>4</sub> = −${fmt(h)} m`)], bonne: 'ok',
+        indices: { z: 'L\'origine est au sol, et la pierre part d\'en haut : y(0) n\'est pas nul.', m: 'L\'axe y est vers le haut : le point de départ a une ordonnée positive.' }, indice: 'Lis les conditions initiales : y(0).',
+        solution: `<p>C<sub>4</sub> = y(0) = h = ${fmt(h)} m, d'où y(t) = −${fr('1', '2')} g ${t2} + ${fmt(h)}.</p>` }] },
+    { titre: 'Une valeur', parties: [{ type: 'nombre', q: `Pour h = ${fmt(h)} m, que vaut l'altitude y à t = 0,40 s ? (2 chiffres significatifs)`, label: 'y =', valeur: -4.905 * .16 + h, rel: .02, unite: 'm' + CALC,
+      diag: v => (Math.abs(v - (h - 9.81 * .16)) < .05 ? 'Il y a un ½ : −½ g t².' : Math.abs(v - 4.905 * .16) < .05 ? 'N\'oublie pas C<sub>4</sub> = h.' : 'y = −½ × 9,81 × 0,40<sup>2</sup> + h.'),
+      solution: `<p class="crs-calc">y = −0,5 × 9,81 × 0,40<sup>2</sup> + ${fmt(h)} = <span class="c">${cs(-4.905 * .16 + h, 2)} m</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Étape 6 : la durée de la chute ---------- */
+const GE = { h: 'h', g: 'g', t: 't', deux: '2' };
+function etape3(c) {
+  const carte = c.carte('3. Étape 6 : durée de la chute');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>On regarde sur le schéma à quel endroit correspond la question : « la balle touche le sol ». Le sol est à l'altitude 0 : on le traduit dans l'équation de la position.</p>
+      ${etapeM(6, 'Traduire la question', `${trad('La balle touche le sol (y = 0 sur le schéma)', 'y(t<sub>chute</sub>) = 0')}
+        <p class="crs-calc">−${fr('1', '2')} g t<sub>chute</sub><sup>2</sup> + h = 0 ⟺ ${fr('1', '2')} g t<sub>chute</sub><sup>2</sup> = h ⟺ t<sub>chute</sub><sup>2</sup> = ${fr('2h', 'g')} ⟺ t<sub>chute</sub> = ${rac(fr('2h', 'g'))}</p>
+        <p>(la racine négative n'a pas de sens physique : t<sub>chute</sub> > 0)</p>`)}
+      <div class="cle"><p>Ce qui compte : repérer le point (le sol), le traduire (<b>y = 0</b>) dans l'équation établie, puis résoudre. Le résultat se retrouve en quelques lignes ; il montre que la durée de chute ne dépend pas de la masse.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">h = 2,0 m : t<sub>chute</sub> = ${rac(fr('2 × 2,0', '9,81'))} = <span class="c">0,64 s</span></p>`)}`);
+  const h = hasard([5.0, 10, 20, 45]), t = Math.sqrt(2 * h / G);
+  c.aToi(carte, [
+    { titre: 'Traduire', parties: [{ type: 'choix', q: 'Quelle équation traduit « la balle touche le sol » (axe y vers le haut, origine au sol) ?', colonne: false, melanger: false,
+      options: [o('ok', 'y(t<sub>chute</sub>) = 0'), o('v', 'v<sub>y</sub>(t<sub>chute</sub>) = 0'), o('h', 'y(t<sub>chute</sub>) = h')], bonne: 'ok',
+      indices: { v: 'La balle touche le sol avec une vitesse non nulle : c\'est une position qu\'il faut traduire.', h: 'y = h est le point de départ, sur le schéma.' }, indice: aide6('le sol', 'son altitude'),
+      solution: '<p>Le sol est à l\'altitude 0 sur le schéma : y(t<sub>chute</sub>) = 0.</p>' }] },
+    { titre: 'Isole t<sub>chute</sub>', enonce: '<p class="er-consigne">y(t<sub>chute</sub>) = 0 s\'écrit aussi h = ½ g t<sup>2</sup>. Dans l\'éditeur, isole t : glisse les grandeurs d\'un membre à l\'autre et utilise l\'outil √ (sur les deux membres), puis « Vérifier l\'étape ».</p>',
+      parties: [EQ.partie(EQ.exercice({ eq: 'h = [1|deux] g t^2', g: GE, cible: 't', outils: ['sqrt'],
+        valeurs: () => { const g = 1 + Math.random() * 20, t = .5 + Math.random() * 5; return { g, t, h: g * t * t / 2, deux: 2 }; },
+        aides: ['Le 2 du dénominateur passe de l\'autre côté en multipliant : glisse-le à côté de h.', 'g multiplie t<sup>2</sup> : glisse-le de l\'autre côté, il divisera.', 'Applique √ aux deux membres pour passer de t<sup>2</sup> à t.'] }),
+      { solution: `<p>t = ${rac(fr('2h', 'g'))}</p>` })] },
+    { titre: 'Calcule', parties: [{ type: 'nombre', q: `Une pierre tombe sans vitesse initiale d'une hauteur h = ${fmt(h)} m. Durée de la chute (2 chiffres significatifs) :`, label: 't<sub>chute</sub> =', valeur: t, rel: .02, unite: 's' + CALC, signe: false,
+      diag: v => (Math.abs(v - Math.sqrt(h / G)) < .02 * t ? 'Repars de y(t<sub>chute</sub>) = 0 : −½ g t² + h = 0 donne t² = 2h / g (il manque le 2).' : Math.abs(v - 2 * h / G) < .03 ? 'Tu as calculé t<sub>chute</sub><sup>2</sup> : il reste la racine carrée.' : aide6('le sol', 'y(t<sub>chute</sub>) = 0, puis isole t<sub>chute</sub>')),
+      solution: `<p class="crs-calc">y(t<sub>chute</sub>) = 0 ⟺ t<sub>chute</sub> = ${rac(fr('2h', 'g'))} = ${rac(fr(`2 × ${fmt(h)}`, '9,81'))} = <span class="c">${cs(t, 2)} s</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>Schéma et conditions initiales</b> : on choisit le repère, puis on écrit ${V('v')}(0) et ${V('OM')}(0) à côté du schéma.</p></div>
+    <div class="cle"><p><b>Seconde loi de Newton</b> : chute libre, seul le poids agit, donc <b>${V('a')} = ${V('g')}</b> (vertical, vers le bas), quelle que soit la masse.</p></div>
+    <div class="cle"><p><b>Coordonnées</b> dans le repère choisi : axe y vers le haut, a<sub>x</sub> = 0 et a<sub>y</sub> = −g ; on intègre deux fois en fixant les constantes avec les conditions initiales.</p></div>
+    <div class="cle"><p><b>Traduire la question</b> : le sol est à y = 0 sur le schéma, donc y(t<sub>chute</sub>) = 0.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : vitesse initiale horizontale →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#sans-vitesse">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+CU.menu('module_3a_cours');
+</script>
+</body>
+</html>

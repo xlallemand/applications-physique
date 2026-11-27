@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions — Mouvement dans un champ uniforme</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cu.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="cu.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 1 : 10 questions.
+   Primitives (constante, A t + B, vérification par dérivation),
+   constantes fixées par les conditions initiales (exemples 2 et 3 du
+   cours avec d'autres valeurs), équations horaires complètes, valeur
+   à un instant, atelier « glisser la courbe », ordre des étapes.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, entre, V, MS, MS2 } = CU;
+const t2 = 't<sup>2</sup>';
+const signe = (k, premier) => (k < 0 ? (premier ? '−' : ' − ') : (premier ? '' : ' + '));
+const coef = k => (Math.abs(k) === 1 ? '' : fmt(Math.abs(k)));
+
+function primConst() {
+  const A = hasard([3, 4, 7, 12, 2.5, -6]);
+  return { theme: 'Primitives', parties: [fq.choix(`Une primitive de ${fmt(A)} (constante) est :`, [o('ok', `${fmt(A)}t + C`), o('t2', `${fmt(A / 2)}${t2} + C`), o('c', `${fmt(A)} + C`), o('z', 'C')], 'ok',
+    { indices: { t2: `En dérivant ${fmt(A / 2)}${t2}, on obtient ${fmt(A)}t et non ${fmt(A)}.`, c: `La dérivée de ${fmt(A)} + C est 0, pas ${fmt(A)}.`, z: 'C est une primitive de 0.' },
+      solution: `<p>(${fmt(A)}t + C)' = ${fmt(A)}.</p>` })] };
+}
+function primLin() {
+  const k = hasard([2, 4, 6, 10, 3, 5]), b = hasard([1, 2, 3, 7, -2]);
+  return { theme: 'Primitives', parties: [{ type: 'gabarit', q: `Complète une primitive de ${fmt(k)}t ${b < 0 ? '−' : '+'} ${Math.abs(b)} :`, label: '',
+    morceaux: ['', { v: k / 2, aria: 'coefficient de t²' }, `${t2} +`, { v: b, aria: 'coefficient de t' }, 't + C'],
+    diag: v => (Math.abs(v[0] - k) < 1e-9 ? `Primitive de A t : ½ A ${t2}. Tu as oublié le ½.` : Math.abs(v[0] - 2 * k) < 1e-9 ? 'On divise par 2 (½ A), on ne multiplie pas.' : 'Primitive de A t : ½ A t² ; primitive de B : B t.'),
+    solution: `<p>${fmt(k / 2)}${t2}${signe(b)}${Math.abs(b)}t + C ; en dérivant : ${fmt(k)}t${signe(b)}${Math.abs(b)}.</p>` }] };
+}
+function derivee() {
+  const a = hasard([2, 3, 5]), b = hasard([2, 4, 7]);
+  return { theme: 'Vérifier en dérivant', parties: [fq.choix(`On a trouvé x(t) = ${a}${t2} + ${b}t + 6. Que vaut sa dérivée v<sub>x</sub>(t) ?`,
+    [o('ok', `${2 * a}t + ${b}`), o('a', `${a}t + ${b}`), o('c', `${2 * a}t + ${b} + 6`), o('d', `${2 * a}t`)], 'ok',
+    { indices: { a: `La dérivée de ${a}${t2} est 2 × ${a}t.`, c: 'La dérivée d\'une constante (6) est nulle.', d: `La dérivée de ${b}t est ${b}.` }, solution: `<p>(${a}${t2})' = ${2 * a}t, (${b}t)' = ${b}, (6)' = 0.</p>` })] };
+}
+// exemple 2 du cours : a(t) = 0 et v(0) donnée
+function exemple2() {
+  const v0 = hasard([3, 5, 8, 12]);
+  return { theme: 'Conditions initiales', enonce: `<p>Sur un axe, a<sub>x</sub>(t) = 0 et v<sub>x</sub>(0) = ${v0} ${MS}.</p>`,
+    parties: [fq.choix('Quelle est l\'expression de v<sub>x</sub>(t) ?', [o('ok', `v<sub>x</sub>(t) = ${v0}`), o('t', `v<sub>x</sub>(t) = ${v0}t`), o('z', 'v<sub>x</sub>(t) = 0'), o('c', 'v<sub>x</sub>(t) = C, on ne peut pas savoir')], 'ok',
+      { indices: { t: `${v0}t est une primitive de ${v0}, pas de 0.`, z: 'Une primitive de 0 est une constante, pas forcément nulle.', c: `La constante se fixe avec la condition initiale : C = v<sub>x</sub>(0).` },
+        solution: `<p>v<sub>x</sub>(t) = C et v<sub>x</sub>(0) = C = ${v0}, donc v<sub>x</sub>(t) = ${v0} ${MS} : mouvement uniforme.</p>` })] };
+}
+// exemple 3 du cours : vₓ(t) = A t et x(0) donnée
+function exemple3() {
+  const A = hasard([4, 6, 8, 10]), x0 = hasard([2, 3, 5, -4]);
+  return { theme: 'Conditions initiales', enonce: `<p>v<sub>x</sub>(t) = ${A}t et x(0) = ${fmt(x0)} m.</p>`,
+    parties: [{ type: 'gabarit', q: 'Complète l\'expression de x(t) :', label: 'x(t) =', morceaux: ['', { v: A / 2, aria: 'coefficient de t²' }, `${t2} +`, { v: x0, aria: 'constante' }],
+      diag: v => (Math.abs(v[0] - A) < 1e-9 ? 'Primitive de A t : ½ A t².' : Math.abs(v[1] - x0) > 1e-9 ? 'La constante vaut x(0).' : 'Vérifie le coefficient de t².'),
+      solution: `<p>x(t) = ${fmt(A / 2)}${t2} + C, et x(0) = C = ${fmt(x0)}, donc x(t) = ${fmt(A / 2)}${t2}${signe(x0)}${fmt(Math.abs(x0))}.</p>` }] };
+}
+function constante() {
+  const A = hasard([-9.8, -10, 2, 3]), v0 = hasard([4, 6, 15, -3]);
+  return { theme: 'Conditions initiales', parties: [fq.nombre(`v<sub>y</sub>(t) = ${fmt(A)}t + C<sub>1</sub> et, à t = 0, v<sub>y</sub>(0) = ${fmt(v0)} ${MS}. Que vaut C<sub>1</sub> ?`, 'C<sub>1</sub> =', v0, MS,
+    { tol: 1e-9, diag: v => (Math.abs(v - A) < 1e-9 ? 'C<sub>1</sub> n\'est pas le coefficient de t : remplace t par 0.' : Math.abs(v + v0) < 1e-9 ? 'Pas de changement de signe : v<sub>y</sub>(0) = C<sub>1</sub>.' : 'v<sub>y</sub>(0) = ' + fmt(A) + ' × 0 + C<sub>1</sub> = C<sub>1</sub>.'),
+      solution: `<p>v<sub>y</sub>(0) = ${fmt(A)} × 0 + C<sub>1</sub> = C<sub>1</sub>, donc C<sub>1</sub> = ${fmt(v0)} ${MS}.</p>` })] };
+}
+// équations horaires complètes à partir de a, v(0), x(0)
+function complet() {
+  const A = hasard([2, 4, -2, -10]), v0 = hasard([3, 5, -1, 6]), x0 = hasard([0, 2, 5]);
+  return { theme: 'Équations horaires', enonce: `<p>a<sub>x</sub>(t) = ${fmt(A)} ${MS2}, v<sub>x</sub>(0) = ${fmt(v0)} ${MS} et x(0) = ${x0} m.</p>`,
+    parties: [{ type: 'gabarit', q: 'a) Complète v<sub>x</sub>(t) :', label: 'v<sub>x</sub>(t) =', morceaux: ['', { v: A, aria: 'coefficient de t' }, 't +', { v: v0, aria: 'constante' }],
+      diag: v => (Math.abs(v[0] - A / 2) < 1e-9 ? 'Primitive d\'une constante A : A t (pas de ½).' : 'Primitive de A : A t + C<sub>1</sub>, et C<sub>1</sub> = v<sub>x</sub>(0).'), solution: `<p>v<sub>x</sub>(t) = ${fmt(A)}t${signe(v0)}${fmt(Math.abs(v0))}</p>` },
+    { type: 'gabarit', q: 'b) Complète x(t) :', label: 'x(t) =', morceaux: ['', { v: A / 2, aria: 'coefficient de t²' }, `${t2} +`, { v: v0, aria: 'coefficient de t' }, 't +', { v: x0, aria: 'constante' }],
+      diag: v => (Math.abs(v[0] - A) < 1e-9 ? 'Primitive de A t : ½ A t².' : Math.abs(v[2] - x0) > 1e-9 ? 'La constante vaut x(0).' : 'Primitive de v<sub>0</sub> : v<sub>0</sub> t.'),
+      solution: `<p>x(t) = ${fmt(A / 2)}${t2}${signe(v0)}${fmt(Math.abs(v0))}t${x0 ? ' + ' + x0 : ''}</p>` }] };
+}
+function valeur() {
+  const a = hasard([-4.9, -5, 2, 1.5]), b = hasard([10, 8, 3]), c = hasard([0, 2, 20]), t = hasard([2, 3, 1]);
+  const x = a * t * t + b * t + c;
+  return { theme: 'Utiliser une équation horaire', parties: [fq.nombre(`y(t) = ${fmt(a)}${t2} + ${b}t${c ? ' + ' + c : ''} (en m, t en s). Que vaut y à t = ${t} s ?`, 'y =', x, 'm',
+    { rel: .005, calc: true, diag: v => (Math.abs(v - (a * t + b * t + c)) < 1e-6 ? `t<sup>2</sup> = ${t * t}, pas ${t}.` : 'Remplace t par sa valeur partout.'), solution: `<p>y = ${fmt(a)} × ${t}<sup>2</sup> + ${b} × ${t}${c ? ' + ' + c : ''} = ${fmt(x)} m</p>` })] };
+}
+function atelier() {
+  const A = hasard([2, 3, -2]), v0 = hasard([4, 6, -2, 1]);
+  return { theme: 'Atelier', enonce: `<p>a(t) = ${fmt(A)} ${MS2}, donc v(t) = ${fmt(A)}t + C, et v(0) = ${fmt(v0)} ${MS}.</p>`,
+    parties: [CU.partieConstante({ q: 'Glisse la courbe jusqu\'à la condition initiale, puis valide.', A, C0: v0, nom: 'v', ymin: -8, ymax: 14, depart: v0 > 0 ? -4 : 5, solution: `<p>C = v(0) = ${fmt(v0)}.</p>` })] };
+}
+function ordre() {
+  return { theme: 'Méthode', parties: [fq.choix('Pour obtenir l\'accélération d\'un système, on utilise :', [o('ok', 'le bilan des forces et la seconde loi de Newton'), o('int', 'une primitive de la position'), o('ci', 'les conditions initiales'), o('der', 'la dérivée de la masse')], 'ok',
+    { colonne: true, indices: { int: 'On intègre pour aller de a⃗ vers v⃗ puis OM⃗, pas l\'inverse.', ci: 'Les conditions initiales servent à fixer les constantes après intégration.', der: 'La masse est constante.' },
+      solution: `<p>Étapes 2 et 3 : bilan des forces, puis m ${V('a')} = Σ ${V('F', 'ext')}.</p>` })] };
+}
+
+CU.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'De l\'accélération à la position',
+  intro: '<p class="er-contexte">10 questions : primitives, vérification par dérivation, constantes et conditions initiales, équations horaires.</p>',
+  questions: () => melanger([primConst(), primLin(), derivee(), exemple2(), exemple3(), constante(), complet(), valeur(), atelier(), ordre()]),
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : coordonnées d\'un vecteur →' },
+});
+CU.menu('module_1_questions');
+</script>
+</body>
+</html>
