@@ -180,9 +180,9 @@
     acteurs: [TERRE, { id: 'eau', nom: 'l\'eau', pourquoi: 'elle touche le bouchon (poussée d\'Archimède)', manque: 'L\'eau touche le bouchon : elle exerce une force de contact (elle le pousse vers le haut).' }, AIR],
     air: NEGL('La partie hors de l\'eau touche l\'air, mais la poussée d\'Archimède de l\'air est très faible devant celle de l\'eau : on néglige la force de l\'air.'),
     distracteurs: [{ id: 'recipient', nom: 'le récipient', diag: 'Le récipient ne touche pas le bouchon.' }],
-    forces: [POIDS, { acteur: 'eau', type: 'contact', lib: 'force exercée par l\'eau', pts: ['G', 'A'], angs: [90], noms: ['Farchi'], diagDir: 'la poussée d\'Archimède est <b>verticale, vers le haut</b>.', diagPt: 'l\'eau touche toute la partie immergée : on dessine la poussée depuis le centre G (ou le centre de la face immergée A).', indNom: `La force verticale vers le haut exercée par un fluide est la poussée d'Archimède ${nomV('Farchi')}.` }],
-    nomsProposes: NOMS_BASE,
-    comp: { bonne: 'oui', expl: `Le bouchon est immobile : ${nomV('P')} et ${nomV('Farchi')} se compensent.`, indice: 'Le bouchon est immobile.' } };
+    forces: [POIDS, { acteur: 'eau', type: 'contact', lib: 'force exercée par l\'eau (ou poussée d\'Archimède)', pts: ['G', 'A'], angs: [90], noms: ['Feau', 'Farchi'], diagDir: 'l\'eau pousse le bouchon <b>verticalement, vers le haut</b> (poussée d\'Archimède).', diagPt: 'l\'eau touche toute la partie immergée : on dessine la force depuis le centre G (ou le centre de la face immergée A).', indNom: `La force exercée par l'eau se note ${nomV('Feau')} (ou poussée d'Archimède ${nomV('Farchi')}).` }],
+    nomsProposes: NOMS_BASE.concat('Feau'),
+    comp: { bonne: 'oui', expl: `Le bouchon est immobile : ${nomV('P')} et ${nomV('Feau')} se compensent.`, indice: 'Le bouchon est immobile.' } };
 
   /* ===== goutte dans l'huile ===== */
   S.goutte = { id: 'goutte', titre: 'Goutte qui tombe dans l\'huile', systeme: 'la goutte', enonce: 'Une goutte de permanganate de potassium tombe dans l\'huile, à vitesse constante.',
