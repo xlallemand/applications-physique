@@ -396,7 +396,7 @@
           <p>Pour une position de la lentille, une seule position de l'écran donne une image nette : l'écran est en A′. L'image réelle est renversée ; γ > 1 : elle est plus grande que l'objet, γ < 1 : plus petite.</p></div>
         <p class="lt-li-aide">Essaie librement : les autres lentilles, d'autres positions, et la lentille f′ = 10 cm à moins de 10 cm de l'objet.</p>
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-          <a class="btn-primary" style="text-decoration:none" href="module_3a_manip.html">Module 3 : l'œil →</a></div>`;
+          <a class="btn-primary" style="text-decoration:none" href="../../modele-oeil/modules/module_1_manip.html" target="_blank" rel="noopener">Module 3 : l'œil ↗</a></div>`;
       $e.querySelector('[data-a="re"]').onclick = () => { k = 0; Object.keys(mesures).forEach(x => delete mesures[x]); etat.f = 10; etat.xL = 25; etat.xE = 70; tout(); entrer(); };
       LT.amener($e, 0.4);
     }

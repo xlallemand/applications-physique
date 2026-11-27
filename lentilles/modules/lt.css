@@ -33,10 +33,7 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lt-cmd { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 .lt-cmd:empty { display: none; }
 .lt-ligne-cmd { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.lt-bac { display: flex; flex-wrap: wrap; gap: 8px; min-height: 0; }
 .lt-retour:empty { display: none; }
-.lt-aide { margin-top: 8px; }
-.lt-aide .btn-small { color: var(--ink-2); }
 .lt-complet { margin-top: 12px; }
 .lt-cmd .er-actions, .lt-cmd-zone .er-actions { margin-top: 4px; }
 [data-a="suite"] .er-actions { margin-top: 12px; }
@@ -290,7 +287,7 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lt-cmd-t b { color: var(--accent-ink); }
 .lt-pm { display: inline-flex; flex-wrap: wrap; gap: 6px; }
 .lt-pm-b { min-width: 58px; min-height: 50px; padding: 0 10px; font-size: .9rem; font-weight: 800; }
-.lt-vues, .lt-deux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.lt-vues { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
 .lt-vue { margin: 0; min-width: 0; }
 .lt-vue figcaption { font-size: .85rem; font-weight: 800; color: var(--ink-2); margin-bottom: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 0 4px; min-height: 36px; }
 .lt-vue .opt-svg { max-width: 300px; }
@@ -308,15 +305,6 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lt-mesures b { color: var(--accent-ink); }
 .lt-donnees { display: flex; flex-direction: column; gap: 2px; background: var(--paper); border-radius: 14px; padding: 10px 14px; font-size: .93rem; line-height: 1.5; font-variant-numeric: tabular-nums; }
 
-/* ---------- Œil ---------- */
-.lt-oeil-globe { fill: var(--sheet); stroke: var(--ink); stroke-width: 2; }
-.lt-oeil-cornee { fill: var(--sheet); stroke: var(--ink); stroke-width: 2; }
-.lt-oeil-nerf { fill: var(--paper-2); stroke: var(--ink); stroke-width: 1.6; }
-.lt-oeil-retine { stroke: var(--accent-ink); stroke-width: 6; stroke-linecap: round; }
-.lt-oeil-iris { stroke: var(--ink-2); stroke-width: 6; stroke-linecap: round; }
-.lt-oeil-cristallin { fill: var(--cle-bg); stroke: var(--accent-ink); stroke-width: 2; }
-.lt-repere { stroke: var(--ink-3); stroke-width: 1; }
-.lt-diaphragme { stroke: var(--ink); stroke-width: 6; stroke-linecap: butt; }
 .lt-cote { stroke: var(--ink-3); stroke-width: 1; }
 .lt-tache-trait { stroke: var(--accent); stroke-width: 6; stroke-linecap: round; stroke-opacity: .6; }
 .lt-curseurs { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
@@ -327,9 +315,8 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lt-curseur-l input[type="range"] { flex: 1 1 200px; width: auto; }
 .lt-curseur input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .lt-vue-petite .opt-svg { max-width: 200px; }
-.lt-bac { margin-top: 10px; }
 @media (max-width: 640px) {
-  .lt-vues, .lt-deux { grid-template-columns: minmax(0, 1fr); }
+  .lt-vues { grid-template-columns: minmax(0, 1fr); }
   .lt-vue .opt-svg { max-width: 260px; }
 }
 .lt-entete > .callout { flex-basis: 100%; margin-top: 4px; }
@@ -343,126 +330,4 @@ sub, sup { font-size: .7em; line-height: 0; }
 /* téléphone : dans la série, la figure reste visible en haut pendant qu'on répond dessous */
 @media (max-width: 899px) {
   .lt-q-fig { position: sticky; top: 58px; z-index: 5; background: var(--sheet); padding-bottom: 4px; }
-}
-
-/* ============================================================
-   MODULE 3 B : simulateur de la vision (une seule page, sans défilement)
-   ============================================================ */
-.er-page.lt-vis-page { max-width: none; padding: 10px; }
-.lt-vis { display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 36px); height: calc(100dvh - 36px); min-height: 420px; }   /* 36 px : marges de la page (2 × 10) et du corps (2 × 8) */
-.lt-vis-tete { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 10px 16px; }
-.lt-vis-tete .er-titre { margin: 2px 0 0; font-size: 1.15rem; }
-.lt-vis-corps { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 10px; }
-.lt-vis-scene { position: relative; margin: 0; padding: 8px 10px; min-height: 0; min-width: 0;
-  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto; gap: 6px; }
-.lt-vis-svg { min-height: 0; position: relative; }
-.lt-vis-3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; font-family: var(--font-sans); }
-.lt-vis-ret-fond { fill: var(--danger-bg); }
-.lt-vis-med-cadre { fill: none; stroke: var(--line-strong); stroke-width: 2.5; }
-.lt-vis-med .lt-vis-ok { fill: var(--success-text); }
-.lt-vis-med .lt-vis-ko { fill: var(--danger-text); }
-.lt-vis-etat { margin: 0; font-size: .95rem; line-height: 1.45; }
-.lt-vis-defis-pc .lt-vis-bloc { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; }
-.lt-vis-defis-pc .lt-vis-defis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; }
-.lt-vis-ok { color: var(--success-text); font-weight: 800; }
-.lt-vis-ko { color: var(--danger-text); font-weight: 800; }
-.lt-vis-panneau { margin: 0; padding: 12px 14px; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-.lt-vis-onglets { display: none; }
-.lt-vis-bloc { display: flex; flex-direction: column; gap: 6px; }
-.lt-vis-bloc + .lt-vis-bloc { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 6px; }
-.lt-vis-lab { font-size: .85rem; font-weight: 800; color: var(--ink-2); margin-top: 2px; }
-.lt-vis-lab small { font-weight: 600; }
-.lt-vis-lab b { color: var(--accent-ink); }
-.lt-vis-info { font-size: .88rem; line-height: 1.4; color: var(--ink-2); }
-.lt-vis-info b { color: var(--ink); }
-.lt-vis-seg { display: flex; gap: 4px; padding: 4px; background: var(--paper-2); border-radius: 999px; }
-.lt-vis-seg button { flex: 1 1 0; min-width: 0; min-height: 40px; padding: 4px 6px; border: none; border-radius: 999px; background: transparent; font: inherit; font-size: .85rem; font-weight: 700; color: var(--ink-2); cursor: pointer; }
-.lt-vis-seg button[aria-pressed="true"] { background: var(--sheet); color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent); }
-.lt-vis-seg button:focus-visible, .lt-vis-onglets button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.lt-vis-seg[hidden] { display: none; }
-.lt-vis-ligne { display: flex; align-items: center; gap: 8px; }
-.lt-vis-ligne input { flex: 1 1 0; min-width: 0; }
-.lt-vis-panneau input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--accent); touch-action: pan-y; cursor: pointer; }
-.lt-vis-panneau input[type="range"]:disabled { opacity: .4; cursor: default; }
-.lt-vis-panneau input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.lt-vis-panneau .btn-small { min-height: 40px; flex-shrink: 0; }
-/* barre d'accommodation : échelle fixe (0 à maximum à 20 ans), partie hachurée inaccessible à l'âge choisi.
-   --v : valeur, --m : limite (fractions), --fin : début de la partie hachurée ; centre du curseur : 11 px + (100 % − 22 px) × fraction */
-.lt-vis-acc-zone { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
-.lt-vis-panneau input.lt-vis-acc { -webkit-appearance: none; appearance: none; background: transparent; --v: 0; }
-.lt-vis-acc::-webkit-slider-runnable-track { height: 10px; border-radius: 999px;
-  background: linear-gradient(to right, var(--accent) 0 calc(11px + (100% - 22px) * var(--v)), var(--paper-3) 0 var(--fin, 100%), transparent 0),
-    repeating-linear-gradient(-45deg, var(--line-strong) 0 3px, var(--paper-2) 0 7px); }
-.lt-vis-acc::-moz-range-track { height: 10px; border-radius: 999px;
-  background: linear-gradient(to right, var(--accent) 0 calc(11px + (100% - 22px) * var(--v)), var(--paper-3) 0 var(--fin, 100%), transparent 0),
-    repeating-linear-gradient(-45deg, var(--line-strong) 0 3px, var(--paper-2) 0 7px); }
-.lt-vis-acc::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin-top: -6px; border-radius: 50%; background: var(--accent); border: 3px solid var(--sheet); box-shadow: 0 0 0 1.5px var(--accent); }
-.lt-vis-acc::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid var(--sheet); box-shadow: 0 0 0 1.5px var(--accent); }
-.lt-vis-acc-grad { position: relative; height: 15px; font-size: .72rem; font-weight: 700; color: var(--ink-3); margin-top: 4px; }
-.lt-vis-acc-grad span { position: absolute; top: 0; white-space: nowrap; }
-.lt-vis-acc-grad [data-a="aLim"] { right: calc(100% - 11px - (100% - 22px) * var(--m, 1) - 8px); }
-.lt-vis-acc-grad [data-a="aLim"].lt-vis-acc-g { right: auto; left: calc(11px + (100% - 22px) * var(--m, 1) - 8px); }
-.lt-vis-acc-grad [data-a="aLim"].lt-vis-acc-g::before { content: "▲ "; }
-.lt-vis-acc-grad [data-a="aLim"]:not(.lt-vis-acc-g)::after { content: " ▲"; }
-.lt-vis-lun { min-height: 44px; }
-.lt-vis-lun[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
-.lt-vis-graduation { display: flex; justify-content: space-between; font-size: .72rem; font-weight: 700; color: var(--ink-3); margin-top: 4px; }
-.lt-vis-defis { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; counter-reset: defi; }
-.lt-vis-defis li { display: flex; gap: 8px; align-items: flex-start; font-size: .88rem; line-height: 1.35; color: var(--ink-2); }
-.lt-vis-coche { flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; font-size: .75rem; font-weight: 900; }
-.lt-vis-defis li.lt-vis-fait { color: var(--ink); }
-.lt-vis-defis li.lt-vis-fait .lt-vis-coche { background: var(--success); border-color: var(--success); color: var(--sheet); }
-.lt-vis-defis li.lt-vis-fait .lt-vis-coche::before { content: "✓"; }
-/* dessin de l'œil (unités : dixièmes de millimètre) */
-.lt-vis-fantome { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 7 6; stroke-opacity: .8; }
-.lt-vis-axe { fill: none; stroke: var(--ink-3); stroke-width: 2; stroke-dasharray: 14 8; }
-.lt-vis-nerf { fill: var(--paper-3); stroke: var(--line-strong); stroke-width: 2; }
-.lt-vis-globe { stroke: var(--line-strong); stroke-width: 3; }
-.lt-vis-coupe { stroke: none; }
-.lt-vis-retine { fill: none; stroke: var(--danger); stroke-opacity: .5; stroke-width: 9; stroke-linecap: round; }
-.lt-vis-crist-coupe { stroke: var(--accent); stroke-width: 3.5; }
-.lt-vis-muscle { fill: var(--ink-3); stroke: var(--sheet); stroke-width: 1; stroke-linejoin: round; }
-.lt-vis-zonule { fill: none; stroke: var(--ink-3); stroke-width: 1.3; }
-.lt-vis-muscle-on { fill: var(--danger); }
-.lt-vis-muscle-anim { animation: lt-vis-clignote .35s infinite alternate; }
-@keyframes lt-vis-clignote { from { opacity: 1; } to { opacity: .25; } }
-.lt-vis-iris { stroke: var(--accent-ink); stroke-width: 1.5; }
-.lt-vis-cornee { fill: var(--cle-bg); stroke: var(--cle-line); stroke-width: 2; }
-.lt-vis-faisceau { fill: var(--ion-h3o); fill-opacity: .16; stroke: none; }
-.lt-vis-rayon { fill: none; stroke: var(--ion-h3o); stroke-width: 2.5; }
-.lt-vis-rayon-c { stroke-dasharray: 10 6; stroke-width: 1.8; }
-.lt-vis-rayon-p { stroke-dasharray: 6 5; stroke-width: 2; }
-.lt-vis-tache { stroke: var(--ion-h3o); stroke-width: 10; stroke-linecap: round; stroke-opacity: .5; }
-.lt-vis-tache-nette { stroke-opacity: 1; }
-.lt-vis-pt { fill: var(--ion-h3o); }
-.lt-vis-verre { stroke: var(--cle-line); stroke-width: 2.5; }
-.lt-vis-cercle { fill: var(--ink); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
-.lt-vis-monture { fill: none; stroke: var(--ink); stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; }
-.lt-vis-objet { stroke: var(--accent); stroke-width: 6; }
-.lt-vis-prise { fill: transparent; cursor: grab; }
-.lt-vis-3d { touch-action: none; }   /* le doigt déplace l'objet A (la page ne défile pas) */
-.lt-vis-prise.lt-vis-prise-on { cursor: grabbing; }
-.lt-vis-objet-p { fill: var(--accent); }
-.lt-vis-nom { font-size: 26px; font-weight: 800; fill: var(--ink); }
-.lt-vis-txt { font-size: 22px; font-weight: 600; fill: var(--ink-2); }
-.lt-vis-lien { stroke: var(--ink-3); stroke-width: 1.5; }
-/* téléphone et tablette : l'œil en haut, les réglages dessous, un onglet à la fois */
-@media (max-width: 899px) {
-  .lt-vis { height: calc(100vh - 54px - 36px); height: calc(100dvh - 54px - 36px); gap: 8px; }   /* 54 px : bandeau du sommaire */
-  .lt-vis-tete { padding: 8px 12px; }
-  .lt-vis-tete .er-badge { display: none; }
-  .lt-vis-tete .er-titre { font-size: 1rem; margin: 0; }
-  .lt-vis-corps { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr); gap: 8px; }
-  .lt-vis-scene { padding: 6px; gap: 4px; }
-  .lt-vis-etat { font-size: .82rem; }
-  .lt-vis-panneau { padding: 8px 10px; }
-  .lt-vis-onglets { display: flex; gap: 4px; padding: 3px; background: var(--paper-2); border-radius: 999px; flex-shrink: 0; }
-  .lt-vis-onglets button { flex: 1 1 0; min-width: 0; min-height: 40px; border: none; border-radius: 999px; background: transparent; font: inherit; font-size: .8rem; font-weight: 800; color: var(--ink-2); cursor: pointer; padding: 2px 4px; }
-  .lt-vis-onglets button[aria-selected="true"] { background: var(--sheet); color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent); }
-  .lt-vis-bloc { display: none; }
-  .lt-vis-bloc.lt-vis-actif { display: flex; }
-  .lt-vis-bloc + .lt-vis-bloc { border-top: none; margin-top: 4px; padding-top: 0; }
-  .lt-vis-titre { display: none; }
-  .lt-vis-nom { font-size: 34px; }
-  .lt-vis-txt { font-size: 30px; }
 }

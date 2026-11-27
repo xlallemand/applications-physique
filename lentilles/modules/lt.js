@@ -27,9 +27,10 @@
       parties: [{ nom: 'Construire l\'image A′B′', questions: 'module_1_questions', noms: { questions: 'Entraînement : construire l\'image' } }] },
     { n: 2, titre: 'Le banc d\'optique', desc: 'Chercher l\'image nette sur l\'écran, mesurer, calculer le grandissement',
       parties: [{ nom: 'Le banc d\'optique', simulation: 'module_2_simulation', noms: { simulation: 'Simulateur : le banc d\'optique' } }] },
-    { n: 3, titre: 'L\'œil', desc: 'Modèle de l\'œil réduit ; accommodation, défauts de la vision et leur correction par des lunettes', sousModules: true,
-      parties: [{ nom: 'Le modèle de l\'œil réduit', entrainement: 'module_3a_manip', noms: { entrainement: 'Manipulation : le modèle de l\'œil réduit' } },
-                { nom: 'Voir net : accommoder, corriger', simulation: 'module_3b_simulation', noms: { simulation: 'Simulateur : accommodation et correction de la vision' } }] },
+    // module 3 : ses deux pages sont dans l'application « Modèle de l'œil » (pages externes ↗, assets/sommaire.js)
+    { n: 3, titre: 'L\'œil', desc: 'À savoir faire : relier la pupille, le cristallin et la rétine au diaphragme, à la lentille convergente et à l\'écran de l\'œil réduit ; expliquer l\'accommodation et la correction de la vision par des lunettes', sousModules: true,
+      parties: [{ nom: 'Le modèle de l\'œil réduit', externe: { app: 'modele-oeil', page: 'module_1_manip', nom: 'Manipulation : le modèle de l\'œil réduit', appNom: 'Modèle de l\'œil' } },
+                { nom: 'Voir net : accommoder, corriger', externe: { app: 'modele-oeil', page: 'module_2_simulation', nom: 'Simulateur : accommodation et correction de la vision', appNom: 'Modèle de l\'œil' } }] },
   ];
   SOM.init({ nom: 'Image par une lentille convergente', id: 'lentilles', plan: PLAN });
 

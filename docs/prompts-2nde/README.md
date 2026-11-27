@@ -15,7 +15,7 @@ Un fichier par application, numéroté dans l'ordre de développement conseillé
 |---|---|---|---|---|---|
 | A11 | Période et fréquence d'un signal | `01-periode-frequence.md` | `periode-frequence/` | une période puis plusieurs, écran d'oscilloscope | crée `BULLE` ; `LG` |
 | A12 + A17 | Réfraction et loi de Snell-Descartes | `02-refraction.md` | `refraction/` | placer normale et angles, simulateur, **dispersion par un prisme** (module 5) | **crée `OPT`** ; `SP.rgb` |
-| A13 | Image par une lentille convergente | `03-lentilles.md` | `lentilles/` | rayons particuliers, banc d'optique (10 δ), œil | étend `OPT` |
+| A13 | Image par une lentille convergente | `03-lentilles.md` | `lentilles/` | rayons particuliers, banc d'optique (10 δ), œil (module 3 déplacé dans `modele-oeil/`, pages ↗) | étend `OPT` |
 | A02 | Atome et ions | `04-atome-ions.md` | `atome-ions/` | cercles et cases remplis ensemble, former un ion, composés ioniques | **crée `ATOME`** |
 | A03 | Classification périodique | `05-classification-periodique.md` | `classification-periodique/` | Z = 1 à 20, ions et liaisons par le tableau | `ATOME` |
 | A04 | Schémas de Lewis | `06-lewis.md` | `lewis/` | relier les liaisons, vérifier, compléter | étend `ORGA` ; `ATOME` |

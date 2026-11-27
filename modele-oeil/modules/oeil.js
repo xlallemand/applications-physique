@@ -1,6 +1,6 @@
 /* ============================================================
-   Module 3, sous-module A : le modèle de l'œil réduit (manipulation)
-   LT.simulateurOeil(zone)
+   Module 1 : le modèle de l'œil réduit (manipulation)
+   MO.simulateurOeil(zone)
    Coupe de l'œil (iris et pupille, cristallin, rétine) à côté du modèle de l'œil réduit
    (diaphragme, lentille convergente, écran) ; l'élève relie chaque partie de l'œil à son modèle
    (glisser l'étiquette, ou toucher l'étiquette puis l'élément du modèle).
@@ -16,27 +16,27 @@
   function coupeOeil(zone) {
     const S = OPT.scene(zone, { largeur: 360, hauteur: 250, aria: 'Coupe de l\'œil : iris et pupille, cristallin, rétine' });
     const C = [30, 0], R = 100;
-    S.cercle('milieux', C, R, 'lt-oeil-globe');
+    S.cercle('milieux', C, R, 'mo-oeil-globe');
     // cornée (bombée à l'avant)
     const cornee = []; for (let a = 118; a <= 242; a += 4) cornee.push(V.add([-40, 0], V.mul(V.dir(a), 45)));
-    S.poly('milieux', cornee, 'lt-oeil-cornee');
+    S.poly('milieux', cornee, 'mo-oeil-cornee');
     // nerf optique
-    S.poly('milieux', [[126, -11], [172, -11], [172, 11], [126, 11]], 'lt-oeil-nerf');
+    S.poly('milieux', [[126, -11], [172, -11], [172, 11], [126, 11]], 'mo-oeil-nerf');
     // rétine (fond de l'œil)
     const ret = []; for (let a = -62; a <= 62; a += 2) ret.push(V.add(C, V.mul(V.dir(a), R - 3)));
-    ret.forEach((p, i) => { if (i) S.ligne('deco', ret[i - 1], p, 'lt-oeil-retine'); });
+    ret.forEach((p, i) => { if (i) S.ligne('deco', ret[i - 1], p, 'mo-oeil-retine'); });
     // iris (la pupille est le trou au centre) et cristallin
-    S.ligne('deco', [-56, 44], [-56, 13], 'lt-oeil-iris');
-    S.ligne('deco', [-56, -44], [-56, -13], 'lt-oeil-iris');
+    S.ligne('deco', [-56, 44], [-56, 13], 'mo-oeil-iris');
+    S.ligne('deco', [-56, -44], [-56, -13], 'mo-oeil-iris');
     const cri = []; for (let a = 0; a < 360; a += 10) cri.push([-36 + 12 * Math.cos(a * Math.PI / 180), 30 * Math.sin(a * Math.PI / 180)]);
-    S.poly('deco', cri, 'lt-oeil-cristallin');
+    S.poly('deco', cri, 'mo-oeil-cristallin');
     // deux rayons qui entrent par la pupille et se rejoignent sur la rétine
     S.rayon('rayons', [-170, 10], [-36, 10], { fleche: 1, cls: 'opt-fin' });
     S.rayon('rayons', [-36, 10], [127, 0], { cls: 'opt-fin' });
     S.rayon('rayons', [-170, -10], [-36, -10], { fleche: 1, cls: 'opt-fin' });
     S.rayon('rayons', [-36, -10], [127, 0], { cls: 'opt-fin' });
     // noms des parties
-    const nom = (p, q, t, ancre) => { S.ligne('textes', p, q, 'lt-repere'); S.texte('textes', q, t, { taille: 13, ancre, cls: 'lt-g-nom' }); };
+    const nom = (p, q, t, ancre) => { S.ligne('textes', p, q, 'mo-repere'); S.texte('textes', q, t, { taille: 13, ancre, cls: 'mo-g-nom' }); };
     nom([-56, 34], [-110, 82], 'iris', 'end');
     nom([-58, 2], [-130, 42], 'pupille', 'end');
     nom([-36, -26], [-80, -92], 'cristallin', 'middle');
@@ -46,22 +46,22 @@
   function modeleOeil(zone) {
     const S = OPT.scene(zone, { largeur: 360, hauteur: 250, aria: 'Modèle de l\'œil réduit : diaphragme, lentille convergente, écran' });
     S.ligne('fond', [-175, 0], [175, 0], 'opt-axe');
-    S.ligne('deco', [-135, 70], [-135, 18], 'lt-diaphragme');
-    S.ligne('deco', [-135, -70], [-135, -18], 'lt-diaphragme');
+    S.ligne('deco', [-135, 70], [-135, 18], 'mo-diaphragme');
+    S.ligne('deco', [-135, -70], [-135, -18], 'mo-diaphragme');
     S.lentille({ O: [-50, 0], h: 72, foyers: false, noms: false, axe: false });
-    S.poly('deco', [[118, -84], [128, -84], [128, 84], [118, 84]], 'lt-ecran');
-    S.texte('textes', [-135, -92], 'diaphragme', { taille: 13, cls: 'lt-g-nom' });
-    S.texte('textes', [-50, -98], 'lentille', { taille: 13, cls: 'lt-g-nom' });
-    S.texte('textes', [-50, -114], 'convergente', { taille: 13, cls: 'lt-g-nom' });
-    S.texte('textes', [123, -100], 'écran', { taille: 13, cls: 'lt-g-nom' });
+    S.poly('deco', [[118, -84], [128, -84], [128, 84], [118, 84]], 'mo-ecran');
+    S.texte('textes', [-135, -92], 'diaphragme', { taille: 13, cls: 'mo-g-nom' });
+    S.texte('textes', [-50, -98], 'lentille', { taille: 13, cls: 'mo-g-nom' });
+    S.texte('textes', [-50, -114], 'convergente', { taille: 13, cls: 'mo-g-nom' });
+    S.texte('textes', [123, -100], 'écran', { taille: 13, cls: 'mo-g-nom' });
     return S;
   }
   function relier(carte, fini) {
-    carte.innerHTML = `<div class="lt-deux"><figure class="lt-vue"><figcaption>Coupe de l'œil</figcaption><div data-a="oeil"></div></figure>
-        <figure class="lt-vue"><figcaption>Œil réduit (modèle)</figcaption><div data-a="mod"></div></figure></div>
-      <p class="lt-aide-t">Glisse chaque étiquette sur l'élément du modèle qui lui correspond, ou touche une étiquette puis touche l'élément.</p>
-      <div class="lt-bac" data-a="bac"></div><div data-a="ret" aria-live="polite"></div>
-      <div class="lt-aide" hidden data-a="aide"><button type="button" class="btn-small">Afficher la réponse</button></div>`;
+    carte.innerHTML = `<div class="mo-deux"><figure class="mo-vue"><figcaption>Coupe de l'œil</figcaption><div data-a="oeil"></div></figure>
+        <figure class="mo-vue"><figcaption>Œil réduit (modèle)</figcaption><div data-a="mod"></div></figure></div>
+      <p class="mo-aide-t">Glisse chaque étiquette sur l'élément du modèle qui lui correspond, ou touche une étiquette puis touche l'élément.</p>
+      <div class="mo-bac" data-a="bac"></div><div data-a="ret" aria-live="polite"></div>
+      <div class="mo-aide" hidden data-a="aide"><button type="button" class="btn-small">Afficher la réponse</button></div>`;
     coupeOeil(carte.querySelector('[data-a="oeil"]'));
     const S = modeleOeil(carte.querySelector('[data-a="mod"]'));
     const ret = carte.querySelector('[data-a="ret"]'), aide = carte.querySelector('[data-a="aide"]');
@@ -81,7 +81,7 @@
       fini();
     }
     const et = OPT.etiquettes(S, carte.querySelector('[data-a="bac"]'), {
-      items: LT.melanger(Object.keys(BON)).map(id => ({ id, html: NOMS[id] })),
+      items: MO.melanger(Object.keys(BON)).map(id => ({ id, html: NOMS[id] })),
       cibles: () => [{ id: 'diaph', a: [-135, -75], b: [-135, 75] }, { id: 'lentille', a: [-50, -75], b: [-50, 75] }, { id: 'ecran', a: [123, -84], b: [123, 84] }],
       surDepot(id, c) {
         if (termine) return false;
@@ -89,7 +89,7 @@
           erreurs++;
           ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${DIAG[id]}</p>${erreurs >= 2 ? '<p class="er-petit">Corrige ta réponse, ou affiche la réponse.</p>' : ''}</div>`;
           if (erreurs >= 2) aide.hidden = false;
-          LT.defiler(ret);
+          MO.defiler(ret);
           return false;
         }
         poser(id); ret.innerHTML = `<p class="ph-ok">✓ ${NOMS[id]}</p>`;
@@ -109,5 +109,5 @@
     relier(zone.querySelector('[data-a="p1"]'), () => SOM.marquer({ fait: true }));
   }
 
-  Object.assign(LT, { simulateurOeil });
+  Object.assign(MO, { simulateurOeil });
 })();
