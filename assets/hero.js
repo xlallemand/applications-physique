@@ -37,8 +37,8 @@
                 avec un arc d'angle, et un petit prisme qui étale un pinceau en éventail (réfraction, lentilles)
      loupe      lentille convergente (symbole) sur son axe optique avec ses foyers, construction de l'image A′B′
                 d'un objet AB, et une loupe qui fait converger un faisceau de rayons parallèles en un point (lentilles)
-     oeil       œil en coupe (cornée, iris, cristallin, rétine, nerf optique) et lunettes vues de profil ;
-                faisceau de rayons parallèles qui traverse le verre puis converge sur la rétine (modèle de l'œil)
+     oeil       œil en coupe (cornée, iris, cristallin, rétine, nerf optique) et faisceau de rayons parallèles
+                qui converge sur la rétine (modèle de l'œil)
      titrage    burette graduée au-dessus d'un bécher, courbe de titrage pH = f(V) en S décroissante avec ses deux
                 tangentes parallèles, la parallèle du milieu et le volume équivalent (titrage pH-métrique)
      atome      noyau au centre (protons et neutrons), trois couches en pointillés avec leurs électrons (la couche
@@ -954,34 +954,48 @@
         ctx.globalAlpha = al; trait(ctx, P[0], P[1], I[0], I[1]); trait(ctx, I[0], I[1], Q[0], Q[1]);
         fleche(P[0], P[1], I[0], I[1]); fleche(I[0], I[1], Q[0], Q[1]);
       });
-      // ---- loupe (vue de profil, manche vers le bas) qui fait converger des rayons parallèles en un point ----
+      // ---- loupe vue de trois quarts (monture ovale, manche oblique) qui fait converger un faisceau en F′ ----
       if (w > 520) {
-        const lx = w * (etroit ? .86 : .88), ly = hb * (etroit ? .3 : .27), lh = Math.min(hb * (etroit ? .19 : .16), 50), e = lh * .22;
-        const xF = lx + lh * 1.7;
-        // faisceau : fond teinté puis rayons
-        ctx.globalAlpha = .08;
-        ctx.beginPath(); ctx.moveTo(lx - lh * 1.9, ly - lh * .8); ctx.lineTo(lx, ly - lh * .8); ctx.lineTo(xF, ly); ctx.lineTo(lx, ly + lh * .8);
-        ctx.lineTo(lx - lh * 1.9, ly + lh * .8); ctx.closePath(); ctx.fill();
+        const lx = w * (etroit ? .86 : .87), ly = hb * (etroit ? .3 : .27), lh = Math.min(hb * (etroit ? .19 : .2), 56);
+        const rx = lh * .34, xF = lx + lh * 1.75, x0 = lx - lh * 2.3;
+        // faisceau : fond teinté (parallèle avant la loupe, en cône après), puis cinq rayons
+        ctx.globalAlpha = .07;
+        ctx.beginPath(); ctx.moveTo(x0, ly - lh * .7); ctx.lineTo(lx, ly - lh * .7); ctx.lineTo(xF, ly);
+        ctx.lineTo(lx, ly + lh * .7); ctx.lineTo(x0, ly + lh * .7); ctx.closePath(); ctx.fill();
         for (let k = -2; k <= 2; k++) {
-          const y = ly + k * lh * .4;
-          ctx.globalAlpha = k ? .45 : .55; ctx.lineWidth = 1.3;
-          trait(ctx, lx - lh * 1.9, y, lx, y); trait(ctx, lx, y, xF, ly);
-          if (k % 2 === 0) fleche(lx - lh * 1.9, y, lx, y, 5);
-          // au-delà du point de convergence, les rayons repartent (en s'effaçant)
-          ctx.globalAlpha = .15; trait(ctx, xF, ly, xF + (xF - lx) * .5, ly + (ly - y) * .5);
+          const y = ly + k * lh * .35;
+          ctx.globalAlpha = .5; ctx.lineWidth = 1.3;
+          trait(ctx, x0, y, lx, y);
+          if (k % 2 === 0) fleche(x0, y, lx, y, 5);
+          ctx.globalAlpha = .55; trait(ctx, lx, y, xF, ly);
+          if (k) fleche(lx, y, xF, ly, 4.5);
+          // au-delà de F′, les rayons repartent en s'effaçant
+          ctx.globalAlpha = .14; trait(ctx, xF, ly, xF + (xF - lx) * .45, ly + (ly - y) * .45);
         }
-        // point de convergence (tache lumineuse)
-        [10, 6, 3].forEach((r, i) => { ctx.globalAlpha = .12 + i * .2; ctx.beginPath(); ctx.arc(xF, ly, r, 0, 2 * Math.PI); ctx.fill(); });
-        // verre biconvexe (deux arcs) et sa monture
-        const R = (lh * lh + e * e) / (2 * e), dx = R - e, ang = Math.asin(lh / R);
-        ctx.beginPath(); ctx.arc(lx - dx, ly, R, -ang, ang); ctx.arc(lx + dx, ly, R, Math.PI - ang, Math.PI + ang); ctx.closePath();
-        ctx.globalAlpha = .14; ctx.fill(); ctx.globalAlpha = .6; ctx.lineWidth = 1.6; ctx.stroke();
-        ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.globalAlpha = .55;
-        trait(ctx, lx - 4, ly - lh - 2, lx + 4, ly - lh - 2); trait(ctx, lx - 4, ly + lh + 2, lx + 4, ly + lh + 2);
-        // manche
-        ctx.lineWidth = 9; ctx.globalAlpha = .4; trait(ctx, lx, ly + lh + 6, lx + lh * .25, ly + lh * 2.1);
+        // tache lumineuse en F′
+        const g = ctx.createRadialGradient(xF, ly, 0, xF, ly, 16);
+        g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.globalAlpha = .5; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(xF, ly, 16, 0, 2 * Math.PI); ctx.fill();
+        ctx.fillStyle = c; ctx.globalAlpha = .9; ctx.beginPath(); ctx.arc(xF, ly, 2.6, 0, 2 * Math.PI); ctx.fill();
+        // manche oblique (vers le bas et la droite) avec sa bague, sous la monture
+        const an = 62 * Math.PI / 180, ux = Math.cos(an), uy = Math.sin(an);
+        const bx = lx + rx * .35, by = ly + lh * .96;                     // départ du manche, sur la monture
+        ctx.lineCap = 'round';
+        ctx.globalAlpha = .5; ctx.lineWidth = 9; trait(ctx, bx, by, bx + ux * lh * .32, by + uy * lh * .32);             // bague
+        ctx.globalAlpha = .3; ctx.lineWidth = 14; trait(ctx, bx + ux * lh * .45, by + uy * lh * .45, bx + ux * lh * 1.3, by + uy * lh * 1.3);
+        ctx.globalAlpha = .45; ctx.lineWidth = 1.2;                                                                    // reflet du manche
+        trait(ctx, bx + ux * lh * .5 - uy * 3, by + uy * lh * .5 + ux * 3 - 6, bx + ux * lh * 1.2 - uy * 3, by + uy * lh * 1.2 + ux * 3 - 6);
         ctx.lineCap = 'butt';
-        ctx.globalAlpha = .45; ctx.lineWidth = 1; ctx.fillText('F′', xF - 6, ly - 14);
+        // verre (ovale teinté) et reflet
+        ctx.beginPath(); ctx.ellipse(lx, ly, rx, lh, 0, 0, 2 * Math.PI);
+        ctx.globalAlpha = .13; ctx.fill();
+        ctx.globalAlpha = .7; ctx.lineWidth = 2.2; ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--sheet').trim() || '#fff';
+        ctx.beginPath(); ctx.ellipse(lx, ly, rx * .62, lh * .72, 0, Math.PI * 1.08, Math.PI * 1.38); ctx.stroke();
+        ctx.strokeStyle = c;
+        // monture : anneau épais (bord extérieur et bord intérieur)
+        ctx.globalAlpha = .55; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(lx, ly, rx, lh, 0, 0, 2 * Math.PI); ctx.stroke();
+        ctx.globalAlpha = .3; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(lx, ly, rx - 5, lh - 5, 0, 0, 2 * Math.PI); ctx.stroke();
+        ctx.font = `600 14px ${police()}`; ctx.globalAlpha = .5; ctx.fillText('F′', xF - 6, ly - 18);
       }
       // relation de conjugaison en filigrane
       ctx.font = `600 18px ${police()}`; ctx.globalAlpha = .18;
@@ -989,8 +1003,8 @@
       if (etroit) voile(ctx, w, h, .5);
     },
 
-    // Modèle de l'œil : œil en coupe (cornée, iris, cristallin, rétine, nerf optique) et lunettes vues de profil ;
-    // un faisceau de rayons parallèles traverse le verre (divergent : myopie corrigée) puis converge sur la rétine
+    // Modèle de l'œil : œil en coupe (cornée, iris, cristallin, rétine, nerf optique) ;
+    // un faisceau de rayons parallèles entre par la pupille et converge sur la rétine
     oeil(ctx, w, h, c) {
       const hb = h / (1 + (reduit ? 0 : F));          // hauteur visible de l'en-tête
       const p = 24, etroit = w < 700;
@@ -1021,44 +1035,18 @@
       // cristallin
       ctx.beginPath(); ctx.ellipse(xc - .66 * R, yc, .1 * R, .27 * R, 0, 0, 2 * Math.PI);
       ctx.globalAlpha = .16; ctx.fill(); ctx.globalAlpha = .55; ctx.lineWidth = 1.5; ctx.stroke();
-      // lunettes vues de profil : verre divergent (plus épais au bord qu'au centre) et branche jusqu'à l'oreille
-      const xg = xc - R * (etroit ? 1.45 : 1.6), hg = R * .4;
-      ctx.beginPath();
-      ctx.moveTo(xg - 6, yc - hg); ctx.lineTo(xg + 6, yc - hg);
-      ctx.quadraticCurveTo(xg + 1, yc, xg + 6, yc + hg); ctx.lineTo(xg - 6, yc + hg);
-      ctx.quadraticCurveTo(xg - 1, yc, xg - 6, yc - hg); ctx.closePath();
-      ctx.globalAlpha = .16; ctx.fill(); ctx.globalAlpha = .6; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = .55;
-      trait(ctx, xg - 7, yc - hg - 3, xg + 7, yc - hg - 3); trait(ctx, xg - 7, yc + hg + 3, xg + 7, yc + hg + 3);   // monture
-      ctx.lineWidth = 3.5; ctx.globalAlpha = .45;
-      ctx.beginPath(); ctx.moveTo(xg + 6, yc - hg - 3);
-      ctx.lineTo(xg + R * .5, yc - R * 1.1); ctx.lineTo(xc + R * 1.25, yc - R * 1.1);
-      ctx.quadraticCurveTo(xc + R * 1.55, yc - R * 1.1, xc + R * 1.5, yc - R * .78); ctx.stroke();
-      ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
-      // faisceau : parallèle avant le verre, un peu divergent après, puis convergent jusqu'à la rétine (point R)
-      const xd = xg - R * (etroit ? .9 : 1.6), xk = xc - 1.02 * R, xr = xc + .94 * R;
+      // faisceau de rayons parallèles qui entre par la pupille et converge sur la rétine (point R)
+      const xd = xc - R * (etroit ? 1.9 : 2.5), xk = xc - 1.02 * R, xr = xc + .94 * R;
       [-1, 0, 1].forEach(k => {
-        const y0 = yc + k * R * .11, y1 = yc + k * R * .15;
+        const y1 = yc + k * R * .15;
         ctx.globalAlpha = k ? .5 : .6; ctx.lineWidth = 1.4;
-        trait(ctx, xd, y0, xg, y0); trait(ctx, xg, y0, xk, y1); trait(ctx, xk, y1, xr, yc);
-        if (k) { fleche(xd, y0, xg, y0); fleche(xk, y1, xr, yc); }
+        trait(ctx, xd, y1, xk, y1); trait(ctx, xk, y1, xr, yc);
+        if (k) { fleche(xd, y1, xk, y1); fleche(xk, y1, xr, yc); }
       });
       ctx.globalAlpha = .08;
-      ctx.beginPath(); ctx.moveTo(xd, yc - R * .11); ctx.lineTo(xg, yc - R * .11); ctx.lineTo(xk, yc - R * .15); ctx.lineTo(xr, yc);
-      ctx.lineTo(xk, yc + R * .15); ctx.lineTo(xg, yc + R * .11); ctx.lineTo(xd, yc + R * .11); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(xd, yc - R * .15); ctx.lineTo(xk, yc - R * .15); ctx.lineTo(xr, yc);
+      ctx.lineTo(xk, yc + R * .15); ctx.lineTo(xd, yc + R * .15); ctx.closePath(); ctx.fill();
       [6, 3].forEach((r, i) => { ctx.globalAlpha = .25 + i * .3; ctx.beginPath(); ctx.arc(xr, yc, r, 0, 2 * Math.PI); ctx.fill(); });
-      // noms des parties
-      ctx.font = `600 13px ${police()}`; ctx.globalAlpha = .45; ctx.lineWidth = 1;
-      const nom = (x1, y1, x2, y2, t, droite) => { trait(ctx, x1, y1, x2, y2); ctx.fillText(t, droite ? x2 + 4 : x2 - ctx.measureText(t).width - 4, y2 + 4); };
-      if (!etroit) {
-        nom(xc - .66 * R, yc + .27 * R, xc - .5 * R, yc + .78 * R, 'cristallin', true);
-        nom(xc + .7 * R, yc + .62 * R, xc + .95 * R, yc + .95 * R, 'rétine', true);
-        nom(xc - .8 * R, yc - .42 * R, xc - 1.05 * R, yc - .7 * R, 'iris', false);
-        nom(xg, yc + hg + 6, xg - R * .2, yc + R * .8, 'lunettes', false);
-      }
-      // vergence en filigrane
-      ctx.font = `600 18px ${police()}`; ctx.globalAlpha = .18;
-      ctx.fillText('V = 1/f′  (en dioptries δ)', w * .06, hb * .92);
       if (etroit) voile(ctx, w, h, .5);
     },
 
