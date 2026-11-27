@@ -49,9 +49,16 @@
                                         sur la grandeur ; une fraction de grandeurs se répartit de part et
                                         d'autre du trait (E = U / L : U prend la place de E, L passe de l'autre côté)
           racineOuverte: true           un facteur (ou un dénominateur entier) glissé sur une racine y entre
-                                        au carré ; les grandeurs de la racine se glissent pour simplifier
-          simplifier: true              une grandeur glissée sur la même de l'autre côté du trait d'une même
-                                        fraction se simplifie (q² / q → q)
+                                        au carré ; les grandeurs de la racine se choisissent (simplifier)
+          simplifier: true              simplifier en deux appuis : une grandeur touchée (sélection), puis la
+                                        même touchée de l'autre côté du trait de la même fraction → les deux se
+                                        barrent, une couleur par paire ; avec des puissances, ce sont elles qui
+                                        sont barrées, la nouvelle écrite au-dessus (rien si 1) : q² / q → q.
+                                        Plusieurs paires à la suite ; « ✓ Vérifier l'étape » efface les termes
+                                        barrés (avant, aucune autre transformation). Une bulle explique le geste
+                                        la première fois. Option de l'éditeur partagé : utilisable dans toute
+                                        application (equations-physique-mobile, equations-en-physique…), seule
+                                        ou avec remplacements (combiner des équations : grandeur = expression)
           forme: 'v = sqrt([deux q U|m])'  forme finale attendue (ordre des facteurs indifférent) : fin de l'exercice
           reserveSeule, objectif, consigne : réserve réduite aux outils ; textes au-dessus de l'équation
      EQ.partie(exercice, opts) → partie 'perso' du moteur de cours COURS (« À toi ») et des séries
@@ -207,6 +214,16 @@
       if (!t || t.closest('.ep-fige, .drag-ghost') || !t.querySelector('.tile-del') || t.dataset.eptBloque) return null;
       return t;
     }
+    // tuile qu'on peut seulement choisir, sans croix (simplification : grandeur sous une racine,
+    // grandeur dont la puissance vient d'être barrée) ; marquée data-ept-choix par l'éditeur
+    function tuileChoix(cible) {
+      const t = cible && cible.closest && cible.closest('[data-ept-choix]');
+      return t && !t.closest('.ep-fige, .drag-ghost') ? t : null;
+    }
+    // écouteurs des éditeurs : paire(a, b) → true si le second appui a été pris (simplification) ;
+    // choix(el) : un élément vient d'être sélectionné
+    const ecouteurs = [];
+    const paire = (a, b) => ecouteurs.some(f => f.paire && f.paire(a, b));
     // réserve (palette) de l'éditeur d'une tuile
     function reserveDe(el) {
       const ed = el.closest('.ep-edit');
@@ -251,11 +268,18 @@
     function deselectionner() {
       if (!selection) return;
       selection.el.classList.remove('ept-sel');
-      selection.croix.remove();
+      if (selection.croix) selection.croix.remove();
       selection = null;
     }
     function selectionner(el) {
       deselectionner();
+      // tuile qu'on choisit seulement (simplification) : pas de croix
+      if (el.dataset.eptChoix) {
+        el.classList.add('ept-sel');
+        selection = { el, croix: null };
+        ecouteurs.forEach(f => f.choix && f.choix(el));
+        return;
+      }
       const croix = document.createElement('button');
       croix.type = 'button';
       croix.className = 'ept-croix';
@@ -269,10 +293,16 @@
       el.classList.add('ept-sel');
       el.appendChild(croix);
       selection = { el, croix };
+      ecouteurs.forEach(f => f.choix && f.choix(el));
     }
     function basculer(el) {
       if (selection && selection.el === el) deselectionner();
       else selectionner(el);
+    }
+    // second appui : après la sélection de « avant », un appui sur el (simplification en deux temps)
+    function second(avant, el) {
+      if (!avant || avant === el || el.classList.contains('slot-simple') || avant.classList.contains('slot-simple')) return false;
+      return paire(avant, el);
     }
 
     // ── geste en cours (observé avant les gestionnaires des pages) ──
@@ -280,15 +310,17 @@
     document.addEventListener('pointerdown', e => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       if (e.target.closest && e.target.closest('.ept-croix')) return;
-      const t = tuileEffacable(e.target);
+      const t = tuileEffacable(e.target) || tuileChoix(e.target);
       const d = !t && caseVide(e.target);
+      // élément sélectionné avant cet appui (simplification : deux appuis successifs)
+      const avant = selection ? selection.el : null;
       // un appui ailleurs que sur l'élément sélectionné annule la sélection
       if (selection && selection.el !== t && selection.el !== d) deselectionner();
       const item = glissable(e.target);
       geste = {
         id: e.pointerId, x: e.clientX, y: e.clientY, bouge: false,
         bloque: e.target.closest ? e.target.closest('[data-ept-bloque]') : null,
-        appui: t || d || null, item,
+        appui: t || d || null, item, avant,
         zone: e.target.closest ? e.target.closest('.eq-row') : null,
         reserve: item && item.classList.contains('eq-tile') && tuileEffacable(item) ? reserveDe(item) : null,
         surReserve: false,
@@ -332,7 +364,10 @@
         if (!bouge) {
           if (!g.appui) return;
           const el = retrouver(g.appui, g.zone);
-          if (el && (el.classList.contains('slot-simple') ? caseVide(el) : tuileEffacable(el))) basculer(el);
+          if (!el || !(el.classList.contains('slot-simple') ? caseVide(el) : (tuileEffacable(el) || tuileChoix(el)))) return;
+          const av = g.avant && retrouver(g.avant, g.zone);
+          if (second(av, el)) return;      // deux grandeurs simplifiées : pas de nouvelle sélection
+          basculer(el);
           return;
         }
         if (!g.item) return;
@@ -376,10 +411,15 @@
     // ── clavier ──
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && selection) { deselectionner(); return; }
-      const el = tuileEffacable(e.target) || (e.target.classList && e.target.classList.contains('slot-simple') && caseVide(e.target));
+      const el = tuileEffacable(e.target) || tuileChoix(e.target) || (e.target.classList && e.target.classList.contains('slot-simple') && caseVide(e.target));
       if (!el || (el !== e.target)) return;
-      if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); effacer(el); }
-      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(el); }
+      if ((e.key === 'Delete' || e.key === 'Backspace') && !el.dataset.eptChoix) { e.preventDefault(); effacer(el); }
+      else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const av = selection ? selection.el : null;
+        if (av !== el && second(av, el)) { deselectionner(); return; }
+        basculer(el);
+      }
     });
 
     // ── grandeurs en italique, éléments accessibles au clavier ──
@@ -421,7 +461,7 @@
       if (racine.matches && racine.matches(TUILES)) liste.push(racine);
       liste.forEach(el => {
         italiques(el);
-        if (el.classList.contains('eq-tile') && !el.hasAttribute('tabindex') && tuileEffacable(el)) el.tabIndex = 0;
+        if ((el.classList.contains('eq-tile') || el.classList.contains('eq-tile-locked')) && !el.hasAttribute('tabindex') && (tuileEffacable(el) || tuileChoix(el))) el.tabIndex = 0;
       });
       const cases = [...racine.querySelectorAll('.slot-simple')];
       if (racine.matches && racine.matches('.slot-simple')) cases.push(racine);
@@ -474,7 +514,9 @@
     const MSG_FONCTION = "✕ On ne peut pas déplacer un terme qui est dans une fonction : supprime d'abord la fonction en appliquant sa fonction réciproque aux deux membres.";
     const MSG_PAREN = "✕ On ne peut pas déplacer un terme qui est dans une parenthèse : la parenthèse forme un seul bloc.";
 
-    return { appui: () => {}, historique, bloquer, MSG_FONCTION, MSG_PAREN };  })();
+    // un éditeur s'abonne : { paire(a, b), choix(el) }
+    const ecouter = f => ecouteurs.push(f);
+    return { appui: () => {}, historique, bloquer, ecouter, deselectionner, MSG_FONCTION, MSG_PAREN };  })();
 
   /* ---------- racine carrée : crochet à la hauteur du contenu (equations.css) ---------- */
   const CROCHET = '<line x1="0" y1=".42em" x2="40%" y2="0"/><line x1="40%" y1="0" x2="100%" y2="100%"/>';
@@ -484,8 +526,12 @@
 
   /* ---------- messages par défaut (EQ.MESSAGES), remplaçables par exercice.messages ---------- */
   const MESSAGES = {
-    MSG_DEDANS: "Sous la racine, une grandeur ne se déplace pas : on peut seulement la simplifier avec la même grandeur placée de l'autre côté du trait de fraction (glisse-la dessus).",
+    MSG_DEDANS: "Sous la racine, une grandeur ne se déplace pas : on peut seulement la simplifier avec la même grandeur placée de l'autre côté du trait de fraction (touche-la, puis touche l'autre).",
     MSG_SIMPL: "On ne simplifie qu'une grandeur du numérateur avec la même grandeur au dénominateur d'une même fraction.",
+    MSG_BARRES: "Des termes sont barrés : touche d'abord « ✓ Vérifier l'étape », ils s'effaceront. Tu pourras ensuite continuer.",
+    MSG_BARRE: "Ce terme est simplifié : il s'effacera quand tu toucheras « ✓ Vérifier l'étape ».",
+    BULLE_CHOIX: "<b>Simplifier</b> : touche maintenant {g} de l'autre côté du trait de fraction. Les deux se barrent.",
+    BULLE_BARRE: "Chaque paire barrée a sa couleur : simplifie d'autres paires si tu veux, puis touche « ✓ Vérifier l'étape » pour effacer les termes barrés.",
     MSG_ENTRER: "Seul un facteur qui multiplie la racine (dans le même membre) peut entrer sous la racine ; il y entre au carré.",
     MSG_SUBST: "Dépose cet outil sur la grandeur {g} de l'équation, pour la remplacer.",
     MSG_MOVE: REGLES.MSG_MOVE, MSG_MOVE_FRAC: REGLES.MSG_MOVE_FRAC, MSG_INSERT: REGLES.MSG_INSERT,
@@ -561,7 +607,31 @@
     const part = cls => racine ? racine.querySelector('.' + cls) : null;
 
     // libellé d'une tuile : la grandeur, avec sa puissance (v², T⁴) ; pow : exposant entier ≥ 2
-    const lab = it => it.label + (it.pow ? (EXP[it.pow] || '<sup>' + it.pow + '</sup>') : '');
+    // simplification en attente (it.sim : [{ reste, c }], une entrée par paire barrée, c : couleur de la paire) :
+    // grandeur entièrement simplifiée (reste 0) → barrée en entier ; sinon sa puissance est barrée
+    // et la nouvelle est écrite au-dessus (rien si elle vaut 1)
+    const puiss = n => EXP[n] || '<sup>' + n + '</sup>';
+    function lab(it) {
+        const b = it.sim;
+        if (!b || !b.length) return it.label + (it.pow > 1 ? puiss(it.pow) : '');
+        const der = b[b.length - 1];
+        if (!der.reste) {
+            const avant = { label: it.label, pow: b.length > 1 ? b[b.length - 2].reste : it.pow, sim: b.slice(0, -1) };
+            return `<span class="eq-barre" style="--c:${coulPaire(der.c)}">${lab(avant)}</span>`;
+        }
+        // puissances successives : la première, puis le reste de chaque paire ; la dernière n'est pas barrée
+        const pows = [it.pow || 1].concat(b.map(e => e.reste));
+        let pile = der.reste > 1 ? `<span class="eq-pw-nv" style="--c:${coulPaire(der.c)}">${der.reste}</span>` : '';
+        // barre dans l'autre sens sur 2, 4, 6, 7, 9 : leur trait penché se confondrait avec elle (fractions-college)
+        const inv = n => /[24679]/.test(String(n)) ? ' eq-barre-inv' : '';
+        for (let i = b.length - 1; i >= 0; i--) if (pows[i] > 1) pile += `<span class="eq-barre eq-barre-fin${inv(pows[i])}" style="--c:${coulPaire(b[i].c)}">${pows[i]}</span>`;
+        return it.label + `<span class="eq-pw">${pile}</span>`;
+    }
+    // couleur d'une paire de termes simplifiés (mêmes couleurs que fractions-college)
+    const COUL_PAIRES = ['--orga-ram-1', '--orga-ram-3', '--orga-ram-4', '--orga-ram-2', '--orga-groupe', '--orga-chaine'];
+    const coulPaire = c => 'var(' + COUL_PAIRES[c % COUL_PAIRES.length] + ')';
+    // puissance d'une tuile une fois ses simplifications appliquées (0 : elle disparaît)
+    const puissEff = it => (it.sim && it.sim.length ? it.sim[it.sim.length - 1].reste : (it.pow || 1));
     function staticFracHtml(num, den) {
         return `<span class="frac-wrap-static"><span class="frac-num-static">${num}</span><span class="frac-line-static"></span><span class="frac-den-static">${den}</span></span>`;
     }
@@ -646,6 +716,7 @@
     // ouvert() : l'exercice permet d'agir dans une racine (entrer un facteur, simplifier, remplacer) ;
     // path : chemin du nœud, donné seulement dans l'éditeur actif d'un tel exercice
     const ouvert = () => !!(currentExercise && currentExercise.racineOuverte);
+    const simplifiable = () => !!(currentExercise && currentExercise.simplifier);
     function renderInlineNode(node, staticMode, enLigne, path) {
         if (staticMode || !ouvert()) path = null;
         const sous = (n, suite) => renderInlineNode(n, staticMode, enLigne, path ? path + suite : null);
@@ -674,9 +745,11 @@
             // l'equation figee
             if (node.items.length === 0) return '<span class="slot-placeholder">…</span>';
             const tileClass = staticMode ? 'eq-tile-static' : 'eq-tile-locked';
+            // exercice de simplification : une grandeur de la racine se choisit d'un appui (simplifier en deux appuis)
+            const choix = it => path && simplifiable() && puissEff(it) > 0 ? ' data-ept-choix="1"' : '';
             return node.items.map((it, idx) => {
                 const sep = (idx > 0 && !isOperatorTile(node.items[idx - 1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
-                return sep + `<span class="${tileClass}"${path ? ` data-path="${path}" data-idx="${idx}"` : ''}>${lab(it)}</span>`;
+                return sep + `<span class="${tileClass}"${path ? ` data-path="${path}" data-idx="${idx}"` : ''}${choix(it)}>${lab(it)}</span>`;
             }).join('');
         }
         if (node.kind === 'func') return renderFunc(node, staticMode, enLigne, path);
@@ -717,7 +790,9 @@
             const items = node.items.map((it, idx) => {
                 const hl = (activeHighlightId && it.id === activeHighlightId) ? ' tile-highlight' : '';
                 const sep = (idx > 0 && !isOperatorTile(node.items[idx-1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
-                return sep + `<span class="eq-tile${hl}" data-path="${path}" data-idx="${idx}">
+                // simplification en attente : la tuile se choisit seulement (pas de croix, pas de glisser)
+                const choix = it.sim && puissEff(it) > 0 ? ' data-ept-choix="1"' : '';
+                return sep + `<span class="eq-tile${hl}" data-path="${path}" data-idx="${idx}"${choix}>
                     ${lab(it)}<span class="tile-del" data-eq-sup="${path}|${idx}">✕</span>
                 </span>`;
             }).join('');
@@ -866,10 +941,11 @@
         // terme dans une fonction : on peut l'attraper, mais il ne bouge pas (message tout de suite),
         // sauf s'il fait partie d'un bloc qui, lui, se déplace (dénominateur, terme additif)
         zone.querySelectorAll('.eq-tile-locked').forEach(el => {
-            // racine ouverte (exercice de simplification) : la tuile se glisse sur une tuile identique (simplifier)
+            // racine ouverte (exercice de simplification) : la tuile ne se déplace pas, elle se choisit
+            // d'un appui puis se simplifie avec la même grandeur touchée de l'autre côté du trait
             if (el.dataset.path) {
                 const n = getNode(el.dataset.path), it = n && n.items && n.items[+el.dataset.idx];
-                if (it) { enableTileDrag(el, { type:'move', dedans:true, from:el.dataset.path, idx:+el.dataset.idx, id:it.id, label:lab(it), item:Object.assign({}, it) }); return; }
+                if (it) { EPT.bloquer(el, it.sim ? msg('MSG_BARRE') : msg('MSG_DEDANS'), it.sim ? m => showFeedback(m, null) : afficherRefus); return; }
             }
             if (!el.closest('.den-draggable, .term-draggable, .sum-term-single, .func-bloc')) EPT.bloquer(el, msg('MSG_FONCTION'), afficherRefus);
         });
@@ -879,6 +955,9 @@
             enableTileDrag(el, { type:'bloc', from: el.dataset.blocPath });
         });
         zone.querySelectorAll('.eq-tile').forEach(el => {
+            // simplification en attente : la tuile ne se déplace plus avant la vérification de l'étape
+            const zt = getNode(el.dataset.path), tt = zt && zt.items && zt.items[+el.dataset.idx];
+            if (tt && tt.sim) { EPT.bloquer(el, msg('MSG_BARRE'), m => showFeedback(m, null)); return; }
             // terme dans une parenthèse : même chose
             if (el.closest('.paren-wrap') && !el.closest('.den-draggable, .term-draggable')) { EPT.bloquer(el, msg('MSG_PAREN'), afficherRefus); return; }
             // une tuile a l'interieur d'un terme additif d'une somme a plusieurs
@@ -1156,18 +1235,15 @@
         return rawPath;
     }
     function handleZoneDrop(data, zone) {
+        // des termes barrés attendent la vérification : aucune autre transformation avant
+        if (barresEnAttente()) { showFeedback(msg('MSG_BARRES'), null); return; }
         if (data.type === 'subst') { processSubst(data, zone.closest('[data-idx]')); return; }
         // un dénominateur entier glissé sur une racine ouverte : chacune de ses grandeurs y entre au carré
         if (data.type === 'fracden' && ouvert() && zone.closest('.sqrt-wrap[data-func-path]')) { processEntrerDen(data.from, zone.closest('.sqrt-wrap[data-func-path]').dataset.funcPath); return; }
-        if (data.type === 'move' && currentExercise && (currentExercise.simplifier || currentExercise.racineOuverte)) {
-            const t = zone.closest('.eq-tile[data-idx], .eq-tile-locked[data-idx]');
-            if (t && currentExercise.simplifier && !(t.dataset.path === data.from && +t.dataset.idx === data.idx)) {
-                const n = getNode(t.dataset.path), it = n && n.items && n.items[+t.dataset.idx];
-                if (it && it.id === data.id) { processSimplif(data, t.dataset.path, +t.dataset.idx); return; }
-            }
+        // racine ouverte : un facteur glissé sur la racine y entre au carré
+        if (data.type === 'move' && ouvert()) {
             const r = zone.closest('.sqrt-wrap[data-func-path]');
-            if (r && !data.dedans) { processEntrer(data, r.dataset.funcPath); return; }
-            if (data.dedans) { if (!(t && t.dataset.path === data.from)) afficherRefus(msg('MSG_DEDANS')); return; }
+            if (r) { processEntrer(data, r.dataset.funcPath); return; }
         }
         if (data.type === 'sumterm') {
             const side = resolveSidePath(zone);
@@ -1249,22 +1325,113 @@
         if (fd && path === fd.frac + '.' + fd.niveau) nettoyerFrac(fd.frac);
         else supprimerFacteur(path);
     }
-    // simplifier : une grandeur du numérateur et la même au dénominateur d'une même fraction
-    function processSimplif(data, pathB, idxB) {
-        const fa = fracDe(data.from), fb = fracDe(pathB);
-        if (!fa || !fb || fa.frac !== fb.frac || fa.niveau === fb.niveau) { afficherRefus(msg('MSG_SIMPL')); return; }
-        const A = getNode(data.from).items[data.idx], B = getNode(pathB).items[idxB];
-        const pa = A.pow || 1, pb = B.pow || 1, k = Math.min(pa, pb), reste = pa - k || pb - k;
-        const ou = pa > pb ? fa.niveau : fb.niveau;
-        A.pow = pa - k; B.pow = pb - k;
-        // retirer d'abord les tuiles à puissance nulle (zones différentes : les indices ne se gênent pas)
-        const fp = fa.frac;
-        [[pathB, idxB, B], [data.from, data.idx, A]].forEach(([p, i, t]) => { if (t.pow === 0) { const z = getNode(p); z.items.splice(i, 1); } else sansPow1(t); });
-        const f = getNode(fp);
-        if (f && f.kind === 'frac') { if (zoneVide(f.num)) f.num = simple([tile('one', '1')]); if (zoneVide(f.den)) f.den = simple([tile('one', '1')]); nettoyerFrac(fp); }
-        showFeedback(`${A.label} simplifié${reste ? ` : il reste ${A.label}${reste > 1 ? (EXP[reste] || '<sup>' + reste + '</sup>') : ''} au ${ou === 'num' ? 'numérateur' : 'dénominateur'}` : ' : il disparaît du numérateur et du dénominateur'}.`, null);
-        refreshView();
+    /* ---------- simplifier en deux appuis (exercices avec simplifier: true) ----------
+       Un appui choisit une grandeur (sélection, avec sa croix si elle peut être effacée) ; un appui
+       sur la même grandeur de l'autre côté du trait de la même fraction barre les deux (une couleur
+       par paire). Rien n'est retiré tout de suite : chaque tuile garde sa puissance (la valeur de
+       l'équation ne change pas) et note la simplification dans it.sim ; « ✓ Vérifier l'étape »
+       l'applique (appliquerBarres) : les termes barrés s'effacent, les puissances diminuent. */
+    // toutes les tuiles de l'équation, avec leur chemin
+    function tuilesEq() {
+        const l = [];
+        function voir(n, p) {
+            if (!n) return;
+            if (n.kind === 'simple') n.items.forEach((it, idx) => l.push({ path: p, idx, it }));
+            else if (n.kind === 'seq') n.slots.forEach((x, i) => voir(x, p + '.' + i));
+            else if (n.kind === 'frac') { voir(n.num, p + '.num'); voir(n.den, p + '.den'); }
+            else if (n.kind === 'func') voir(n.inner, p + '.inner');
+            else if (n.kind === 'sum') n.terms.forEach((t, i) => voir(t.node, p + '.term' + i));
+        }
+        voir(state.left, 'left');
+        voir(state.right, 'right');
+        return l;
     }
+    const barresEnAttente = () => tuilesEq().some(t => t.it.sim);
+    // A (zone pa, rang ia) et B se simplifient-ils ? même grandeur, même fraction, de part et d'autre du trait
+    function pairable(pa, ia, pb, ib) {
+        const fa = fracDe(pa), fb = fracDe(pb), za = getNode(pa), zb = getNode(pb);
+        const A = za && za.items && za.items[ia], B = zb && zb.items && zb.items[ib];
+        return !!(A && B && A !== B && A.id === B.id && fa && fb && fa.frac === fb.frac && fa.niveau !== fb.niveau && puissEff(A) > 0 && puissEff(B) > 0);
+    }
+    // existe-t-il, de l'autre côté du trait, la même grandeur pour simplifier ?
+    const partenaire = (pa, ia) => tuilesEq().some(t => pairable(pa, ia, t.path, t.idx));
+    function processSimplif(data, pathB, idxB) {
+        if (!pairable(data.from, data.idx, pathB, idxB)) { afficherRefus(msg('MSG_SIMPL')); return false; }
+        const A = getNode(data.from).items[data.idx], B = getNode(pathB).items[idxB];
+        const pa = puissEff(A), pb = puissEff(B), k = Math.min(pa, pb);
+        // couleur de la paire : la suivante après celles déjà barrées
+        const c = tuilesEq().reduce((m, t) => Math.max(m, ...(t.it.sim || []).map(e => e.c + 1)), 0);
+        (A.sim = A.sim || []).push({ reste: pa - k, c });
+        (B.sim = B.sim || []).push({ reste: pb - k, c });
+        const reste = pa - k || pb - k, ou = pa > pb ? fracDe(data.from).niveau : fracDe(pathB).niveau;
+        showFeedback(`${A.label} simplifié${reste ? ` : il restera ${A.label}${reste > 1 ? puiss(reste) : ''} au ${ou === 'num' ? 'numérateur' : 'dénominateur'}` : ' : il disparaîtra du numérateur et du dénominateur'}.`, null);
+        refreshView();
+        // première paire barrée dans cet éditeur : la suite est expliquée
+        // (sous un terme barré du dénominateur : la fraction reste visible)
+        if (!bulleBarreVue) {
+            bulleBarreVue = true;
+            const z = part('ed-zone'), bas = z && z.querySelector('.frac-den-wrap .eq-barre');
+            montrerBulle(bas ? bas.closest('.eq-tile, .eq-tile-locked') : z && z.querySelector('.eq-barre'), msg('BULLE_BARRE'), !!bas);
+        }
+        return true;
+    }
+    // « ✓ Vérifier l'étape » : les simplifications s'appliquent, les termes barrés s'effacent
+    function appliquerBarres() {
+        for (let garde = 0; garde < 500; garde++) {
+            const t = tuilesEq().find(x => x.it.sim);
+            if (!t) return;
+            const p = puissEff(t.it);
+            if (p > 0) { t.it.pow = p; delete t.it.sim; sansPow1(t.it); }
+            else retirerTuile(t.path, t.idx);     // la zone vidée se range (fraction, facteur)
+        }
+    }
+    // bulle d'explication au-dessus de l'élément, ou au-dessous (dessous, ou pas la place) ; fermée au prochain appui
+    let bulle = null, bulleChoixVue = false, bulleBarreVue = false;
+    function fermerBulle() { if (bulle) { bulle.remove(); bulle = null; } }
+    function montrerBulle(el, html, dessous) {
+        fermerBulle();
+        if (!el || !racine || !racine.contains(el)) return;
+        bulle = document.createElement('div');
+        bulle.className = 'eq-bulle';
+        bulle.setAttribute('role', 'status');
+        bulle.innerHTML = html;
+        racine.appendChild(bulle);
+        // mesurée en haut à gauche (toute la largeur disponible), sans l'animation d'apparition (offset*),
+        // largeur figée avant le placement : la hauteur mesurée ne change plus
+        bulle.style.left = bulle.style.top = '0px';
+        bulle.style.width = bulle.offsetWidth + 'px';
+        const r = racine.getBoundingClientRect(), t = el.getBoundingClientRect(), b = { width: bulle.offsetWidth, height: bulle.offsetHeight };
+        const cx = t.left + t.width / 2 - r.left;
+        const x = Math.max(0, Math.min(r.width - b.width, cx - b.width / 2));
+        let y = t.top - r.top - b.height - 12;
+        if (dessous || y < 0) { y = t.bottom - r.top + 12; bulle.classList.add('eq-bulle-bas'); }
+        bulle.style.left = x + 'px';
+        bulle.style.top = y + 'px';
+        bulle.style.setProperty('--fl', Math.max(14, Math.min(b.width - 14, cx - x)) + 'px');   // pointe vers l'élément
+    }
+    document.addEventListener('pointerdown', fermerBulle, true);
+    // sélection et second appui (EPT) : dans cet éditeur seulement, pour un exercice de simplification
+    EPT.ecouter({
+        paire(a, b) {
+            if (!racine || resolved || !simplifiable() || !racine.contains(a) || !racine.contains(b)) return false;
+            if (!a.dataset.path || !b.dataset.path || a.dataset.idx == null || b.dataset.idx == null) return false;
+            const za = getNode(a.dataset.path), zb = getNode(b.dataset.path);
+            const A = za && za.items && za.items[+a.dataset.idx], B = zb && zb.items && zb.items[+b.dataset.idx];
+            if (!A || !B || A.id !== B.id) return false;     // grandeurs différentes : nouvelle sélection
+            processSimplif({ from: a.dataset.path, idx: +a.dataset.idx }, b.dataset.path, +b.dataset.idx);
+            return true;
+        },
+        // première grandeur choisie qui peut se simplifier : la bulle explique le second appui
+        choix(el) {
+            if (!racine || resolved || !simplifiable() || bulleChoixVue || !racine.contains(el) || !el.dataset.path) return;
+            if (!partenaire(el.dataset.path, +el.dataset.idx)) return;
+            const z = getNode(el.dataset.path), it = z && z.items[+el.dataset.idx];
+            bulleChoixVue = true;
+            // terme du dénominateur : bulle au-dessous, pour laisser voir le numérateur (et inversement)
+            const fd = fracDe(el.dataset.path);
+            montrerBulle(el, msg('BULLE_CHOIX').replace('{g}', '<b>' + (it ? it.label : '') + '</b>'), !!(fd && fd.niveau === 'den'));
+        },
+    });
     // entrer sous la racine : un facteur du même produit y entre au carré (a √X = √(a² X))
     function processEntrer(data, funcPath, silencieux) {
         const fn = getNode(funcPath);
@@ -1335,8 +1502,9 @@
         if (R.kind === 'frac' && R.num.kind === 'simple' && R.den.kind === 'simple') {
             // fraction de grandeurs : le numérateur prend la place de la grandeur, le dénominateur passe de l'autre côté du trait
             const puis = l => l.items.filter(x => x.id !== 'one').map(x => sansPow1(Object.assign({}, x, { pow: (x.pow || 1) * p })));
-            const fd = fracDe(path), enHaut = !fd || fd.niveau === 'num';
-            const ici = puis(enHaut ? R.num : R.den), la = puis(enHaut ? R.den : R.num);
+            // (au dénominateur aussi : X / (U / L) = X × L / U, U prend la place de E, L passe au numérateur)
+            const fd = fracDe(path);
+            const ici = puis(R.num), la = puis(R.den);
             z.items.splice(idx, 1, ...ici);
             if (!z.items.length) z.items.push(tile('one', '1'));
             if (la.length) {
@@ -1542,6 +1710,7 @@
         spawnVanishGhost({ left: r.left - 20, top: r.top, width: 20, height: r.height });
     }
     function negateSide(sidePath) {
+        if (barresEnAttente()) { showFeedback(msg('MSG_BARRES'), null); return; }
         if (sidePath !== 'left' && sidePath !== 'right') return;
         const s = getNode(sidePath);
         const vanishRect = captureVanishingSignRect(sidePath);
@@ -1637,6 +1806,7 @@
     // est enveloppé (l'outil se dépose sur les deux membres, l'un après l'autre)
     function applyFuncTool(tool, side) {
         if (side !== 'left' && side !== 'right') return;
+        if (barresEnAttente()) { showFeedback(msg('MSG_BARRES'), null); return; }
         if (tool === 'inv') { inverserMembre(side); return; }
         const o = outil(tool);
         const s = getNode(side);
@@ -1963,6 +2133,8 @@
     }
     function verifyStep() {
         if (resolved || !currentExercise) return;
+        // termes barrés : ils s'effacent (simplification appliquée) avant la vérification
+        if (barresEnAttente()) { EPT.deselectionner(); fermerBulle(); appliquerBarres(); refreshView(); }
         if (isSlotEmpty(state.left) || isSlotEmpty(state.right)) {
             showFeedback(msg('VIDE'), false);
             return;
@@ -2069,7 +2241,8 @@
         annuler: annulerAction,
         // remplacer, simplifier, entrer sous la racine (exercices qui les activent)
         remplacer: (k, path, idx) => { const r = currentExercise.remplacements[k]; processSubst({ type:'subst', id:r.id, nom:r.label, noeud:r.noeud }, { dataset: { path, idx: String(idx) } }); },
-        simplifier: (pa, ia, pb, ib) => { const it = getNode(pa).items[ia]; processSimplif({ type:'move', from:pa, idx:ia, id:it.id, item:Object.assign({}, it) }, pb, ib); },
+        simplifier: (pa, ia, pb, ib) => processSimplif({ from:pa, idx:ia }, pb, ib),
+        barres: barresEnAttente,
         entrer: (pa, ia, funcPath) => { const it = getNode(pa).items[ia]; processEntrer({ type:'move', from:pa, idx:ia, id:it.id, label:lab(it), item:Object.assign({}, it) }, funcPath); },
         forme,
         // remplace l'équation affichée (tests automatiques)
