@@ -260,6 +260,8 @@ body.dnd-active .insert-zone { opacity:.55; }
 /* grandeurs en italique ; indices et exposants droits */
 .ept-i { font-style:italic; margin-right:.04em; }
 .eq-tile sub, .eq-tile sup, .palette-tile sub, .palette-tile sup { font-style:normal; }
+/* tuile en boîte flex : l’indice y devient un élément flex et perd son abaissement, on le redescend */
+.eq-tile > sub, .eq-tile-locked > sub, .eq-tile-frozen > sub, .palette-tile > sub { position:relative; top:.45em; }
 
 /* ── case où l'on dépose : discrète au repos, en couleur pendant un glisser ── */
 .slot-simple {
@@ -411,6 +413,44 @@ body.dnd-active .slot-simple { border-color:var(--accent); }
 .palette-tile.palette-subst { display:inline-flex; align-items:center; gap:6px; width:auto; padding:4px 10px; }
 .palette-subst .eq-side { display:inline-flex; align-items:center; }
 .palette-subst .eq-sign { font-size:1em; margin:0 2px; }
-/* racine ouverte : ses grandeurs se glissent (simplifier) */
+/* racine ouverte : ses grandeurs reçoivent un remplacement ; elles se choisissent d'un appui (simplifier) */
 .eq-tile-locked[data-path] { cursor:grab; touch-action:none; }
+.eq-tile-locked[data-ept-choix] { cursor:pointer; }
 .sqrt-wrap[data-func-path].drag-over, .eq-tile-locked[data-path].drag-over { outline:2px dashed var(--accent); outline-offset:2px; border-radius:4px; }
+.eq-tile-locked.ept-sel, .eq-tile[data-ept-choix].ept-sel { border-color:var(--ink); transform:translateY(-2px); }
+.eq-tile-locked:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+/* ── simplification en deux appuis (EQ.exercice({ simplifier: true })) ──
+   terme barré : trait oblique de la couleur de sa paire, d'un coin à l'autre (comme fractions-college) ;
+   puissance barrée, la nouvelle écrite au-dessus. Masque SVG étiré : épaisseur constante. */
+.eq-barre { position:relative; display:inline-block; color:var(--c); }
+.eq-barre::after {
+    content:''; position:absolute; left:-.08em; right:-.08em; top:.08em; bottom:.08em; background:var(--c); pointer-events:none;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='2.2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+            mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='2.2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+.eq-barre-fin::after { left:-.12em; right:-.12em; top:0; bottom:0;
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='1.6' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+            mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='1.6' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.eq-barre-inv::after { transform:scaleX(-1); }
+/* puissances empilées en exposant : la nouvelle au-dessus de la puissance barrée */
+.eq-pw { display:inline-flex; flex-direction:column; align-items:center; align-self:flex-start; font-size:.68em; font-weight:800; line-height:1; margin:-.2em 0 0 .06em; }
+.eq-pw-nv { color:var(--c); }
+.eq-tile .eq-barre, .eq-tile-locked .eq-barre { animation:eq-barre .3s ease-out; }
+@keyframes eq-barre { from { transform:scale(1.25); } }
+
+/* bulle d'explication, au moment d'utiliser la simplification (fermée au prochain appui) */
+.ep-edit { position:relative; }
+.eq-bulle {
+    position:absolute; z-index:20; box-sizing:border-box; max-width:min(320px, 100%); padding:9px 13px;
+    background:var(--ink); color:var(--sheet); border-radius:12px; font:500 .88rem/1.4 var(--font-sans);
+    pointer-events:none;   /* l'appui suivant atteint la tuile dessous */
+    animation:ept-pop .15s ease-out;
+}
+.eq-bulle b { color:inherit; }
+.eq-bulle::after {
+    content:''; position:absolute; left:var(--fl, 50%); bottom:-6px; width:12px; height:12px; margin-left:-6px;
+    background:var(--ink); transform:rotate(45deg); border-radius:2px;
+}
+.eq-bulle.eq-bulle-bas::after { bottom:auto; top:-6px; }
+@media (prefers-reduced-motion: reduce) { .eq-barre, .eq-bulle { animation:none !important; } }
