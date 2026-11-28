@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche" id="fiche"></div>
+<script>
+/* Fiche récapitulative du module 2 : une section par sous-module de cours (ancres du PLAN) */
+const { V, fr, rac, MS, schemaMvt, figAcc } = ET;
+const DEC = 'Δ<sub>AB</sub>E<sub>c</sub>';
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card"><span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span><h2 class="er-titre">Théorème de l'énergie cinétique</h2></div>
+
+  <section class="er-card" id="energie-cinetique">
+    <h3 class="cours-titre">Énergie cinétique</h3>
+    <div class="cle"><p class="som-formule">E<sub>c</sub> = ${fr('1', '2')} m v<sup>2</sup> &nbsp; ⟺ &nbsp; v = ${rac(fr('2 E<sub>c</sub>', 'm'))}</p>
+      <p>E<sub>c</sub> en J ; m en kg ; v en ${MS} (km·h<sup>−1</sup> ÷ 3,6).</p></div>
+  </section>
+
+  <section class="er-card" id="enonce">
+    <h3 class="cours-titre">Énoncé du théorème</h3>
+    <div class="cle"><p>Dans un référentiel galiléen, la variation d'énergie cinétique d'un solide est égale à la somme des travaux des forces extérieures :</p>
+      <p class="som-formule">${DEC} = ΣW<sub>AB</sub>(${V('F')}) &nbsp; avec &nbsp; ${DEC} = E<sub>c</sub>(B) − E<sub>c</sub>(A)</p>
+      <p>Travaux connus → variation de vitesse ; vitesses connues → travail, une force, un déplacement.</p></div>
+  </section>
+
+  <section class="er-card" id="pesanteur">
+    <h3 class="cours-titre">Utilisation dans le champ de pesanteur</h3>
+    <div class="cle"><p><b>Méthode</b> : schéma (A, B, données, grandeur cherchée) ; bilan des forces et angle de chacune ; « D'après le théorème de l'énergie cinétique entre A et B » ; chaque travail (⊥ → 0) ; isoler l'inconnue ; application numérique.</p></div>
+    <div class="som-defile"><table class="som-tab">
+      <thead><tr><th>Situation</th><th>Théorème</th><th>Résultat</th></tr></thead>
+      <tbody><tr><td>pomme lâchée de 10 m (g = 10)</td><td>½ m v<sub>B</sub>² − 0 = m g h</td><td>v<sub>B</sub> = ${rac('2 g h')} ≈ 14 ${MS}</td></tr>
+        <tr><td>pomme lancée à 10 ${MS} (g = 9,81)</td><td>0 − ½ m v<sub>A</sub>² = −m g h</td><td>h = v<sub>A</sub>² / (2g) = 5,1 m</td></tr>
+        <tr><td>curling : 18 kg, 1 ${MS}, f = 0,7 N</td><td>0 − ½ m v<sub>A</sub>² = −f × AB</td><td>AB = m v<sub>A</sub>² / (2f) ≈ 13 m</td></tr></tbody></table></div>
+    <div class="som-fiche-figs">${schemaMvt({ sens: 'bas', objet: 'pomme', forces: ['P'], d: 'h', angles: true }, { vA: '0', vB: '?', d: '10 m' })}
+      ${schemaMvt({ sens: 'droite', objet: 'pierre', forces: ['P', 'RN', 'f'], d: 'AB', angles: true }, { vA: '1 ' + MS, vB: '0', d: '?', f: '0,7 N' })}</div>
+  </section>
+
+  <section class="er-card" id="accelerateur">
+    <h3 class="cours-titre">Accélérateur linéaire</h3>
+    <div class="cle"><p>Le théorème de l'énergie cinétique permet de calculer la <b>vitesse de sortie</b> d'un accélérateur linéaire, comme la seconde loi de Newton, mais <b>beaucoup plus rapidement</b>.</p>
+      <p><b>Méthode</b> : poids négligé ; théorème entre l'entrée O et la sortie B, avec le travail de la force électrique W<sub>OB</sub>(${V('F', 'él')}) = ± q U (+ si elle favorise le mouvement : travail moteur) ; on isole v<sub>B</sub>.</p>
+      <p class="som-formule">½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>0</sub><sup>2</sup> = W<sub>OB</sub>(${V('F', 'él')})</p>
+      <p>L'expression de v<sub>B</sub> n'est pas à retenir : on la retrouve avec cette méthode.</p></div>
+    <div class="som-fiche-figs">${figAcc({ q: 1 })}</div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_2a_cours.html">Revoir les cours</a>
+    <a class="btn-secondary" href="module_2_questions.html">Questions sur le module 2</a>
+  </div>`;
+ET.menu('fiche_2');
+</script>
+</body>
+</html>

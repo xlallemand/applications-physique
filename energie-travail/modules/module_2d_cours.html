@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : accélérateur linéaire — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/equations.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+<script src="../../assets/equations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 4 / 4</span>
+    <h2 class="er-titre">Accélérateur linéaire</h2>
+    <p class="er-contexte">La vitesse de sortie d'un condensateur se trouve en quelques lignes avec le <b>théorème de l'énergie cinétique</b> et le travail <b>W = q U</b> : le même résultat que par la méthode de Newton, bien plus vite.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   L'expression de la vitesse de sortie n'est PAS à retenir : c'est la
+   méthode (théorème de l'énergie cinétique entre O et B, travail q U et
+   son signe, isoler v_B) qui est travaillée.
+   1. Particule q > 0 sans vitesse initiale : méthode, comparaison avec la
+      seconde loi de Newton (lien facultatif) ; exemple : proton sous
+      10 kV (1,4 × 10⁶ m·s⁻¹) ; « À toi » : travail, théorème écrit, isoler
+      v_B (éditeur d'équations EQ), calcul
+   2. Électron qui arrive avec v₀ : ½ m v_B² − ½ m v₀² = eU (travail
+      moteur) ; exemple : 1,0 × 10⁶ m·s⁻¹, 100 V (6,0 × 10⁶ m·s⁻¹) ;
+      « À toi » : signe, théorème écrit, expression de v_B, calcul
+   Valeurs (vérifiées par un script).
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { fmt, sci, proche, fr, rac, demo, W, V, MS, CALC, figAcc, E_CH, M_P, M_E, o } = ET;
+const c = h => `<span class="c">${h}</span>`;
+const DEC = 'Δ<sub>OB</sub>E<sub>c</sub>', WE = `W<sub>OB</sub>(${V('F', 'él')})`, vB = 'v<sub>B</sub>', v0 = 'v<sub>0</sub>';
+const v2 = x => `${x}<sup>2</sup>`;
+const GV = { v: vB, q: 'e', U: 'U', m: 'm', deux: '2' };
+const METHODE = `<div class="cle"><p><b class="cle-titre">Méthode</b> (l'expression de ${vB} n'est pas à retenir : on la retrouve ainsi) :</p>
+  <ol class="er-liste"><li><b>bilan des forces</b> : la force électrique ${V('F', 'él')} = q ${V('E')} ; le poids est négligeable ;</li>
+    <li>« D'après le <b>théorème de l'énergie cinétique</b> entre O et B » : ${DEC} = ${WE} ;</li>
+    <li>le <b>travail</b> : ${WE} = q U, avec le signe <b>+</b> si la force favorise le mouvement (travail moteur) ;</li>
+    <li>on <b>isole</b> ${vB}, puis l'application numérique.</li></ol></div>`;
+
+/* ---------- 1. Particule sans vitesse initiale ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Vitesse de sortie');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Une particule de charge q > 0 est placée en O, sans vitesse initiale, dans un condensateur plan de largeur L soumis à la tension U. On cherche sa vitesse à la sortie B.</p>
+      ${figAcc({ q: 1 })}
+      ${METHODE}
+      <div class="ph-lien-app"><p>Le même résultat s'obtient par la seconde loi de Newton (deux intégrations, x(t<sub>sortie</sub>) = L), mais c'est bien plus long !</p><a class="btn-small" href="../../champ-uniforme/modules/module_5a_cours.html" target="_blank" rel="noopener">Mouvement dans un champ uniforme ↗</a></div>
+    </div>
+    ${exemple(`<p>Un proton (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg, e = 1,60 × 10<sup>−19</sup> C) est accéléré sans vitesse initiale sous U = 10 kV. Quelle est sa vitesse de sortie ?</p>
+      <p>Bilan des forces : la force électrique ${V('F', 'él')} (poids négligeable). Elle pousse le proton vers B : travail moteur, ${WE} = +e U.</p>
+      <p>D'après le théorème de l'énergie cinétique entre O et B :</p>
+      ${demo([`${DEC} = ${WE}`, `⟺ ½ m<sub>p</sub> ${v2(vB)} − ½ m<sub>p</sub> ${v2(v0)} = e U`, `> avec ${v0} = 0 :`, `½ m<sub>p</sub> ${v2(vB)} = e U`, `⟺ ${v2(vB)} = ${fr('2 e U', 'm<sub>p</sub>')}`, `⟺ ${vB} = ${rac(fr('2 e U', 'm<sub>p</sub>'))}`,
+        `= ${rac(fr('2 × 1,60 × 10<sup>−19</sup> × 1,0 × 10<sup>4</sup>', '1,67 × 10<sup>−27</sup>'))}`, `= ${c('1,4 × 10<sup>6</sup> ' + MS)}`])}`)}`);
+  const U = hasard([500, 2000, 8000]), v = Math.sqrt(2 * E_CH * U / M_P);
+  c_.aToi(carte, [
+    { titre: 'Un proton accéléré', enonce: `<p>Un proton (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg, e = 1,60 × 10<sup>−19</sup> C) part du repos en O et est accéléré jusqu'en B sous U = ${fmt(U)} V.</p>`,
+      parties: [
+        { type: 'choix', q: `Le travail de la force électrique entre O et B vaut :`, colonne: false, melanger: false,
+          options: [o('p', '+e U'), o('m', '−e U'), o('L', 'e U × L')], bonne: 'p',
+          indices: { m: 'Le proton est accéléré : la force favorise le mouvement, le travail est moteur (positif).', L: 'Le travail d\'une force électrique est q U : la largeur L est déjà dans U = E × L.' },
+          solution: `<p>Travail moteur : ${WE} = +e U.</p>` },
+        { type: 'choix', q: 'D\'après le théorème de l\'énergie cinétique entre O et B :', colonne: true, melanger: false,
+          options: [o('ok', `½ m<sub>p</sub> ${v2(vB)} − 0 = e U`), o('inv', `0 − ½ m<sub>p</sub> ${v2(vB)} = e U`), o('sq', `½ m<sub>p</sub> ${vB} = e U`)], bonne: 'ok',
+          indices: { inv: 'ΔE<sub>c</sub> = E<sub>c</sub>(B) − E<sub>c</sub>(O) : l\'état <b>final</b> moins l\'état <b>initial</b> (v<sub>0</sub> = 0).', sq: 'E<sub>c</sub> = ½ m v<sup>2</sup> : la vitesse est au carré.' },
+          solution: `<p>${DEC} = ${WE} : ½ m<sub>p</sub> ${v2(vB)} − 0 = e U.</p>` },
+        EQ.partie(EQ.exercice({ eq: '[1|deux] m v^2 = q U', g: GV, cible: 'v', outils: ['sqrt'],
+          valeurs: () => { const m = 1 + Math.random() * 9, vv = 1 + Math.random() * 9, q = 1 + Math.random() * 4; return { m, v: vv, q, U: m * vv * vv / (2 * q), deux: 2 }; },
+          aides: ['m et ½ sont en facteur de v<sub>B</sub><sup>2</sup> : glisse m et le 2 de l\'autre côté du signe =.', 'Applique √ aux deux membres pour passer de v<sub>B</sub><sup>2</sup> à v<sub>B</sub>.'] }),
+          { q: `Dans l'éditeur, isole ${vB} : glisse les grandeurs d'un membre à l'autre, puis l'outil √ sur les deux membres.`, solution: `<p>${vB} = ${rac(fr('2 e U', 'm'))}</p>` }),
+        { type: 'sci', q: `Calcule la vitesse de sortie (2 chiffres significatifs).`, label: `${vB} =`, valeur: v, cs: 2, rel: .02, unite: MS + CALC,
+          diag: x => (proche(x, v * v, .05) ? 'Tu as calculé v<sub>B</sub>² : prends la racine.' : proche(x, v / Math.SQRT2, .03) ? `N'oublie pas le 2 : v<sub>B</sub> = ${rac(fr('2 e U', 'm'))}.` : `${vB} = ${rac(fr('2 e U', 'm<sub>p</sub>'))}.`),
+          solution: demo([`${vB} = ${rac(fr('2 e U', 'm<sub>p</sub>'))}`, `= ${rac(fr(`2 × 1,60 × 10<sup>−19</sup> × ${fmt(U)}`, '1,67 × 10<sup>−27</sup>'))}`, `= ${c(sci(v, 2) + ' ' + MS)}`]) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Électron avec une vitesse initiale ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Avec une vitesse initiale');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Un électron arrive en O avec une vitesse ${V('v', '0')} dans un condensateur de largeur L soumis à la tension U. On applique la <b>même méthode</b>, sans oublier l'énergie cinétique initiale.</p>
+      ${figAcc({ q: -1, v0: true })}
+      <p>La force ${V('F', 'él')} = −e ${V('E')} est dans le sens du mouvement : son travail est <b>moteur</b>, ${WE} = +e U (signe à justifier sur la copie). D'après le théorème de l'énergie cinétique entre O et B :</p>
+      ${demo([`${DEC} = ${WE}`, `⟺ ½ m ${v2(vB)} − ½ m ${v2(v0)} = e U`, `⟺ ${v2(vB)} − ${v2(v0)} = ${fr('2 e U', 'm')}`, `⟺ ${v2(vB)} = ${fr('2 e U', 'm')} + ${v2(v0)}`, `⟺ ${vB} = ${rac(`${fr('2 e U', 'm')} + ${v2(v0)}`)}`])}
+    </div>
+    ${exemple(`<p>Électron (m<sub>e</sub> = 9,11 × 10<sup>−31</sup> kg) entrant à ${v0} = 1,0 × 10<sup>6</sup> ${MS}, U = 100 V :</p>
+      ${demo([`${vB} = ${rac(`${fr('2 e U', 'm<sub>e</sub>')} + ${v2(v0)}`)}`, `= ${rac(`${fr('2 × 1,60 × 10<sup>−19</sup> × 100', '9,11 × 10<sup>−31</sup>')} + (1,0 × 10<sup>6</sup>)<sup>2</sup>`)}`, `= ${c('6,0 × 10<sup>6</sup> ' + MS)}`])}`)}`);
+  const U = hasard([50, 200, 400]), vi = hasard([2e6, 3e6]), v = Math.sqrt(2 * E_CH * U / M_E + vi * vi);
+  c_.aToi(carte, [
+    { titre: 'Un électron accéléré', enonce: `<p>Un électron (m<sub>e</sub> = 9,11 × 10<sup>−31</sup> kg, e = 1,60 × 10<sup>−19</sup> C) entre en O à ${sci(vi, 1)} ${MS} dans un condensateur soumis à U = ${U} V ; il va de l'armature − vers l'armature +.</p>`,
+      parties: [
+        { type: 'choix', q: 'Le travail de la force électrique entre O et B vaut :', colonne: false, melanger: false,
+          options: [o('p', '+e U'), o('m', '−e U'), o('0', '0')], bonne: 'p', indices: { m: 'L\'électron est attiré par l\'armature + : la force est dans le sens du mouvement, travail moteur.', 0: 'La force est parallèle au déplacement.' },
+          solution: '<p>Travail moteur : W = +e U.</p>' },
+        { type: 'choix', q: 'D\'après le théorème de l\'énergie cinétique entre O et B :', colonne: true, melanger: false,
+          options: [o('ok', `½ m ${v2(vB)} − ½ m ${v2(v0)} = e U`), o('sans', `½ m ${v2(vB)} = e U`), o('inv', `½ m ${v2(v0)} − ½ m ${v2(vB)} = e U`)], bonne: 'ok',
+          indices: { sans: `L'électron a une vitesse initiale : E<sub>c</sub>(O) = ½ m ${v2(v0)} n'est pas nulle.`, inv: 'ΔE<sub>c</sub> = état <b>final</b> (B) moins état <b>initial</b> (O).' },
+          solution: `<p>½ m ${v2(vB)} − ½ m ${v2(v0)} = e U.</p>` },
+        { type: 'choix', q: `On isole ${vB} :`, colonne: false, melanger: false,
+          options: [o('ok', `${vB} = ${rac(`${fr('2 e U', 'm')} + ${v2(v0)}`)}`), o('add', `${vB} = ${rac(fr('2 e U', 'm'))} + ${v0}`), o('moins', `${vB} = ${rac(`${fr('2 e U', 'm')} − ${v2(v0)}`)}`)], bonne: 'ok',
+          indices: { add: 'La racine d\'une somme n\'est pas la somme des racines : isole d\'abord v<sub>B</sub><sup>2</sup>.', moins: `½ m ${v2(v0)} passe de l'autre côté du signe = : il change de signe.` },
+          solution: demo([`½ m ${v2(vB)} = e U + ½ m ${v2(v0)}`, `⟺ ${v2(vB)} = ${fr('2 e U', 'm')} + ${v2(v0)}`, `⟺ ${vB} = ${rac(`${fr('2 e U', 'm')} + ${v2(v0)}`)}`]) },
+        { type: 'sci', q: 'Calcule sa vitesse de sortie (2 chiffres significatifs).', label: `${vB} =`, valeur: v, cs: 2, rel: .02, unite: MS + CALC,
+          diag: x => (proche(x, Math.sqrt(2 * E_CH * U / M_E), .02) ? `N'oublie pas la vitesse initiale : + ${v2(v0)} sous la racine.` : proche(x, Math.sqrt(2 * E_CH * U / M_E) + vi, .02) ? 'On ajoute les carrés des vitesses (sous la racine), pas les vitesses.' : `${vB} = ${rac(`${fr('2 e U', 'm')} + ${v2(v0)}`)}.`),
+          solution: demo([`${vB} = ${rac(`${fr('2 e U', 'm')} + ${v2(v0)}`)}`, `= ${rac(`${fr(`2 × 1,60 × 10<sup>−19</sup> × ${U}`, '9,11 × 10<sup>−31</sup>')} + (${sci(vi, 1)})<sup>2</sup>`)}`, `= ${c(sci(v, 2) + ' ' + MS)}`]) }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>La vitesse de sortie d'un accélérateur se calcule avec le <b>théorème de l'énergie cinétique</b> entre l'entrée et la sortie : comme avec la seconde loi de Newton, mais beaucoup plus rapidement.</p></div>
+    <div class="cle"><p><b>Méthode</b> : poids négligé ; ½ m ${v2(vB)} − ½ m ${v2(v0)} = W<sub>OB</sub>(${V('F', 'él')}) = ± q U (+ si travail moteur) ; on isole ${vB}. L'expression de ${vB} n'est pas à retenir.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le théorème →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : énergie mécanique</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#accelerateur">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+ET.menu('module_2d_cours');
+</script>
+</body>
+</html>

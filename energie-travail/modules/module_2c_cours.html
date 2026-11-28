@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : utilisation dans le champ de pesanteur — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 3 / 4</span>
+    <h2 class="er-titre">Utilisation dans le champ de pesanteur</h2>
+    <p class="er-contexte">On applique le théorème avec la même <b>méthode</b> à chaque fois : un <b>schéma</b> avec les données, le <b>bilan des forces</b>, puis le <b>théorème</b>, et on isole la grandeur cherchée.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Méthode avec schéma (outil repris de energie-cinetique/, module 4 :
+   données placées par glisser-déposer ET.partieDonnees, angle de chaque
+   force ET.partieAngles, théorème ET.partieEquation), puis l'inconnue.
+   1. Exemple 1 du cours : pomme lâchée de 10 m (g = 10) : v = √(2gh) ≈ 14 m·s⁻¹ ;
+      « À toi » : bille lâchée de 1,8 m (g = 10) : 6,0 m·s⁻¹
+   2. Exemple 2 : pomme lancée vers le haut à 10 m·s⁻¹ (g = 9,81) : h = 5,1 m ;
+      « À toi » : balle lancée à 8,0 m·s⁻¹ : h = 3,26 m
+   3. Exemple 3 : pierre de curling (18 kg, 1 m·s⁻¹, f = 0,7 N) : AB ≈ 13 m ;
+      « À toi » : palet de 170 g à 6,0 m·s⁻¹, f = 0,30 N : 10,2 m
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, fr, rac, demo, W, V, nomV, MS, CALC, schemaMvt, partieDonnees, partieAngles, partieEquation, versCours } = ET;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const DEC = 'Δ<sub>AB</sub>E<sub>c</sub>', vA = 'v<sub>A</sub>', vB = 'v<sub>B</sub>', G = 'm·s<sup>−2</sup>';
+const v2 = x => `${x}<sup>2</sup>`;
+const METHODE = `<div class="cle"><p><b class="cle-titre">Méthode</b> (dans toutes les rédactions) :</p>
+  <ol class="er-liste"><li>un <b>schéma</b> : A (départ), B (arrivée), le déplacement, les données (${vA}, ${vB}, h ou AB, m) et la grandeur cherchée ;</li>
+    <li>le <b>bilan des forces</b> et l'angle α de chacune avec le déplacement ;</li>
+    <li>« D'après le théorème de l'énergie cinétique entre A et B » : ${DEC} = Σ W<sub>AB</sub>, en remplaçant chaque travail (une force ⊥ au déplacement donne 0) ;</li>
+    <li>on <b>isole</b> l'inconnue, puis l'application numérique.</li></ol></div>`;
+
+/* ---------- 1. Exemple 1 : pomme lâchée ---------- */
+const CHUTE = { sens: 'bas', objet: 'pomme', forces: ['P'], d: 'h' };
+function etape1(c_) {
+  const carte = c_.carte('1. Un objet lâché');
+  c_.ajouter(carte, `<div class="cours-bloc">${METHODE}</div>
+    ${exemple(`<p>Exemple 1 : on lâche une pomme de masse m = 100 g d'une hauteur de 10 m. Quelle est sa vitesse en arrivant au sol ? (g = 10 ${G} ; air négligé)</p>
+      ${schemaMvt(Object.assign({ angles: true }, CHUTE), { m: '0,100 kg', vA: '0', vB: '?', d: '10 m' })}
+      <p>Bilan des forces : le poids ${nomV('P')} = m ${V('g')} seulement.</p>
+      <p>D'après le théorème de l'énergie cinétique entre A et B :</p>
+      ${demo([`${DEC} = ${W('P')}`, `⟺ ½ m ${v2(vB)} − ½ m ${v2(vA)} = m g h`, `> avec ${vA} = 0 :`, `½ m ${v2(vB)} = m g h`, `⟺ ${v2(vB)} = 2 g h`, `⟺ ${vB} = ${rac('2 g h')}`, `= ${rac('2 × 10 × 10')}`, `≈ ${c('14 ' + MS)}`])}
+      <p>La masse se simplifie : tous les objets lâchés de la même hauteur arrivent à la même vitesse (sans air).</p>`, 'Exemple 1 (traité)')}`);
+  c_.aToi(carte, [{ titre: 'Une bille qui tombe', enonce: `<p>Une bille de <b>50 g</b> est lâchée sans vitesse d'une hauteur de <b>1,8 m</b>. On cherche sa vitesse en arrivant au sol (g = 10 ${G}, air négligé).</p>`,
+    parties: [
+      versCours(partieDonnees(CHUTE, { m: '50 g', vA: '0 ' + MS, vB: '?', d: '1,8 m' })),
+      versCours(partieAngles(CHUTE)),
+      partieEquation(CHUTE, { solution: `<p>Le poids est la seule force : ½ m ${v2(vB)} − ½ m ${v2(vA)} = m g h.</p>` }),
+      { type: 'nombre', q: `Isole ${vB} (avec ${vA} = 0) et calcule-la.`, label: `${vB} =`, valeur: 6, unite: MS + CALC, signe: false,
+        diag: v => (proche(v, 36) ? 'Tu as trouvé v² : prends la <b>racine carrée</b>.' : proche(v, Math.sqrt(18)) ? `${v2(vB)} = 2 g h : n'oublie pas le 2.` : `${vB} = ${rac('2 g h')}.`),
+        solution: demo([`½ m ${v2(vB)} = m g h`, `⟺ ${vB} = ${rac('2 g h')}`, `= ${rac('2 × 10 × 1,8')}`, `= ${c('6,0 ' + MS)}`]) },
+    ] }]);
+  return carte;
+}
+
+/* ---------- 2. Exemple 2 : pomme lancée vers le haut ---------- */
+const LANCER = { sens: 'haut', objet: 'pomme', forces: ['P'], d: 'h' };
+function etape2(c_) {
+  const carte = c_.carte('2. Un objet lancé vers le haut');
+  c_.ajouter(carte, `<div class="cours-bloc"><p>Au point le plus haut, l'objet s'arrête un instant : ${vB} = 0. Le poids s'oppose à la montée : son travail est résistant, ${W('P')} = −m g h.</p></div>
+    ${exemple(`<p>Exemple 2 : on lance une pomme de masse m = 100 g vers le haut avec une vitesse initiale de 10 ${MS}. À quelle hauteur va-t-elle monter ? (g = 9,81 ${G})</p>
+      ${schemaMvt(Object.assign({ angles: true }, LANCER), { m: '0,100 kg', vA: '10 ' + MS, vB: '0', d: '?' })}
+      <p>Bilan des forces : le poids ${nomV('P')}. D'après le théorème de l'énergie cinétique entre A et B :</p>
+      ${demo([`${DEC} = ${W('P')}`, `⟺ 0 − ½ m ${v2(vA)} = −m g h`, `⟺ ½ ${v2(vA)} = g h`, `⟺ h = ${fr(v2(vA), '2 g')}`, `= ${fr('10<sup>2</sup>', '2 × 9,81')}`, `= ${c('5,1 m')}`])}`, 'Exemple 2 (traité)')}`);
+  c_.aToi(carte, [{ titre: 'Une balle lancée vers le haut', enonce: `<p>Une balle de <b>60 g</b> est lancée verticalement vers le haut à <b>8,0 ${MS}</b>. Quelle hauteur atteint-elle ? (g = 9,81 ${G}, air négligé)</p>`,
+    parties: [
+      versCours(partieDonnees(LANCER, { m: '60 g', vA: '8,0 ' + MS, vB: '0 ' + MS, d: '?' })),
+      partieEquation(LANCER, { solution: `<p>Le poids s'oppose à la montée : 0 − ½ m ${v2(vA)} = −m g h.</p>` }),
+      { type: 'nombre', q: 'Isole h et calcule-la (3 chiffres significatifs).', label: 'h =', valeur: 64 / (2 * 9.81), rel: .01, unite: 'm' + CALC, signe: false,
+        diag: v => (proche(v, 64 / 9.81, .02) ? 'h = v<sub>A</sub>² / (2 g) : n\'oublie pas le 2.' : proche(v, 8 / (2 * 9.81), .02) ? 'La vitesse est au carré.' : 'h = v<sub>A</sub>² / (2 g).'),
+        solution: demo([`½ m ${v2(vA)} = m g h`, `⟺ h = ${fr(v2(vA), '2 g')}`, `= ${fr('8,0<sup>2</sup>', '2 × 9,81')}`, `= ${c('3,26 m')}`]) },
+    ] }]);
+  return carte;
+}
+
+/* ---------- 3. Exemple 3 : pierre de curling ---------- */
+const CURLING = { sens: 'droite', objet: 'pierre', forces: ['P', 'RN', 'f'], d: 'AB' };
+function etape3(c_) {
+  const carte = c_.carte('3. Une distance d\'arrêt');
+  c_.ajouter(carte, `<div class="cours-bloc"><p>Sur un trajet horizontal, le poids et la réaction du support ne travaillent pas (α = 90°). Les frottements, opposés au mouvement (α = 180°), ont un travail résistant : W<sub>AB</sub>(${nomV('f')}) = f × AB × cos 180° = −f × AB.</p></div>
+    ${exemple(`<p>Exemple 3 : on lance une pierre de curling de masse m = 18 kg avec une vitesse ${vA} = 1 ${MS}. Les frottements de la glace valent f = 0,7 N (tant que la pierre est en mouvement). Quelle distance parcourt la pierre ?</p>
+      ${schemaMvt(Object.assign({ angles: true }, CURLING), { m: '18 kg', vA: '1 ' + MS, vB: '0', d: '?', f: '0,7 N' })}
+      <p>Bilan des forces : poids ${nomV('P')}, réaction de la glace ${nomV('RN')}, frottements ${nomV('f')}. D'après le théorème de l'énergie cinétique :</p>
+      ${demo([`${DEC} = ${W('P')} + ${W('RN')} + ${W('f')}`, `> avec ${W('P')} = ${W('RN')} = 0 car ces forces sont ⊥ au déplacement :`, `0 − ½ m ${v2(vA)} = f × AB × cos 180°`, `⟺ −½ m ${v2(vA)} = −f × AB`, `⟺ AB = ${fr(`m ${v2(vA)}`, '2 f')}`, `= ${fr('18 × 1<sup>2</sup>', '2 × 0,7')}`, `≈ ${c('13 m')}`])}`, 'Exemple 3 (traité)')}`);
+  const PALET = { sens: 'droite', objet: 'pierre', forces: ['P', 'RN', 'f'], d: 'AB' };
+  c_.aToi(carte, [{ titre: 'Un palet de hockey', enonce: `<p>Un palet de hockey de <b>170 g</b> glisse sur la glace ; il part à <b>6,0 ${MS}</b> et s'arrête. Les frottements valent f = <b>0,30 N</b>. Quelle distance parcourt-il ?</p>`,
+    parties: [
+      versCours(partieDonnees(PALET, { m: '170 g', vA: '6,0 ' + MS, vB: '0 ' + MS, d: '?', f: '0,30 N' })),
+      versCours(partieAngles(PALET)),
+      partieEquation(PALET, { solution: `<p>Seuls les frottements travaillent : 0 − ½ m ${v2(vA)} = −f × AB.</p>` }),
+      { type: 'nombre', q: 'Isole AB et calcule-la (3 chiffres significatifs).', label: 'AB =', valeur: .17 * 36 / .6, rel: .01, unite: 'm' + CALC, signe: false,
+        diag: v => (proche(v, .17 * 36 / .3, .02) ? 'AB = m v<sub>A</sub>² / (2 f) : n\'oublie pas le 2.' : proche(v, 170 * 36 / .6, .02) ? 'La masse en kg : 170 g = 0,170 kg.' : 'AB = m v<sub>A</sub>² / (2 f).'),
+        solution: demo([`½ m ${v2(vA)} = f × AB`, `⟺ AB = ${fr(`m ${v2(vA)}`, '2 f')}`, `= ${fr('0,170 × 6,0<sup>2</sup>', '2 × 0,30')}`, `= ${c('10,2 m')}`]) },
+    ] }]);
+  return carte;
+}
+
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Méthode</b> : schéma (A, B, données) ; bilan des forces et angles ; théorème ${DEC} = Σ W<sub>AB</sub> (⊥ → 0) ; isoler l'inconnue.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2d_cours.html">Cours : accélérateur linéaire →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#pesanteur">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+ET.menu('module_2c_cours');
+</script>
+</body>
+</html>

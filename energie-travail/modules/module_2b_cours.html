@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : énoncé du théorème — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 2 / 4</span>
+    <h2 class="er-titre">Énoncé du théorème</h2>
+    <p class="er-contexte">Le <b>théorème de l'énergie cinétique</b> relie la variation de la vitesse d'un solide au <b>travail des forces</b> qu'il subit : si on connaît l'un, on trouve l'autre.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Énoncé : Δ_AB E_c = Σ W_AB(F⃗), Δ = finale − initiale ; utilité
+      (W connu → variation de vitesse ; vitesses connues → W, une force,
+      un déplacement) ; « À toi » : ΔE_c, signe, somme des travaux
+   Valeurs (vérifiées par un script) : chariot de 2,0 kg, 1,0 → 3,0 m·s⁻¹ :
+   ΣW = 8,0 J.
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { fmt, cs, proche, fr, rac, demo, V, MS, CALC, o } = ET;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const DEC = 'Δ<sub>AB</sub>E<sub>c</sub>', SW = `ΣW<sub>AB</sub>(${V('F')})`;
+
+function etape1(c_) {
+  const carte = c_.carte('1. Le théorème de l\'énergie cinétique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Théorème de l'énergie cinétique.</b> Dans un référentiel galiléen, la variation d'énergie cinétique d'un solide entre A et B est égale à la somme des travaux des forces extérieures qu'il subit entre A et B :</p>
+        <p class="crs-formule">${DEC} = ${SW}</p>
+        <p>avec ${DEC} = E<sub>c</sub>(B) − E<sub>c</sub>(A) = ½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>A</sub><sup>2</sup> : état <b>final</b> moins état <b>initial</b>, en J.</p></div>
+      <p><b>À quoi sert-il ?</b> L'énergie cinétique est liée à la vitesse ; le travail, aux forces et au déplacement.</p>
+      <ul class="er-liste"><li>Si on connaît les travaux, on calcule ${DEC}, donc la <b>variation de vitesse</b>.</li>
+        <li>Si on connaît les vitesses initiale et finale, on calcule le travail, donc une <b>force</b> ou un <b>déplacement</b>.</li></ul>
+      <p>Des travaux moteurs font augmenter l'énergie cinétique (le solide accélère), des travaux résistants la font diminuer (il ralentit).</p>
+    </div>
+    ${exemple(`<p>Un chariot de 2,0 kg passe de v<sub>A</sub> = 1,0 ${MS} à v<sub>B</sub> = 3,0 ${MS}. Quelle est la somme des travaux des forces qu'il subit ?</p>
+      ${demo([`${SW} = ${DEC}`, '= ½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>A</sub><sup>2</sup>', '= ½ × 2,0 × 3,0<sup>2</sup> − ½ × 2,0 × 1,0<sup>2</sup>', '= 9,0 − 1,0', `= ${c('8,0 J')}`])}`)}`);
+  const m = hasard([1.0, 4.0, 10]), vA = hasard([6, 8]), vB = hasard([2, 3]), d = .5 * m * (vB * vB - vA * vA);
+  c_.aToi(carte, [
+    { titre: 'Un freinage', enonce: `<p>Un objet de ${fmt(m)} kg ralentit de v<sub>A</sub> = ${vA} ${MS} à v<sub>B</sub> = ${vB} ${MS}.</p>`,
+      parties: [{ type: 'nombre', q: `Calcule ${DEC}.`, label: `${DEC} =`, valeur: d, rel: .005, unite: 'J' + CALC,
+        diag: x => (proche(x, -d) ? 'Δ = état <b>final</b> (B) moins état <b>initial</b> (A).' : proche(x, .5 * m * (vB - vA) ** 2) || proche(x, -.5 * m * (vB - vA) ** 2) ? 'Calcule chaque énergie cinétique, puis fais la différence : (v<sub>B</sub>² − v<sub>A</sub>²), pas (v<sub>B</sub> − v<sub>A</sub>)².' : 'E<sub>c</sub>(B) − E<sub>c</sub>(A).'),
+        solution: calc(`${DEC} = ½ × ${fmt(m)} × ${vB}<sup>2</sup> − ½ × ${fmt(m)} × ${vA}<sup>2</sup> = ${c(fmt(d) + ' J')}`) },
+      { type: 'choix', q: 'La somme des travaux des forces est donc :', colonne: false, melanger: false, options: [o('r', 'négative : résistante'), o('m', 'positive : motrice')], bonne: 'r',
+        indice: `D'après le théorème, ${SW} = ${DEC}.`, solution: `<p>${SW} = ${DEC} < 0 : l'objet ralentit.</p>` }] },
+    { titre: 'Trouver la vitesse', enonce: `<p>Un palet de 0,20 kg, lancé à v<sub>A</sub> = 5,0 ${MS}, reçoit en tout un travail de −1,6 J.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule sa vitesse v<sub>B</sub> (2 chiffres significatifs).', label: 'v<sub>B</sub> =', valeur: 3, rel: .01, unite: MS + CALC, signe: false,
+        diag: x => (proche(x, 9) ? 'Tu as trouvé v<sub>B</sub>² : prends la racine.' : proche(x, Math.sqrt(41)) ? 'Le travail est négatif : l\'énergie cinétique diminue.' : '½ m v<sub>B</sub>² = ½ m v<sub>A</sub>² + ΣW.'),
+        solution: demo([`½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>A</sub><sup>2</sup> = ${SW}`, `⟺ ½ m v<sub>B</sub><sup>2</sup> = ½ m v<sub>A</sub><sup>2</sup> + ${SW}`, '= ½ × 0,20 × 5,0<sup>2</sup> − 1,6', '= 2,5 − 1,6 = 0,90 J', `⟺ v<sub>B</sub> = ${rac(fr('2 × 0,90', '0,20'))}`, `= ${c('3,0 ' + MS)}`]) }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>${DEC} = ${SW} : ½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>A</sub><sup>2</sup> = somme des travaux des forces extérieures entre A et B (final − initial).</p></div>
+    <div class="cle"><p>Travaux connus → variation de vitesse ; vitesses connues → travail, d'où une force ou un déplacement.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2c_cours.html">Cours : utilisation dans le champ de pesanteur →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#enonce">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+ET.menu('module_2b_cours');
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : définition et formule — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 1 / 5</span>
+    <h2 class="er-titre">Définition et formule</h2>
+    <p class="er-contexte">Le <b>travail</b> d'une force est l'énergie qu'elle transmet au cours d'un déplacement. On le calcule avec <b>W<sub>AB</sub>(<span class="vec-nom">F</span>) = F × AB × cos α</b>, l'angle toujours en <b>degrés</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Définition, W = F × AB × cos α ; exemple 1 du cours (F = 10 N,
+      AB = 1 m ; α = 40°, 90°, 180°, et 30° repéré sur la direction
+      opposée au déplacement, soit α = 150°) ; « À toi » : calculs avec
+      diagnostics (calculatrice en radians, sin au lieu de cos, cos oublié,
+      angle mal repéré)
+   2. Exemple 2 : pétrolier remorqué (2,0 km, 100 kN, 20°) : conversions,
+      écriture scientifique ; « À toi » : même méthode
+   Valeurs (vérifiées par un script) : 7,66 J ; 0 J ; −10 J ; −8,66 J ;
+   pétrolier : 1,9 × 10⁸ J.
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { demo, fmt, cs, sci, proche, W, nomV, figTravail, figPetrolier, CERCLE, CALC } = ET;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const WF = W('F');
+const cosd = a => Math.cos(a * Math.PI / 180);
+const o = (id, label) => ({ id, label });
+
+// diagnostic d'un calcul de W = F × AB × cos α
+function diagW(F, AB, a) {
+  const w = F * AB * cosd(a);
+  return v => (proche(v, F * AB * Math.cos(a), .02) ? 'Ta calculatrice est en <b>radians</b> : passe-la en <b>degrés</b>.'
+    : Math.abs(w) > 1e-9 && proche(v, -w, .02) ? `Regarde le signe de cos ${a}°.`
+    : proche(v, F * AB * Math.sin(a * Math.PI / 180), .02) ? 'C\'est <b>cos</b> α, pas sin α.'
+    : proche(v, F * AB * cosd(180 - a), .02) && a !== 90 ? `α est l'angle entre ${nomV('F')} et le déplacement A → B, pas avec la direction opposée.`
+    : proche(v, F * AB, .02) ? 'N\'oublie pas de multiplier par cos α.' : `${WF} = F × AB × cos α.`);
+}
+
+/* ---------- 1. Définition et formule ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le travail d\'une force constante');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Le <b>travail</b> d'une force est l'<b>énergie</b> qu'elle transmet au solide au cours d'un déplacement. Pour une force ${nomV('F')} constante, sur un déplacement de A à B :</p>
+        <p class="crs-formule">${WF} = F × AB × cos α</p>
+        <p>${WF} en joules (J) ; F en newtons (N) ; AB en mètres (m) ; α : angle entre ${nomV('F')} et <span class="vec-nom">AB</span>, en <b>degrés</b> (calculatrice en mode degrés).</p></div>
+      ${figTravail({ alpha: 40 })}
+      <p>Trois valeurs à connaître par cœur :</p>
+      ${CERCLE}
+      <p>Le travail ne dépend que de A et de B : il est <b>indépendant du chemin suivi</b> entre A et B.</p>
+    </div>
+    ${exemple(`<p>Exemple 1 : F = 10 N et AB = 1 m.</p>
+      ${calc(`α = 40° : ${WF} = 10 × 1 × cos 40° = ${c('7,66 J')}`)}
+      ${calc(`α = 90° : ${WF} = 10 × 1 × cos 90° = ${c('0 J')}`)}
+      ${calc(`α = 180° : ${WF} = 10 × 1 × cos 180° = 10 × 1 × (−1) = ${c('−10 J')}`)}
+      ${figTravail({ alpha: 150, ref: 'BA', W: 320, H: 140 })}
+      <p>Ici l'angle de 30° est repéré par rapport à la direction <b>opposée</b> au déplacement : l'angle avec <span class="vec-nom">AB</span> est α = 180° − 30° = 150°.</p>
+      ${calc(`${WF} = 10 × 1 × cos 150° = ${c('−8,66 J')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Calcul 1', enonce: '<p>F = 25 N, AB = 4,0 m, α = 60°.</p>',
+      parties: [{ type: 'nombre', q: `Calcule ${WF}.`, label: `${WF} =`, valeur: 50, unite: 'J' + CALC, rel: .01, diag: diagW(25, 4, 60), solution: calc(`${WF} = 25 × 4,0 × cos 60° = 25 × 4,0 × 0,5 = ${c('50 J')}`) }] },
+    { titre: 'Calcul 2', enonce: '<p>F = 12 N, AB = 3,0 m, α = 135°.</p>',
+      parties: [{ type: 'nombre', q: `Calcule ${WF} (3 chiffres significatifs).`, label: `${WF} =`, valeur: 12 * 3 * cosd(135), unite: 'J' + CALC, rel: .01, diag: diagW(12, 3, 135), solution: calc(`${WF} = 12 × 3,0 × cos 135° = ${c('−25,5 J')}`) }] },
+    { titre: 'L\'angle', parties: [{ type: 'choix', q: 'Une force fait un angle de 20° avec la direction <b>opposée</b> au déplacement. Quel angle α faut-il mettre dans la formule ?', colonne: false, melanger: false,
+      options: [o('160', 'α = 160°'), o('20', 'α = 20°'), o('70', 'α = 70°')], bonne: '160',
+      indices: { 20: 'α se mesure entre la force et le déplacement A → B, pas avec la direction opposée.', 70: '70° = 90° − 20° : l\'angle est mesuré à partir du déplacement, pas de sa perpendiculaire.' },
+      solution: '<p>α = 180° − 20° = 160° : le travail sera négatif.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Exemple 2 : le pétrolier remorqué ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Avec des conversions');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Avant de calculer, on <b>convertit</b> : F en N (1 kN = 10<sup>3</sup> N), AB en m (1 km = 10<sup>3</sup> m). Un grand résultat s'écrit en écriture scientifique.</p>
+    </div>
+    ${exemple(`<p>Exemple 2 : un pétrolier est remorqué par un câble sur une distance de 2,0 km. La force ${nomV('F')} exercée par le câble, constante, vaut 100 kN et fait un angle de 20° avec l'horizontale. Calculer le travail de ${nomV('F')} lors de ce déplacement.</p>
+      ${figPetrolier()}
+      ${demo([`${WF} = F × AB × cos α`, '= 100 × 10<sup>3</sup> N × 2,0 × 10<sup>3</sup> m × cos 20°', `= ${c('1,9 × 10<sup>8</sup> J')}`])}`)}`);
+  const F = hasard([50, 80, 120]), d = hasard([1.5, 3.0, 5.0]), a = hasard([15, 25, 35]), w = F * 1e3 * d * 1e3 * cosd(a);
+  c_.aToi(carte, [
+    { titre: 'Un remorqueur', enonce: `<p>Un remorqueur tire une barge sur ${fmt(d)} km avec une force constante de ${F} kN qui fait un angle de ${a}° avec le déplacement.</p>`,
+      parties: [{ type: 'sci', q: `Calcule ${WF} (2 chiffres significatifs).`, label: `${WF} =`, valeur: w, cs: 2, unite: 'J' + CALC,
+        diag: v => (proche(v, w / 1e3, .05) || proche(v, w / 1e6, .05) ? 'Convertis les kN en N et les km en m (× 10<sup>3</sup> chacun).' : proche(v, F * d * 1e6 * Math.cos(a), .05) ? 'Ta calculatrice est en radians : passe-la en degrés.' : `${WF} = F × AB × cos α, F en N et AB en m.`),
+        solution: calc(`${WF} = ${F} × 10<sup>3</sup> × ${fmt(d)} × 10<sup>3</sup> × cos ${a}° = ${c(sci(w, 2) + ' J')}`) }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>${WF} = F × AB × cos α : en J, avec F en N, AB en m, α angle entre ${nomV('F')} et <span class="vec-nom">AB</span>, en degrés.</p></div>
+    <div class="cle"><p>cos 0° = 1 ; cos 90° = 0 ; cos 180° = −1. Le travail d'une force constante ne dépend pas du chemin suivi.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1b_cours.html">Cours : travail moteur, résistant ou nul →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#formule">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+ET.menu('module_1a_cours');
+</script>
+</body>
+</html>
