@@ -37,7 +37,7 @@
       dépend pas du chemin suivi) ; « À toi » : travail sur chaque portion
    ============================================================ */
 const { exemple, hasard } = COURS;
-const { fmt, proche, W, nomV, figDecomp, CALC, o } = ET;
+const { fmt, proche, W, nomV, demo, figDecomp, CALC, o } = ET;
 const calc = h => `<p class="crs-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
 const WP = W('P'), G = 'm·s<sup>−2</sup>';
@@ -52,8 +52,7 @@ function etape1(c_) {
       <div class="cle"><p><b class="cle-titre">Pour retenir.</b> Poids × altitude (dénivelé), <b>puis</b> le signe : + s'il descend, − s'il monte.</p></div>
     </div>
     ${exemple(`<p>Un skieur de 70 kg descend une piste de A (altitude 1 850 m) à B (altitude 1 730 m) ; g = 9,81 ${G}.</p>
-      ${calc(`h = z<sub>A</sub> − z<sub>B</sub> = 1 850 − 1 730 = 120 m (il descend : h > 0)`)}
-      ${calc(`${WP} = m g h = 70 × 9,81 × 120 = ${c('8,2 × 10<sup>4</sup> J')} : travail moteur`)}`)}`);
+      ${demo(['h = z<sub>A</sub> − z<sub>B</sub> = 1 850 − 1 730 = 120 m', '> il descend : h > 0', `${WP} = m g h`, '= 70 × 9,81 × 120', `= ${c('8,2 × 10<sup>4</sup> J')}`, '> travail moteur'])}`)}`);
   const m = hasard([0.50, 0.25, 2.0]), h = hasard([3.0, 4.5, 12]), w = m * 9.81 * h;
   c_.aToi(carte, [
     { titre: 'Une montée', enonce: `<p>On soulève un sac de ${fmt(m * 1000)} g de ${fmt(h)} m (g = 9,81 ${G}).</p>`,
@@ -75,12 +74,10 @@ function etape2(c_) {
       <p>Le travail du poids ne dépend pas du chemin suivi : on le calcule sur un chemin plus simple, <b>A → C</b> vertical puis <b>C → B</b> horizontal.</p>
       <p><b>Si l'objet descend</b> (AC = h, altitude descendue, positive) :</p>
       ${figDecomp('descend')}
-      ${calc(`${WP} = W<sub>AC</sub>(${nomV('P')}) + W<sub>CB</sub>(${nomV('P')}) = P × AC × cos 0° + P × CB × cos 90° = P × AC + 0`)}
-      ${calc(`donc ${WP} = m g h, avec h = AC > 0`)}
+      ${demo([`${WP} = W<sub>AC</sub>(${nomV('P')}) + W<sub>CB</sub>(${nomV('P')})`, '= P × AC × cos 0° + P × CB × cos 90°', '= P × AC + 0', '= m g h', '> avec h = AC > 0'])}
       <p><b>Si l'objet monte</b> :</p>
       ${figDecomp('monte')}
-      ${calc(`${WP} = W<sub>AC</sub>(${nomV('P')}) + W<sub>CB</sub>(${nomV('P')}) = 0 + P × CB × cos 180° = −m g CB`)}
-      ${calc(`donc ${WP} = m g h, avec h = −CB < 0, l'altitude descendue`)}
+      ${demo([`${WP} = W<sub>AC</sub>(${nomV('P')}) + W<sub>CB</sub>(${nomV('P')})`, '= 0 + P × CB × cos 180°', '= −m g CB', '= m g h', '> avec h = −CB < 0 : l\'altitude descendue est négative'])}
     </div>
     ${exemple(`<p>Une bille de 50 g descend de 2,0 m en suivant une rampe sinueuse de 5 m de long (g = 9,81 ${G}). Le chemin n'intervient pas :</p>
       ${calc(`${WP} = m g h = 0,050 × 9,81 × 2,0 = ${c('0,98 J')}`)}`)}`);

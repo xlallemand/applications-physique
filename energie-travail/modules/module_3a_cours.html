@@ -36,7 +36,7 @@
       les deux cas) ; « À toi » : E_pp avec une origine donnée, variation
    ============================================================ */
 const { exemple, hasard } = COURS;
-const { fmt, proche, MS, CALC, figBalcon, o } = ET;
+const { fmt, proche, demo, MS, CALC, figBalcon, o } = ET;
 const calc = h => `<p class="crs-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
 const G = 'm·s<sup>−2</sup>', EPP = 'E<sub>pp</sub>', EM = 'E<sub>m</sub>', EC = 'E<sub>c</sub>';
@@ -52,7 +52,7 @@ function etape1(c_) {
         <p>m : masse (kg) ; g : intensité de la pesanteur (${G}) ; z : altitude de l'objet (m), sur un axe vertical vers le haut.</p></div>
     </div>
     ${exemple(`<p>Une balle de 60 g passe à 2,0 m d'altitude à la vitesse de 5,0 ${MS} (g = 9,81 ${G}).</p>
-      ${calc(`${EC} = ½ × 0,060 × 5,0<sup>2</sup> = 0,75 J ; ${EPP} = 0,060 × 9,81 × 2,0 = 1,18 J ; ${EM} = 0,75 + 1,18 = ${c('1,93 J')}`)}`)}`);
+      ${demo([`${EC} = ½ m v<sup>2</sup> = ½ × 0,060 × 5,0<sup>2</sup> = 0,75 J`, `${EPP} = m g z = 0,060 × 9,81 × 2,0 = 1,18 J`, `${EM} = ${EC} + ${EPP} = 0,75 + 1,18 = ${c('1,93 J')}`])}`)}`);
   const m = hasard([0.25, 0.40, 1.5]), z = hasard([1.2, 3.0, 8.0]), v = hasard([2.0, 4.0, 6.0]), Ep = m * 9.81 * z, Ec = .5 * m * v * v;
   c_.aToi(carte, [
     { titre: 'Énergies d\'un objet', enonce: `<p>Un objet de ${fmt(m * 1000)} g passe à l'altitude z = ${fmt(z)} m à la vitesse de ${fmt(v)} ${MS} (g = 9,81 ${G}).</p>`,
@@ -60,7 +60,7 @@ function etape1(c_) {
         diag: x => (proche(x, Ep * 1000, .02) ? 'La masse en kg.' : `${EPP} = m g z.`), solution: calc(`${EPP} = ${fmt(m)} × 9,81 × ${fmt(z)} = ${c(fmt(+Ep.toPrecision(3)) + ' J')}`) },
       { type: 'nombre', q: `Calcule ${EM} (3 chiffres significatifs).`, label: `${EM} =`, valeur: Ep + Ec, rel: .01, unite: 'J' + CALC, signe: false,
         diag: x => (proche(x, Ep + m * v * v, .02) ? `${EC} = ½ m v² : le ½.` : proche(x, Ep, .02) || proche(x, Ec, .02) ? `${EM} = ${EC} + ${EPP} : les deux.` : `${EM} = ½ m v² + m g z.`),
-        solution: calc(`${EC} = ½ × ${fmt(m)} × ${fmt(v)}<sup>2</sup> = ${fmt(+Ec.toPrecision(3))} J ; ${EM} = ${fmt(+Ec.toPrecision(3))} + ${fmt(+Ep.toPrecision(3))} = ${c(fmt(+(Ec + Ep).toPrecision(3)) + ' J')}`) }] },
+        solution: demo([`${EC} = ½ × ${fmt(m)} × ${fmt(v)}<sup>2</sup> = ${fmt(+Ec.toPrecision(3))} J`, `${EM} = ${EC} + ${EPP}`, `= ${fmt(+Ec.toPrecision(3))} + ${fmt(+Ep.toPrecision(3))}`, `= ${c(fmt(+(Ec + Ep).toPrecision(3)) + ' J')}`]) }] },
   ]);
   return carte;
 }
@@ -72,8 +72,10 @@ function etape2(c_) {
       <p>On choisit l'altitude où l'on décide que ${EPP} est nulle (l'origine z = 0). La valeur de ${EPP} change avec ce choix, mais <b>ses variations ne changent pas</b> : ce sont elles qui comptent.</p>
     </div>
     ${exemple(`<p>Énergie potentielle de pesanteur d'une balle de 100 g sur un balcon à 3 m du sol (g = 10 ${G}) :</p>
-      <div class="et-figs2"><div>${figBalcon({ origine: 'sol' })}<p><b>Origine au sol.</b> Sur le balcon : ${EPP} = 0,100 × 10 × 3 = 3 J. Au sol : ${EPP} = 0,100 × 10 × 0 = 0 J. Dans sa chute, ${EPP} diminue de ${c('3 J')}.</p></div>
-        <div>${figBalcon({ origine: 'balcon' })}<p><b>Origine au balcon.</b> Sur le balcon : ${EPP} = 0,100 × 10 × 0 = 0 J. Au sol : ${EPP} = 0,100 × 10 × (−3) = −3 J. Dans sa chute, ${EPP} diminue de ${c('3 J')}.</p></div></div>`)}`);
+      <div class="et-figs2"><div><p><b>Origine au sol</b></p>${figBalcon({ origine: 'sol' })}
+          ${demo([`> Sur le balcon (z = 3 m) :`, `${EPP} = 0,100 × 10 × 3 = 3 J`, `> Au sol (z = 0) :`, `${EPP} = 0,100 × 10 × 0 = 0 J`, `> Dans sa chute :`, `Δ${EPP} = 0 − 3 = ${c('−3 J')}`])}</div>
+        <div><p><b>Origine au balcon</b></p>${figBalcon({ origine: 'balcon' })}
+          ${demo([`> Sur le balcon (z = 0) :`, `${EPP} = 0,100 × 10 × 0 = 0 J`, `> Au sol (z = −3 m) :`, `${EPP} = 0,100 × 10 × (−3) = −3 J`, `> Dans sa chute :`, `Δ${EPP} = −3 − 0 = ${c('−3 J')}`])}</div></div>`)}`);
   const m = hasard([0.50, 2.0]), z = hasard([4.0, 6.0]);
   c_.aToi(carte, [
     { titre: 'Origine en haut', enonce: `<p>Un pot de fleurs de ${fmt(m)} kg est posé sur le rebord d'une fenêtre à ${fmt(z)} m du sol. On choisit l'origine des altitudes au niveau de la <b>fenêtre</b> (g = 10 ${G}).</p>`,

@@ -29,11 +29,13 @@
   /* ---------- Force et déplacement ---------- */
   function figTravail(o) {
     o = Object.assign({ alpha: 30, nom: 'F', ref: 'AB', W: 320, H: 150 }, o);
-    const xA = o.ref === 'BA' ? 120 : 60, xB = 280, y = 108, a = o.alpha;
+    // A assez à droite pour qu'une force tirée vers l'arrière tienne dans la figure ; AB⃗ et ses noms au-dessus du bas du cadre
+    const a = o.alpha, r = rad(a), y = o.H - 34, L = Math.min(88, (y - 28) / Math.max(Math.sin(r), .01));
+    const xA = Math.max(o.ref === 'BA' ? 120 : 60, Math.cos(r) < 0 ? 34 - L * Math.cos(r) : 0), xB = o.W - 30;
     let g = dep(xA, y, xB, y) + pt(xA, y) + pt(xB, y);
     g += txt(xA - 4, y + 22, 'A', { g: 800, c: ENCRE, t: 14, a: 'middle' }) + txt(xB, y + 22, 'B', { g: 800, c: ENCRE, t: 14, a: 'middle' });
-    g += nom((xA + xB) / 2 + 20, y + 24, 'AB', '', COUL.traj, { t: 13 });
-    const L = 88, r = rad(a), x2 = xA + L * Math.cos(r), y2 = y - L * Math.sin(r);
+    g += nom((xA + xB) / 2 + 10, y + 24, 'AB', '', COUL.traj, { t: 13 });
+    const x2 = xA + L * Math.cos(r), y2 = y - L * Math.sin(r);
     g += fl(xA, y, x2, y2, COULF.F, { ep: 2.8, lt: 12 }) + nom(x2 + (Math.cos(r) < -.2 ? -12 : 12), y2 - 6, o.nom, '', COULF.F, { t: 15 });
     // angle : repéré depuis AB⃗ (ou depuis la direction opposée, en pointillés)
     const R = 30;
@@ -147,14 +149,16 @@
       return svg(170, 160, g, 'Satellite en orbite circulaire : la force d\'attraction de la Terre est dirigée vers le centre, perpendiculaire à la vitesse');
     }
     if (k === 'pendule') {
-      g += `<line x1="40" y1="14" x2="130" y2="14" stroke="${ENCRE}" stroke-width="2"/>`;
-      for (let x = 46; x < 130; x += 10) g += `<line x1="${x}" y1="14" x2="${x - 6}" y2="6" stroke="${ENCRE3}"/>`;
-      const a = rad(30), x = 85 + 100 * Math.sin(a), y = 14 + 100 * Math.cos(a);
-      g += `<path d="M${f1(85 - 100 * Math.sin(a))},${f1(y)} A100,100 0 0 0 ${f1(x)},${f1(y)}" fill="none" stroke="${ENCRE3}" stroke-dasharray="5 4"/>`;
-      g += `<line x1="85" y1="14" x2="${f1(x)}" y2="${f1(y)}" stroke="${ENCRE2}" stroke-width="1.4"/><circle cx="${f1(x)}" cy="${f1(y)}" r="7" fill="#fff" stroke="${ENCRE}" stroke-width="1.6"/>`;
-      g += fl(x, y, x - 30 * Math.sin(a), y - 30 * Math.cos(a), COUL.F, { ep: 2.2 }) + nom(x - 26, y - 34, 'T', '', COUL.F, { t: 12 });
-      g += fl(x, y, x + 30 * Math.cos(a), y - 30 * Math.sin(a), COUL.v, { ep: 2.2 }) + nom(x + 32, y - 18, 'v', '', COUL.v, { t: 12 });
-      return svg(170, 140, g, 'Pendule : la tension du fil est dirigée vers le point d\'attache, perpendiculaire à la vitesse');
+      // point d'attache en (70, 14) : la boule et le vecteur v⃗ restent dans le cadre ; nom de T⃗ à gauche du fil
+      const xo = 70;
+      g += `<line x1="${xo - 45}" y1="14" x2="${xo + 45}" y2="14" stroke="${ENCRE}" stroke-width="2"/>`;
+      for (let x = xo - 39; x < xo + 45; x += 10) g += `<line x1="${x}" y1="14" x2="${x - 6}" y2="6" stroke="${ENCRE3}"/>`;
+      const a = rad(30), x = xo + 100 * Math.sin(a), y = 14 + 100 * Math.cos(a);
+      g += `<path d="M${f1(xo - 100 * Math.sin(a))},${f1(y)} A100,100 0 0 0 ${f1(x)},${f1(y)}" fill="none" stroke="${ENCRE3}" stroke-dasharray="5 4"/>`;
+      g += `<line x1="${xo}" y1="14" x2="${f1(x)}" y2="${f1(y)}" stroke="${ENCRE2}" stroke-width="1.4"/><circle cx="${f1(x)}" cy="${f1(y)}" r="7" fill="#fff" stroke="${ENCRE}" stroke-width="1.6"/>`;
+      g += fl(x, y, x - 34 * Math.sin(a), y - 34 * Math.cos(a), COUL.F, { ep: 2.2 }) + nom(x - 30, y - 8, 'T', '', COUL.F, { t: 12 });
+      g += fl(x, y, x + 30 * Math.cos(a), y - 30 * Math.sin(a), COUL.v, { ep: 2.2 }) + nom(x + 30, y - 22, 'v', '', COUL.v, { t: 12 });
+      return svg(180, 140, g, 'Pendule : la tension du fil est dirigée vers le point d\'attache, perpendiculaire à la vitesse');
     }
     g += `<line x1="10" y1="110" x2="200" y2="110" stroke="${ENCRE2}" stroke-width="1.6"/><rect x="70" y="72" width="50" height="38" rx="3" fill="#ebe8e1" stroke="${ENCRE2}"/>`;
     g += force('RN', 95, 91, 90, 54) + force('P', 95, 91, 270, 54);
@@ -166,13 +170,16 @@
   function figBalcon(o) {
     o = Object.assign({ origine: 'sol' }, o);
     const sol = 150, yb = sol - 90;
-    let g = `<line x1="10" y1="${sol}" x2="200" y2="${sol}" stroke="${ENCRE2}" stroke-width="1.6"/><path d="M60,${sol} V60 L100,30 L140,60 V${sol}" fill="#fff" stroke="${ENCRE2}" stroke-width="1.5"/>`;
+    // le sol commence à droite de l'axe z : les graduations 0 et −3 restent lisibles
+    let g = `<line x1="42" y1="${sol}" x2="200" y2="${sol}" stroke="${ENCRE2}" stroke-width="1.6"/><path d="M60,${sol} V60 L100,30 L140,60 V${sol}" fill="#fff" stroke="${ENCRE2}" stroke-width="1.5"/>`;
     g += `<rect x="140" y="${yb}" width="26" height="12" fill="none" stroke="${ENCRE2}"/><circle cx="156" cy="${yb - 5}" r="5" fill="${COUL.Epp}"/>`;
     const y0 = o.origine === 'sol' ? sol : yb;
-    g += fl(30, sol + 6, 30, 16, ENCRE, { ep: 1.2, lt: 7 }) + txt(38, 22, 'z', { g: 800, c: ENCRE, t: 13 }) + txt(24, y0 + 4, '0', { g: 800, c: ENCRE, t: 12, a: 'end' });
-    if (o.origine !== 'sol') g += `<line x1="30" y1="${yb}" x2="176" y2="${yb}" stroke="${ENCRE3}" stroke-dasharray="4 4"/>` + txt(24, sol + 4, '−3', { g: 700, c: ENCRE2, t: 11, a: 'end' });
-    else g += txt(24, yb + 4, '3', { g: 700, c: ENCRE2, t: 11, a: 'end' }) + `<line x1="27" y1="${yb}" x2="33" y2="${yb}" stroke="${ENCRE}"/>`;
-    return svg(210, 170, g, o.origine === 'sol' ? 'Balle sur un balcon à 3 m du sol ; origine des altitudes au sol' : 'Balle sur un balcon à 3 m du sol ; origine des altitudes au niveau du balcon, le sol est à −3 m');
+    g += fl(30, sol, 30, 16, ENCRE, { ep: 1.2, lt: 7 }) + txt(38, 22, 'z', { g: 800, c: ENCRE, t: 13 });
+    // graduations (petit trait sur l'axe) et valeurs à gauche de l'axe, en m
+    const grad = (y, t, gras) => `<line x1="26" y1="${y}" x2="34" y2="${y}" stroke="${ENCRE}" stroke-width="1.4"/>` + txt(21, y + 5, t, { g: gras ? 800 : 700, c: gras ? ENCRE : ENCRE2, t: 14, a: 'end' });
+    if (o.origine !== 'sol') g += `<line x1="38" y1="${yb}" x2="176" y2="${yb}" stroke="${ENCRE3}" stroke-dasharray="4 4"/>` + grad(yb, '0', true) + grad(sol, '−3');
+    else g += grad(sol, '0', true) + grad(yb, '3');
+    return svg(210, 162, g, o.origine === 'sol' ? 'Balle sur un balcon à 3 m du sol ; origine des altitudes au sol' : 'Balle sur un balcon à 3 m du sol ; origine des altitudes au niveau du balcon, le sol est à −3 m');
   }
 
   /* ---------- Énergies en fonction du temps (lancer de balle) ----------
@@ -182,8 +189,8 @@
     const T = 1, Epp = t => (o.Em0 - 8) * 4 * t * (1 - t) * (1 - o.frott / o.Em0 * .3 * t), Em = t => o.Em0 - o.frott * t, Ec = t => Em(t) - Epp(t);
     return ET.courbes({ tmax: T, ymin: 0, ymax: o.Em0 + 4, pasT: .2, pasY: 5, W: o.W, H: o.H, nomY: 'E (J)', series: [
       { f: Em, coul: COUL.Em, nom: 'E<tspan dy="3" font-size="8">m</tspan>', tNom: .08 },
-      { f: Ec, coul: COUL.Ec, nom: 'E<tspan dy="3" font-size="8">c</tspan>', tNom: .82 },
-      { f: Epp, coul: COUL.Epp, nom: 'E<tspan dy="3" font-size="8">pp</tspan>', tNom: .3 }],
+      { f: Ec, coul: COUL.Ec, nom: 'E<tspan dy="3" font-size="8">c</tspan>', tNom: .86, dxNom: 6, dyNom: 22 },
+      { f: Epp, coul: COUL.Epp, nom: 'E<tspan dy="3" font-size="8">pp</tspan>', tNom: .5, dxNom: -4, dyNom: -6, aNom: 'middle' }],
       aria: o.aria || (o.frott ? 'Énergies d\'une balle lancée avec frottements : l\'énergie mécanique diminue' : 'Énergies d\'une balle lancée sans frottements : l\'énergie mécanique reste constante, l\'énergie cinétique et l\'énergie potentielle s\'échangent') });
   }
 

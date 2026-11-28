@@ -21,6 +21,7 @@
    ET.V(n, s)                 nom de vecteur (flèche au-dessus), indice hors de la flèche
    ET.col(a, b), ET.sys(…)    coordonnées en colonne, système avec accolade
    ET.fr(h, b), ET.rac(x)     fraction sur deux étages, racine carrée (signe relié à la barre)
+   ET.demo(lignes)            démonstration ou résolution d'équation, une étape par ligne (suites « = », « ⟺ » décalées)
    ET.newton(sys, F, a, proj) phrase de la seconde loi de Newton ; ET.integ(…) intégration rédigée
    ET.W(clé, d)               travail d'une force : W_AB(F⃗) ; ET.nomV(clé) nom de la force
    ET.CALC                    icône calculatrice (après l'unité d'un champ)
@@ -33,6 +34,7 @@
    ET.condo(o)                condensateur plan horizontal ; ET.courbes(o) graphique de fonctions du temps
    ET.schemaMvt(o, vals)      schéma du théorème de l'énergie cinétique (A, B, forces, données)
    ET.partieDonnees(o, d, opts)  placer les données de l'énoncé sur ce schéma (glisser-déposer)
+   ET.schemaEm(o, vals), ET.partieDonneesEm(o, d, opts)  même chose pour la conservation de E_m (z_A, v_A, z_B, v_B, m)
    ET.partieAngles(o, opts)   angle α de chaque force avec le déplacement, puis chaque travail
    ET.partieEquation(o, opts) choisir le théorème écrit pour la situation
 
@@ -101,6 +103,14 @@
 
   // fraction écrite sur deux étages
   const fr = (h, b) => `<span class="fr"><span>${h}</span><span>${b}</span></span>`;
+  /* Démonstration ou résolution d'équation : une étape par ligne.
+     lignes : tableau de chaînes HTML ; une ligne qui commence par « = », « ⟺ » ou « ⟹ » est décalée
+     (suite du calcul) ; une ligne qui commence par « > » est un commentaire (« donc », « avec … ») */
+  const demo = lignes => `<div class="et-demo">${lignes.filter(Boolean).map(l => {
+    const t = String(l).trim();
+    if (t[0] === '>') return `<p class="et-demo-com">${t.slice(1).trim()}</p>`;
+    return /^(=|⟺|⟹|≈)/.test(t) ? `<p class="et-demo-suite">${t}</p>` : `<p>${t}</p>`;
+  }).join('')}</div>`;
 
   /* ============================================================
      OUTILS
@@ -912,7 +922,8 @@
       let p = '';
       for (let k = 0; k <= 80; k++) { const t = o.tmax * k / 80, y = s.f(t); if (y < o.ymin - 1e-9 || y > o.ymax + 1e-9) continue; p += `${p ? 'L' : 'M'}${f1(X(t))},${f1(Y(y))}`; }
       c += `<path d="${p}" fill="none" stroke="${s.coul || COUL.traj}" stroke-width="2.4"/>`;
-      if (s.nom) { const t = s.tNom == null ? o.tmax * .72 : s.tNom; c += txt(X(t) + 4, Y(s.f(t)) - 7, s.nom, { g: 800, c: s.coul || COUL.traj, t: 11 }); }
+      // nom de la courbe près du point d'abscisse tNom, décalé de (dxNom, dyNom) pour ne pas être sur une courbe
+      if (s.nom) { const t = s.tNom == null ? o.tmax * .72 : s.tNom; c += txt(X(t) + 4 + (s.dxNom || 0), Y(s.f(t)) - 7 + (s.dyNom || 0), s.nom, { g: 800, c: s.coul || COUL.traj, t: 11, a: s.aNom }); }
     });
     (o.points || []).forEach(([t, y, n]) => { c += `<circle cx="${f1(X(t))}" cy="${f1(Y(y))}" r="3.5" fill="${ENCRE}"/>` + (n ? txt(X(t) + 6, Y(y) - 6, n, { g: 700, c: ENCRE, t: 11 }) : ''); });
     return svg(o.W, o.H, c, o.aria || 'Graphique en fonction du temps', 'et-fig-courbe');
@@ -928,7 +939,7 @@
      orange, la réaction du support bleue, les frottements roses…
      (attributs de présentation des SVG, comme VEC.C)
      ============================================================ */
-  const NOMS = { P: ['P'], RN: ['R', 'N'], R: ['R'], N: ['N'], f: ['f'], Fm: ['F', 'm'], F: ['F'] };
+  const NOMS = { P: ['P'], RN: ['R', 'N'], R: ['R', 'N'], N: ['R', 'N'], f: ['f'], Fm: ['F', 'm'], F: ['F'] };
   const nomV = k => V(...NOMS[k]);
   // travail d'une force : W_AB(F⃗)
   const W = (k, d) => `W<sub>${d || 'AB'}</sub>(${nomV(k)})`;
@@ -963,7 +974,7 @@
              objet: 'voiture' | 'camion' | 'pierre' | 'bloc' | 'pomme' | 'balle',
              forces: ['P', 'RN', 'f', 'Fm'] (clés de NOMS), d: 'AB' | 'h' | 'ℓ' (nom de la distance),
              angles: true (angles α marqués : schéma d'un exemple traité), aria }
-       vals = { m, vA, vB, d } : HTML de chaque case ; '#clé' → case vide (ET.slot), '?' → grandeur cherchée
+       vals = { m, vA, vB, d, f } : HTML de chaque case (f : frottements, sous le schéma horizontal) ; '#clé' → case vide (ET.slot), '?' → grandeur cherchée
      Déplacement horizontal : les données au-dessus du dessin (A à gauche, B à droite),
      la distance en dessous. Déplacement vertical : les données à droite du dessin.
      ============================================================ */
@@ -987,7 +998,8 @@
       `<path class="et-sc-vitre" d="M${x + 23},${sol - 27} h7 l6,7 h-13 Z"/></g>` +
       `<circle cx="${x - 30}" cy="${sol - 6}" r="6" class="et-sc-roue"/><circle cx="${x - 16}" cy="${sol - 6}" r="6" class="et-sc-roue"/><circle cx="${x + 30}" cy="${sol - 6}" r="6" class="et-sc-roue"/>` };
     if (type === 'pierre') return { G: [x, sol - 11], svg: `<path class="et-sc-sys" d="M${x - 22},${sol} h44 q4,0 4,-5 v-8 q0,-7 -7,-7 h-38 q-7,0 -7,7 v8 q0,5 4,5 Z"/>` +
-      `<path class="et-sc-anse" d="M${x - 8},${sol - 20} v-6 h20"/>` };
+      // poignée à l'arrière (à gauche), pour laisser libres l'angle droit et l'arc de 180° tracés en G
+      `<path class="et-sc-anse" d="M${x - 8},${sol - 20} v-6 h-12"/>` };
     return { G: [x, sol - 15], svg: `<rect x="${x - 26}" y="${sol - 30}" width="52" height="30" rx="3" class="et-sc-sys"/>` };
   }
   // une ligne de données « nom = valeur »
@@ -1014,8 +1026,9 @@
       if (o.angles) {
         // direction du déplacement (référence des angles), puis arcs : 180° pour f⃗, angle droit pour les forces verticales
         g += `<line x1="${gx}" y1="${gy}" x2="${gx + 54}" y2="${gy}" class="et-sc-ref"/>`;
-        if (fs.includes('f')) g += `<path d="M${gx + 15},${gy} A15,15 0 0 0 ${gx - 15},${gy}" class="et-sc-arc"/><text x="${gx - 16}" y="${gy - 30}" text-anchor="end" class="et-sc-alpha">α = 180°</text>`;
-        if (fs.some(k => ['P', 'RN', 'R', 'N'].includes(k))) g += `<path d="M${gx + 8},${gy} v-8 h-8" class="et-sc-arc"/>`;
+        // arc de 180° au-dessus de G, assez grand pour passer au-dessus de la poignée ; angle droit entre le déplacement et la verticale
+        if (fs.includes('f')) g += `<path d="M${gx + 30},${gy} A30,30 0 0 0 ${gx - 30},${gy}" class="et-sc-arc"/><text x="${gx - 28}" y="${gy - 26}" text-anchor="end" class="et-sc-alpha">α = 180°</text>`;
+        if (fs.some(k => ['P', 'RN', 'R', 'N'].includes(k))) g += `<path d="M${gx + 12},${gy} v-12 h-12" class="et-sc-arc"/>`;
       }
       const ANG = { P: 270, RN: 90, R: 90, N: 90, f: 180, Fm: 0 };
       fs.forEach(k => { g += force(k, gx, gy, ANG[k], ['f', 'Fm'].includes(k) ? 52 : k === 'P' ? 36 : 42); });
@@ -1023,8 +1036,8 @@
       return `<div class="et-sch et-sch-h" ${role} aria-label="${aria}">
         <div class="et-sch-haut"><div class="et-sch-col"><p class="et-sch-pt">A : départ</p>${ligneDonnee('m', vals.m)}${ligneDonnee('v<sub>A</sub>', vals.vA)}</div>
           <div class="et-sch-col"><p class="et-sch-pt">B : arrivée</p>${ligneDonnee('v<sub>B</sub>', vals.vB)}</div></div>
-        <svg viewBox="0 0 360 148" class="et-sc" aria-hidden="true">${g}</svg>
-        <div class="et-sch-bas">${ligneDonnee(d, vals.d)}</div></div>`;
+        <svg viewBox="0 0 360 172" class="et-sc" aria-hidden="true">${g}</svg>
+        <div class="et-sch-bas">${ligneDonnee(d, vals.d)}${ligneDonnee('f', vals.f)}</div></div>`;
     }
     // déplacement vertical : chute (A en haut) ou lancer vers le haut (A en bas, B au sommet)
     const bas = o.sens === 'bas', yH = 30, yB = bas ? 204 : 182, yA = bas ? yH : yB, yBpt = bas ? yB : yH, x = 82;
@@ -1051,7 +1064,7 @@
   }
 
   // Placer les données de l'énoncé sur le schéma
-  // d = { m, vA, vB, d } : texte de chaque étiquette ('?' : grandeur cherchée) ; opts = { q, intrus: [{ label, indice }], solution }
+  // d = { m, vA, vB, d, f } : texte de chaque étiquette ('?' : grandeur cherchée) ; opts = { q, intrus: [{ label, indice }], solution }
   function partieDonnees(o, d, opts) {
     opts = opts || {};
     const nd = nomD(o);
@@ -1060,8 +1073,9 @@
       vA: 'v<sub>A</sub> est la vitesse au <b>départ</b>, en A. « Lâchée », « démarre » : v<sub>A</sub> = 0.',
       vB: 'v<sub>B</sub> est la vitesse à l\'<b>arrivée</b>, en B. « S\'arrête », « s\'immobilise », « au sommet » : v<sub>B</sub> = 0.',
       d: `${nd} est la ${nd === 'h' ? 'hauteur' : 'distance'} parcourue entre A et B, en mètres.`,
+      f: 'f est la valeur de la force de frottement, en newtons (N).',
     };
-    const cles = ['m', 'vA', 'vB', 'd'].filter(k => d[k] != null);
+    const cles = ['m', 'vA', 'vB', 'd', 'f'].filter(k => d[k] != null);
     const etiquettes = cles.map(k => ({ id: k, label: d[k] === '?' ? '?<span class="et-replique"> (on la cherche)</span>' : d[k], cible: k,
       indice: d[k] === '?' ? 'Le « ? » se place sur la grandeur que l\'on cherche.' : IND[k] }))
       .concat((opts.intrus || []).map((x, i) => ({ id: 'intrus' + i, label: x.label, cible: null, indice: x.indice })));
@@ -1069,6 +1083,51 @@
     cles.forEach(k => { vals[k] = '#' + k; });
     return { type: 'schema', q: opts.q || 'Fais le schéma : place les données de l\'énoncé (le « ? » sur la grandeur que l\'on cherche).',
       titrePalette: 'Données de l\'énoncé', schema: schemaMvt(o, vals), etiquettes, solution: opts.solution, correction: opts.correction };
+  }
+
+  /* Schéma de la conservation de l'énergie mécanique (chute libre, axe z vertical vers le haut, origine au sol)
+     o = { sens: 'bas' (A en haut, B au sol) | 'haut' (lancer : A au sol, B au sommet), objet: 'pomme' | 'balle',
+           hauteurA: true (lancer depuis une hauteur : A au-dessus du sol), aria }
+     vals = { m, zA, vA, zB, vB } : HTML de chaque case ; '#clé' → case vide (ET.slot), '?' → grandeur cherchée */
+  function schemaEm(o, vals) {
+    vals = vals || {};
+    const bas = o.sens === 'bas', vides = Object.keys(vals).some(k => String(vals[k])[0] === '#');
+    const yH = 34, yS = 204, x = 92, yA = bas ? yH : o.hauteurA ? yS - 60 : yS, yB = bas ? yS : yH;
+    let g = `<line x1="40" y1="${yS}" x2="146" y2="${yS}" class="et-sc-sol"/>`;
+    // axe z (origine au sol)
+    g += `<line x1="22" y1="${yS}" x2="22" y2="18" class="et-sc-cote"/><path d="M22,10 l-4,9 h8 Z" class="et-sc-cote-p"/><text x="30" y="20" class="et-sc-pt">z</text>`;
+    g += `<line x1="17" y1="${yS}" x2="27" y2="${yS}" class="et-sc-marque"/><text x="12" y="${yS + 5}" text-anchor="end" class="et-sc-pt">0</text>`;
+    g += `<line x1="22" y1="${yH}" x2="${x}" y2="${yH}" class="et-sc-ref"/>`;
+    // trajet de A vers B
+    g += `<line x1="${x}" y1="${yA}" x2="${x}" y2="${yB + (bas ? -12 : 12)}" class="et-sc-dep"/><path d="M${x},${yB + (bas ? -2 : 2)} l-5,${bas ? -11 : 11} h10 Z" class="et-sc-dep-p"/>`;
+    [[yA, 'A'], [yB, 'B']].forEach(([y, n]) => { g += `<line x1="${x - 5}" y1="${y}" x2="${x + 5}" y2="${y}" class="et-sc-marque"/><text x="${x + 22}" y="${y + (y === yS ? -6 : 5)}" text-anchor="middle" class="et-sc-pt">${n}</text>`; });
+    g += o.objet === 'pomme'
+      ? `<circle cx="${x}" cy="${yA}" r="10" class="et-sc-sys"/><path d="M${x},${yA - 10} q2,-6 7,-7" class="et-sc-anse"/>`
+      : `<circle cx="${x}" cy="${yA}" r="9" class="et-sc-sys"/>`;
+    const col = (p, t) => `<div class="et-sch-col"><p class="et-sch-pt">${t}</p>${ligneDonnee(`z<sub>${p}</sub>`, vals['z' + p])}${ligneDonnee(`v<sub>${p}</sub>`, vals['v' + p])}</div>`;
+    const haut = bas ? col('A', 'A : départ') : col('B', 'B : sommet (arrivée)'), dessous = bas ? col('B', 'B : arrivée') : col('A', 'A : départ');
+    return `<div class="et-sch et-sch-v" ${vides ? 'role="group"' : 'role="img"'} aria-label="${o.aria || `Schéma : axe z vertical vers le haut, origine au sol ; le système va de A à B ${bas ? 'en tombant' : 'en montant'}`}">
+      <svg viewBox="0 0 150 230" class="et-sc" aria-hidden="true">${g}</svg>
+      <div class="et-sch-droite">${haut}<div class="et-sch-col">${ligneDonnee('m', vals.m)}</div>${dessous}</div></div>`;
+  }
+  // Placer les données de l'énoncé sur ce schéma ; d = { m, zA, vA, zB, vB } ; opts = { q, intrus, solution }
+  function partieDonneesEm(o, d, opts) {
+    opts = opts || {};
+    const IND = {
+      m: 'La masse est celle du système : en kg (ou en g, à convertir).',
+      zA: 'z<sub>A</sub> est l\'altitude du <b>départ</b> A, mesurée depuis l\'origine (le sol).',
+      zB: 'z<sub>B</sub> est l\'altitude de l\'<b>arrivée</b> B. « Au sol » : z<sub>B</sub> = 0.',
+      vA: 'v<sub>A</sub> est la vitesse au <b>départ</b>. « Lâché » : v<sub>A</sub> = 0.',
+      vB: 'v<sub>B</sub> est la vitesse à l\'<b>arrivée</b>. « Au sommet » : v<sub>B</sub> = 0.',
+    };
+    const cles = ['m', 'zA', 'vA', 'zB', 'vB'].filter(k => d[k] != null);
+    const etiquettes = cles.map(k => ({ id: k, label: d[k] === '?' ? '?<span class="et-replique"> (on la cherche)</span>' : d[k], cible: k,
+      indice: d[k] === '?' ? 'Le « ? » se place sur la grandeur que l\'on cherche.' : IND[k] }))
+      .concat((opts.intrus || []).map((x, i) => ({ id: 'intrus' + i, label: x.label, cible: null, indice: x.indice })));
+    const vals = {};
+    cles.forEach(k => { vals[k] = '#' + k; });
+    return { type: 'schema', q: opts.q || 'Fais le schéma : place les données de l\'énoncé (le « ? » sur la grandeur que l\'on cherche).',
+      titrePalette: 'Données de l\'énoncé', schema: schemaEm(o, vals), etiquettes, solution: opts.solution, correction: opts.correction };
   }
 
   // expression du travail de la force k (« 0 car ⊥ », « f × AB × (−1) »)
@@ -1171,11 +1230,11 @@
   const accueil = zone => window.SOM.accueil(zone);
 
   window.ET = Object.assign(window.ET || {}, {
-    MOINS, fmt, cs, sci, lire, proche, fr, unite, o, fq, el, secouer, melanger, hasard, entre, champ, PARTIES, versCours, boutonValider, CALC,
+    MOINS, fmt, cs, sci, lire, proche, fr, demo, unite, o, fq, el, secouer, melanger, hasard, entre, champ, PARTIES, versCours, boutonValider, CALC,
     question, serie, confettis, fig, monter, outil, cap,
     V, NUL, col, sys, rac, newton, integ, ci, figCI, etapeM, trad, aide6, MS, MS2, VM, E_CH, M_P, M_E,
     ENCRE, ENCRE2, ENCRE3, COUL, fl, nom, txt, svg, condo, courbes,
-    slot, NOMS, nomV, W, COULF, fleche, nomSVG, force, schemaMvt, partieDonnees, partieAngles, partieEquation, angleDe, exprTravail,
+    slot, NOMS, nomV, W, COULF, fleche, nomSVG, force, schemaMvt, partieDonnees, schemaEm, partieDonneesEm, partieAngles, partieEquation, angleDe, exprTravail,
     PLAN, menu, accueil,
   });
 })();

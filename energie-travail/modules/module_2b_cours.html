@@ -36,7 +36,7 @@
    ΣW = 8,0 J.
    ============================================================ */
 const { exemple, hasard } = COURS;
-const { fmt, cs, proche, fr, rac, V, MS, CALC, o } = ET;
+const { fmt, cs, proche, fr, rac, demo, V, MS, CALC, o } = ET;
 const calc = h => `<p class="crs-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
 const DEC = 'Δ<sub>AB</sub>E<sub>c</sub>', SW = `ΣW<sub>AB</sub>(${V('F')})`;
@@ -53,7 +53,7 @@ function etape1(c_) {
       <p>Des travaux moteurs font augmenter l'énergie cinétique (le solide accélère), des travaux résistants la font diminuer (il ralentit).</p>
     </div>
     ${exemple(`<p>Un chariot de 2,0 kg passe de v<sub>A</sub> = 1,0 ${MS} à v<sub>B</sub> = 3,0 ${MS}. Quelle est la somme des travaux des forces qu'il subit ?</p>
-      ${calc(`${SW} = ${DEC} = ½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>A</sub><sup>2</sup> = ½ × 2,0 × 3,0<sup>2</sup> − ½ × 2,0 × 1,0<sup>2</sup> = 9,0 − 1,0 = ${c('8,0 J')}`)}`)}`);
+      ${demo([`${SW} = ${DEC}`, '= ½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>A</sub><sup>2</sup>', '= ½ × 2,0 × 3,0<sup>2</sup> − ½ × 2,0 × 1,0<sup>2</sup>', '= 9,0 − 1,0', `= ${c('8,0 J')}`])}`)}`);
   const m = hasard([1.0, 4.0, 10]), vA = hasard([6, 8]), vB = hasard([2, 3]), d = .5 * m * (vB * vB - vA * vA);
   c_.aToi(carte, [
     { titre: 'Un freinage', enonce: `<p>Un objet de ${fmt(m)} kg ralentit de v<sub>A</sub> = ${vA} ${MS} à v<sub>B</sub> = ${vB} ${MS}.</p>`,
@@ -65,7 +65,7 @@ function etape1(c_) {
     { titre: 'Trouver la vitesse', enonce: `<p>Un palet de 0,20 kg, lancé à v<sub>A</sub> = 5,0 ${MS}, reçoit en tout un travail de −1,6 J.</p>`,
       parties: [{ type: 'nombre', q: 'Calcule sa vitesse v<sub>B</sub> (2 chiffres significatifs).', label: 'v<sub>B</sub> =', valeur: 3, rel: .01, unite: MS + CALC, signe: false,
         diag: x => (proche(x, 9) ? 'Tu as trouvé v<sub>B</sub>² : prends la racine.' : proche(x, Math.sqrt(41)) ? 'Le travail est négatif : l\'énergie cinétique diminue.' : '½ m v<sub>B</sub>² = ½ m v<sub>A</sub>² + ΣW.'),
-        solution: calc(`½ m v<sub>B</sub><sup>2</sup> = ½ m v<sub>A</sub><sup>2</sup> + ${SW} = ½ × 0,20 × 5,0<sup>2</sup> − 1,6 = 2,5 − 1,6 = 0,90 J, donc v<sub>B</sub> = ${rac(fr('2 × 0,90', '0,20'))} = ${c('3,0 ' + MS)}`) }] },
+        solution: demo([`½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>A</sub><sup>2</sup> = ${SW}`, `⟺ ½ m v<sub>B</sub><sup>2</sup> = ½ m v<sub>A</sub><sup>2</sup> + ${SW}`, '= ½ × 0,20 × 5,0<sup>2</sup> − 1,6', '= 2,5 − 1,6 = 0,90 J', `⟺ v<sub>B</sub> = ${rac(fr('2 × 0,90', '0,20'))}`, `= ${c('3,0 ' + MS)}`]) }] },
   ]);
   return carte;
 }

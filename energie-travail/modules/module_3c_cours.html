@@ -37,7 +37,7 @@
    Valeurs (vérifiées par un script).
    ============================================================ */
 const { exemple, hasard } = COURS;
-const { fmt, proche, nomV, W, MS, CALC, figEnergies, o } = ET;
+const { fmt, proche, nomV, W, demo, fr, MS, CALC, figEnergies, o } = ET;
 const calc = h => `<p class="crs-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
 const G = 'm·s<sup>−2</sup>', EPP = 'E<sub>pp</sub>', EM = 'E<sub>m</sub>', EC = 'E<sub>c</sub>', DEM = 'ΔE<sub>m</sub>', WFR = W('f');
@@ -61,7 +61,7 @@ function etape1(c_) {
       { type: 'nombre', q: `b) Calcule ΔE<sub>pp</sub> (3 chiffres significatifs).`, label: 'ΔE<sub>pp</sub> =', valeur: dEp, rel: .01, unite: 'J' + CALC,
         diag: x => (proche(x, -dEp, .02) ? 'La balle monte : E<sub>pp</sub> augmente.' : 'ΔE<sub>pp</sub> = m g z<sub>max</sub> − 0.'), solution: calc(`ΔE<sub>pp</sub> = ${fmt(m)} × 9,81 × ${fmt(z)} − 0 = ${c(r3(dEp) + ' J')}`) },
       { type: 'nombre', q: `c) Calcule ${DEM}, puis conclus : y a-t-il des frottements ? (2 chiffres significatifs)`, label: `${DEM} =`, valeur: dEm, rel: .03, unite: 'J' + CALC,
-        diag: () => `${DEM} = ΔE<sub>c</sub> + ΔE<sub>pp</sub>.`, solution: calc(`${DEM} = ${r3(dEc)} + ${r3(dEp)} = ${c(fmt(+dEm.toPrecision(2)) + ' J')} : ${EM} a diminué, il y a des frottements ; ${WFR} = ${fmt(+dEm.toPrecision(2))} J.`) }] },
+        diag: () => `${DEM} = ΔE<sub>c</sub> + ΔE<sub>pp</sub>.`, solution: demo([`${DEM} = ΔE<sub>c</sub> + ΔE<sub>pp</sub>`, `= ${r3(dEc)} + ${r3(dEp)}`, `= ${c(fmt(+dEm.toPrecision(2)) + ' J')}`, `> ${EM} a diminué : il y a des frottements, ${WFR} = ${fmt(+dEm.toPrecision(2))} J.`]) }] },
   ]);
   return carte;
 }
@@ -70,12 +70,12 @@ function etape1(c_) {
 function etape2(c_) {
   const carte = c_.carte('2. En déduire la force de frottement');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <p>Si la force de frottement ${nomV('f')} est constante et toujours opposée au mouvement (α = 180°), son travail sur une distance d vaut ${WFR} = f × d × cos 180° = −f × d. Donc :</p>
+      <p>Si la force de frottement ${nomV('f')} est constante et toujours opposée au mouvement (α = 180°), son travail sur une distance d vaut :</p>
+      ${demo([`${WFR} = f × d × cos 180°`, '= −f × d', `> or ${DEM} = ${WFR}, donc :`, `${DEM} = −f × d`, `⟺ f = ${fr('−' + DEM, 'd')}`])}
       <div class="cle"><p class="crs-formule">f = −${DEM} / d</p></div>
     </div>
     ${exemple(`<p>Un palet de 200 g lancé à 4,0 ${MS} sur un sol horizontal s'arrête après 5,0 m.</p>
-      ${calc(`${DEM} = ΔE<sub>c</sub> = 0 − ½ × 0,200 × 4,0<sup>2</sup> = −1,6 J (${EPP} ne change pas)`)}
-      ${calc(`f = −${DEM} / d = 1,6 / 5,0 = ${c('0,32 N')}`)}`)}`);
+      ${demo([`${DEM} = ΔE<sub>c</sub> &nbsp; (${EPP} ne change pas)`, '= 0 − ½ × 0,200 × 4,0<sup>2</sup>', '= −1,6 J', `f = ${fr('−' + DEM, 'd')} = ${fr('1,6', '5,0')} = ${c('0,32 N')}`])}`)}`);
   const m = hasard([0.5, 1.0]), h = hasard([2.0, 3.0]), v = hasard([5.0, 6.0]), L = hasard([4.0, 5.0]), dEm = .5 * m * v * v - m * 9.81 * h, f = -dEm / L;
   c_.aToi(carte, [
     { titre: 'Une glissade', enonce: `<p>Un bloc de ${fmt(m)} kg part sans vitesse du haut d'une pente de ${fmt(L)} m de long et ${fmt(h)} m de dénivelé ; il arrive en bas à ${fmt(v)} ${MS} (g = 9,81 ${G}).</p>`,

@@ -17,7 +17,7 @@
 <div class="er-page som-fiche" id="fiche"></div>
 <script>
 /* Fiche récapitulative du module 3 : une section par sous-module de cours (ancres du PLAN) */
-const { W, rac, fr, figBalcon, figEnergies } = ET;
+const { W, rac, fr, figBalcon, figEnergies, schemaEm } = ET;
 const EPP = 'E<sub>pp</sub>', EM = 'E<sub>m</sub>', EC = 'E<sub>c</sub>';
 document.getElementById('fiche').innerHTML = `
   <div class="er-card"><span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span><h2 class="er-titre">Énergie mécanique</h2></div>
@@ -33,7 +33,9 @@ document.getElementById('fiche').innerHTML = `
   <section class="er-card" id="conservation">
     <h3 class="cours-titre">Conservation de l'énergie mécanique</h3>
     <div class="cle"><p>S'il n'y a pas de perte d'énergie par frottements, l'énergie mécanique se conserve : ${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B). ${EC} et ${EPP} s'échangent.</p>
-      <p>C'est équivalent au théorème de l'énergie cinétique (au programme : en chute libre). Pomme lâchée de h : v = ${rac('2 g h')} ; lancée à v : h = ${fr('v<sup>2</sup>', '2 g')} (10 m·s<sup>−1</sup> : 5,1 m).</p></div>
+      <p>C'est équivalent au théorème de l'énergie cinétique. On ne l'utilise que pour la chute libre : dans les autres situations, il existe d'autres énergies potentielles, hors programme (liées aux travaux des forces autres que le poids).</p>
+      <p><b>Méthode</b> : schéma (axe z vers le haut et son origine, A, B, z<sub>A</sub>, v<sub>A</sub>, z<sub>B</sub>, v<sub>B</sub>, m) ; « sans frottements, l'énergie mécanique se conserve entre A et B » ; on remplace chaque énergie ; on isole l'inconnue. Pomme lâchée de h : v = ${rac('2 g h')} ; lancée à v : h = ${fr('v<sup>2</sup>', '2 g')} (10 m·s<sup>−1</sup> : 5,1 m).</p></div>
+    <div class="som-fiche-figs">${schemaEm({ sens: 'haut', objet: 'pomme' }, { zA: '0', vA: '10 m·s<sup>−1</sup>', zB: '?', vB: '0' })}</div>
     <div class="som-fiche-figs">${figEnergies({ frott: 0 })}</div>
     <p>Savoir reconnaître les courbes : ${EM} constante ; ${EPP} maximale à l'altitude maximale ; ${EC} minimale quand la vitesse est minimale.</p>
   </section>

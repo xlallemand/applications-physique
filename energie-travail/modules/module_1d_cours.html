@@ -39,7 +39,7 @@
    électron, 500 V : 8,0 × 10⁻¹⁷ J.
    ============================================================ */
 const { exemple, hasard } = COURS;
-const { fmt, sci, proche, W, nomV, V, fr, figCondoW, figAcc, CALC, o } = ET;
+const { fmt, sci, proche, W, nomV, V, fr, demo, figCondoW, figAcc, CALC, o } = ET;
 const calc = h => `<p class="crs-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
 const WF = `W<sub>AB</sub>(${V('F', 'él')})`;
@@ -53,7 +53,7 @@ function etape1(c_) {
         <p>q : charge de la particule, en coulombs (C) ; U : tension entre les deux armatures (différence de potentiel), en volts (V) ; ${WF} en J.</p></div>
       <p><b>Démonstration</b> : le travail ne dépend pas du chemin suivi ; on le calcule sur le chemin A → C → B.</p>
       ${figCondoW()}
-      ${calc(`${WF} = W<sub>AC</sub>(${V('F', 'él')}) + W<sub>CB</sub>(${V('F', 'él')}) = qE × AC × cos 0° + 0 = qE L = q ${fr('U', 'L')} L = q U &nbsp; car E = ${fr('U', 'L')}`)}
+      ${demo([`${WF} = W<sub>AC</sub>(${V('F', 'él')}) + W<sub>CB</sub>(${V('F', 'él')})`, '= qE × AC × cos 0° + 0', '= qE L', `= q ${fr('U', 'L')} L &nbsp; car E = ${fr('U', 'L')}`, '= q U'])}
       <p>Si la particule va en ligne droite d'une armature à l'autre, on calcule directement le travail sur AC : qEL = qU.</p>
     </div>
     ${exemple(`<p>Un ion de charge q = 2e = 3,2 × 10<sup>−19</sup> C traverse un condensateur soumis à U = 1 000 V, de l'armature + vers l'armature − (la force l'y pousse : travail moteur).</p>
@@ -77,7 +77,8 @@ function etape2(c_) {
     ${exemple(`<p><b>Électron accéléré</b> (q = −e) : il entre par l'armature − et sort par l'armature +. La force ${V('F', 'él')} = −e ${V('E')} est dans le sens du mouvement : travail moteur.</p>
       ${figAcc({ q: -1, d: 'L' })}
       ${calc(`${WF} = e U > 0`)}
-      <p><b>OU</b> avec la formule du travail : α = 0°, ${WF} = F<sub>él</sub> × AB × cos 0° = eE × L × 1 = e U (E = U / L).</p>
+      <p><b>OU</b> avec la formule du travail (α = 0°) :</p>
+      ${demo([`${WF} = F<sub>él</sub> × AB × cos 0°`, '= eE × L × 1', `= e U &nbsp; car E = ${fr('U', 'L')}`])}
       <p><b>Particule positive ralentie</b> (q > 0, elle va vers l'armature +) : la force est opposée au mouvement, travail résistant : ${WF} = ${c('−q U')}.</p>`)}`);
   const U = hasard([500, 1500, 3000]), w = 1.6e-19 * U;
   c_.aToi(carte, [

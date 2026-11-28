@@ -3,8 +3,9 @@
    un écran ; idée de « Energy Skate Park », sans la copier)
 
    ET.simEnergies(zone) :
-   - deux situations : un skieur sur une piste (hauteur de départ, hauteur
-     du sommet suivant, masse, frottements) ou une balle lancée
+   - deux situations : un skieur de 70 kg sur une piste (hauteur de départ,
+     hauteur du sommet suivant, frottements ; dessin repris du skieur de
+     bilan-forces/modules/situations.js, utilisé par « Lois de Newton ») ou une balle lancée
      verticalement (vitesse, hauteur de départ, masse, frottements de
      l'air) ; tout se règle à tout moment ;
    - barres E_c, E_pp, E_m et énergie perdue par frottements, avec leurs
@@ -23,7 +24,8 @@
    Défis « À essayer », dans n'importe quel ordre (cochés tout seuls) :
    sommet suivant ; altitude maximale d'une balle (calcul vérifié) ;
    conservation de E_m sans frottements (deux pauses) ; énergie perdue et
-   force de frottement (frottements inconnus, calcul vérifié) ; origine
+   force de frottement (balle lancée depuis le sol, frottements inconnus :
+   f = énergie perdue / (2 z_max) sur tout le trajet, calcul vérifié) ; origine
    déplacée ; skieur arrêté par les frottements. Bilan ouvrable à tout
    moment.
    ============================================================ */
@@ -50,6 +52,31 @@
     return { y, dy };
   }
 
+  /* ---------- Skieur fléchi (repris de bilan-forces/modules/situations.js) ----------
+     dessiné dans son repère : t le long de la piste (sens du mouvement : sens = 1 ou −1), h perpendiculaire
+     (vers le haut) ; les skis reposent en h = 0 ; k : échelle. Renvoie [skis, corps] : les skis suivent la pente,
+     le corps est moins incliné (il reste lisible sur une pente raide à l'écran) */
+  function skieur(sens, k) {
+    const p = (t, h) => [sens * t * 1.5 * k, -h * 1.5 * k];
+    const s = (t, h) => p(t, h).map(f1).join(',');
+    const membre = (pts, l) => {
+      const d = 'M' + pts.map(q => q.map(f1).join(',')).join(' L');
+      return `<path d="${d}" class="et-sk-membre" style="stroke-width:${f1((l + 3) * k)}"/><path d="${d}" class="et-sk-membre-in" style="stroke-width:${f1(l * k)}"/>`;
+    };
+    const che = p(0, 6), gen = p(2, 18), han = p(-7, 27), epa = p(-2, 42), tete = p(1, 51), mn = p(11, 30);
+    const cou = [(epa[0] + mn[0]) / 2 + 4 * k * sens, (epa[1] + mn[1]) / 2 + 6 * k];
+    const skis = `<path d="M${s(-30, 0)} L${s(26, 0)} Q${s(33, 0)} ${s(35, 5)}" class="et-sk-ski" style="stroke-width:${f1(5 * k)}"/>`;
+    let g = membre([p(-3, 6), [gen[0] - 5 * k * sens, gen[1] + k], [han[0] - 4 * k * sens, han[1]]], 9);
+    g += `<path d="M${s(-6, 1.5)} L${s(6, 1.5)} L${s(4, 10)} L${s(-3, 10)} Z" class="et-sk-chaussure"/>`;
+    g += membre([che, gen, han], 10) + membre([han, epa], 16);
+    g += `<line x1="${f1(mn[0])}" y1="${f1(mn[1])}" x2="${f1(p(-18, .5)[0])}" y2="${f1(p(-18, .5)[1])}" class="et-sk-baton"/>`;
+    g += membre([epa, cou, mn], 8);
+    const r = 15 * k;
+    g += `<circle cx="${f1(tete[0])}" cy="${f1(tete[1])}" r="${f1(r)}" class="et-sk-tete"/>` +
+      `<path d="M${f1(tete[0] - r * 1.05)},${f1(tete[1] + r * .05)} A${f1(r * 1.05)},${f1(r * 1.05)} 0 0 1 ${f1(tete[0] + r * 1.05)},${f1(tete[1] + r * .05)} Z" class="et-sk-casque"/>`;
+    return [skis, g];
+  }
+
   function simEnergies(zone) {
     const st = {
       mode: 'piste', hA: 6, hS: 5, mS: 70, fS: 0, v0: 10, h: 1, mB: 0.2, fB: 0,
@@ -69,7 +96,7 @@
       sections: [
         { id: 'reg', html: `<div class="et-seg" role="group" aria-label="Situation"><button type="button" data-mode="piste" aria-pressed="true">Skieur sur une piste</button><button type="button" data-mode="balle" aria-pressed="false">Balle lancée</button></div>
             <div class="et-reglages" data-a="rPiste">${ET.reglage({ id: 'hA', nom: 'départ (m)', min: 1, max: 10, pas: .5, val: st.hA, aria: 'Hauteur de départ du skieur' })}${ET.reglage({ id: 'hS', nom: 'sommet (m)', min: 1, max: 10, pas: .5, val: st.hS, aria: 'Hauteur du sommet suivant' })}
-              ${ET.reglage({ id: 'mS', nom: 'masse (kg)', min: 40, max: 120, pas: 5, val: st.mS, aria: 'Masse du skieur' })}${ET.reglage({ id: 'fS', nom: 'frottements f (N)', min: 0, max: 150, pas: 5, val: st.fS, aria: 'Force de frottement sur le skieur' })}</div>
+              ${ET.reglage({ id: 'fS', nom: 'frottements f (N)', min: 0, max: 150, pas: 5, val: st.fS, aria: 'Force de frottement sur le skieur' })}<p class="et-lab">Masse du skieur : ${st.mS} kg</p></div>
             <div class="et-reglages" data-a="rBalle" hidden>${ET.reglage({ id: 'v0', nom: 'v<sub>0</sub> (m·s<sup>−1</sup>)', min: 0, max: 16, pas: .5, val: st.v0, aria: 'Vitesse de lancer, vers le haut' })}${ET.reglage({ id: 'h', nom: 'départ (m)', min: 0, max: 5, pas: .5, val: st.h, aria: 'Hauteur de départ de la balle' })}
               ${ET.reglage({ id: 'mB', nom: 'masse (kg)', min: .05, max: 1, pas: .05, val: st.mB, aria: 'Masse de la balle' })}${ET.reglage({ id: 'fB', nom: 'frottements f (N)', min: 0, max: 1, pas: .02, val: st.fB, aria: 'Force de frottement de l\'air sur la balle' })}</div>
             <p class="et-lab">Origine des altitudes (z = 0)</p>
@@ -188,14 +215,16 @@
       if (balle()) d += `<circle cx="${f1(X)}" cy="${f1(Y - 7)}" r="7" fill="${COUL.Ec}" stroke="${ENCRE}" stroke-width="1.4"/>`;
       else {
         const a = Math.atan(P.dy(st.x) * sy / sx) * 180 / Math.PI;     // inclinaison à l'écran
-        d += `<g transform="translate(${f1(X)},${f1(Y)}) rotate(${f1(-a)})"><line x1="-12" y1="-2" x2="12" y2="-2" stroke="${ENCRE}" stroke-width="2.4" stroke-linecap="round"/>` +
-          `<line x1="0" y1="-3" x2="0" y2="-18" stroke="${COUL.Ec}" stroke-width="4" stroke-linecap="round"/><circle cx="0" cy="-23" r="5" fill="${COUL.Ec}"/></g>`;
+        // skieur tourné dans le sens du mouvement (vers la droite au départ)
+        if (st.u < -1e-6) st.sensSki = -1; else if (st.u > 1e-6) st.sensSki = 1;
+        const [skis, corps] = skieur(st.sensSki || 1, .5);
+        d += `<g transform="translate(${f1(X)},${f1(Y)})"><g transform="rotate(${f1(-a * .3)})">${corps}</g><g transform="rotate(${f1(-a)})">${skis}</g></g>`;
       }
       // vecteur vitesse, tangent à la piste (direction calculée à l'écran : échelles différentes en x et en z)
       if (vitesse() > .05) {
         let tx = 0, ty = -1;
         if (!balle()) { const x2 = st.x + .1; tx = px(x2) - X; ty = py(P.y(x2)) - Y; const n = Math.hypot(tx, ty); tx /= n; ty /= n; }
-        const L = Math.min(70, 4 * vitesse()) * Math.sign(st.u), ox = balle() ? 16 : 0, oy = balle() ? -7 : -12;
+        const L = Math.min(70, 4 * vitesse()) * Math.sign(st.u), ox = balle() ? 16 : 0, oy = balle() ? -7 : -5;
         d += fl(X + ox, Y + oy, X + ox + tx * L, Y + oy + ty * L, COUL.v, { ep: 2, lt: 7 });
       }
       // ---- barres ----
@@ -333,7 +362,7 @@
     zone.querySelectorAll('[data-vit]').forEach(b => { b.onclick = () => { st.vit = +b.dataset.vit; zone.querySelectorAll('[data-vit]').forEach(x => x.setAttribute('aria-pressed', x === b)); }; });
 
     /* ---------- Réglages ---------- */
-    const FMT = { hA: fmt, hS: fmt, mS: fmt, fS: fmt, v0: fmt, h: fmt, mB: v => fmt(v, 2), fB: v => fmt(v, 2) };
+    const FMT = { hA: fmt, hS: fmt, fS: fmt, v0: fmt, h: fmt, mB: v => fmt(v, 2), fB: v => fmt(v, 2) };
     function regler(k, v) {
       st[k] = v;
       if (k === 'fB') st.fInconnu = null;
@@ -369,8 +398,8 @@
         ok: () => st.rep.zmax === true },
       { t: 'Sans frottements, lance un mouvement et <b>mets-le en pause à deux instants</b> différents : compare E<sub>m</sub>.', preparer: prep({ fS: 0, fB: 0 }),
         ok: () => { const p = st.pauses.filter(q => q.f === 0); return p.length >= 2 && Math.abs(p[p.length - 1].t - p[0].t) > .2 && Math.abs(p[p.length - 1].Em - p[0].Em) <= .001 * Math.abs(p[0].Em || 1); } },
-      { t: `Frottements de l'air <b>inconnus</b> : lance la balle (0,20 kg, 12 ${MS}, depuis 1,0 m), lis E<sub>m</sub> au départ et au sommet, puis <b>déduis f</b> (f = −ΔE<sub>m</sub> / d).<br>` + CHAMP('f', 'f =', 'N'),
-        preparer: () => { prep({ mode: 'balle', v0: 12, h: 1, mB: .2, fInconnu: [0.1, 0.12, 0.16, 0.2][Math.floor(Math.random() * 4)], cache: false, z0: 0 })(); },
+      { t: `Frottements de l'air <b>inconnus</b> : lance la balle depuis le sol (0,20 kg, 12 ${MS}) et attends qu'elle retombe. Sur tout le trajet, l'énergie perdue vaut −ΔE<sub>m</sub> = f × d, avec d = 2 z<sub>max</sub> (montée et descente) : lis l'énergie perdue et z<sub>max</sub>, puis <b>déduis f</b>.<br>` + CHAMP('f', 'f =', 'N'),
+        preparer: () => { prep({ mode: 'balle', v0: 12, h: 0, mB: .2, fInconnu: [0.1, 0.12, 0.16, 0.2][Math.floor(Math.random() * 4)], cache: false, z0: 0 })(); },
         ok: () => st.rep.f === true },
       { t: 'Déplace l\'<b>origine des altitudes</b> (▲ ▼ ou glisse la ligne z = 0), puis lance : E<sub>pp</sub> change, mais pas ses variations.', preparer: prep({ z0: 0 }),
         ok: () => st.z0 !== 0 && st.lance },
@@ -393,7 +422,7 @@
           else { attendu = st.fInconnu; bon = attendu != null && ET.proche(v, attendu, .06); }
           if (bon) { st.rep[id] = true; verifier(); return; }
           msg.innerHTML = id === 'zmax' ? (st.mode !== 'balle' || st.fB ? 'Reviens à la situation du défi (bouton « Essayer »).' : 'Pas tout à fait : E<sub>m</sub> au départ = E<sub>m</sub> au sommet, avec v = 0 au sommet.')
-            : (attendu == null ? 'Clique d\'abord sur « Essayer ».' : 'Pas tout à fait : ΔE<sub>m</sub> = E<sub>m</sub>(sommet) − E<sub>m</sub>(départ), d = z<sub>max</sub> − z<sub>départ</sub>.');
+            : (attendu == null ? 'Clique d\'abord sur « Essayer ».' : 'Pas tout à fait : f = énergie perdue / d, avec d = 2 z<sub>max</sub> (la balle monte puis redescend).');
         };
         bt.onclick = tester;
         inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); tester(); } });

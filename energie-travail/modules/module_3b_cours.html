@@ -32,14 +32,16 @@
    1. Conservation sans frottements ; lancer de balle : courbes E_c,
       E_pp, E_m (savoir les reconnaître) ; « À toi » : reconnaître les
       courbes, transferts
-   2. Équivalence avec le théorème de l'énergie cinétique (au programme :
-      E_m en chute libre seulement) ; les deux exemples de la pomme refaits
-      avec E_m ; « À toi » : vitesse, hauteur
+   2. Équivalence avec le théorème de l'énergie cinétique (E_m utilisée en
+      chute libre seulement : autres énergies potentielles hors programme) ;
+      méthode avec schéma (ET.schemaEm : z_A, v_A, z_B, v_B, m) ; les deux
+      exemples de la pomme refaits avec E_m ; « À toi » : données placées
+      sur le schéma, conservation écrite, vitesse, hauteur
    Valeurs (vérifiées par un script) : v = √(2gh) ; h = 10² / (2 × 9,81)
    = 5,1 m ; « À toi » : 12,5 m·s⁻¹ (8,0 m, g = 9,81), etc.
    ============================================================ */
 const { exemple, hasard } = COURS;
-const { fmt, proche, fr, rac, MS, CALC, figEnergies, versCours, o } = ET;
+const { fmt, proche, fr, rac, demo, MS, CALC, figEnergies, versCours, schemaEm, partieDonneesEm, o } = ET;
 const calc = h => `<p class="crs-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
 const G = 'm·s<sup>−2</sup>', EPP = 'E<sub>pp</sub>', EM = 'E<sub>m</sub>', EC = 'E<sub>c</sub>';
@@ -68,27 +70,47 @@ function etape1(c_) {
 }
 
 /* ---------- 2. Le lien avec le théorème de l'énergie cinétique ---------- */
+const CHUTE = { sens: 'bas', objet: 'pomme' }, LANCER = { sens: 'haut', objet: 'pomme' };
+const METHODE = `<div class="cle"><p><b class="cle-titre">Méthode</b> :</p>
+  <ol class="er-liste"><li>un <b>schéma</b> : axe z vertical vers le haut et son origine, A (départ), B (arrivée), les données (z<sub>A</sub>, v<sub>A</sub>, z<sub>B</sub>, v<sub>B</sub>, m) et la grandeur cherchée ;</li>
+    <li>« En l'absence de frottements, l'énergie mécanique se <b>conserve</b> entre A et B » : ${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B) ;</li>
+    <li>on remplace chaque énergie (½ m v<sup>2</sup> et m g z, une vitesse ou une altitude nulle donne 0) ;</li>
+    <li>on <b>isole</b> l'inconnue, puis l'application numérique.</li></ol></div>`;
 function etape2(c_) {
   const carte = c_.carte('2. Une autre écriture du théorème');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <p>Le théorème de l'énergie cinétique et la conservation de l'énergie mécanique sont <b>équivalents</b> : ils donnent les mêmes relations, on utilise l'un ou l'autre (au programme, la conservation de ${EM} ne s'utilise qu'en chute libre).</p>
+      <p>Le théorème de l'énergie cinétique et la conservation de l'énergie mécanique sont <b>équivalents</b> : ils donnent les mêmes relations, on utilise l'un ou l'autre.</p>
+      <p>On n'utilise la conservation de ${EM} que pour la <b>chute libre</b> (seul le poids agit) : dans les autres situations, il existe d'autres énergies potentielles, qui ne sont pas au programme (elles sont liées aux travaux des forces autres que le poids).</p>
       <div class="cle"><p class="crs-formule">${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B)</p></div>
+      ${METHODE}
     </div>
-    ${exemple(`<p><b>Pomme lâchée</b> d'une hauteur h (origine au sol) : en A, v<sub>A</sub> = 0, ${EC}(A) = 0, ${EPP}(A) = m g h ; en B, ${EC}(B) = ½ m v<sub>sol</sub><sup>2</sup>, ${EPP}(B) = 0.</p>
-      ${calc(`0 + m g h = ½ m v<sub>sol</sub><sup>2</sup> + 0 &nbsp; ⟺ &nbsp; v<sub>sol</sub> = ${rac('2 g h')}`)}
-      <p><b>Pomme lancée</b> vers le haut à v<sub>initiale</sub> = 10 ${MS} : ${EC}<sub>i</sub> = ½ m v<sub>initiale</sub><sup>2</sup>, ${EPP}<sub>i</sub> = 0 ; au sommet, ${EC}<sub>f</sub> = 0, ${EPP}<sub>f</sub> = m g h.</p>
-      ${calc(`½ m v<sub>initiale</sub><sup>2</sup> + 0 = 0 + m g h &nbsp; ⟺ &nbsp; h = ${fr('v<sub>initiale</sub><sup>2</sup>', '2 g')} = ${fr('10<sup>2</sup>', '2 × 9,81')} = ${c('5,1 m')}`)}
-      <p>Les mêmes résultats qu'avec le théorème de l'énergie cinétique.</p>`)}`);
+    ${exemple(`<p><b>Pomme lâchée</b> d'une hauteur h ; on cherche sa vitesse en arrivant au sol (origine des altitudes au sol).</p>
+      ${schemaEm(CHUTE, { zA: 'h', vA: '0', zB: '0', vB: '?' })}
+      <p>En l'absence de frottements, l'énergie mécanique se conserve entre A et B :</p>
+      ${demo([`${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B)`, '⟺ ½ m v<sub>A</sub><sup>2</sup> + m g z<sub>A</sub> = ½ m v<sub>B</sub><sup>2</sup> + m g z<sub>B</sub>', '> avec v<sub>A</sub> = 0, z<sub>A</sub> = h et z<sub>B</sub> = 0 :', '0 + m g h = ½ m v<sub>B</sub><sup>2</sup> + 0', '⟺ v<sub>B</sub><sup>2</sup> = 2 g h', `⟺ v<sub>B</sub> = ${rac('2 g h')}`])}`, 'Exemple 1 (traité)')}
+    ${exemple(`<p><b>Pomme lancée</b> vers le haut depuis le sol à v<sub>A</sub> = 10 ${MS} ; quelle hauteur atteint-elle ? (g = 9,81 ${G})</p>
+      ${schemaEm(LANCER, { zA: '0', vA: '10 ' + MS, zB: '?', vB: '0' })}
+      <p>En l'absence de frottements, l'énergie mécanique se conserve entre A et B :</p>
+      ${demo([`${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B)`, '⟺ ½ m v<sub>A</sub><sup>2</sup> + 0 = 0 + m g z<sub>B</sub>', `⟺ z<sub>B</sub> = ${fr('v<sub>A</sub><sup>2</sup>', '2 g')}`, `= ${fr('10<sup>2</sup>', '2 × 9,81')}`, `= ${c('5,1 m')}`])}
+      <p>Les mêmes résultats qu'avec le théorème de l'énergie cinétique.</p>`, 'Exemple 2 (traité)')}`);
   const h = hasard([5.0, 8.0, 15]), v = Math.sqrt(2 * 9.81 * h), v0 = hasard([4.0, 7.0]), z = v0 * v0 / (2 * 9.81);
   c_.aToi(carte, [
-    { titre: 'Une chute', enonce: `<p>Un caillou est lâché sans vitesse d'une hauteur de ${fmt(h)} m (g = 9,81 ${G}, sans frottements).</p>`,
-      parties: [{ type: 'nombre', q: 'Par la conservation de l\'énergie mécanique, calcule sa vitesse au sol (3 chiffres significatifs).', label: 'v<sub>sol</sub> =', valeur: v, rel: .01, unite: MS + CALC, signe: false,
-        diag: x => (proche(x, v * v, .02) ? 'Prends la racine carrée.' : proche(x, Math.sqrt(9.81 * h), .02) ? 'm g h = ½ m v² donne v² = 2 g h.' : 'E<sub>m</sub>(A) = E<sub>m</sub>(B) : m g h = ½ m v<sub>sol</sub>².'),
-        solution: calc(`m g h = ½ m v<sub>sol</sub><sup>2</sup> ⟺ v<sub>sol</sub> = ${rac('2 g h')} = ${rac(`2 × 9,81 × ${fmt(h)}`)} = ${c(fmt(+v.toPrecision(3)) + ' ' + MS)}`) }] },
-    { titre: 'Un lancer', enonce: `<p>Un caillou est lancé verticalement vers le haut depuis le sol à ${fmt(v0)} ${MS}.</p>`,
-      parties: [{ type: 'nombre', q: 'Calcule l\'altitude maximale atteinte (3 chiffres significatifs).', label: 'h =', valeur: z, rel: .01, unite: 'm' + CALC, signe: false,
-        diag: x => (proche(x, 2 * z, .02) ? 'h = v<sub>i</sub>² / (2 g).' : 'E<sub>m</sub> au départ = E<sub>m</sub> au sommet : ½ m v<sub>i</sub>² = m g h.'),
-        solution: calc(`½ m v<sub>i</sub><sup>2</sup> = m g h ⟺ h = ${fr('v<sub>i</sub><sup>2</sup>', '2 g')} = ${c(fmt(+z.toPrecision(3)) + ' m')}`) }] },
+    { titre: 'Une chute', enonce: `<p>Un caillou de 200 g est lâché sans vitesse d'une hauteur de ${fmt(h)} m (g = 9,81 ${G}, sans frottements). On cherche sa vitesse au sol.</p>`,
+      parties: [
+        versCours(partieDonneesEm(CHUTE, { m: '200 g', zA: fmt(h) + ' m', vA: '0 ' + MS, zB: '0 m', vB: '?' })),
+        { type: 'choix', q: 'La conservation de l\'énergie mécanique entre A et B s\'écrit :', colonne: true, melanger: false,
+          options: [o('ok', '0 + m g z<sub>A</sub> = ½ m v<sub>B</sub><sup>2</sup> + 0'), o('inv', '½ m v<sub>B</sub><sup>2</sup> + m g z<sub>A</sub> = 0'), o('z', '0 + m g z<sub>A</sub> = ½ m v<sub>B</sub><sup>2</sup> + m g z<sub>A</sub>')], bonne: 'ok',
+          indices: { inv: `En A : ${EC}(A) = 0 (lâché) et ${EPP}(A) = m g z<sub>A</sub> ; en B : ${EC}(B) = ½ m v<sub>B</sub><sup>2</sup> et ${EPP}(B) = 0.`, z: 'En B, le caillou est au sol : z<sub>B</sub> = 0, donc E<sub>pp</sub>(B) = 0.' },
+          solution: `<p>${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B) : 0 + m g z<sub>A</sub> = ½ m v<sub>B</sub><sup>2</sup> + 0.</p>` },
+        { type: 'nombre', q: 'Isole v<sub>B</sub> et calcule-la (3 chiffres significatifs).', label: 'v<sub>B</sub> =', valeur: v, rel: .01, unite: MS + CALC, signe: false,
+          diag: x => (proche(x, v * v, .02) ? 'Prends la racine carrée.' : proche(x, Math.sqrt(9.81 * h), .02) ? 'm g z<sub>A</sub> = ½ m v<sub>B</sub>² donne v<sub>B</sub>² = 2 g z<sub>A</sub>.' : 'm g z<sub>A</sub> = ½ m v<sub>B</sub>².'),
+          solution: demo(['m g z<sub>A</sub> = ½ m v<sub>B</sub><sup>2</sup>', `⟺ v<sub>B</sub> = ${rac('2 g z<sub>A</sub>')}`, `= ${rac(`2 × 9,81 × ${fmt(h)}`)}`, `= ${c(fmt(+v.toPrecision(3)) + ' ' + MS)}`]) }] },
+    { titre: 'Un lancer', enonce: `<p>Un caillou de 50 g est lancé verticalement vers le haut depuis le sol à ${fmt(v0)} ${MS} (g = 9,81 ${G}, sans frottements). On cherche l'altitude maximale atteinte.</p>`,
+      parties: [
+        versCours(partieDonneesEm(LANCER, { m: '50 g', zA: '0 m', vA: fmt(v0) + ' ' + MS, zB: '?', vB: '0 ' + MS })),
+        { type: 'nombre', q: 'Écris la conservation de l\'énergie mécanique entre A et B, isole z<sub>B</sub> et calcule-la (3 chiffres significatifs).', label: 'z<sub>B</sub> =', valeur: z, rel: .01, unite: 'm' + CALC, signe: false,
+          diag: x => (proche(x, 2 * z, .02) ? 'z<sub>B</sub> = v<sub>A</sub>² / (2 g).' : 'E<sub>m</sub>(A) = E<sub>m</sub>(B) : ½ m v<sub>A</sub>² + 0 = 0 + m g z<sub>B</sub>.'),
+          solution: demo([`${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B)`, '⟺ ½ m v<sub>A</sub><sup>2</sup> + 0 = 0 + m g z<sub>B</sub>', `⟺ z<sub>B</sub> = ${fr('v<sub>A</sub><sup>2</sup>', '2 g')}`, `= ${fr(fmt(v0) + '<sup>2</sup>', '2 × 9,81')}`, `= ${c(fmt(+z.toPrecision(3)) + ' m')}`]) }] },
   ]);
   return carte;
 }

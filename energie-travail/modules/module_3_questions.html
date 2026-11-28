@@ -19,15 +19,22 @@
 
 <script>
 /* ============================================================
-   Série du module 3 : 10 questions.
-   E_pp avec une origine donnée, E_m, conservation pour trouver v ou h,
-   reconnaître les courbes, transferts, perte d'énergie, frottements
-   présents ou non, force de frottement à partir de la perte.
+   Série du module 3 : 10 questions, dans l'ordre.
+   1-4. Sans calcul : courbes, transferts, énergie perdue et travail des
+        frottements, origine des altitudes
+   5-6. Calculs simples : E_pp (origine donnée), E_m
+   7-8. Conservation de E_m avec la méthode détaillée : schéma à compléter
+        (ET.partieDonneesEm), conservation écrite, inconnue
+   9-10. Résultat demandé directement (conservation de E_m) : correction
+        avec E_m et avec le théorème de l'énergie cinétique
    ============================================================ */
-const { o, fq, fmt, sci, proche, hasard, melanger, MS, figEnergies } = ET;
+const { o, fq, fmt, sci, proche, hasard, fr, rac, demo, MS, figEnergies, partieDonneesEm } = ET;
 const G = 'm·s<sup>−2</sup>', g = 9.81, EPP = 'E<sub>pp</sub>', EM = 'E<sub>m</sub>', EC = 'E<sub>c</sub>', DEM = 'ΔE<sub>m</sub>';
 const nb = (q, label, valeur, unite, opts) => Object.assign({ type: 'nombre', q, label, valeur, unite, rel: .01, calc: true }, opts);
 const r3 = v => fmt(+v.toPrecision(3));
+const CONS = `${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B)`;
+// correction par les deux méthodes
+const deux = (em, tec) => `<p><b>Avec la conservation de l'énergie mécanique</b> (sans frottements, origine au sol) :</p>${demo(em)}<p><b>Avec le théorème de l'énergie cinétique</b> (seul le poids travaille) :</p>${demo(tec)}`;
 
 function origine() {
   const m = hasard([0.5, 2.0, 5.0]), zO = hasard([3.0, 4.5, 10]), zObj = hasard([0, 1.0]), Ep = m * g * (zObj - zO);
@@ -38,18 +45,43 @@ function origine() {
 function mecanique() {
   const m = hasard([0.1, 0.6]), v = hasard([3.0, 8.0]), z = hasard([2.0, 12]), E = .5 * m * v * v + m * g * z;
   return { theme: 'Énergie mécanique', parties: [nb(`Une balle de ${fmt(m * 1000)} g passe à ${fmt(z)} m d'altitude à ${fmt(v)} ${MS} (g = 9,81 ${G}). Calcule ${EM} (3 chiffres significatifs).`, `${EM} =`, E, 'J',
-    { signe: false, diag: x => (proche(x, m * v * v + m * g * z, .02) ? `${EC} = ½ m v².` : proche(x, .5 * m * v * v, .02) || proche(x, m * g * z, .02) ? `${EM} = ${EC} + ${EPP}.` : `${EM} = ½ m v² + m g z.`), solution: `<p>${EM} = ½ × ${fmt(m)} × ${fmt(v)}<sup>2</sup> + ${fmt(m)} × 9,81 × ${fmt(z)} = ${r3(E)} J</p>` })] };
+    { signe: false, diag: x => (proche(x, m * v * v + m * g * z, .02) ? `${EC} = ½ m v².` : proche(x, .5 * m * v * v, .02) || proche(x, m * g * z, .02) ? `${EM} = ${EC} + ${EPP}.` : `${EM} = ½ m v² + m g z.`), solution: demo([`${EM} = ${EC} + ${EPP} = ½ m v<sup>2</sup> + m g z`, `= ½ × ${fmt(m)} × ${fmt(v)}<sup>2</sup> + ${fmt(m)} × 9,81 × ${fmt(z)}`, `= ${r3(E)} J`]) })] };
 }
 function vitesseCons() {
   const h = hasard([3.0, 6.0, 20]), v = Math.sqrt(2 * g * h);
-  return { theme: 'Conservation : vitesse', parties: [nb(`Un objet est lâché sans vitesse d'une hauteur de ${fmt(h)} m ; on néglige les frottements (g = 9,81 ${G}). Par la conservation de ${EM}, calcule sa vitesse au sol (3 chiffres significatifs).`, 'v =', v, MS,
-    { signe: false, diag: x => (proche(x, v * v, .02) ? 'Prends la racine.' : proche(x, Math.sqrt(g * h), .02) ? 'm g h = ½ m v² : v² = 2 g h.' : `${EM}(départ) = ${EM}(sol) : m g h = ½ m v².`), solution: `<p>m g h = ½ m v² ⟺ v² = 2 g h, v = ${r3(v)} ${MS}</p>` })] };
+  return { theme: 'Résultat direct : vitesse', parties: [nb(`Un objet est lâché sans vitesse d'une hauteur de ${fmt(h)} m ; on néglige les frottements (g = 9,81 ${G}). Calcule sa vitesse au sol (3 chiffres significatifs).`, 'v<sub>B</sub> =', v, MS,
+    { signe: false, diag: x => (proche(x, v * v, .02) ? 'Prends la racine.' : proche(x, Math.sqrt(g * h), .02) ? 'm g h = ½ m v² : v² = 2 g h.' : `${EM}(départ) = ${EM}(sol) : m g h = ½ m v².`),
+      solution: deux([CONS, '⟺ 0 + m g h = ½ m v<sub>B</sub><sup>2</sup> + 0', `⟺ v<sub>B</sub> = ${rac('2 g h')}`, `= ${rac(`2 × 9,81 × ${fmt(h)}`)}`, `= ${r3(v)} ${MS}`],
+        [`Δ<sub>AB</sub>E<sub>c</sub> = W<sub>AB</sub>(<span class="vec-nom">P</span>)`, '⟺ ½ m v<sub>B</sub><sup>2</sup> − 0 = m g h', `⟺ v<sub>B</sub> = ${rac('2 g h')} = ${r3(v)} ${MS}`]) })] };
 }
 function hauteurCons() {
-  const v = hasard([5.0, 10, 14]), h0 = hasard([0, 1.5]), z = h0 + v * v / (2 * g);
-  return { theme: 'Conservation : altitude', parties: [nb(`Une balle est lancée verticalement vers le haut à ${fmt(v)} ${MS} depuis ${h0 ? `une hauteur de ${fmt(h0)} m` : 'le sol'} ; on néglige les frottements. Calcule son altitude maximale (origine au sol, 3 chiffres significatifs).`, 'z<sub>max</sub> =', z, 'm',
-    { signe: false, diag: x => (h0 && proche(x, z - h0, .02) ? 'Tu as trouvé l\'altitude gagnée : ajoute la hauteur de départ.' : proche(x, h0 + v * v / g, .02) ? 'Le 2 : ½ m v² = m g Δz.' : `${EM} au départ = ${EM} au sommet (v = 0).`),
-    solution: `<p>½ m v<sub>0</sub>² + m g h<sub>0</sub> = m g z<sub>max</sub> ⟺ z<sub>max</sub> = h<sub>0</sub> + v<sub>0</sub>² / (2g) = ${r3(z)} m</p>` })] };
+  const v = hasard([5.0, 10, 14]), h0 = hasard([1.2, 1.5, 2.0]), z = h0 + v * v / (2 * g);
+  return { theme: 'Résultat direct : altitude', parties: [nb(`Une balle est lancée verticalement vers le haut à ${fmt(v)} ${MS} depuis une hauteur de ${fmt(h0)} m ; on néglige les frottements (g = 9,81 ${G}). Calcule son altitude maximale (origine au sol, 3 chiffres significatifs).`, 'z<sub>max</sub> =', z, 'm',
+    { signe: false, diag: x => (proche(x, z - h0, .02) ? 'Tu as trouvé l\'altitude gagnée : ajoute la hauteur de départ.' : proche(x, h0 + v * v / g, .02) ? 'Le 2 : ½ m v² = m g Δz.' : `${EM} au départ = ${EM} au sommet (v = 0).`),
+      solution: deux([CONS, '⟺ ½ m v<sub>0</sub><sup>2</sup> + m g h<sub>0</sub> = 0 + m g z<sub>max</sub>', `⟺ z<sub>max</sub> = h<sub>0</sub> + ${fr('v<sub>0</sub><sup>2</sup>', '2 g')}`, `= ${fmt(h0)} + ${fr(fmt(v) + '<sup>2</sup>', '2 × 9,81')}`, `= ${r3(z)} m`],
+        [`Δ<sub>AB</sub>E<sub>c</sub> = W<sub>AB</sub>(<span class="vec-nom">P</span>)`, '⟺ 0 − ½ m v<sub>0</sub><sup>2</sup> = −m g (z<sub>max</sub> − h<sub>0</sub>)', `⟺ z<sub>max</sub> = h<sub>0</sub> + ${fr('v<sub>0</sub><sup>2</sup>', '2 g')} = ${r3(z)} m`]) })] };
+}
+/* conservation avec la méthode détaillée : schéma, conservation écrite, inconnue */
+const CHUTE = { sens: 'bas', objet: 'balle' }, LANCER = { sens: 'haut', objet: 'balle', hauteurA: true };
+function chuteDetail() {
+  const m = hasard([0.20, 0.50]), h = hasard([4.0, 8.0, 15]), v = Math.sqrt(2 * g * h);
+  return { theme: 'Méthode : conservation (chute)', enonce: `<p>Une balle de ${fmt(m * 1000)} g est lâchée sans vitesse d'une hauteur de ${fmt(h)} m (g = 9,81 ${G}, sans frottements). On cherche sa vitesse au sol ; origine des altitudes au sol.</p>`,
+    parties: [partieDonneesEm(CHUTE, { m: fmt(m * 1000) + ' g', zA: fmt(h) + ' m', vA: '0 ' + MS, zB: '0 m', vB: '?' }),
+      fq.choix('La conservation de l\'énergie mécanique entre A et B s\'écrit :', [o('ok', '0 + m g z<sub>A</sub> = ½ m v<sub>B</sub><sup>2</sup> + 0'), o('inv', '½ m v<sub>B</sub><sup>2</sup> + m g z<sub>A</sub> = 0'), o('z', '0 + m g z<sub>A</sub> = ½ m v<sub>B</sub><sup>2</sup> + m g z<sub>A</sub>')], 'ok',
+        { melanger: false, colonne: true, indices: { inv: `En A : ${EC}(A) = 0 et ${EPP}(A) = m g z<sub>A</sub> ; en B : ${EC}(B) = ½ m v<sub>B</sub><sup>2</sup> et ${EPP}(B) = 0.`, z: 'En B, la balle est au sol : z<sub>B</sub> = 0.' },
+          solution: `<p>${CONS} : 0 + m g z<sub>A</sub> = ½ m v<sub>B</sub><sup>2</sup> + 0.</p>` }),
+      nb('Isole v<sub>B</sub> et calcule-la (3 chiffres significatifs).', 'v<sub>B</sub> =', v, MS, { signe: false, diag: x => (proche(x, v * v, .02) ? 'Prends la racine.' : proche(x, Math.sqrt(g * h), .02) ? 'v<sub>B</sub>² = 2 g z<sub>A</sub>.' : 'm g z<sub>A</sub> = ½ m v<sub>B</sub>².'),
+        solution: demo(['m g z<sub>A</sub> = ½ m v<sub>B</sub><sup>2</sup>', `⟺ v<sub>B</sub> = ${rac('2 g z<sub>A</sub>')}`, `= ${rac(`2 × 9,81 × ${fmt(h)}`)}`, `= ${r3(v)} ${MS}`]) })] };
+}
+function lancerDetail() {
+  const m = hasard([0.060, 0.15]), v0 = hasard([6.0, 8.0, 12]), h0 = hasard([1.5, 2.0]), z = h0 + v0 * v0 / (2 * g);
+  return { theme: 'Méthode : conservation (lancer)', enonce: `<p>Une balle de ${fmt(m * 1000)} g est lancée verticalement vers le haut à ${fmt(v0)} ${MS} depuis une hauteur de ${fmt(h0)} m (g = 9,81 ${G}, sans frottements). On cherche l'altitude maximale ; origine des altitudes au sol.</p>`,
+    parties: [partieDonneesEm(LANCER, { m: fmt(m * 1000) + ' g', zA: fmt(h0) + ' m', vA: fmt(v0) + ' ' + MS, zB: '?', vB: '0 ' + MS }),
+      fq.choix('La conservation de l\'énergie mécanique entre A et B s\'écrit :', [o('ok', '½ m v<sub>A</sub><sup>2</sup> + m g z<sub>A</sub> = 0 + m g z<sub>B</sub>'), o('za', '½ m v<sub>A</sub><sup>2</sup> = m g z<sub>B</sub>'), o('vb', '½ m v<sub>A</sub><sup>2</sup> + m g z<sub>A</sub> = ½ m v<sub>A</sub><sup>2</sup> + m g z<sub>B</sub>')], 'ok',
+        { melanger: false, colonne: true, indices: { za: `En A, la balle est à z<sub>A</sub> = ${fmt(h0)} m : ${EPP}(A) n'est pas nulle.`, vb: 'Au sommet, la vitesse est nulle : E<sub>c</sub>(B) = 0.' },
+          solution: `<p>${CONS} : ½ m v<sub>A</sub><sup>2</sup> + m g z<sub>A</sub> = 0 + m g z<sub>B</sub>.</p>` }),
+      nb('Isole z<sub>B</sub> et calcule-la (3 chiffres significatifs).', 'z<sub>B</sub> =', z, 'm', { signe: false, diag: x => (proche(x, z - h0, .02) ? 'N\'oublie pas z<sub>A</sub> : z<sub>B</sub> = z<sub>A</sub> + v<sub>A</sub>² / (2 g).' : proche(x, h0 + v0 * v0 / g, .02) ? 'Le 2 : v<sub>A</sub>² / (2 g).' : 'Divise les deux membres par m g.'),
+        solution: demo(['½ m v<sub>A</sub><sup>2</sup> + m g z<sub>A</sub> = m g z<sub>B</sub>', `⟺ z<sub>B</sub> = z<sub>A</sub> + ${fr('v<sub>A</sub><sup>2</sup>', '2 g')}`, `= ${fmt(h0)} + ${fr(fmt(v0) + '<sup>2</sup>', '2 × 9,81')}`, `= ${r3(z)} m`]) })] };
 }
 function courbes() {
   const k = hasard([['em', EM, 'la droite horizontale'], ['epp', EPP, 'la courbe en cloche (maximale au milieu)'], ['ec', EC, 'la courbe en creux (minimale au milieu)']]);
@@ -61,17 +93,6 @@ function transfert() {
   const m = hasard([['descend', 'potentielle en énergie cinétique'], ['monte', 'cinétique en énergie potentielle']]);
   return { theme: 'Transferts', parties: [fq.choix(`Un wagonnet de montagnes russes ${m[0]} (sans frottements). Il y a un transfert d'énergie :`, [o('ok', m[1]), o('inv', m[0] === 'descend' ? 'cinétique en énergie potentielle' : 'potentielle en énergie cinétique'), o('th', 'mécanique en énergie thermique')], 'ok',
     { melanger: false, colonne: true, indices: { inv: m[0] === 'descend' ? 'En descendant, il perd de l\'altitude et gagne de la vitesse.' : 'En montant, il gagne de l\'altitude et perd de la vitesse.', th: 'Sans frottements, rien n\'est perdu.' }, solution: `<p>Énergie ${m[1]}.</p>` })] };
-}
-function perte() {
-  const m = hasard([0.045, 0.06]), v = hasard([10, 12]), z = hasard([3.5, 4.0]), dEm = -.5 * m * v * v + m * g * z;
-  return { theme: 'Énergie perdue', enonce: `<p>Une balle de ${fmt(m * 1000)} g, lancée vers le haut depuis le sol à ${v} ${MS}, monte jusqu'à ${fmt(z)} m (g = 9,81 ${G}).</p>`,
-    parties: [nb(`a) Calcule ${DEM} entre le départ et le sommet (2 chiffres significatifs).`, `${DEM} =`, dEm, 'J', { rel: .03, diag: x => (proche(x, -dEm, .03) ? 'Final − initial.' : `${DEM} = (0 + m g z<sub>max</sub>) − (½ m v<sub>0</sub>² + 0).`), solution: `<p>${DEM} = ${fmt(m)} × 9,81 × ${fmt(z)} − ½ × ${fmt(m)} × ${v}<sup>2</sup> = ${fmt(+dEm.toPrecision(2))} J</p>` }),
-      fq.choix('b) Conclusion :', [o('ok', 'il y a des frottements'), o('non', 'les frottements sont négligeables')], 'ok', { melanger: false, indice: `${EM} a diminué.`, solution: `<p>${EM} diminue : l'énergie perdue est le travail des frottements.</p>` })] };
-}
-function forceF() {
-  const dEm = hasard([-1.2, -2.4, -0.60]), d = hasard([3.0, 4.0, 6.0]), f = -dEm / d;
-  return { theme: 'Force de frottement', parties: [nb(`Un objet perd ${fmt(-dEm)} J d'énergie mécanique sur une distance de ${fmt(d)} m. La force de frottement est constante et opposée au mouvement. Calcule f (3 chiffres significatifs).`, 'f =', f, 'N',
-    { signe: false, diag: x => (proche(x, -f, .02) ? 'f est une valeur : positive.' : proche(x, -dEm * d, .02) ? 'W = −f × d : on divise par d.' : `${DEM} = W(f) = −f × d.`), solution: `<p>${DEM} = −f × d ⟺ f = −${DEM} / d = ${fmt(-dEm)} / ${fmt(d)} = ${r3(f)} N</p>` })] };
 }
 function travailF() {
   return { theme: 'Énergie perdue et travail', parties: [fq.choix(`Avec des frottements, la perte d'énergie mécanique ${DEM} est égale :`, [o('ok', 'au travail des forces de frottement'), o('p', 'au travail du poids'), o('c', 'à la variation d\'énergie cinétique')], 'ok',
@@ -85,8 +106,8 @@ function variationOrigine() {
 ET.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Énergie mécanique',
-  intro: '<p class="er-contexte">10 questions : énergie potentielle de pesanteur, énergie mécanique, conservation sans frottements, énergie perdue et force de frottement.</p>',
-  questions: () => melanger([origine(), mecanique(), vitesseCons(), hauteurCons(), courbes(), transfert(), perte(), forceF(), travailF(), variationOrigine()]),
+  intro: '<p class="er-contexte">10 questions : d\'abord sans calcul, puis des calculs d\'énergies, la conservation de l\'énergie mécanique avec la méthode détaillée, et pour finir des résultats à trouver directement.</p>',
+  questions: () => [courbes(), transfert(), travailF(), variationOrigine(), origine(), mecanique(), chuteDetail(), lancerDetail(), vitesseCons(), hauteurCons()],
   revoir: { href: 'module_3a_cours.html', label: 'Revoir les cours' },
   suite: { href: 'module_4.html', label: 'Module 4 : exercices →' },
 });

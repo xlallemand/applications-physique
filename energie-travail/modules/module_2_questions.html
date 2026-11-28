@@ -19,83 +19,107 @@
 
 <script>
 /* ============================================================
-   Série du module 2 : 10 questions.
-   E_c = ½ m v² (unités), vitesse à partir de E_c, Δ E_c (final −
-   initial), vitesse finale d'une chute (avec ou sans vitesse initiale),
-   hauteur atteinte, distance d'arrêt, force de frottement, théorème écrit
-   pour une situation (schéma), vitesse de sortie d'un accélérateur,
-   tension nécessaire.
+   Série du module 2 : 10 questions, dans l'ordre (de la méthode
+   détaillée au résultat demandé directement).
+   1-2. E_c = ½ m v² (unités) ; Δ E_c (final − initial) et signe de ΣW
+   3-6. Méthode détaillée : angles et théorème écrit (schéma) ; chute
+        (schéma à compléter, angles, théorème, vitesse) ; distance d'arrêt
+        (idem) ; accélérateur (travail qU et son signe, théorème, vitesse)
+   7-10. Résultat demandé directement : hauteur atteinte, force de
+        frottement, vitesse après une chute avec vitesse initiale,
+        tension nécessaire
    ============================================================ */
-const { o, fq, fmt, cs, sci, proche, fr, rac, hasard, melanger, W, V, nomV, MS, E_CH, M_P, M_E, schemaMvt, partieAngles, partieEquation } = ET;
+const { o, fq, fmt, cs, sci, proche, fr, rac, demo, hasard, W, V, nomV, MS, E_CH, M_P, M_E, schemaMvt, partieDonnees, partieAngles, partieEquation } = ET;
 const G = 'm·s<sup>−2</sup>', g = 9.81, EC = 'E<sub>c</sub>', DEC = 'Δ<sub>AB</sub>E<sub>c</sub>';
 const nb = (q, label, valeur, unite, opts) => Object.assign({ type: 'nombre', q, label, valeur, unite, rel: .01, calc: true, signe: false }, opts);
 const sc = (q, label, valeur, unite, opts) => Object.assign({ type: 'sci', q, label, valeur, unite, cs: 2, rel: .03, calc: true }, opts);
 const r3 = v => fmt(+v.toPrecision(3));
+const vA = 'v<sub>A</sub>', vB = 'v<sub>B</sub>', v2 = x => `${x}<sup>2</sup>`;
 
+/* ---------- 1-2. Énergie cinétique et sa variation ---------- */
 function energie() {
   const m = hasard([1200, 900, 1500]), vk = hasard([50, 90, 130]), v = vk / 3.6, E = .5 * m * v * v;
   return { theme: 'Énergie cinétique', enonce: `<p>Une voiture de ${fmt(m)} kg roule à ${vk} km·h<sup>−1</sup>.</p>`,
     parties: [sc(`Calcule son énergie cinétique ${EC}.`, `${EC} =`, E, 'J', { diag: x => (proche(x, .5 * m * vk * vk, .05) ? 'Convertis la vitesse en m·s<sup>−1</sup> (÷ 3,6).' : proche(x, m * v * v, .05) ? 'N\'oublie pas le ½.' : `${EC} = ½ m v².`),
-      solution: `<p>v = ${vk} / 3,6 = ${r3(v)} ${MS} ; ${EC} = ½ × ${fmt(m)} × ${r3(v)}<sup>2</sup> = ${sci(E, 2)} J</p>` })] };
-}
-function vitesse() {
-  const m = hasard([0.5, 2.0, 4.0]), E = hasard([25, 64, 100]), v = Math.sqrt(2 * E / m);
-  return { theme: 'Retrouver la vitesse', parties: [nb(`Un objet de ${fmt(m)} kg a une énergie cinétique de ${E} J. Calcule sa vitesse (3 chiffres significatifs).`, 'v =', v, MS,
-    { diag: x => (proche(x, v * v, .02) ? 'Tu as trouvé v² : prends la racine.' : proche(x, Math.sqrt(E / m), .02) ? `v = ${rac(fr('2 E<sub>c</sub>', 'm'))} : n'oublie pas le 2.` : `v = ${rac(fr('2 E<sub>c</sub>', 'm'))}.`), solution: `<p>v = ${rac(fr(`2 × ${E}`, fmt(m)))} = ${r3(v)} ${MS}</p>` })] };
+      solution: demo([`v = ${vk} / 3,6 = ${r3(v)} ${MS}`, `${EC} = ½ m v<sup>2</sup> = ½ × ${fmt(m)} × ${r3(v)}<sup>2</sup>`, `= ${sci(E, 2)} J`]) })] };
 }
 function variation() {
-  const m = hasard([2.0, 5.0, 0.4]), vA = hasard([10, 12]), vB = hasard([4, 6]), d = .5 * m * (vB * vB - vA * vA);
-  return { theme: 'Variation d\'énergie cinétique', enonce: `<p>Un objet de ${fmt(m)} kg passe de v<sub>A</sub> = ${vA} ${MS} à v<sub>B</sub> = ${vB} ${MS}.</p>`,
-    parties: [nb(`a) Calcule ${DEC}.`, `${DEC} =`, d, 'J', { signe: true, rel: .005, diag: x => (proche(x, -d) ? 'Δ = final (B) − initial (A).' : 'E<sub>c</sub>(B) − E<sub>c</sub>(A), en calculant chaque énergie.'), solution: `<p>${DEC} = ½ × ${fmt(m)} × (${vB}<sup>2</sup> − ${vA}<sup>2</sup>) = ${fmt(d)} J</p>` }),
+  const m = hasard([2.0, 5.0, 0.4]), va = hasard([10, 12]), vb = hasard([4, 6]), d = .5 * m * (vb * vb - va * va);
+  return { theme: 'Variation d\'énergie cinétique', enonce: `<p>Un objet de ${fmt(m)} kg passe de ${vA} = ${va} ${MS} à ${vB} = ${vb} ${MS}.</p>`,
+    parties: [nb(`a) Calcule ${DEC}.`, `${DEC} =`, d, 'J', { signe: true, rel: .005, diag: x => (proche(x, -d) ? 'Δ = final (B) − initial (A).' : 'E<sub>c</sub>(B) − E<sub>c</sub>(A), en calculant chaque énergie.'),
+      solution: demo([`${DEC} = ½ m ${v2(vB)} − ½ m ${v2(vA)}`, `= ½ × ${fmt(m)} × ${vb}<sup>2</sup> − ½ × ${fmt(m)} × ${va}<sup>2</sup>`, `= ${fmt(d)} J`]) }),
       fq.choix('b) La somme des travaux des forces est :', [o('n', 'négative'), o('p', 'positive'), o('0', 'nulle')], 'n', { melanger: false, indice: `D'après le théorème, ΣW = ${DEC}.`, solution: '<p>ΣW = ΔE<sub>c</sub> < 0 : les forces ont freiné l\'objet.</p>' })] };
 }
-function chute() {
-  const h = hasard([5.0, 12, 20]), vA = hasard([0, 0, 4.0]), v = Math.sqrt(vA * vA + 2 * g * h);
-  return { theme: 'Vitesse après une chute', enonce: `<p>Une pierre ${vA ? `lancée vers le bas à ${fmt(vA)} ${MS}` : 'lâchée sans vitesse'} tombe de ${fmt(h)} m (g = 9,81 ${G}, air négligé).</p>`,
-    parties: [nb('Calcule sa vitesse en arrivant en bas (3 chiffres significatifs).', 'v<sub>B</sub> =', v, MS, {
-      diag: x => (proche(x, Math.sqrt(2 * g * h), .02) && vA ? 'N\'oublie pas E<sub>c</sub>(A) : ½ m v<sub>B</sub>² − ½ m v<sub>A</sub>² = m g h.' : proche(x, v * v, .02) ? 'Prends la racine carrée.' : proche(x, Math.sqrt(vA * vA + g * h), .02) ? 'v<sub>B</sub>² = v<sub>A</sub>² + 2 g h.' : 'D\'après le théorème : ½ m v<sub>B</sub>² − ½ m v<sub>A</sub>² = m g h.'),
-      solution: `<p>½ m v<sub>B</sub><sup>2</sup> − ½ m v<sub>A</sub><sup>2</sup> = m g h ⟺ v<sub>B</sub> = ${rac('v<sub>A</sub>² + 2 g h')} = ${r3(v)} ${MS}</p>` })] };
+
+/* ---------- 3-6. Méthode détaillée ---------- */
+function theoreme() {
+  const s = hasard([{ sens: 'droite', objet: 'pierre', forces: ['P', 'RN', 'f'], d: 'AB', t: 'Une pierre glisse sur la glace et ralentit à cause des frottements.' },
+    { sens: 'haut', objet: 'balle', forces: ['P'], d: 'h', t: 'Une balle est lancée verticalement vers le haut jusqu\'au sommet B (air négligé).' },
+    { sens: 'droite', objet: 'voiture', forces: ['P', 'R', 'Fm', 'f'], d: 'AB', t: 'Une voiture démarre sur une route horizontale : force motrice et frottements.' }]);
+  return { theme: 'Méthode : écrire le théorème', enonce: `<p>${s.t}</p>${schemaMvt(Object.assign({ angles: false }, s), {})}`,
+    parties: [partieAngles(s), partieEquation(s, { solution: '<p>Chaque force ⊥ au déplacement a un travail nul ; à 180°, cos α = −1.</p>' })] };
 }
+function chuteDetail() {
+  const m = hasard([0.20, 0.50]), h = hasard([5.0, 12, 20]), v = Math.sqrt(2 * g * h);
+  const S = { sens: 'bas', objet: 'balle', forces: ['P'], d: 'h' };
+  return { theme: 'Méthode : vitesse après une chute', enonce: `<p>Une balle de ${fmt(m * 1000)} g est lâchée sans vitesse d'une hauteur de ${fmt(h)} m (g = 9,81 ${G}, air négligé). On cherche sa vitesse en arrivant au sol.</p>`,
+    parties: [partieDonnees(S, { m: fmt(m * 1000) + ' g', vA: '0 ' + MS, vB: '?', d: fmt(h) + ' m' }), partieAngles(S), partieEquation(S),
+      nb(`Isole ${vB} (avec ${vA} = 0) et calcule-la (3 chiffres significatifs).`, `${vB} =`, v, MS, {
+        diag: x => (proche(x, v * v, .02) ? 'Prends la racine carrée.' : proche(x, Math.sqrt(g * h), .02) ? `${v2(vB)} = 2 g h : n'oublie pas le 2.` : `½ m ${v2(vB)} = m g h.`),
+        solution: demo([`½ m ${v2(vB)} − 0 = m g h`, `⟺ ${vB} = ${rac('2 g h')}`, `= ${rac(`2 × 9,81 × ${fmt(h)}`)}`, `= ${r3(v)} ${MS}`]) })] };
+}
+function arretDetail() {
+  const m = hasard([0.17, 0.40, 2.0]), v = hasard([3.0, 5.0, 8.0]), f = hasard([0.20, 0.50, 1.5]), d = m * v * v / (2 * f);
+  const S = { sens: 'droite', objet: 'pierre', forces: ['P', 'RN', 'f'], d: 'AB' };
+  return { theme: 'Méthode : distance d\'arrêt', enonce: `<p>Un palet de ${fmt(m * 1000)} g glisse sur un sol horizontal, lancé à ${fmt(v)} ${MS}, jusqu'à l'arrêt ; les frottements valent f = ${fmt(f)} N. On cherche la distance parcourue.</p>`,
+    parties: [partieDonnees(S, { m: fmt(m * 1000) + ' g', vA: fmt(v) + ' ' + MS, vB: '0 ' + MS, d: '?', f: fmt(f) + ' N' }), partieAngles(S), partieEquation(S),
+      nb('Isole AB et calcule-la (3 chiffres significatifs).', 'AB =', d, 'm', { diag: x => (proche(x, 2 * d, .02) ? 'AB = m v<sub>A</sub>² / (2 f) : n\'oublie pas le 2.' : proche(x, d * 1000, .02) ? 'La masse en kg.' : '0 − ½ m v<sub>A</sub>² = −f × AB.'),
+        solution: demo([`0 − ½ m ${v2(vA)} = −f × AB`, `⟺ AB = ${fr(`m ${v2(vA)}`, '2 f')}`, `= ${fr(`${fmt(m)} × ${fmt(v)}<sup>2</sup>`, `2 × ${fmt(f)}`)}`, `= ${r3(d)} m`]) })] };
+}
+function sortieDetail() {
+  const p = hasard([['un proton', M_P, '1,67 × 10<sup>−27</sup>', 'p'], ['un électron', M_E, '9,11 × 10<sup>−31</sup>', 'e']]), U = hasard([100, 1000, 5000]), v = Math.sqrt(2 * E_CH * U / p[1]);
+  const WE = `W<sub>AB</sub>(${V('F', 'él')})`;
+  return { theme: 'Méthode : accélérateur linéaire', enonce: `<p>${p[0][0].toUpperCase() + p[0].slice(1)} (m = ${p[2]} kg, |q| = e = 1,60 × 10<sup>−19</sup> C) entre en A sans vitesse initiale dans un condensateur soumis à U = ${fmt(U)} V, qui l'accélère jusqu'en B. Le poids est négligeable.</p>`,
+    parties: [fq.choix(`Le travail ${WE} de la force électrique vaut :`, [o('p', '+e U'), o('m', '−e U'), o('0', '0')], 'p', { melanger: false,
+        indices: { m: 'La particule est accélérée : la force favorise le mouvement, le travail est moteur (positif).', 0: 'La force est parallèle au déplacement.' }, solution: `<p>Travail moteur : ${WE} = +e U.</p>` }),
+      fq.choix('D\'après le théorème de l\'énergie cinétique entre A et B :', [o('ok', `½ m ${v2(vB)} − 0 = e U`), o('inv', `0 − ½ m ${v2(vB)} = e U`), o('sq', `½ m ${vB} = e U`)], 'ok', { melanger: false, colonne: true,
+        indices: { inv: 'Δ = état <b>final</b> (B) moins état <b>initial</b> (A).', sq: 'E<sub>c</sub> = ½ m v<sup>2</sup> : la vitesse est au carré.' }, solution: `<p>${DEC} = ${WE} : ½ m ${v2(vB)} − 0 = e U.</p>` }),
+      sc(`Isole ${vB} et calcule-la.`, `${vB} =`, v, MS, { diag: x => (proche(x, v * v, .05) ? 'Prends la racine.' : proche(x, v / Math.SQRT2, .03) ? 'v<sub>B</sub>² = 2 e U / m : le 2.' : '½ m v<sub>B</sub>² = e U.'),
+        solution: demo([`½ m ${v2(vB)} = e U`, `⟺ ${vB} = ${rac(fr('2 e U', 'm'))}`, `= ${rac(fr(`2 × 1,60 × 10<sup>−19</sup> × ${fmt(U)}`, p[2]))}`, `= ${sci(v, 2)} ${MS}`]) })] };
+}
+
+/* ---------- 7-10. Résultat demandé directement ---------- */
 function hauteur() {
   const v = hasard([6.0, 9.0, 15]), h = v * v / (2 * g);
   return { theme: 'Hauteur atteinte', parties: [nb(`Une balle est lancée verticalement vers le haut à ${fmt(v)} ${MS} (g = 9,81 ${G}, air négligé). Quelle hauteur gagne-t-elle ? (3 chiffres significatifs)`, 'h =', h, 'm',
-    { diag: x => (proche(x, v * v / g, .02) ? 'h = v<sub>A</sub>² / (2 g).' : proche(x, v / (2 * g), .02) ? 'La vitesse est au carré.' : 'Au sommet, v<sub>B</sub> = 0 : 0 − ½ m v<sub>A</sub>² = −m g h.'), solution: `<p>0 − ½ m v<sub>A</sub><sup>2</sup> = −m g h ⟺ h = v<sub>A</sub>² / (2 g) = ${r3(h)} m</p>` })] };
-}
-function arret() {
-  const m = hasard([0.17, 0.40, 2.0]), v = hasard([3.0, 5.0, 8.0]), f = hasard([0.20, 0.50, 1.5]), d = m * v * v / (2 * f);
-  return { theme: 'Distance d\'arrêt', enonce: `<p>Un objet de ${fmt(m * 1000)} g glisse sur un sol horizontal, lancé à ${fmt(v)} ${MS} ; les frottements valent f = ${fmt(f)} N.</p>`,
-    parties: [nb('Quelle distance parcourt-il avant de s\'arrêter ? (3 chiffres significatifs)', 'AB =', d, 'm', { diag: x => (proche(x, 2 * d, .02) ? 'AB = m v<sub>A</sub>² / (2 f) : n\'oublie pas le 2.' : proche(x, d * 1000, .02) ? 'La masse en kg.' : '0 − ½ m v<sub>A</sub>² = −f × AB (poids et réaction ne travaillent pas).'),
-      solution: `<p>0 − ½ m v<sub>A</sub><sup>2</sup> = −f × AB ⟺ AB = m v<sub>A</sub>² / (2 f) = ${r3(d)} m</p>` })] };
+    { diag: x => (proche(x, v * v / g, .02) ? 'h = v<sub>A</sub>² / (2 g).' : proche(x, v / (2 * g), .02) ? 'La vitesse est au carré.' : 'Au sommet, v<sub>B</sub> = 0 : 0 − ½ m v<sub>A</sub>² = −m g h.'),
+      solution: demo([`> Poids seul, sens contraire du déplacement : ${DEC} = W<sub>AB</sub>(${V('P')}) = −m g h, avec ${vB} = 0 au sommet :`, `0 − ½ m ${v2(vA)} = −m g h`, `⟺ h = ${fr(v2(vA), '2 g')}`, `= ${fr(fmt(v) + '<sup>2</sup>', '2 × 9,81')}`, `= ${r3(h)} m`]) })] };
 }
 function frottement() {
   const m = hasard([18, 20]), v = hasard([1.5, 2.0]), d = hasard([25, 30]), f = m * v * v / (2 * d);
   return { theme: 'Force de frottement', enonce: `<p>Une pierre de curling de ${m} kg, lancée à ${fmt(v)} ${MS}, s'arrête après ${d} m.</p>`,
     parties: [nb('Calcule la valeur de la force de frottement, supposée constante (3 chiffres significatifs).', 'f =', f, 'N', { diag: x => (proche(x, 2 * f, .02) ? 'f = m v<sub>A</sub>² / (2 AB).' : 'D\'après le théorème : 0 − ½ m v<sub>A</sub>² = −f × AB.'),
-      solution: `<p>0 − ½ m v<sub>A</sub><sup>2</sup> = −f × AB ⟺ f = m v<sub>A</sub>² / (2 AB) = ${r3(f)} N</p>` })] };
+      solution: demo([`> Poids et réaction ⊥ au déplacement (travail nul), frottements à 180° :`, `0 − ½ m ${v2(vA)} = −f × AB`, `⟺ f = ${fr(`m ${v2(vA)}`, '2 AB')}`, `= ${fr(`${m} × ${fmt(v)}<sup>2</sup>`, `2 × ${d}`)}`, `= ${r3(f)} N`]) })] };
 }
-function theoreme() {
-  const s = hasard([{ sens: 'droite', objet: 'pierre', forces: ['P', 'N', 'f'], d: 'AB', t: 'Une pierre glisse sur la glace et ralentit à cause des frottements.' },
-    { sens: 'haut', objet: 'balle', forces: ['P'], d: 'h', t: 'Une balle est lancée verticalement vers le haut jusqu\'au sommet B (air négligé).' },
-    { sens: 'droite', objet: 'voiture', forces: ['P', 'R', 'Fm', 'f'], d: 'AB', t: 'Une voiture démarre sur une route horizontale : force motrice et frottements.' }]);
-  return { theme: 'Écrire le théorème', enonce: `<p>${s.t}</p>${schemaMvt(Object.assign({ angles: false }, s), {})}`,
-    parties: [partieAngles(s), partieEquation(s, { solution: '<p>Chaque force ⊥ au déplacement a un travail nul ; à 180°, cos α = −1.</p>' })] };
-}
-function sortie() {
-  const p = hasard([['un proton', M_P, '1,67 × 10<sup>−27</sup>'], ['un électron', M_E, '9,11 × 10<sup>−31</sup>']]), U = hasard([100, 1000, 5000]), v = Math.sqrt(2 * E_CH * U / p[1]);
-  return { theme: 'Accélérateur linéaire', enonce: `<p>${p[0][0].toUpperCase() + p[0].slice(1)} (m = ${p[2]} kg, |q| = e = 1,60 × 10<sup>−19</sup> C) est accéléré sans vitesse initiale sous U = ${fmt(U)} V.</p>`,
-    parties: [sc('Calcule sa vitesse de sortie (théorème de l\'énergie cinétique, W = eU).', 'v<sub>B</sub> =', v, MS, { diag: x => (proche(x, v * v, .05) ? 'Prends la racine.' : proche(x, v / Math.SQRT2, .03) ? `v<sub>B</sub> = ${rac(fr('2 e U', 'm'))} : le 2.` : '½ m v<sub>B</sub>² = e U.'), solution: `<p>½ m v<sub>B</sub><sup>2</sup> = e U ⟺ v<sub>B</sub> = ${rac(fr('2 e U', 'm'))} = ${sci(v, 2)} ${MS}</p>` })] };
+function chute() {
+  const h = hasard([5.0, 12, 20]), va = hasard([3.0, 4.0, 6.0]), v = Math.sqrt(va * va + 2 * g * h);
+  return { theme: 'Vitesse après une chute', enonce: `<p>Une pierre lancée vers le bas à ${fmt(va)} ${MS} tombe de ${fmt(h)} m (g = 9,81 ${G}, air négligé).</p>`,
+    parties: [nb('Calcule sa vitesse en arrivant en bas (3 chiffres significatifs).', `${vB} =`, v, MS, {
+      diag: x => (proche(x, Math.sqrt(2 * g * h), .02) ? 'N\'oublie pas E<sub>c</sub>(A) : ½ m v<sub>B</sub>² − ½ m v<sub>A</sub>² = m g h.' : proche(x, v * v, .02) ? 'Prends la racine carrée.' : proche(x, Math.sqrt(va * va + g * h), .02) ? 'v<sub>B</sub>² = v<sub>A</sub>² + 2 g h.' : 'D\'après le théorème : ½ m v<sub>B</sub>² − ½ m v<sub>A</sub>² = m g h.'),
+      solution: demo([`½ m ${v2(vB)} − ½ m ${v2(vA)} = m g h`, `⟺ ${v2(vB)} = ${v2(vA)} + 2 g h`, `⟺ ${vB} = ${rac(`${v2(vA)} + 2 g h`)}`, `= ${rac(`${fmt(va)}<sup>2</sup> + 2 × 9,81 × ${fmt(h)}`)}`, `= ${r3(v)} ${MS}`]) })] };
 }
 function tension() {
   const v = hasard([1.0e6, 2.0e6, 5.0e6]), U = M_P * v * v / (2 * E_CH);
-  return { theme: 'Tension nécessaire', parties: [sc(`Quelle tension faut-il pour accélérer un proton (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg) du repos jusqu'à ${sci(v, 1)} ${MS} ?`, 'U =', U, 'V',
-    { diag: x => (proche(x, 2 * U, .05) ? 'U = m v² / (2e).' : '½ m v<sub>B</sub>² = e U : isole U.'), solution: `<p>½ m v<sub>B</sub><sup>2</sup> = e U ⟺ U = m v<sub>B</sub>² / (2e) = ${sci(U, 2)} V</p>` })] };
+  return { theme: 'Tension nécessaire', parties: [sc(`Quelle tension faut-il pour accélérer un proton (m<sub>p</sub> = 1,67 × 10<sup>−27</sup> kg, e = 1,60 × 10<sup>−19</sup> C) du repos jusqu'à ${sci(v, 1)} ${MS} ?`, 'U =', U, 'V',
+    { diag: x => (proche(x, 2 * U, .05) ? 'U = m v² / (2e).' : '½ m v<sub>B</sub>² = e U : isole U.'),
+      solution: demo([`½ m ${v2(vB)} − 0 = e U`, `⟺ U = ${fr(`m ${v2(vB)}`, '2 e')}`, `= ${fr(`1,67 × 10<sup>−27</sup> × (${sci(v, 1)})<sup>2</sup>`, '2 × 1,60 × 10<sup>−19</sup>')}`, `= ${sci(U, 2)} V`]) })] };
 }
 
 ET.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Théorème de l\'énergie cinétique',
-  intro: '<p class="er-contexte">10 questions : énergie cinétique, théorème de l\'énergie cinétique (vitesse finale, hauteur atteinte, distance d\'arrêt, force de frottement) et vitesse de sortie d\'un accélérateur.</p>',
-  questions: () => melanger([energie(), vitesse(), variation(), chute(), hauteur(), arret(), frottement(), theoreme(), sortie(), tension()]),
+  intro: '<p class="er-contexte">10 questions : énergie cinétique, puis le théorème de l\'énergie cinétique avec la méthode détaillée (schéma, angles, théorème écrit), et pour finir des résultats à trouver directement (hauteur, force de frottement, vitesse, tension).</p>',
+  questions: () => [energie(), variation(), theoreme(), chuteDetail(), arretDetail(), sortieDetail(), hauteur(), frottement(), chute(), tension()],
   revoir: { href: 'module_2a_cours.html', label: 'Revoir les cours' },
   suite: { href: 'fiche_2.html', label: 'Fiche récapitulative →' },
 });
