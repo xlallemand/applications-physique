@@ -29,7 +29,8 @@
   const familles = [
     { id: 'MU', nom: 'Produits et quotients', desc: 'Un terme qui multiplie ou qui divise passe de l’autre côté en changeant de place : en haut ↔ en bas.' },
     { id: 'AD', nom: 'Termes additifs', desc: 'Un terme relié par + ou − passe de l’autre côté en changeant de signe.' },
-    { id: 'FO', nom: 'Fonctions réciproques', desc: 'Une fonction (carré, racine, sinus, log…) s’annule en appliquant sa fonction réciproque aux deux membres.' }
+    { id: 'FO', nom: 'Fonctions réciproques', desc: 'Une fonction (carré, racine, sinus, log…) s’annule en appliquant sa fonction réciproque aux deux membres.' },
+    { id: 'CO', nom: 'Combiner des équations', desc: 'Une grandeur seule dans une équation se remplace par son expression dans une autre : on élimine ainsi les grandeurs intermédiaires.' }
   ];
   const CLASSES = [['2de', '2de'], ['1re', '1re'], ['tle', 'Terminale']];
   const RANG = { '2de': 0, '1re': 1, tle: 2 };
@@ -129,6 +130,52 @@
       methode: 'Isole d’abord l’exponentielle (ou ln), puis applique sa réciproque aux deux membres. Termine avec les règles des produits et des signes. Calculatrice : shift + ln donne e<sup>x</sup>.',
       piege: 'Divise par N<sub>0</sub> <b>avant</b> d’appliquer ln : ln(N<sub>0</sub> × e<sup>−λt</sup>) n’est pas égal à N<sub>0</sub> × (−λt).' }
   ];
+
+
+  /* ---------------- Combiner des équations (questions : modules/combiner.js) ---------------- */
+  const sb = x => '<sub>' + x + '</sub>';
+  liste.push(
+    { id: 'CO1', famille: 'CO', niveau: 2, prerequis: ['MU1', 'MU2', 'MU3', 'MU4'], classe: '2de', titre: 'Remplacer une grandeur',
+      regle: 'Quand une grandeur est <b>seule</b> d’un côté d’une équation (n = m / M), on peut la <b>remplacer</b> par son expression dans une autre équation.',
+      illus: duo(op(calc(lg('c', fr('n', 'V'), '', 'équation 1'), lg('n', fr('m', 'M'), '', 'équation 2 : n est seule'), lg('c', fr('m', 'M × V'), '', 'n remplacée dans l’équation 1')))),
+      methode: 'Repère la grandeur qui n’est pas dans la liste demandée. Trouve l’équation où elle est seule, et reporte son expression dans l’autre équation : glisse l’outil « n = … » de la réserve sur n.',
+      piege: 'Une fraction reportée se répartit : ' + m(fr('n', 'V')) + ' avec ' + m('n = ' + fr('m', 'M')) + ' donne ' + m(fr('m', 'M × V')) + ' : M passe en bas, avec V.' },
+    { id: 'CO2', famille: 'CO', niveau: 3, prerequis: ['CO1', 'MU3'], classe: '2de', titre: 'Isoler pour remplacer',
+      regle: 'Pour remplacer une grandeur, il faut d’abord l’<b>isoler</b> dans une équation ; on la reporte, puis on isole la grandeur cherchée.',
+      illus: duo(op(calc(lg('c', fr('n', 'V'), '× V'), lg('c × V', 'n', '⇄'), lg('n', 'c × V', '', 'n est seule : on la reporte'), lg(fr('m', 'M'), 'c × V', '', 'dans n = m / M'), lg('m', 'c × V × M')))),
+      methode: 'Choisis la grandeur à éliminer. Isole-la dans une équation et vérifie l’étape : l’outil « grandeur = … » apparaît dans la réserve de l’autre équation. Reporte-la, puis isole la grandeur cherchée.',
+      piege: 'On ne reporte qu’une grandeur seule, à gauche : dans ' + m('c = ' + fr('n', 'V')) + ', n n’est pas encore isolée (' + m('n = c × V') + ').' },
+    { id: 'CO3', famille: 'CO', niveau: 3, prerequis: ['CO2'], classe: '2de', titre: 'Remplacer puis simplifier',
+      regle: 'Une grandeur présente <b>au numérateur et au dénominateur</b> d’une même fraction se <b>simplifie</b> ; une grandeur qui <b>multiplie chacun des deux membres</b> aussi (on divise les deux membres par elle).',
+      illus: duo(op(calc(lg('P', 'm × g', '', 'équation 1'), lg(fr('G × M' + sb('T') + ' × m', 'R' + sb('T') + '²'), 'm × g', '÷ m', 'P remplacé'), lg(fr('G × M' + sb('T'), 'R' + sb('T') + '²'), 'g')))),
+      methode: 'Après le report, touche une grandeur, puis la même en haut et en bas de la fraction, ou dans l’autre membre : elles se barrent. Vérifie l’étape : les termes barrés s’effacent.',
+      piege: 'On ne simplifie que des facteurs : dans ' + m(fr('m + M', 'm')) + ', m ne se simplifie pas.' },
+    { id: 'CO4', famille: 'CO', niveau: 4, prerequis: ['CO3'], classe: '1re', titre: 'Trois équations',
+      regle: 'Avec trois équations, on élimine les grandeurs intermédiaires <b>une à une</b> : chaque report fait disparaître une grandeur.',
+      illus: duo(op(calc(lg('C' + sb('m'), fr('m', 'V'), '', 'équation 1'), lg('C' + sb('m'), fr('n × M', 'V'), '', 'm = n × M remplacée'), lg('C' + sb('m'), fr('c × V × M', 'V'), '', 'n = c × V remplacée'), lg('C' + sb('m'), 'c × M', '', 'V simplifié')))),
+      methode: 'Liste les grandeurs à éliminer. Pour chacune, trouve une équation qui la donne, isole-la et reporte-la. Termine par les simplifications et l’isolement.',
+      piege: 'Ne reporte pas une grandeur dans l’équation d’où elle vient : tu retrouverais une égalité toujours vraie, sans rien de nouveau.' },
+    { id: 'CO5', famille: 'CO', niveau: 4, prerequis: ['CO2'], classe: '1re', titre: 'Repérer l’équation inutile',
+      regle: 'Toutes les équations données ne servent pas toujours : on n’utilise que celles qui relient la grandeur cherchée aux grandeurs demandées.',
+      illus: duo(op(calc(lg('c', fr('n', 'V'), '', 'utile'), lg('n', fr('m', 'M'), '', 'utile'), lg('N', 'n × N' + sb('A'), '', 'inutile : N n’est pas demandée'), lg('m', 'c × V × M')))),
+      methode: 'Pour chaque équation, regarde si elle contient la grandeur cherchée ou une grandeur à éliminer. Une équation qui n’apporte que des grandeurs étrangères à la consigne ne sert pas.',
+      piege: 'Une équation qui introduit une nouvelle grandeur (absente de la liste) ajoute une grandeur à éliminer : elle ne sert souvent à rien.' },
+    { id: 'CO6', famille: 'CO', niveau: 5, prerequis: ['CO3', 'FO1', 'FO2'], classe: '1re', titre: 'Remplacer dans un carré ou une racine',
+      regle: 'Une grandeur au carré se remplace avec son expression <b>au carré</b> : v = d / Δt donne v² = d² / Δt². Un facteur qui entre sous une racine y entre <b>au carré</b>.',
+      illus: duo(op(calc(lg('E' + sb('c'), fr('1', '2') + ' × m × v²', '', 'v = d / Δt'), lg('E' + sb('c'), fr('m × d²', '2 × Δt²'), '', 'v² remplacé : d² / Δt²')))),
+      methode: 'Reporte l’expression : chaque grandeur prend la puissance. Simplifie, puis applique √ aux deux membres si la grandeur cherchée est au carré. Glisse un facteur sur une racine pour l’y faire entrer au carré.',
+      piege: m('(d / Δt)² = d² / Δt²') + ' : le carré porte sur le numérateur <b>et</b> sur le dénominateur.' },
+    { id: 'CO7', famille: 'CO', niveau: 6, prerequis: ['CO4', 'CO5', 'CO6'], classe: 'tle', titre: 'Jusqu’à quatre équations',
+      regle: 'Une démonstration de Terminale enchaîne plusieurs reports : on garde le même principe, une grandeur éliminée à chaque report.',
+      illus: duo(op(calc(lg('t', fr('m' + sb('NaOH'), 'm' + sb('sol')), '', 'titre massique'), lg('t', fr('C' + sb('m') + ' × V', 'ρ × V'), '', 'deux reports'), lg('t', fr('c × M', 'ρ'), '', 'C' + sb('m') + ' = c × M, V simplifié')))),
+      methode: 'Commence par l’équation qui contient la grandeur cherchée ; remplace ses grandeurs une à une jusqu’à n’avoir que les grandeurs demandées. Simplifie à chaque étape.',
+      piege: 'Simplifie au fur et à mesure : une expression trop longue cache les grandeurs qui se simplifient.' },
+    { id: 'CO8', famille: 'CO', niveau: 7, prerequis: ['CO7'], classe: '1re', titre: 'Choisir ses équations',
+      regle: 'Pour exprimer une grandeur, on cherche dans le cours les relations qui la relient aux grandeurs connues.',
+      illus: duo(op(calc(lg('m', '?', '', 'cherchée : formule qui contient m'), lg('n', fr('m', 'M'), '', 'formulaire'), lg('c', fr('n', 'V'), '', 'formulaire : n s’élimine'), lg('m', 'c × V × M')))),
+      methode: 'Choisis d’abord une formule qui contient la grandeur cherchée. Si elle contient une grandeur inconnue, cherche une formule qui la donne, et ainsi de suite (4 formules au plus).',
+      piege: 'Vérifie que chaque grandeur de la formule choisie a bien le même sens dans la situation : m de la soude ou m de la solution ?' }
+  );
 
   const R = {};
   liste.forEach(c => { R[c.id] = c; });

@@ -11,7 +11,8 @@
        résolution dans l'éditeur à tuiles, aides toujours disponibles (EPM.Q) ;
      - points : 2 sans erreur, 1 après erreur, 0 solution affichée ;
        note sur 20 ; suivi enregistré à chaque question (EPM.enregistrer).
-   Dépend de : epm.js, question.js, equations.js, competences.js, editeur.js.
+   Dépend de : epm.js, question.js, equations.js, competences.js, editeur.js ;
+   combiner.js et question-co.js (famille CO : combiner des équations).
    API : EPM.seance(zone)
    ============================================================ */
 (function () {
@@ -69,7 +70,9 @@
 
     function question() {
       const p = plan[k], niv = niveau(p.comp);
-      const q = EPM.Q.choisir(p.comp, niv, res.map(x => x.cle));
+      // combiner des équations (famille CO) : question à plusieurs équations (modules/question-co.js)
+      const co = EPM.CO && EPM.CO.estCO(p.comp);
+      const q = co ? EPM.CO.choisir(p.comp, niv, res.map(x => x.cle)) : EPM.Q.choisir(p.comp, niv, res.map(x => x.cle));
       zone.innerHTML = '';
       // en-tête : numéro, score, barre de progression
       const t = el('div', 'er-card pm-entete-q');
@@ -80,7 +83,7 @@
       const r = RAISONS[p.raison];
       c.appendChild(el('p', 'er-q-nom', C.R[p.comp].titre + (r ? ' <span class="pm-tag">' + r + '</span>' : '')));
       zone.appendChild(c);
-      EPM.Q.monter(c, q, {
+      (co ? EPM.QC : EPM.Q).monter(c, q, {
         surFin: (pts, act, info) => {
           points += pts;
           res.push({ comp: p.comp, niv: q.diff, pts, cle: q.cle });

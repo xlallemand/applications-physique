@@ -37,9 +37,11 @@
                      funcTools:['pow10', 'log', 'inv', 'pow:4'…], needsParenTool,
                      aides:['…'] (facultatif : bouton « Un coup de pouce ? », une aide par étape validée),
                      messages:{ CLE: 'texte' } (facultatif : remplace un message de EQ.MESSAGES) }
-        rappels  : { surErreur(), surEtape(), surResolu(), surMessage(element) }
+        rappels  : { surErreur(), surEtape(), surResolu(), surMessage(element), surRemplacement(id) }
         montrer(etapes) : l'éditeur se fige et affiche la correction (démonstration EQ.demo
                           toute dépliée si etapes = { etapes, g } est donné)
+     ops.remplacements([{ id, label, noeud }]) : outils « grandeur = expression » changés en cours de route
+        (combiner des équations : une grandeur isolée dans une équation se reporte dans les autres)
      EQ.exercice({ eq, g, cible, valeurs, outils, parentheses, aides, messages, tuiles })
         → exercice pour EQ.monter, à partir de l'écriture compacte (eq), des libellés (g),
           de la grandeur à isoler (cible), des valeurs de test (valeurs() → { id: valeur }),
@@ -59,6 +61,11 @@
                                         la première fois. Option de l'éditeur partagé : utilisable dans toute
                                         application (equations-physique-mobile, equations-en-physique…), seule
                                         ou avec remplacements (combiner des équations : grandeur = expression)
+          simplifierMembres: true       avec simplifier : la même grandeur en facteur dans les deux membres, à la même
+                                        place (en haut des deux côtés, ou en bas), se simplifie aussi en deux appuis
+                                        (m g = G M m / R² : on divise les deux membres par m)
+          controle(etat) → { fini } | { message }   contrôle de fin propre à l'exercice, après chaque étape juste
+                                        (combiner des équations : grandeurs permises, forme simplifiée)
           forme: 'v = sqrt([deux q U|m])'  forme finale attendue (ordre des facteurs indifférent) : fin de l'exercice
           reserveSeule, objectif, consigne : réserve réduite aux outils ; textes au-dessus de l'équation
      EQ.partie(exercice, opts) → partie 'perso' du moteur de cours COURS (« À toi ») et des séries
@@ -1347,11 +1354,34 @@
         return l;
     }
     const barresEnAttente = () => tuilesEq().some(t => t.it.sim);
+    // simplifier un facteur commun aux deux membres (exercices avec simplifierMembres: true)
+    const membresSimplifiables = () => !!(currentExercise && currentExercise.simplifierMembres);
+    // une tuile multiplie-t-elle tout son membre ? { cote, bas } (bas : au dénominateur), sinon null
+    // (pas dans une fonction, une somme ou une fraction de fraction, pas dans une zone avec + ou −)
+    function facteurMembre(path) {
+        const p = path.split('.');
+        let nf = 0, bas = false;
+        for (let i = 1; i < p.length; i++) {
+            if (p[i] === 'num' || p[i] === 'den') { nf++; if (p[i] === 'den') bas = true; }
+            else if (!/^\d+$/.test(p[i])) return null;
+        }
+        const z = getNode(path);
+        if (nf > 1 || !z || z.kind !== 'simple' || z.items.some(isOperatorTile)) return null;
+        return { cote: p[0], bas };
+    }
+    // A et B : même grandeur, chacune multipliant un membre, à la même place (en haut des deux côtés, ou en bas)
+    function pairableMembres(pa, pb) {
+        if (!membresSimplifiables()) return false;
+        const ma = facteurMembre(pa), mb = facteurMembre(pb);
+        return !!(ma && mb && ma.cote !== mb.cote && ma.bas === mb.bas);
+    }
     // A (zone pa, rang ia) et B se simplifient-ils ? même grandeur, même fraction, de part et d'autre du trait
+    // (ou, si l'exercice le permet, la même grandeur en facteur dans les deux membres)
     function pairable(pa, ia, pb, ib) {
         const fa = fracDe(pa), fb = fracDe(pb), za = getNode(pa), zb = getNode(pb);
         const A = za && za.items && za.items[ia], B = zb && zb.items && zb.items[ib];
-        return !!(A && B && A !== B && A.id === B.id && fa && fb && fa.frac === fb.frac && fa.niveau !== fb.niveau && puissEff(A) > 0 && puissEff(B) > 0);
+        if (!(A && B && A !== B && A.id === B.id && puissEff(A) > 0 && puissEff(B) > 0)) return false;
+        return !!(fa && fb && fa.frac === fb.frac && fa.niveau !== fb.niveau) || pairableMembres(pa, pb);
     }
     // existe-t-il, de l'autre côté du trait, la même grandeur pour simplifier ?
     const partenaire = (pa, ia) => tuilesEq().some(t => pairable(pa, ia, t.path, t.idx));
@@ -1363,8 +1393,16 @@
         const c = tuilesEq().reduce((m, t) => Math.max(m, ...(t.it.sim || []).map(e => e.c + 1)), 0);
         (A.sim = A.sim || []).push({ reste: pa - k, c });
         (B.sim = B.sim || []).push({ reste: pb - k, c });
-        const reste = pa - k || pb - k, ou = pa > pb ? fracDe(data.from).niveau : fracDe(pathB).niveau;
-        showFeedback(`${A.label} simplifié${reste ? ` : il restera ${A.label}${reste > 1 ? puiss(reste) : ''} au ${ou === 'num' ? 'numérateur' : 'dénominateur'}` : ' : il disparaîtra du numérateur et du dénominateur'}.`, null);
+        const reste = pa - k || pb - k;
+        const fA = fracDe(data.from), fB = fracDe(pathB);
+        if (!(fA && fB && fA.frac === fB.frac)) {
+            // facteur commun aux deux membres : on divise (ou on multiplie) les deux membres par ce facteur
+            const bas = facteurMembre(data.from).bas, cote = pa > pb ? facteurMembre(data.from).cote : facteurMembre(pathB).cote;
+            showFeedback(`${A.label} simplifié dans les deux membres (on ${bas ? 'multiplie' : 'divise'} les deux membres par ${A.label})${reste ? ` : il restera ${A.label}${reste > 1 ? puiss(reste) : ''} dans le membre de ${cote === 'left' ? 'gauche' : 'droite'}` : ''}.`, null);
+        } else {
+            const ou = pa > pb ? fA.niveau : fB.niveau;
+            showFeedback(`${A.label} simplifié${reste ? ` : il restera ${A.label}${reste > 1 ? puiss(reste) : ''} au ${ou === 'num' ? 'numérateur' : 'dénominateur'}` : ' : il disparaîtra du numérateur et du dénominateur'}.`, null);
+        }
         refreshView();
         // première paire barrée dans cet éditeur : la suite est expliquée
         // (sous un terme barré du dénominateur : la fraction reste visible)
@@ -1438,7 +1476,8 @@
         const p = funcPath.split('.'), parSeq = p.slice(0, -1).join('.');
         const reste = data.from.startsWith(parSeq + '.') ? data.from.slice(parSeq.length + 1).split('.') : null;
         if (!fn || fn.fn !== 'sqrt' || !reste || reste[0] === p[p.length - 1] || reste.some(x => x === 'inner' || /^term/.test(x))) { afficherRefus(msg('MSG_ENTRER')); return; }
-        const den = REGLES.level(data.from) === 'den';
+        // le facteur entre en bas de la racine s'il est au dénominateur, ou si la racine elle-même est au dénominateur (pas les deux)
+        const den = (REGLES.level(data.from) === 'den') !== (REGLES.level(funcPath) === 'den');
         const t = Object.assign({}, data.item); t.pow = (t.pow || 1) * 2;
         // contenu de la racine : fraction (numérateur ou dénominateur), ou produit (qui devient une fraction pour un dénominateur)
         let ip = funcPath + '.inner', I = getNode(ip);
@@ -1511,6 +1550,12 @@
                 if (fd) { const op = zoneSimple(fd.frac + (fd.niveau === 'num' ? '.den' : '.num')); la.forEach(t => { const o = getNode(op); if (zoneUn(o)) o.items = []; o.items.push(t); }); }
                 else setNode(path, frac(simple(z.items), simple(la)));
             }
+        } else if (R.kind === 'simple' && R.items.length && !R.items.some(isOperatorTile)) {
+            // produit de grandeurs (n = c V) : ses grandeurs prennent la place de la grandeur, dans le même produit
+            // (puissances multipliées ; une grandeur déjà présente voit sa puissance augmenter : I × I = I²)
+            z.items.splice(idx, 1);
+            R.items.forEach(t => { if (t.id !== 'one') ajouterTuile(path, Object.assign({}, t, { pow: (t.pow || 1) * p })); });
+            if (!z.items.length) z.items.push(tile('one', '1'));
         } else {
             if (p !== 1) { afficherRefus(msg('MSG_SUBST').replace('{g}', nomG)); return; }
             if (z.items.length === 1) setNode(path, R);
@@ -1521,8 +1566,14 @@
                 else setNode(path, seq([z, R]));
             }
         }
+        // réserve : les grandeurs apportées par le remplacement y reviennent si on les efface ; la grandeur remplacée n'y est plus
+        if (currentExercise.tiles) {
+            tuilesDe({ left: data.noeud, right: simple([]) }).forEach(t => { if (!currentExercise.tiles.some(x => x.id === t.id)) currentExercise.tiles.push({ id: t.id, label: t.label }); });
+            if (countIdAnywhere(data.id) === 0) currentExercise.tiles = currentExercise.tiles.filter(t => t.id !== data.id);
+        }
         showFeedback(`${nomG} remplacé.`, null);
         refreshView();
+        if (rappels.surRemplacement) rappels.surRemplacement(data.id);
     }
     // forme d'une expression, indépendante de l'ordre des facteurs (fin d'un exercice de simplification)
     function forme(n) {
@@ -1879,6 +1930,7 @@
         if (!pal) return;
         const el = document.createElement('div');
         el.className = 'palette-tile palette-subst';
+        el.dataset.id = r.id;
         el.innerHTML = `<span class="eq-tile-static">${r.label}</span><span class="eq-sign">=</span>${renderStatic(r.noeud)}`;
         enableTileDrag(el, { type:'subst', id:r.id, nom:r.label, noeud:r.noeud });
         pal.appendChild(el);
@@ -1955,6 +2007,7 @@
         // utiliser (il ne fait que changer un signe) et son absence occasionnelle
         // empechait de corriger une erreur de signe sur certaines questions
         addNegPaletteTile();
+        crochets(pal);
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -2151,6 +2204,20 @@
         history.push(JSON.parse(JSON.stringify(state)));
         renderHistory();
 
+        // contrôle propre à l'exercice (combiner des équations) : { fini } ou { message } (étape juste, à poursuivre)
+        if (currentExercise.controle) {
+            const c = currentExercise.controle(JSON.parse(JSON.stringify(state))) || {};
+            if (c.fini) {
+                resolved = true; fin(); showFeedback('', true);
+                if (rappels.surResolu) rappels.surResolu();
+                return;
+            }
+            showFeedback(c.message || "Étape correcte, continue !", true);
+            state = JSON.parse(JSON.stringify(state)); annul.vider(); refreshView();
+            if (rappels.surEtape) rappels.surEtape();
+            return;
+        }
+
         // exercice de simplification : fini quand l'équation a la forme attendue
         if (currentExercise.forme) {
             const fm = currentExercise.forme;
@@ -2245,6 +2312,8 @@
         barres: barresEnAttente,
         entrer: (pa, ia, funcPath) => { const it = getNode(pa).items[ia]; processEntrer({ type:'move', from:pa, idx:ia, id:it.id, label:lab(it), item:Object.assign({}, it) }, funcPath); },
         forme,
+        // outils « grandeur = expression » de la réserve, changés en cours de route ([{ id, label, noeud }])
+        remplacements: liste => { if (!currentExercise) return; currentExercise.remplacements = liste; if (!resolved) buildPalette(); },
         // remplace l'équation affichée (tests automatiques)
         charger: st => { state = JSON.parse(JSON.stringify(st)); resolved = false; refreshView(); },
         juste: () => equationJuste(state),
@@ -2402,6 +2471,7 @@
       // simplification num/den, forme finale attendue (écriture compacte), objectif et consigne affichés
       remplacements: (o.remplacements || []).map(r => ({ id: r.id, label: o.g[r.id], noeud: membre(r.par, o.g) })),
       racineOuverte: !!o.racineOuverte, simplifier: !!o.simplifier, reserveSeule: !!o.reserveSeule,
+      simplifierMembres: !!o.simplifierMembres, controle: o.controle,
       forme: o.forme ? lire(o.forme, o.g) : null, objectif: o.objectif, consigne: o.consigne,
     };
   }

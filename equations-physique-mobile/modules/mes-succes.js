@@ -38,7 +38,7 @@
   const seuilsFamille = fam => () => { const n = permises(fam).length; return [0.25, 0.5, 0.75, 1].map(x => Math.max(1, Math.ceil(x * n))); };
   // compétences de la classe pas maîtrisées en ce moment (statut actuel, pas « au moins une fois »)
   const pasMaitrisees = () => permises().filter(id => EPM.statut(id) !== 'm');
-  const nbDecouverte = () => (EPM.DECOUVERTE ? EPM.DECOUVERTE.length : 17);
+  const nbDecouverte = () => (EPM.DECOUVERTE ? EPM.DECOUVERTE.length : 19);
 
   const categories = [
     { nom: 'Régularité', succes: [
@@ -77,7 +77,8 @@
         } },
       { id: 'famille-MU', ic: '✖️', nom: 'Produits et quotients', cond: 'Compétences de la famille maîtrisées au moins une fois', seuils: seuilsFamille('MU'), val: E => maitrisees(E, 'MU') },
       { id: 'famille-AD', ic: '➕', nom: 'Termes additifs', cond: 'Compétences de la famille maîtrisées au moins une fois', seuils: seuilsFamille('AD'), val: E => maitrisees(E, 'AD') },
-      { id: 'famille-FO', ic: '√', nom: 'Fonctions réciproques', cond: 'Compétences de la famille maîtrisées au moins une fois', seuils: seuilsFamille('FO'), val: E => maitrisees(E, 'FO') }
+      { id: 'famille-FO', ic: '√', nom: 'Fonctions réciproques', cond: 'Compétences de la famille maîtrisées au moins une fois', seuils: seuilsFamille('FO'), val: E => maitrisees(E, 'FO') },
+      { id: 'famille-CO', ic: '🔗', nom: 'Combiner des équations', cond: 'Compétences de la famille maîtrisées au moins une fois', seuils: seuilsFamille('CO'), val: E => maitrisees(E, 'CO') }
     ] },
     { nom: 'Découverte', succes: [
       { id: 'explorateur', ic: '🧭', nom: 'Explorateur', cond: 'Équations de la Découverte résolues', seuils: () => [4, 8, 12, nbDecouverte()], val: () => EPM.decouverteFaits().length }

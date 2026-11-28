@@ -43,7 +43,7 @@
 
   /* ---------- Plan de l'application (sommaire, accueil, index de recherche du portail) ---------- */
   const PLAN = [
-    { n: 1, titre: 'Découverte des méthodes', desc: '17 équations dans l’ordre, une méthode à la fois : à faire en premier.',
+    { n: 1, titre: 'Découverte des méthodes', desc: '19 équations dans l’ordre, une méthode à la fois : à faire en premier.',
       parties: [{ nom: 'Découverte des méthodes', cours: 'decouverte', noms: { cours: 'Découverte des méthodes' } }] },
     { n: 2, titre: 'Séance de résolution', desc: '5 équations choisies d’après ton suivi, à résoudre en déplaçant les grandeurs, avec des aides.',
       parties: [{ nom: 'Séance de résolution', questions: 'seance', noms: { questions: 'Séance de 5 questions' } }] },
@@ -138,8 +138,8 @@
     const s0 = el('div', 'pm-sect');
     s0.appendChild(el('h4', '', 'Ma classe'));
     s0.appendChild(segment(C.CLASSES, S.classe, v => { changer('classe', v); contenuReglages(z); }, 'Ma classe'));
-    s0.appendChild(el('p', 'pm-petit', S.classe === '2de' ? 'Sans puissance n, log, ln ni 1/x : ces compétences sont vues en 1re et en Terminale.'
-      : S.classe === '1re' ? 'Toutes les compétences sauf ln et e<sup>x</sup>, vues en Terminale.' : 'Toutes les compétences.'));
+    s0.appendChild(el('p', 'pm-petit', S.classe === '2de' ? 'Sans puissance n, log, ln ni 1/x, et en combinant deux équations au plus : le reste est vu en 1re et en Terminale.'
+      : S.classe === '1re' ? 'Toutes les compétences sauf ln et e<sup>x</sup> et les combinaisons de Terminale (jusqu’à quatre équations).' : 'Toutes les compétences.'));
     z.appendChild(s0);
     // ce que l'élève travaille
     const s1 = el('div', 'pm-sect');
@@ -311,7 +311,8 @@
     memo[id] = st;
     return st;
   }
-  function prerequisOk(id, memo) { return R[id].prerequis.every(p => statut(p, memo) === 'm'); }
+  // prérequis maîtrisés (ceux de la classe choisie seulement : CO8, proposée en 1re, n'attend pas CO7, de Terminale)
+  function prerequisOk(id, memo) { return R[id].prerequis.every(p => !permise(p) || statut(p, memo) === 'm'); }
   const taux = id => stats(id).taux;
   // 3 compétences prioritaires (de la classe choisie) : à travailler ou fragiles, prérequis maîtrisés
   function priorites() {
@@ -390,7 +391,7 @@
   function accueil(zone) {
     zone.innerHTML = '';
     // conseil : la Découverte d'abord, puis les séances
-    const nf = decouverteFaits().length, nd = EPM.DECOUVERTE ? EPM.DECOUVERTE.length : 17;
+    const nf = decouverteFaits().length, nd = EPM.DECOUVERTE ? EPM.DECOUVERTE.length : 19;
     const conseil = el('div', 'callout callout-accent pm-conseil');
     conseil.innerHTML = nf >= nd ? '<b>Découverte terminée.</b> Entraîne-toi maintenant avec les séances de résolution : l’application choisit les compétences à travailler.'
       : '<b>Par où commencer ?</b> Fais d’abord la <b>Découverte des méthodes</b> : chaque équation montre une règle, une à la fois. Entraîne-toi ensuite avec les <b>séances de résolution</b>.';
@@ -555,7 +556,7 @@
         const a = el('a', 'btn-secondary pm-pt', 'M’entraîner sur cette compétence →');
         a.href = 'seance.html#comp=' + c.id;
         r.appendChild(a);
-        const k = EPM.DECOUVERTE ? EPM.DECOUVERTE.findIndex(p => EPM.B.parCle[p.cle] && EPM.B.parCle[p.cle].cible.comp === c.id) : -1;
+        const k = EPM.DECOUVERTE ? EPM.DECOUVERTE.findIndex(p => (p.co ? p.comp === c.id : EPM.B.parCle[p.cle] && EPM.B.parCle[p.cle].cible.comp === c.id)) : -1;
         if (k >= 0) { const b = el('a', 'btn-small', 'Voir dans la Découverte'); b.href = 'decouverte.html#' + (k + 1); r.appendChild(b); }
         x.appendChild(r);
         d.appendChild(x);

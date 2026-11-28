@@ -1,7 +1,8 @@
 /* ============================================================
    Équations en physique (smartphone) — module Découverte des méthodes (EPM.decouverte)
    ------------------------------------------------------------
-   Les équations de EPM.DECOUVERTE (equations.js), toujours dans le même
+   Les équations de EPM.DECOUVERTE (equations.js, puis les deux de combiner.js :
+   reporter une grandeur, puis reporter et simplifier), toujours dans le même
    ordre : chacune fait travailler une seule règle nouvelle. Une équation
    par écran (adresse decouverte.html#3), avec :
      - la carte « La règle » de sa compétence (règle et calcul illustré) ;
@@ -35,7 +36,8 @@
     }
 
     function afficher(k) {
-      const p = D[k], q = EPM.B.question(p.cle), comp = C.R[p.comp];
+      // équation de la banque, ou question « combiner des équations » (p.co, modules/combiner.js)
+      const p = D[k], q = p.co ? EPM.CO.question(p.co) : EPM.B.question(p.cle), comp = C.R[p.comp];
       const faits = EPM.decouverteFaits();
       zone.innerHTML = '';
       // en-tête : numéro, titre, niveau, progression, pastilles de toutes les équations
@@ -74,7 +76,7 @@
       const c = el('div', 'er-card pm-q');
       c.appendChild(el('p', 'er-q-nom', 'À toi'));
       zone.appendChild(c);
-      EPM.Q.monter(c, q, {
+      (p.co ? EPM.QC : EPM.Q).monter(c, q, {
         rappel: false,
         surFin: (pts, act, info) => {
           const f = EPM.marquerDecouverte(k);
