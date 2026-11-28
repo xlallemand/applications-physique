@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="maths">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquette : combiner des équations</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<style>
+/* ============================================================
+   Maquette NON FONCTIONNELLE : combiner plusieurs équations dans
+   l'application « Équations en physique (smartphone) ».
+   Écrans statiques dessinés en JavaScript (petits gabarits plus bas),
+   pour choisir les idées de mise en œuvre (codes A1, B2…).
+   Couleurs : uniquement les variables de assets/theme.css.
+   ============================================================ */
+body { font-family: var(--font-sans); background: var(--paper); color: var(--ink); margin: 0; padding: 24px 16px 60px; }
+.mq { max-width: 1320px; margin: 0 auto; }
+.mq-titre { font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; }
+.mq-note { max-width: 900px; color: var(--ink-2); line-height: 1.55; margin: 6px 0 18px; }
+.mq-note b { color: var(--ink); }
+.mq-section { margin: 46px 0 0; }
+.mq-section > h2 { font-size: 1.3rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 4px; }
+.mq-section > p { color: var(--ink-2); max-width: 900px; margin: 0 0 18px; line-height: 1.5; }
+.mq-choix { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+.mq-opt { width: 390px; max-width: 100%; }
+.mq-opt-t { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; }
+.mq-code { background: var(--ink); color: var(--sheet); font-weight: 800; border-radius: 999px; padding: 3px 11px; font-size: .9rem; }
+.mq-opt-t b { font-size: 1.05rem; }
+.mq-plus { font-size: .9rem; color: var(--ink-2); line-height: 1.45; margin: 10px 4px 0; padding-left: 18px; }
+.mq-plus li { margin: 2px 0; }
+.mq-deja { font-size: .8rem; font-weight: 700; color: var(--accent-ink); background: var(--cle-bg); border-radius: 999px; padding: 2px 10px; }
+
+/* ── téléphone (390 px) ── */
+.tel { width: 390px; max-width: 100%; box-sizing: border-box; background: var(--paper); border: 1px solid var(--line-strong); border-radius: 26px; padding: 10px; overflow: hidden; }
+.carte { background: var(--sheet); border: 1px solid var(--line); border-radius: 18px; padding: 14px 12px; }
+.q-nom { color: var(--accent); font-weight: 700; font-size: .85rem; margin: 0 0 8px; }
+.ctx { background: var(--cle-bg); border-radius: 14px; padding: 10px 12px; font-size: .92rem; line-height: 1.45; }
+.leg { font-size: .78rem; color: var(--ink-2); margin-top: 6px; }
+.consigne { font-weight: 700; margin: 12px 0 8px; line-height: 1.35; }
+.consigne i, .obj i { font-weight: 800; color: var(--accent-ink); }
+.aides { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.pil { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 6px 12px; font-size: .82rem; font-weight: 700; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); white-space: nowrap; }
+.pil.noir { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.pil.acc { background: var(--cle-bg); color: var(--accent-ink); box-shadow: none; }
+.pil.mini { padding: 3px 9px; font-size: .75rem; }
+.pil.off { opacity: .45; }
+
+/* zone d'une équation (un éditeur par équation) */
+.zone { border: 1.5px solid var(--line-strong); border-radius: 16px; padding: 8px 8px 10px; margin: 0 0 10px; background: var(--sheet); }
+.zone.active { border-color: var(--accent); }
+.zone-t { display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; color: var(--ink-2); margin: 0 0 6px; }
+.zone.active .zone-t { color: var(--accent-ink); }
+.zone-t .esp { flex: 1; }
+.plateau { background: var(--paper); border: 1.5px dashed var(--paper-3); border-radius: 14px; padding: 12px 6px; display: flex; justify-content: center; align-items: center; min-height: 64px; position: relative; }
+.reserve-t { font-size: .7rem; font-weight: 800; color: var(--ink-2); text-transform: uppercase; letter-spacing: .03em; margin: 8px 0 4px; }
+.reserve { background: var(--paper); border-radius: 12px; padding: 7px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.verif { text-align: center; margin-top: 8px; }
+.ligne-zone { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--line-strong); border-radius: 14px; padding: 8px 10px; margin: 0 0 10px; background: var(--sheet); font-size: .9rem; }
+.ligne-zone .n { font-size: .72rem; font-weight: 800; color: var(--ink-2); text-transform: uppercase; }
+.ligne-zone .esp { flex: 1; }
+.ligne-zone.faite { background: var(--paper); border-style: dashed; color: var(--ink-2); }
+.ligne-zone.faite .se { opacity: .7; }
+
+/* tuiles de l'éditeur */
+.eq { display: inline-flex; align-items: center; gap: 6px; }
+.eg { font-weight: 800; font-size: 1.15rem; margin: 0 4px; }
+.t { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 36px; padding: 0 6px; box-sizing: border-box; background: var(--sheet); border: 1.5px solid var(--line-strong); border-bottom-width: 4px; border-radius: 10px; font-weight: 800; font-style: italic; font-size: 1rem; }
+.t.droit { font-style: normal; }
+.t.vise { outline: 3px solid var(--accent); outline-offset: 2px; }
+.t.neuf { background: var(--cle-bg); border-color: var(--accent); }
+.t.elim { border-style: dashed; border-bottom-width: 1.5px; }
+.t.b1, .t.b2 { position: relative; }
+.t.b1::after, .t.b2::after { content: ''; position: absolute; left: -3px; right: -3px; top: 50%; border-top: 3px solid var(--danger-text); transform: rotate(-28deg); }
+.t.b2::after { border-color: var(--accent); }
+.fr { display: inline-flex; flex-direction: column; align-items: stretch; text-align: center; }
+.fr > span { display: flex; justify-content: center; gap: 5px; padding: 3px 2px; }
+.fr > span:first-child { border-bottom: 2.5px solid var(--ink); }
+.outil { display: inline-flex; align-items: center; gap: 5px; border: 1.5px dashed var(--accent); background: var(--cle-bg); color: var(--accent-ink); border-radius: 999px; padding: 6px 11px; font-weight: 800; font-size: .85rem; white-space: nowrap; }
+.outil.report { border-style: solid; background: var(--sheet); }
+.outil i { font-weight: 800; }
+.sep { width: 1px; align-self: stretch; background: var(--paper-3); }
+
+/* écriture figée (lignes repliées) */
+.se { display: inline; white-space: nowrap; }
+.t sub { font-size: .65em; font-style: normal; align-self: flex-end; margin: 0 0 3px 1px; }
+.se i { font-weight: 700; }
+.sfr { display: inline-flex; flex-direction: column; text-align: center; font-size: .82em; line-height: 1.1; vertical-align: middle; }
+.sfr > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 2px; }
+
+/* bulles, fantôme du glisser */
+.bulle { position: relative; background: var(--ink); color: var(--sheet); border-radius: 12px; padding: 8px 11px; font-size: .82rem; line-height: 1.4; margin: 8px 0 0; }
+.bulle::before { content: ''; position: absolute; top: -6px; left: 40px; border: 6px solid transparent; border-top: 0; border-bottom-color: var(--ink); }
+.fantome { position: absolute; z-index: 2; box-shadow: 0 8px 22px rgba(0, 0, 0, .22); transform: rotate(-3deg); }
+.menu { position: absolute; z-index: 3; background: var(--sheet); border: 1px solid var(--line-strong); border-radius: 14px; padding: 8px; box-shadow: 0 8px 22px rgba(0, 0, 0, .18); width: 230px; font-size: .85rem; }
+.menu .m-t { font-weight: 800; margin: 2px 4px 6px; }
+.menu .m-o { display: flex; align-items: center; gap: 8px; border-radius: 10px; padding: 8px; background: var(--cle-bg); margin: 0 0 6px; }
+.menu .m-o small { color: var(--ink-2); }
+.fleche { font-size: 1.4rem; color: var(--accent); position: absolute; z-index: 2; }
+
+/* objectif, messages */
+.obj { background: var(--paper); border-radius: 12px; padding: 8px 10px; font-size: .88rem; margin: 0 0 10px; line-height: 1.6; }
+.obj .lab { font-weight: 800; font-size: .72rem; text-transform: uppercase; color: var(--ink-2); margin-right: 4px; }
+.g { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; padding: 0 6px; height: 22px; border-radius: 999px; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-style: italic; font-size: .85rem; }
+.g.elim { background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.g.fait { text-decoration: line-through; opacity: .55; }
+.msg { border-radius: 12px; padding: 8px 11px; font-size: .85rem; line-height: 1.4; margin: 8px 0 0; }
+.msg.ok { background: var(--success-bg); color: var(--success-text); }
+.msg.ko { background: var(--danger-bg); color: var(--danger-text); }
+.msg.neutre { background: var(--paper); }
+
+/* onglets */
+.onglets { display: flex; background: var(--paper); border-radius: 999px; padding: 3px; margin: 0 0 8px; }
+.onglets span { flex: 1; text-align: center; border-radius: 999px; padding: 7px 4px; font-weight: 800; font-size: .82rem; color: var(--ink-2); }
+.onglets span.on { background: var(--sheet); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.resume { background: var(--paper); border-radius: 12px; padding: 6px 10px; margin: 0 0 8px; font-size: .88rem; display: grid; gap: 4px; }
+
+/* formulaire */
+.form-l { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line-strong); border-radius: 12px; padding: 7px 9px; margin: 0 0 6px; font-size: .9rem; }
+.form-l .esp { flex: 1; }
+.form-l small { color: var(--ink-2); font-size: .74rem; }
+.form-l.pris { background: var(--cle-bg); border-color: var(--cle-line); }
+.bande { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; }
+.bande .fc { flex: none; border: 1.5px solid var(--line-strong); border-radius: 12px; padding: 8px 10px; background: var(--sheet); font-size: .9rem; }
+.depot { border: 2px dashed var(--accent); border-radius: 14px; padding: 14px; text-align: center; color: var(--accent-ink); font-weight: 700; font-size: .85rem; background: var(--cle-bg); margin: 0 0 10px; }
+
+/* ordinateur (réduit) */
+.pc-cadre { width: 1280px; transform: scale(.62); transform-origin: 0 0; }
+.pc-boite { max-width: 100%; width: calc(1280px * .62); height: calc(760px * .62); overflow: hidden; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--sheet); }
+.pc { display: flex; height: 760px; }
+.pc-som { width: 264px; border-right: 1px solid var(--line); padding: 18px; box-sizing: border-box; font-size: .9rem; color: var(--ink-2); }
+.pc-corps { flex: 1; background: var(--paper); padding: 22px 28px; box-sizing: border-box; }
+.pc-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+</style>
+</head>
+<body>
+<div class="mq" id="mq"></div>
+
+<script>
+/* ---------- petits gabarits (maquette seulement) ---------- */
+const NB = ' ';
+// tuile : grandeur (italique) ; o : classes en plus (vise, neuf, elim, b1, b2, droit)
+const T = (x, o) => `<span class="t${o ? ' ' + o : ''}">${x}</span>`;
+// fraction de tuiles
+const F = (n, d) => `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+// équation à tuiles
+const E = (g, d) => `<span class="eq">${g}<span class="eg">=</span>${d}</span>`;
+// écriture figée compacte
+const sf = (n, d) => `<span class="sfr"><span>${n}</span><span>${d}</span></span>`;
+const SE = (g, d) => `<span class="se">${g} = ${d}</span>`;
+const pil = (x, c) => `<span class="pil${c ? ' ' + c : ''}">${x}</span>`;
+const outil = (x, c) => `<span class="outil${c ? ' ' + c : ''}">${x}</span>`;
+const g = (x, c) => `<span class="g${c ? ' ' + c : ''}">${x}</span>`;
+const sub = x => `<sub>${x}</sub>`;
+
+// réserve habituelle d'un éditeur
+const RES = (plus) => `<div class="reserve-t">Réserve</div><div class="reserve">${T('1', 'droit')}<span class="sep"></span>${outil('⋯/⋯')}${outil('×(−1)')}${plus || ''}</div>`;
+// zone d'équation complète (éditeur)
+function zone(num, eq, o) {
+  o = o || {};
+  return `<div class="zone${o.active ? ' active' : ''}" style="${o.style || ''}">
+    <div class="zone-t">${o.poignee ? '<span title="poignée">⠿</span>' : ''}Équation ${num}${o.etat ? ' · <span style="text-transform:none">' + o.etat + '</span>' : ''}<span class="esp"></span>${o.boutons === false ? '' : pil('↶', 'mini off') + pil('↺', 'mini')}</div>
+    <div class="plateau">${eq}${o.dans || ''}</div>
+    ${o.reserve === false ? '' : RES(o.res)}
+    ${o.verif === false ? '' : `<div class="verif">${pil('✓ Vérifier l’étape', 'noir')}</div>`}
+    ${o.apres || ''}
+  </div>`;
+}
+// zone repliée (une ligne)
+const ligne = (num, eq, o) => `<div class="ligne-zone${o && o.faite ? ' faite' : ''}"><span class="n">Éq.${NB}${num}</span>${eq}<span class="esp"></span>${(o && o.droite) || pil('Ouvrir ▾', 'mini')}</div>`;
+// en-tête de question commun (exemple 2de : c = n / V et n = m / M)
+const CTX = `<div class="q-nom">Combiner deux équations</div>
+  <div class="ctx">On prépare une solution de sulfate de cuivre de concentration c, en dissolvant une masse m de soluté dans un volume V d’eau.
+  <div class="leg">c : concentration (mol·L⁻¹) · n : quantité de matière (mol) · V : volume (L) · m : masse (g) · M : masse molaire (g·mol⁻¹)</div></div>
+  <div class="consigne">Exprime <i>m</i> en fonction de <i>c</i>, <i>V</i> et <i>M</i>.</div>
+  <div class="aides">${pil('📖 Rappel')}${pil('💡 Indice')}${pil('✎ Exemple')}${pil('Afficher la solution')}</div>`;
+const EQ1 = E(T('c'), F(T('n'), T('V'))), EQ2 = E(T('n'), F(T('m'), T('M')));
+const se1 = SE('<i>c</i>', sf('<i>n</i>', '<i>V</i>')), se2 = SE('<i>n</i>', sf('<i>m</i>', '<i>M</i>'));
+const tel = (h, haut) => `<div class="tel"><div class="carte">${haut === false ? '' : CTX}${h}</div></div>`;
+const opt = (code, nom, ecran, plus, deja) => `<div class="mq-opt"><div class="mq-opt-t"><span class="mq-code">${code}</span><b>${nom}</b>${deja ? '<span class="mq-deja">déjà dans l’éditeur</span>' : ''}</div>${ecran}<ul class="mq-plus">${plus.map(x => '<li>' + x + '</li>').join('')}</ul></div>`;
+const section = (titre, texte, opts) => `<div class="mq-section"><h2>${titre}</h2><p>${texte}</p><div class="mq-choix">${opts.join('')}</div></div>`;
+
+let H = `<h1 class="mq-titre">Maquette : combiner des équations</h1>
+<p class="mq-note">Écrans <b>non fonctionnels</b>, au format téléphone (390 px), pour choisir la mise en œuvre dans <b>Équations en physique</b>. Chaque idée a un code (A1, B2…). Indique-moi les codes retenus (plusieurs possibles dans une même section quand ils se complètent), et ce qu’il faut changer. Exemple utilisé (niveau 2de)${NB}: <i>c</i> = <i>n</i> / <i>V</i> et <i>n</i> = <i>m</i> / <i>M</i>, exprimer <i>m</i> en fonction de <i>c</i>, <i>V</i> et <i>M</i>. Rappel de tes choix${NB}: stratégie toujours libre, nouvelle famille dans les séances, équations inutiles dès la 1re, formulaire au niveau le plus élevé, forme simplifiée exigée, 4 équations au plus, zone utilisée repliée, ajout à la Découverte, nombres simples (2, ½, 10) autorisés.</p>`;
+
+/* ---------- A. disposition des équations ---------- */
+H += section('A. Disposition des équations sur le téléphone', 'Chaque équation a son propre éditeur (ses tuiles, Annuler, Recommencer, Vérifier l’étape). Comment les montrer sur un écran étroit${NB}?'.replace('${NB}', NB), [
+  opt('A1', 'Accordéon', tel(zone(1, EQ1, { active: true }) + ligne(2, se2)),
+    ['Une seule équation ouverte à la fois, grande et lisible.', 'Les autres sont des lignes compactes${NB}: un appui les ouvre (et replie l’équation ouverte).'.replace('${NB}', NB), 'Le moins chargé${NB}; il faut ouvrir l’équation d’arrivée pour y reporter une grandeur.'.replace('${NB}', NB)]),
+  opt('A2', 'Onglets', tel(`<div class="resume"><div>${se1}</div><div>${se2}</div></div><div class="onglets"><span class="on">Équation 1</span><span>Équation 2</span></div>` + zone(1, EQ1, { active: true })),
+    ['Résumé de toutes les équations toujours visible au-dessus.', 'Un onglet par équation, un seul éditeur affiché.', 'Proche de A1, mais le passage d’une équation à l’autre se fait toujours au même endroit.']),
+  opt('A3', 'Tout ouvert', tel(zone(1, EQ1, { active: true, reserve: false }) + zone(2, EQ2, { reserve: false }) + RES() , ),
+    ['Toutes les équations ouvertes, l’une sous l’autre.', 'Une seule réserve, commune, en bas (collée en bas de l’écran pendant le défilement).', 'On voit tout d’un coup d’œil, mais la page devient longue avec 3 ou 4 équations.']),
+  opt('A4', 'Ordinateur : côte à côte', `<div class="pc-boite"><div class="pc-cadre"><div class="pc"><div class="pc-som"><b style="color:var(--ink)">Équations en physique</b><br><br>Sommaire…</div><div class="pc-corps"><div class="carte">${CTX}<div class="pc-2">${zone(1, EQ1, { active: true })}${zone(2, EQ2)}</div></div></div></div></div></div>`,
+    ['À partir de 900 px (ordinateur, tablette en paysage)${NB}: les zones côte à côte, 2 par ligne.'.replace('${NB}', NB), 'Se combine avec A1, A2 ou A3 sur le téléphone.']).replace('class="mq-opt"', 'class="mq-opt" style="width:800px"'),
+]);
+
+/* ---------- B. reporter une grandeur ---------- */
+const z1fait = zone(1, E(T('n'), T('c') + T('V')), { etat: 'n isolée ✓', verif: false, reserve: false, boutons: false });
+H += section('B. Reporter une grandeur dans une autre équation', 'Une grandeur isolée dans une équation (<i>n</i> = <i>c V</i>, étape vérifiée) peut remplacer cette grandeur dans une autre équation. Quel geste${NB}?'.replace('${NB}', NB), [
+  opt('B1', 'Outil dans la réserve', tel(z1fait + zone(2, E(T('n', 'vise'), F(T('m'), T('M'))), { active: true, res: outil('<i>n</i> = <i>c V</i>', 'report'),
+      dans: `<span class="fantome" style="left:58px;top:-16px">${outil('<i>n</i> = <i>c V</i>', 'report')}</span>`,
+      apres: `<div class="bulle">Glisse l’outil «${NB}<i>n</i> = <i>c V</i>${NB}» sur <i>n</i> pour remplacer <i>n</i>.</div>` }), false),
+    ['Dès qu’une grandeur est isolée et vérifiée, l’outil «${NB}n = c V${NB}» apparaît dans la réserve des autres équations.'.replace(/\$\{NB\}/g, NB), 'Même geste que «${NB}t = …${NB}» de champ-uniforme (Accélération dans un condensateur).'.replace(/\$\{NB\}/g, NB), 'Glisser-déposer au doigt ou à la souris.'], true),
+  opt('B2', 'Glisser l’équation', tel(zone(1, E(T('n'), T('c') + T('V')), { etat: 'n isolée ✓', poignee: true, verif: false, reserve: false, boutons: false, style: 'opacity:.55' }) +
+      zone(2, E(T('n', 'vise'), F(T('m'), T('M'))), { active: true, dans: `<span class="fantome carte" style="left:40px;top:-30px;padding:6px 10px">${SE('<i>n</i>', '<i>c V</i>')}</span>` }), false),
+    ['On attrape l’équation 1 par sa poignée ⠿ et on la lâche sur <i>n</i> dans l’équation 2.', 'Image mentale${NB}: «${NB}je transporte l’équation${NB}».'.replace(/\$\{NB\}/g, NB), 'Moins pratique avec l’accordéon (A1)${NB}: l’équation d’arrivée doit être visible.'.replace('${NB}', NB)]),
+  opt('B3', 'Toucher la grandeur', tel(z1fait + zone(2, E(T('n', 'vise'), F(T('m'), T('M'))), { active: true,
+      dans: `<div class="menu" style="left:14px;top:58px"><div class="m-t">Remplacer <i>n</i> par${NB}:</div><div class="m-o">${SE('<i>n</i>', '<i>c V</i>')}<small>équation 1</small></div><div class="m-o" style="background:var(--paper)">Annuler</div></div>` }) + '<div style="height:70px"></div>', false),
+    ['Sans glisser${NB}: un appui sur <i>n</i> propose les expressions de <i>n</i> disponibles.'.replace('${NB}', NB), 'Pratique au doigt, sur un petit écran, et avec A1.', 'Peut compléter B1 (les deux gestes marchent).']),
+  opt('B4', 'Égaler deux expressions', tel(zone(1, E(T('n'), T('c') + T('V')), { etat: 'n isolée ✓', verif: false, reserve: false, boutons: false }) +
+      zone(2, E(T('n'), F(T('m'), T('M'))), { etat: 'n isolée ✓', verif: false, reserve: false, boutons: false }) +
+      `<div class="verif">${pil('<i>n</i> = <i>n</i>${NB}: écrire <i>c V</i> = <i>m</i> / <i>M</i>'.replace('${NB}', NB), 'acc')}</div>`, false),
+    ['Quand la même grandeur est isolée dans deux équations, un bouton écrit l’égalité des deux expressions, dans une nouvelle zone.', 'Méthode utile en titrage (<i>n</i><sub>A</sub> = <i>n</i><sub>B</sub> à l’équivalence).', 'En plus de B1, B2 ou B3.']),
+]);
+
+/* ---------- C. après le report ---------- */
+H += section('C. Après le report', 'Que devient l’écran une fois <i>n</i> remplacée${NB}? (Tu as choisi${NB}: l’équation utilisée se replie.)'.replace(/\$\{NB\}/g, NB), [
+  opt('C1', 'L’équation d’arrivée se transforme', tel(ligne(1, SE('<i>n</i>', '<i>c V</i>'), { faite: true, droite: '<small>✓ reportée dans l’éq.' + NB + '2</small>' }) +
+      zone(2, E(T('c', 'neuf') + T('V', 'neuf'), F(T('m'), T('M'))), { active: true, apres: `<div class="msg neutre"><i>n</i> remplacée par <i>c V</i>. Continue${NB}: isole <i>m</i>.</div>` })),
+    ['L’équation 1, utilisée, se replie en une ligne grisée (on peut la rouvrir).', 'Les tuiles reportées sont mises en valeur un instant.', 'Le nombre de zones diminue au fil du travail.']),
+  opt('C2', 'Une nouvelle équation apparaît', tel(ligne(1, SE('<i>n</i>', '<i>c V</i>'), { faite: true, droite: '<small>✓ utilisée</small>' }) + ligne(2, se2, { faite: true, droite: '<small>✓ utilisée</small>' }) +
+      zone(3, E(T('c', 'neuf') + T('V', 'neuf'), F(T('m'), T('M'))), { active: true, etat: 'éq.' + NB + '1 dans éq.' + NB + '2' })),
+    ['Les équations d’origine restent intactes, repliées.', 'Une zone «${NB}Équation 3${NB}» contient le résultat du report.'.replace(/\$\{NB\}/g, NB), 'Garde la trace de chaque étape, mais ajoute des zones.']),
+]);
+
+/* ---------- D. objectif et grandeurs ---------- */
+H += section('D. Objectif et grandeurs à éliminer', 'Comment l’élève sait-il quelles grandeurs doivent disparaître${NB}?'.replace('${NB}', NB), [
+  opt('D1', 'Bandeau d’objectif', tel(`<div class="obj"><span class="lab">Objectif</span><i>m</i> = … avec ${g('c')} ${g('V')} ${g('M')}<br><span class="lab">À éliminer</span>${g('n', 'elim fait')} ✓</div>` +
+      ligne(1, SE('<i>n</i>', '<i>c V</i>'), { faite: true, droite: '<small>✓ reportée</small>' }) + zone(2, E(T('c') + T('V'), F(T('m'), T('M'))), { active: true }), false),
+    ['Les grandeurs permises et celles à éliminer, en pastilles.', 'Une grandeur éliminée est barrée ✓${NB}: l’élève voit ce qui reste à faire.'.replace('${NB}', NB), 'Toujours visible, au-dessus des équations.']),
+  opt('D2', 'Repère sur les tuiles', tel(zone(1, E(T('c'), F(T('n', 'elim'), T('V'))), { active: true, apres: `<div class="msg neutre" style="font-size:.78rem">Tuile en pointillés${NB}: grandeur qui ne doit plus apparaître à la fin.</div>` }) + ligne(2, SE('<span style="border:1.5px dashed var(--ink-3);border-radius:4px;padding:0 3px"><i>n</i></span>', sf('<i>m</i>', '<i>M</i>'))), false),
+    ['Les tuiles des grandeurs à éliminer sont en pointillés, dans toutes les équations.', 'Pas de bandeau${NB}: l’information est sur les tuiles elles-mêmes.'.replace('${NB}', NB), 'Peut se combiner avec D1.']),
+  opt('D3', 'Consigne seule', tel(zone(1, EQ1, { active: true }) + ligne(2, se2)),
+    ['Seule la consigne «${NB}Exprime m en fonction de c, V et M${NB}» le dit.'.replace(/\$\{NB\}/g, NB), 'Plus exigeant${NB}: l’élève doit repérer lui-même la grandeur intermédiaire.'.replace('${NB}', NB), 'Possible aux niveaux élevés seulement, avec D1 aux premiers niveaux.']),
+]);
+
+/* ---------- F. simplifier et finir (déjà dans l'éditeur partagé) ---------- */
+const CTXT = `<div class="q-nom">Combiner trois équations</div><div class="ctx">Titre massique t d’une solution de Destop (masse volumique ρ).<div class="leg">t : titre massique · m${sub('NaOH')} : masse de soude (g) · m${sub('sol')} : masse de solution (g) · C${sub('m')} : concentration massique (g·L⁻¹) · V : volume (L) · ρ : masse volumique (g·L⁻¹)</div></div><div class="consigne">Exprime <i>t</i> en fonction de <i>C</i>${sub('m')} et <i>ρ</i>.</div>`;
+const lt = (num, eq, d) => ligne(num, eq, { faite: true, droite: d || '<small>✓ reportée</small>' });
+H += section('F. Simplifier, puis finir', 'Déjà dans l’éditeur partagé (champ-uniforme)${NB}: deux appuis sur la même grandeur, en haut puis en bas d’une fraction${NB}; elles se barrent, une couleur par paire${NB}; «${NB}Vérifier l’étape${NB}» les efface. Exemple Terminale (titrage pH-métrique). La question n’est finie que si plus rien ne se simplifie.'.replace(/\$\{NB\}/g, NB), [
+  opt('F', 'Simplification (rappel)', tel(lt(2, SE('<i>m</i>' + sub('NaOH'), '<i>C</i>' + sub('m') + ' <i>V</i>')) + lt(3, SE('<i>m</i>' + sub('sol'), '<i>ρ V</i>')) +
+      zone(1, E(T('t'), F(T('C' + sub('m'))+ T('V', 'b1'), T('ρ') + T('V', 'b1'))), { active: true, apres: `<div class="bulle">Chaque paire barrée a sa couleur${NB}: touche «${NB}✓ Vérifier l’étape${NB}» pour effacer les termes barrés.</div>`.replace(/\$\{NB\}/g, NB) }), false).replace('<div class="carte">', '<div class="carte">' + CTXT),
+    ['Rien à choisir ici${NB}: c’est le fonctionnement actuel de l’éditeur partagé, repris tel quel.'.replace('${NB}', NB)], true),
+  opt('F2', 'Fin refusée tant qu’on peut simplifier', tel(zone(1, E(T('t'), F(T('C' + sub('m')) + T('V'), T('ρ') + T('V'))), { active: true, apres: `<div class="msg ko"><b>Presque.</b> <i>t</i> est bien seule, avec les bonnes grandeurs, mais <i>V</i> est en haut et en bas${NB}: simplifie-le.</div>` }), false).replace('<div class="carte">', '<div class="carte">' + CTXT),
+    ['Message ciblé, sans compter d’erreur${NB}: l’expression est juste, il reste une simplification.'.replace('${NB}', NB), 'Même chose si une grandeur à éliminer est encore là («${NB}il reste V, qui n’est pas dans la liste${NB}»).'.replace(/\$\{NB\}/g, NB)]),
+]);
+
+/* ---------- G. équation inutile ---------- */
+H += section('G. Équation inutile (dès la 1re)', 'Une équation de plus que nécessaire est donnée. Que dire à la fin${NB}?'.replace('${NB}', NB), [
+  opt('G1', 'Le dire dans le bilan', tel(ligne(1, SE('<i>n</i>', '<i>c V</i>'), { faite: true, droite: '<small>✓ reportée</small>' }) + ligne(2, SE('<i>m</i>', '<i>c V M</i>'), { faite: true, droite: '<small>✓ résultat</small>' }) + ligne(3, SE('<i>N</i>', '<i>n N</i>' + sub('A')), { droite: '<small>non utilisée</small>' }) +
+      `<div class="msg ok"><b>Juste${NB}!</b> <i>m</i> = <i>c V M</i>. L’équation 3 ne servait pas${NB}: <i>N</i> et <i>N</i>${sub('A')} ne sont pas dans la consigne.</div>`.replace(/\$\{NB\}/g, NB)),
+    ['Le bilan explique pourquoi l’équation était inutile.']),
+  opt('G2', 'Ne rien dire', tel(ligne(1, SE('<i>n</i>', '<i>c V</i>'), { faite: true, droite: '<small>✓ reportée</small>' }) + ligne(2, SE('<i>m</i>', '<i>c V M</i>'), { faite: true, droite: '<small>✓ résultat</small>' }) + ligne(3, SE('<i>N</i>', '<i>n N</i>' + sub('A'))) +
+      `<div class="msg ok"><b>Juste${NB}!</b> <i>m</i> = <i>c V M</i>.</div>`.replace(/\$\{NB\}/g, NB)),
+    ['L’équation inutile reste simplement non utilisée.']),
+]);
+
+/* ---------- E. formulaire (niveau le plus élevé) ---------- */
+const CTXE = `<div class="q-nom">Choisir ses équations</div><div class="ctx">Titre massique t d’une solution de Destop.<div class="leg">Mêmes grandeurs qu’en F</div></div><div class="consigne">Exprime <i>t</i> en fonction de <i>C</i>${sub('m')} et <i>ρ</i>. Choisis les équations utiles dans le formulaire du chapitre.</div>`;
+const FO = [[SE('<i>t</i>', sf('<i>m</i>' + sub('NaOH'), '<i>m</i>' + sub('sol'))), 'titre massique'], [SE('<i>C</i>' + sub('m'), sf('<i>m</i>', '<i>V</i>')), 'concentration massique'], [SE('<i>ρ</i>', sf('<i>m</i>', '<i>V</i>')), 'masse volumique'], [SE('<i>c</i>', sf('<i>n</i>', '<i>V</i>')), 'concentration'], [SE('<i>n</i>', sf('<i>m</i>', '<i>M</i>')), 'quantité de matière'], [SE('<i>C</i>' + sub('m'), '<i>c M</i>'), 'lien C' + sub('m') + ' et c']];
+H += section('E. Niveau le plus élevé : choisir dans le formulaire', 'L’élève choisit lui-même les équations (4 au plus) dans les formules du chapitre. Une même lettre (m) peut désigner deux masses différentes${NB}: les formules choisies prennent les indices de la situation (m${NB}→${NB}m<sub>NaOH</sub>).'.replace(/\$\{NB\}/g, NB), [
+  opt('E1', 'Liste à cocher', tel(`<div class="reserve-t">Formulaire du chapitre</div>` + FO.map((f, k) => `<div class="form-l${k < 2 ? ' pris' : ''}">${f[0]}<small>${f[1]}</small><span class="esp"></span>${k < 2 ? pil('✓ Prise', 'mini acc') : pil('+ Utiliser', 'mini')}</div>`).join('') +
+      `<div class="reserve-t">Ton travail (2 / 4)</div>` + zone(1, E(T('t'), F(T('m' + sub('NaOH')), T('m' + sub('sol')))), { active: true }) + ligne(2, SE('<i>C</i>' + sub('m'), sf('<i>m</i>' + sub('NaOH'), '<i>V</i>'))), false).replace('<div class="carte">', '<div class="carte">' + CTXE),
+    ['Le formulaire est en haut${NB}; «${NB}+ Utiliser${NB}» ajoute la formule comme nouvelle équation, avec les indices de la situation.'.replace(/\$\{NB\}/g, NB), 'Une formule prise peut être retirée tant qu’elle n’a pas été utilisée.', 'Choisir une formule inutile ne compte pas comme une erreur.']),
+  opt('E2', 'Bande de formules à glisser', tel(`<div class="reserve-t">Formulaire du chapitre (glisse une formule en dessous)</div><div class="bande">` + FO.map(f => `<span class="fc">${f[0]}</span>`).join('') + `</div>` +
+      zone(1, E(T('t'), F(T('m' + sub('NaOH')), T('m' + sub('sol')))), { active: true }) + `<div class="depot">Dépose ici une formule du formulaire (2 / 4)</div>`, false).replace('<div class="carte">', '<div class="carte">' + CTXE),
+    ['Les formules défilent sur une bande horizontale.', 'On les glisse dans la zone de travail.', 'Plus compact, mais les noms des formules ne sont pas affichés.']),
+]);
+
+document.getElementById('mq').innerHTML = H;
+</script>
+</body>
+</html>
