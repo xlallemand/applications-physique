@@ -1208,6 +1208,9 @@
                 if (zone && !racine.contains(zone)) zone = null;
             const moved = Math.hypot(evt.clientX - startX, evt.clientY - startY) > 8;
                 if (onTap && !moved) { onTap(); return; }
+                // simple appui sur un dénominateur ou un terme entier : pas un déplacement
+                // (le premier appui d'une simplification en deux temps, par exemple)
+                if (!moved && (data.type === 'sumterm' || data.type === 'fracden')) return;
                 if (zone) handleZoneDrop(data, zone);
             },
             onCancel: () => {
@@ -1535,7 +1538,8 @@
         if (!el || !el.dataset.path) { afficherRefus(msg('MSG_SUBST').replace('{g}', nomG)); return; }
         const path = el.dataset.path, idx = +el.dataset.idx, z = getNode(path), it = z && z.items && z.items[idx];
         if (!it || it.id !== data.id) { afficherRefus(msg('MSG_SUBST').replace('{g}', nomG)); return; }
-        let R = JSON.parse(JSON.stringify(data.noeud));
+        // expression écrite dans l'autre éditeur : produits en plusieurs cases (ρ × V glissé à la main) regroupés
+        let R = aplatir(JSON.parse(JSON.stringify(data.noeud)));
         while (R.kind === 'seq' && R.slots.length === 1) R = R.slots[0];
         const p = it.pow || 1;
         if (R.kind === 'frac' && R.num.kind === 'simple' && R.den.kind === 'simple') {
@@ -1558,13 +1562,16 @@
             if (!z.items.length) z.items.push(tile('one', '1'));
         } else {
             if (p !== 1) { afficherRefus(msg('MSG_SUBST').replace('{g}', nomG)); return; }
-            if (z.items.length === 1) setNode(path, R);
-            else {
+            const pp = path.split('.'), last = pp.pop(), par = getNode(pp.join('.'));
+            const dansSeq = par && par.kind === 'seq' && /^\d+$/.test(last);
+            // produit en plusieurs cases : ses cases rejoignent celles du produit, sans produit imbriqué
+            const cases = R.kind === 'seq' && !R.parenthesized ? R.slots : [R];
+            if (dansSeq) {
                 z.items.splice(idx, 1);
-                const pp = path.split('.'), last = pp.pop(), par = getNode(pp.join('.'));
-                if (par && par.kind === 'seq' && /^\d+$/.test(last)) par.slots.splice(+last + 1, 0, R);
-                else setNode(path, seq([z, R]));
+                par.slots.splice(+last + (z.items.length ? 1 : 0), z.items.length ? 0 : 1, ...cases);
             }
+            else if (z.items.length === 1) setNode(path, R);
+            else { z.items.splice(idx, 1); setNode(path, seq([z, ...cases])); }
         }
         // réserve : les grandeurs apportées par le remplacement y reviennent si on les efface ; la grandeur remplacée n'y est plus
         if (currentExercise.tiles) {
@@ -1574,6 +1581,23 @@
         showFeedback(`${nomG} remplacé.`, null);
         refreshView();
         if (rappels.surRemplacement) rappels.surRemplacement(data.id);
+    }
+    // produit écrit en plusieurs cases (glissers successifs) : produits imbriqués défaits,
+    // cases de grandeurs seules regroupées en un seul produit (ρ | V → ρ × V)
+    function aplatir(n) {
+        if (!n) return n;
+        if (n.kind === 'frac') return Object.assign({}, n, { num: aplatir(n.num), den: aplatir(n.den) });
+        if (n.kind === 'func') return Object.assign({}, n, { inner: aplatir(n.inner) });
+        if (n.kind === 'sum') return Object.assign({}, n, { terms: n.terms.map(t => Object.assign({}, t, { node: aplatir(t.node) })) });
+        if (n.kind !== 'seq') return n;
+        const slots = [];
+        n.slots.map(aplatir).forEach(x => { if (x.kind === 'seq' && !x.parenthesized) slots.push(...x.slots); else slots.push(x); });
+        if (!n.parenthesized && slots.length > 1 && slots.every(x => x.kind === 'simple')) {
+            const items = [].concat(...slots.map(x => x.items));
+            const utiles = items.filter(x => x.id !== 'one');
+            return simple(utiles.length ? utiles : items.slice(0, 1));
+        }
+        return Object.assign({}, n, { slots });
     }
     // forme d'une expression, indépendante de l'ordre des facteurs (fin d'un exercice de simplification)
     function forme(n) {

@@ -20,7 +20,7 @@
    changer VERSION pour que l'ancien cache soit remplacé.
    ============================================================ */
 'use strict';
-const VERSION = 'eqphys-v1.8';      // pas « equations-… » : le service worker d'Équations du 1er degré efface ces caches-là
+const VERSION = 'eqphys-v1.9';      // pas « equations-… » : le service worker d'Équations du 1er degré efface ces caches-là
 const FICHIERS = [
   './', './index.html', './manifest.webmanifest',
   './modules/decouverte.html', './modules/seance.html', './modules/suivi.html', './modules/fiches.html',

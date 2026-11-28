@@ -552,34 +552,71 @@
      plus rien à simplifier ; sinon un message ciblé (aucune erreur comptée). */
   function controle(q, st) {
     const C = q.cible, L = x => '<b>' + lab(x) + '</b>';
-    const seul = (n, X) => n && n.kind === 'seq' && n.slots.length === 1 && n.slots[0].kind === 'simple' && n.slots[0].items.length === 1 && (!X || n.slots[0].items[0].id === X) && !n.slots[0].items[0].pow;
+    // produit d'une seule case (éventuellement imbriqué) : son contenu
+    const deb = n => { while (n && n.kind === 'seq' && n.slots.length === 1) n = n.slots[0]; return n; };
+    // grandeur seule dans un membre (puissance 1) : son identifiant
+    const seul = (n, X) => {
+      n = deb(n);
+      const it = n && n.kind === 'simple' && n.items.length === 1 ? n.items[0] : null;
+      return it && it.id !== 'one' && (it.pow || 1) === 1 && (!X || it.id === X) ? it.id : null;
+    };
     const idsN = n => idsEq({ G: n, D: { kind: 'simple', items: [] } });
+    const tous = idsEq({ G: st.left, D: st.right });
+    // grandeurs ni cherchée ni permise : à éliminer
+    const etrangeres = tous.filter(x => x !== C && !q.permis.has(x));
+    // place de chaque grandeur dans un membre : en haut (+1) ou en bas (−1), sous une racine, dans une somme
+    const places = racine => {
+      const o = {};
+      (function voir(n, s, rac, som) {
+        if (!n) return;
+        if (n.kind === 'simple') n.items.forEach(it => { if (it.id !== 'one') (o[it.id] = o[it.id] || []).push({ s, rac, som }); });
+        else if (n.kind === 'seq') n.slots.forEach(x => voir(x, s, rac, som));
+        else if (n.kind === 'frac') { voir(n.num, s, rac, som); voir(n.den, -s, rac, som); }
+        else if (n.kind === 'func') voir(n.inner, s, rac || n.fn === 'sqrt', som);
+        else if (n.kind === 'sum') n.terms.forEach(t => voir(t.node, s, rac, true));
+      })(racine, 1, false, false);
+      return o;
+    };
+    const pG = places(st.left), pD = places(st.right);
+    const facteurs = (p, x) => (p[x] || []).filter(o => !o.som);
+    const hautBas = l => l.some(o => o.s > 0) && l.some(o => o.s < 0);
+    // une grandeur se simplifie : en haut et en bas d'un même membre, ou à la même place dans les deux membres
+    const enFace = x => { const a = facteurs(pG, x), b = facteurs(pD, x); return (a.some(o => o.s > 0) && b.some(o => o.s > 0)) || (a.some(o => o.s < 0) && b.some(o => o.s < 0)); };
+    const simplifiable = x => hautBas(facteurs(pG, x)) || hautBas(facteurs(pD, x)) || enFace(x);
+    // comment simplifier ces grandeurs (deux appuis, ou entrer d'abord sous la racine)
+    const commentSimplifier = l => l.map(x => {
+      const o = facteurs(pG, x).concat(facteurs(pD, x));
+      if (o.some(e => e.rac) && o.some(e => !e.rac)) return 'fais entrer ' + L(x) + ' sous la racine (glisse-le sur la racine), puis simplifie-le';
+      return hautBas(facteurs(pG, x)) || hautBas(facteurs(pD, x))
+        ? 'simplifie ' + L(x) + ' (touche ' + L(x) + ' en haut, puis ' + L(x) + ' en bas)'
+        : 'simplifie ' + L(x) + ' (touche ' + L(x) + ' dans un membre, puis ' + L(x) + ' dans l’autre)';
+    }).join(' ; ');
     if (!seul(st.left, C)) {
       if (seul(st.right, C)) return { message: 'Étape correcte ! ' + L(C) + ' est seule à droite : échange les deux membres avec ⇄.' };
-      if (seul(st.left) && idsN(st.right).indexOf(st.left.slots[0].items[0].id) < 0 && st.left.slots[0].items[0].id !== C) {
-        const X = st.left.slots[0].items[0].id;
-        return { message: 'Étape correcte ! ' + L(X) + ' est seule à gauche : tu peux la reporter. Dans une autre équation qui contient ' + L(X) + ', glisse l’outil « ' + lab(X) + ' = … » de la réserve sur ' + L(X) + '.' };
+      if (tous.indexOf(C) >= 0) {
+        // l'équation relie déjà la grandeur cherchée aux grandeurs demandées : il reste à l'isoler
+        if (!etrangeres.length) return { message: 'Étape correcte ! L’équation contient toutes les grandeurs désirées : isole ' + L(C) + '.' };
+        if (etrangeres.every(simplifiable)) return { message: 'Étape correcte ! ' + commentSimplifier(etrangeres).replace(/^./, c => c.toUpperCase()) + ', puis isole ' + L(C) + '.' };
       }
+      // grandeur à éliminer seule à gauche (absente à droite) : elle se reporte
+      const X = seul(st.left);
+      if (X && X !== C && !q.permis.has(X) && idsN(st.right).indexOf(X) < 0)
+        return { message: 'Étape correcte ! ' + L(X) + ' est seule à gauche : tu peux la reporter. Dans une autre équation qui contient ' + L(X) + ', glisse l’outil « ' + lab(X) + ' = … » de la réserve sur ' + L(X) + '.' };
       return { message: 'Étape correcte, continue !' };
     }
     const reste = idsN(st.right).filter(x => !q.permis.has(x));
     if (reste.indexOf(C) >= 0) return { message: 'Étape correcte, mais ' + L(C) + ' est encore à droite : continue.' };
-    if (reste.length) return { message: 'Étape correcte : ' + L(C) + ' est seule, mais il reste ' + reste.map(L).join(', ') + ', qui n’' + (reste.length > 1 ? 'sont' : 'est') + ' pas dans la liste. Remplace-' + (reste.length > 1 ? 'les' : 'la') + ' en reportant une autre équation.' };
+    if (reste.length) {
+      const sim = reste.filter(simplifiable), autres = reste.filter(x => sim.indexOf(x) < 0);
+      const debut = 'Étape correcte : ' + L(C) + ' est seule, mais il reste ' + reste.map(L).join(', ') + (reste.length > 1 ? ', qui ne sont pas' : ', qui n’est pas') + ' dans la liste. ';
+      if (!sim.length) return { message: debut + 'Remplace-' + (reste.length > 1 ? 'les' : 'la') + ' en reportant une autre équation.' };
+      if (!autres.length) return { message: debut + commentSimplifier(sim).replace(/^./, c => c.toUpperCase()) + '.' };
+      return { message: debut + commentSimplifier(sim).replace(/^./, c => c.toUpperCase()) + ' ; puis remplace ' + autres.map(L).join(', ') + ' en reportant une autre équation.' };
+    }
     if (EQ.compterUns(st.left) + EQ.compterUns(st.right)) return { message: 'Étape correcte ! Retire les 1 inutiles (touche un 1, puis sa croix ✕).' };
     // plus rien à simplifier : aucune grandeur à la fois en haut et en bas
-    const sens = {};
-    (function voir(n, s, rac) {
-      if (n.kind === 'simple') n.items.forEach(it => { if (it.id !== 'one') (sens[it.id] = sens[it.id] || []).push({ s, rac }); });
-      else if (n.kind === 'seq') n.slots.forEach(x => voir(x, s, rac));
-      else if (n.kind === 'frac') { voir(n.num, s, rac); voir(n.den, -s, rac); }
-      else if (n.kind === 'func') voir(n.inner, s, rac || n.fn === 'sqrt');
-      else if (n.kind === 'sum') n.terms.forEach(t => voir(t.node, s, rac));
-    })(st.right, 1, false);
-    const X = Object.keys(sens).find(k => sens[k].some(o => o.s > 0) && sens[k].some(o => o.s < 0));
-    if (X) {
-      const r = sens[X].some(o => o.rac) && sens[X].some(o => !o.rac);
-      return { message: 'Presque : ' + L(C) + ' est seule, avec les bonnes grandeurs, mais ' + L(X) + ' est en haut et en bas : ' + (r ? 'fais entrer ' + L(X) + ' sous la racine (glisse-le sur la racine), puis simplifie.' : 'simplifie-le (touche ' + L(X) + ' en haut, puis ' + L(X) + ' en bas).') };
-    }
+    const X = Object.keys(pD).find(k => hautBas(pD[k]));
+    if (X) return { message: 'Presque : ' + L(C) + ' est seule, avec les bonnes grandeurs, mais ' + L(X) + ' est en haut et en bas : ' + commentSimplifier([X]) + '.' };
     return { fini: true };
   }
 

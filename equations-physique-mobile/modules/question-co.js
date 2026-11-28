@@ -55,10 +55,12 @@
   }
   // grandeur seule à gauche (sans puissance) et absente à droite : elle peut se reporter
   function isolee(st) {
-    const l = st.left;
-    if (!l || l.kind !== 'seq' || l.slots.length !== 1 || l.slots[0].kind !== 'simple' || l.slots[0].items.length !== 1) return null;
-    const it = l.slots[0].items[0];
-    if (it.pow || it.id === 'one' || CO.NB[it.id]) return null;
+    let l = st.left;
+    // produit d'une seule case, éventuellement imbriqué : son contenu
+    while (l && l.kind === 'seq' && l.slots.length === 1) l = l.slots[0];
+    if (!l || l.kind !== 'simple' || l.items.length !== 1) return null;
+    const it = l.items[0];
+    if ((it.pow || 1) !== 1 || it.id === 'one' || CO.NB[it.id]) return null;
     return idsDe({ left: { kind: 'simple', items: [] }, right: st.right }).has(it.id) ? null : it.id;
   }
   const pastille = (x, q, cls) => '<span class="pmc-g' + (cls ? ' ' + cls : '') + '">' + q.lab(x) + '</span>';
