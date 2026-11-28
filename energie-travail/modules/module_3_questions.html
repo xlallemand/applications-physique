@@ -20,8 +20,9 @@
 <script>
 /* ============================================================
    Série du module 3 : 10 questions, dans l'ordre.
-   1-4. Sans calcul : courbes, transferts, énergie perdue et travail des
-        frottements, origine des altitudes
+   1-4. Sans calcul : courbes, transferts, énergie perdue (E_m diminue,
+        énergie thermique, ΔE_m = W(f)), force de frottement (travail
+        résistant, f = −ΔE_m / d)
    5-6. Calculs simples : E_pp (origine donnée), E_m
    7-8. Conservation de E_m avec la méthode détaillée : schéma à compléter
         (ET.partieDonneesEm), conservation écrite, inconnue
@@ -94,20 +95,28 @@ function transfert() {
   return { theme: 'Transferts', parties: [fq.choix(`Un wagonnet de montagnes russes ${m[0]} (sans frottements). Il y a un transfert d'énergie :`, [o('ok', m[1]), o('inv', m[0] === 'descend' ? 'cinétique en énergie potentielle' : 'potentielle en énergie cinétique'), o('th', 'mécanique en énergie thermique')], 'ok',
     { melanger: false, colonne: true, indices: { inv: m[0] === 'descend' ? 'En descendant, il perd de l\'altitude et gagne de la vitesse.' : 'En montant, il gagne de l\'altitude et perd de la vitesse.', th: 'Sans frottements, rien n\'est perdu.' }, solution: `<p>Énergie ${m[1]}.</p>` })] };
 }
-function travailF() {
-  return { theme: 'Énergie perdue et travail', parties: [fq.choix(`Avec des frottements, la perte d'énergie mécanique ${DEM} est égale :`, [o('ok', 'au travail des forces de frottement'), o('p', 'au travail du poids'), o('c', 'à la variation d\'énergie cinétique')], 'ok',
-    { melanger: false, colonne: true, indices: { p: `Le travail du poids est déjà compté dans ${EPP}.`, c: `ΔE<sub>c</sub> est la somme de tous les travaux.` }, solution: `<p>${DEM} = W(<span class="vec-nom">f</span>) < 0.</p>` })] };
+function perteQ() {
+  return { theme: 'Énergie perdue', enonce: `<p>Énergies d'une balle lancée vers le haut, <b>avec</b> des frottements de l'air.</p>${figEnergies({ frott: 5, Em0: 25 })}`,
+    parties: [fq.choix(`a) Pendant le mouvement, ${EM} :`, [o('ok', 'diminue'), o('cst', 'reste constante'), o('aug', 'augmente')], 'ok',
+        { melanger: false, indices: { cst: 'Avec des frottements, il y a des pertes : la courbe de E<sub>m</sub> descend.', aug: 'Les frottements ne fournissent pas d\'énergie : ils en font perdre.' }, solution: `<p>${EM} diminue : une partie de l'énergie est perdue.</p>` }),
+      fq.choix('b) L\'énergie perdue est transformée en :', [o('ok', 'énergie thermique (chaleur)'), o('pp', 'énergie potentielle de pesanteur'), o('c', 'énergie cinétique')], 'ok',
+        { melanger: false, colonne: true, indices: { pp: `${EPP} fait partie de ${EM} : elle n'est pas perdue.`, c: `${EC} fait partie de ${EM} : elle n'est pas perdue.` }, solution: '<p>Les frottements chauffent la balle et l\'air : énergie thermique.</p>' }),
+      fq.choix(`c) La variation ${DEM} est égale :`, [o('ok', 'au travail des forces de frottement'), o('p', 'au travail du poids'), o('c', 'à la variation d\'énergie cinétique')], 'ok',
+        { melanger: false, colonne: true, indices: { p: `Le travail du poids est déjà compté dans ${EPP}.`, c: 'ΔE<sub>c</sub> est la somme de tous les travaux.' }, solution: `<p>${DEM} = W(<span class="vec-nom">f</span>) < 0.</p>` })] };
 }
-function variationOrigine() {
-  return { theme: 'Origine et variation', parties: [fq.choix(`On change l'origine des altitudes. La <b>variation</b> d'${EPP} d'une balle qui tombe d'un balcon :`, [o('ok', 'ne change pas'), o('c', 'change'), o('s', 'change de signe')], 'ok',
-    { melanger: false, indice: `${EPP} est définie à une constante près : la constante disparaît dans la différence.`, solution: '<p>Balcon à 3 m, 100 g : ΔE<sub>pp</sub> = −3 J quelle que soit l\'origine.</p>' })] };
+function forceQ() {
+  return { theme: 'Force de frottement', enonce: `<p>Un objet glisse sur une distance d ; la force de frottement <span class="vec-nom">f</span> est constante et toujours opposée au mouvement.</p>`,
+    parties: [fq.choix('a) Le travail de la force de frottement est :', [o('ok', 'résistant : W = −f × d'), o('m', 'moteur : W = f × d'), o('0', 'nul')], 'ok',
+        { melanger: false, colonne: true, indices: { m: 'La force est opposée au mouvement : α = 180°, cos α = −1.', 0: 'La force n\'est pas perpendiculaire au mouvement : elle est opposée.' }, solution: '<p>α = 180° : W = f × d × cos 180° = −f × d.</p>' }),
+      fq.choix(`b) Connaissant la perte d'énergie mécanique ${DEM} sur la distance d, on trouve f par :`, [o('ok', `f = −${DEM} / d`), o('x', `f = ${DEM} × d`), o('s', `f = ${DEM} / d`)], 'ok',
+        { melanger: false, indices: { x: `${DEM} = −f × d : pour isoler f, on divise par d.`, s: `${DEM} est négative et f est une valeur positive : f = −${DEM} / d.` }, solution: `<p>${DEM} = W(<span class="vec-nom">f</span>) = −f × d ⟺ f = −${DEM} / d.</p>` })] };
 }
 
 ET.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Énergie mécanique',
   intro: '<p class="er-contexte">10 questions : d\'abord sans calcul, puis des calculs d\'énergies, la conservation de l\'énergie mécanique avec la méthode détaillée, et pour finir des résultats à trouver directement.</p>',
-  questions: () => [courbes(), transfert(), travailF(), variationOrigine(), origine(), mecanique(), chuteDetail(), lancerDetail(), vitesseCons(), hauteurCons()],
+  questions: () => [courbes(), transfert(), perteQ(), forceQ(), origine(), mecanique(), chuteDetail(), lancerDetail(), vitesseCons(), hauteurCons()],
   revoir: { href: 'module_3a_cours.html', label: 'Revoir les cours' },
   suite: { href: 'module_4.html', label: 'Module 4 : exercices →' },
 });
