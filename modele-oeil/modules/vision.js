@@ -1,6 +1,6 @@
 /* ============================================================
-   Module 3, sous-module B : voir net, accommoder, corriger (simulation sur une seule page)
-   LT.simulateurVision(zone)
+   Module 2 : voir net, accommoder, corriger (simulation sur une seule page)
+   MO.simulateurVision(zone)
    Inspiré de « Corrections de la vision » (G. Tulloue) : objet A à déplacer (ou à l'infini),
    œil normal, myope ou hypermétrope (moyen ou fort : œil trop long ou trop court), âge
    (presbytie : l'amplitude d'accommodation diminue), accommodation à la main ou réflexe
@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  const fmt = LT.fmt, RAD = Math.PI / 180;
+  const fmt = MO.fmt, RAD = Math.PI / 180;
 
   /* ---------- Modèle optique ---------- */
   const L0 = 17;                                   // cristallin → rétine, œil normal (mm)
@@ -95,57 +95,57 @@
       return { loin: distance(Vret - V0, true), pres: distance(Vret - V0 - A(), false) };
     }
 
-    zone.innerHTML = `<div class="lt-vis">
-      <div class="er-card lt-vis-tete">
-        <div class="lt-entete-l"><span class="er-badge">MODULE 3 · SIMULATION</span><h2 class="er-titre">Voir net : accommoder, corriger</h2></div>
+    zone.innerHTML = `<div class="mo-vis">
+      <div class="er-card mo-vis-tete">
+        <div class="mo-entete-l"><span class="er-badge">MODULE 2 · SIMULATION</span><h2 class="er-titre">Voir net : accommoder, corriger</h2></div>
         <span data-plein></span>
       </div>
-      <div class="lt-vis-corps">
-        <div class="er-card lt-vis-scene">
-          <div class="lt-vis-svg" data-a="scene"></div>
-          <p class="lt-vis-etat" data-a="etat" aria-live="polite"></p>
-          <div class="lt-vis-defis-pc" data-a="defisPC"></div>
+      <div class="mo-vis-corps">
+        <div class="er-card mo-vis-scene">
+          <div class="mo-vis-svg" data-a="scene"></div>
+          <p class="mo-vis-etat" data-a="etat" aria-live="polite"></p>
+          <div class="mo-vis-defis-pc" data-a="defisPC"></div>
         </div>
-        <aside class="er-card lt-vis-panneau" aria-label="Réglages">
-          <div class="lt-vis-onglets" role="tablist">
+        <aside class="er-card mo-vis-panneau" aria-label="Réglages">
+          <div class="mo-vis-onglets" role="tablist">
             <button type="button" role="tab" data-o="oeil" aria-selected="true">L'œil</button>
             <button type="button" role="tab" data-o="voir" aria-selected="false">Regarder</button>
             <button type="button" role="tab" data-o="lun" aria-selected="false">Lunettes</button>
             <button type="button" role="tab" data-o="defis" aria-selected="false">À essayer</button>
           </div>
-          <section class="lt-vis-bloc" data-s="oeil">
-            <p class="lt-vis-lab lt-vis-titre">L'œil</p>
-            <div class="lt-vis-seg" role="group" aria-label="Défaut de l'œil">
+          <section class="mo-vis-bloc" data-s="oeil">
+            <p class="mo-vis-lab mo-vis-titre">L'œil</p>
+            <div class="mo-vis-seg" role="group" aria-label="Défaut de l'œil">
               <button type="button" data-d="normal">Normal</button><button type="button" data-d="myope">Myope</button><button type="button" data-d="hyper">Hypermétrope</button>
             </div>
-            <div class="lt-vis-seg lt-vis-seg-p" role="group" aria-label="Importance du défaut" data-a="niveau">
+            <div class="mo-vis-seg mo-vis-seg-p" role="group" aria-label="Importance du défaut" data-a="niveau">
               <button type="button" data-n="moyen">Défaut moyen</button><button type="button" data-n="fort">Défaut fort</button>
             </div>
-            <p class="lt-vis-lab">Âge <small>(presbytie : le cristallin durcit)</small></p>
-            <div class="lt-vis-seg" role="group" aria-label="Âge">${Object.keys(AGES).map(a => `<button type="button" data-g="${a}">${a} ans</button>`).join('')}</div>
-            <p class="lt-vis-info" data-a="zone"></p>
+            <p class="mo-vis-lab">Âge <small>(presbytie : le cristallin durcit)</small></p>
+            <div class="mo-vis-seg" role="group" aria-label="Âge">${Object.keys(AGES).map(a => `<button type="button" data-g="${a}">${a} ans</button>`).join('')}</div>
+            <p class="mo-vis-info" data-a="zone"></p>
           </section>
-          <section class="lt-vis-bloc" data-s="voir">
-            <p class="lt-vis-lab">Objet A : <b data-a="dT"></b> <small>(à déplacer aussi sur le dessin)</small></p>
-            <div class="lt-vis-ligne"><input type="range" min="0" max="${DIST.length - 1}" step="1" data-a="d" aria-label="Distance de l'objet">
+          <section class="mo-vis-bloc" data-s="voir">
+            <p class="mo-vis-lab">Objet A : <b data-a="dT"></b> <small>(à déplacer aussi sur le dessin)</small></p>
+            <div class="mo-vis-ligne"><input type="range" min="0" max="${DIST.length - 1}" step="1" data-a="d" aria-label="Distance de l'objet">
               <button type="button" class="btn-small" data-a="inf">À l'infini</button></div>
-            <p class="lt-vis-lab">Accommodation : <b data-a="aT"></b></p>
-            <div class="lt-vis-ligne"><div class="lt-vis-acc-zone">
-                <input type="range" min="0" max="100" step="1" data-a="a" class="lt-vis-acc" aria-label="Accommodation du cristallin">
-                <div class="lt-vis-acc-grad" aria-hidden="true"><span data-a="aLim"></span></div></div>
+            <p class="mo-vis-lab">Accommodation : <b data-a="aT"></b></p>
+            <div class="mo-vis-ligne"><div class="mo-vis-acc-zone">
+                <input type="range" min="0" max="100" step="1" data-a="a" class="mo-vis-acc" aria-label="Accommodation du cristallin">
+                <div class="mo-vis-acc-grad" aria-hidden="true"><span data-a="aLim"></span></div></div>
               <button type="button" class="btn-small" data-a="acc">Accommoder</button></div>
-            <p class="lt-vis-info" data-a="foc"></p>
+            <p class="mo-vis-info" data-a="foc"></p>
           </section>
-          <section class="lt-vis-bloc" data-s="lun">
-            <p class="lt-vis-lab lt-vis-titre">Lunettes</p>
-            <button type="button" class="btn-secondary lt-vis-lun" data-a="lun" aria-pressed="false">Mettre les lunettes</button>
-            <p class="lt-vis-lab">Verres : <b data-a="gT"></b></p>
+          <section class="mo-vis-bloc" data-s="lun">
+            <p class="mo-vis-lab mo-vis-titre">Lunettes</p>
+            <button type="button" class="btn-secondary mo-vis-lun" data-a="lun" aria-pressed="false">Mettre les lunettes</button>
+            <p class="mo-vis-lab">Verres : <b data-a="gT"></b></p>
             <input type="range" min="-32" max="32" step="1" data-a="g" aria-label="Vergence des verres">
-            <div class="lt-vis-graduation" aria-hidden="true"><span>−8 δ</span><span>divergents · 0 · convergents</span><span>+8 δ</span></div>
+            <div class="mo-vis-graduation" aria-hidden="true"><span>−8 δ</span><span>divergents · 0 · convergents</span><span>+8 δ</span></div>
           </section>
-          <section class="lt-vis-bloc lt-vis-bloc-defis" data-s="defis">
-            <p class="lt-vis-lab lt-vis-titre">À essayer</p>
-            <ol class="lt-vis-defis" data-a="defis"></ol>
+          <section class="mo-vis-bloc mo-vis-bloc-defis" data-s="defis">
+            <p class="mo-vis-lab mo-vis-titre">À essayer</p>
+            <ol class="mo-vis-defis" data-a="defis"></ol>
           </section>
         </aside>
       </div></div>`;
@@ -154,7 +154,7 @@
     /* ---------- Scène : œil vu de côté, coupé dans le plan de l'axe optique ---------- */
     const NS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('class', 'lt-vis-3d'); svg.setAttribute('role', 'img');
+    svg.setAttribute('class', 'mo-vis-3d'); svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', 'Œil vu de côté, coupé dans le plan de l\'axe optique : cornée, iris, cristallin, muscles ciliaires, rétine ; faisceau de lumière issu de l\'objet A ; lunettes ; sous la rétine, l\'image qu\'elle reçoit');
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     // médaillon « image sur la rétine » (mm) : sous le fond de l'œil
@@ -163,25 +163,25 @@
     // dégradés (couleurs du thème)
     const grad = (type, gid, attrs, stops) => `<${type} id="${gid}-${id}" ${attrs}>${stops.map(([o, c, op]) => `<stop offset="${o}" style="stop-color:var(${c});stop-opacity:${op == null ? 1 : op}"/>`).join('')}</${type}>`;
     svg.innerHTML = `<defs>
-      ${grad('radialGradient', 'lt-sclere', 'cx="35%" cy="30%" r="80%"', [[0, '--sheet'], [0.6, '--paper'], [1, '--paper-3']])}
-      ${grad('linearGradient', 'lt-vitre', 'x1="0" y1="0" x2="1" y2="0"', [[0, '--cle-bg', 0.55], [0.55, '--paper-2', 0.9], [1, '--danger-bg']])}
-      ${grad('radialGradient', 'lt-crist', 'cx="40%" cy="35%" r="75%"', [[0, '--sheet', 0.9], [1, '--cle-line', 0.85]])}
-      ${grad('linearGradient', 'lt-iris', 'x1="0" y1="0" x2="0" y2="1"', [[0, '--orga-ram-3'], [1, '--accent-ink']])}
-      ${grad('linearGradient', 'lt-verre', 'x1="0" y1="0" x2="0" y2="1"', [[0, '--cle-line', 0.55], [0.45, '--sheet', 0.9], [1, '--cle-line', 0.55]])}
-      <clipPath id="lt-med-clip-${id}"><rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10"/></clipPath>
-      <filter id="lt-flou-vis-${id}" filterUnits="userSpaceOnUse" x="${mx}" y="${my}" width="${ml}" height="${mh}"><feGaussianBlur stdDeviation="0"/></filter>
+      ${grad('radialGradient', 'mo-sclere', 'cx="35%" cy="30%" r="80%"', [[0, '--sheet'], [0.6, '--paper'], [1, '--paper-3']])}
+      ${grad('linearGradient', 'mo-vitre', 'x1="0" y1="0" x2="1" y2="0"', [[0, '--cle-bg', 0.55], [0.55, '--paper-2', 0.9], [1, '--danger-bg']])}
+      ${grad('radialGradient', 'mo-crist', 'cx="40%" cy="35%" r="75%"', [[0, '--sheet', 0.9], [1, '--cle-line', 0.85]])}
+      ${grad('linearGradient', 'mo-iris', 'x1="0" y1="0" x2="0" y2="1"', [[0, '--orga-ram-3'], [1, '--accent-ink']])}
+      ${grad('linearGradient', 'mo-verre', 'x1="0" y1="0" x2="0" y2="1"', [[0, '--cle-line', 0.55], [0.45, '--sheet', 0.9], [1, '--cle-line', 0.55]])}
+      <clipPath id="mo-med-clip-${id}"><rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10"/></clipPath>
+      <filter id="mo-flou-vis-${id}" filterUnits="userSpaceOnUse" x="${mx}" y="${my}" width="${ml}" height="${mh}"><feGaussianBlur stdDeviation="0"/></filter>
     </defs><g data-a="g3d"></g>
-    <rect data-a="prise" class="lt-vis-prise" x="${-38.5 * U}" y="${-12.5 * U}" width="${20 * U}" height="${17 * U}"/>
-    <g class="lt-vis-med">
-      <rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10" class="lt-vis-ret-fond"/>
-      <g clip-path="url(#lt-med-clip-${id})"><g data-a="lettre" filter="url(#lt-flou-vis-${id})"></g></g>
-      <rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10" class="lt-vis-med-cadre"/>
-      <text x="${mx + ml / 2}" y="${my + mh + 26}" class="lt-vis-txt" text-anchor="middle">Sur la rétine : <tspan data-a="retT"></tspan></text>
+    <rect data-a="prise" class="mo-vis-prise" x="${-38.5 * U}" y="${-12.5 * U}" width="${20 * U}" height="${17 * U}"/>
+    <g class="mo-vis-med">
+      <rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10" class="mo-vis-ret-fond"/>
+      <g clip-path="url(#mo-med-clip-${id})"><g data-a="lettre" filter="url(#mo-flou-vis-${id})"></g></g>
+      <rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10" class="mo-vis-med-cadre"/>
+      <text x="${mx + ml / 2}" y="${my + mh + 26}" class="mo-vis-txt" text-anchor="middle">Sur la rétine : <tspan data-a="retT"></tspan></text>
     </g>`;
     $('scene').appendChild(svg);
     const g3d = svg.querySelector('[data-a="g3d"]');
     const flou = svg.querySelector('feGaussianBlur');
-    LT.lettre(svg.querySelector('[data-a="lettre"]'), mx + ml / 2 - 2, my + mh / 2 - 31, 62, true, 'lt-lettre');
+    MO.lettre(svg.querySelector('[data-a="lettre"]'), mx + ml / 2 - 2, my + mh / 2 - 31, 62, true, 'mo-lettre');
     const url = n => `url(#${n}-${id})`;
 
     function dessiner(o) {
@@ -203,48 +203,48 @@
       const xAv = y => xg - ec / 2 + SF * (y / rv) * (y / rv), xAr = y => xg + ec / 2 + SB * (y / rv) * (y / rv);
 
       // axe optique, hors de l'œil
-      ligne([[xGauche, 0], [-7.5, 0]], 'lt-vis-axe');
+      ligne([[xGauche, 0], [-7.5, 0]], 'mo-vis-axe');
       // branche des lunettes : passe derrière l'œil jusqu'à l'oreille
       if (etat.lun) {
         const q = (x, y) => P([x, y]).map(n1).join(' ');
         // de la charnière à l'oreille, puis le crochet qui épouse l'arrière de l'oreille
         out.push(`<path d="M${q(xAr(rv) - 0.2, rv - 0.4)}C${q(xAr(rv) + 3, rv - 0.6)} ${q(-9, 7.2)} ${q(-6, 7.2)}L${q(Lr + 9, 7.2)}`
-          + `C${q(Lr + 12.5, 7.2)} ${q(Lr + 14.6, 6.2)} ${q(Lr + 14.6, 4.2)}C${q(Lr + 14.6, 2.4)} ${q(Lr + 13.6, 1.2)} ${q(Lr + 12.4, 0.8)}" class="lt-vis-monture lt-vis-branche"/>`);
+          + `C${q(Lr + 12.5, 7.2)} ${q(Lr + 14.6, 6.2)} ${q(Lr + 14.6, 4.2)}C${q(Lr + 14.6, 2.4)} ${q(Lr + 13.6, 1.2)} ${q(Lr + 12.4, 0.8)}" class="mo-vis-monture mo-vis-branche"/>`);
       }
       // nerf optique
-      path([[Lr - 1, -1], [Lr + 9, -1.4], [Lr + 9, -4.6], [Lr - 1, -4.4]], 'lt-vis-nerf');
+      path([[Lr - 1, -1], [Lr + 9, -1.4], [Lr + 9, -4.6], [Lr - 1, -4.4]], 'mo-vis-nerf');
       // globe : sclérotique (contour complet), intérieur (humeurs), cornée transparente
-      path(contourOeil(C0, RC, xc, rx, R), 'lt-vis-globe', ` fill="${url('lt-sclere')}"`);
-      path(contourOeil(C0, RC - EC, xc, rx - EP, R - EP), 'lt-vis-coupe', ` fill="${url('lt-vitre')}"`);
+      path(contourOeil(C0, RC, xc, rx, R), 'mo-vis-globe', ` fill="${url('mo-sclere')}"`);
+      path(contourOeil(C0, RC - EC, xc, rx - EP, R - EP), 'mo-vis-coupe', ` fill="${url('mo-vitre')}"`);
       const yl = limbe(C0, RC, xc, rx, R), yli = limbe(C0, RC - EC, xc, rx - EP, R - EP);
       const al = Math.asin(yl / RC) / RAD, ali = Math.asin(yli / (RC - EC)) / RAD;
-      path(arc(C0, 0, RC, RC, 180 + al, 180 - al, 3).concat(arc(C0, 0, RC - EC, RC - EC, 180 - ali, 180 + ali, 3)), 'lt-vis-cornee');
+      path(arc(C0, 0, RC, RC, 180 + al, 180 - al, 3).concat(arc(C0, 0, RC - EC, RC - EC, 180 - ali, 180 + ali, 3)), 'mo-vis-cornee');
       // rétine : fond de l'œil
-      ligne(arc(xc, 0, rx - EP - 0.25, R - EP - 0.25, -64, 64, 3), 'lt-vis-retine');
+      ligne(arc(xc, 0, rx - EP - 0.25, R - EP - 0.25, -64, 64, 3), 'mo-vis-retine');
 
       // cristallin : plus bombé quand il accommode (déformation exagérée pour la voir) ; contour au repos en pointillé
       const k = Math.pow(Math.max(0, etat.a) / 10, 0.75);
       const lentille = (av, ar, h) => arc(0, 0, ar, h, -90, 90, 6).concat(arc(0, 0, av, h, 90, 270, 6));
       const hC = 4.6 - 0.7 * k, eAv = 1.1 + 1.3 * k, eAr = 1.6 + 1.6 * k;
-      path(lentille(eAv, eAr, hC), 'lt-vis-crist-coupe', ` fill="${url('lt-crist')}"`);
-      if (k > 0.03) path(lentille(1.1, 1.6, 4.6), 'lt-vis-fantome');
+      path(lentille(eAv, eAr, hC), 'mo-vis-crist-coupe', ` fill="${url('mo-crist')}"`);
+      if (k > 0.03) path(lentille(1.1, 1.6, 4.6), 'mo-vis-fantome');
       // muscles ciliaires (anneau autour du cristallin, en haut et en bas de la coupe) et fibres qui tiennent le cristallin :
       // au repos le muscle est relâché et les fibres sont tendues ; en accommodant, il se contracte et les fibres se relâchent
       const xi = -2.9;
       [1, -1].forEach(s => {
         const pointe = [0.1, s * (7.1 - 1.1 * k)], ep = 1.3 + 0.8 * k;
         const m = [[xi + 0.5, s * yParoi(xi + 0.5)], [pointe[0] - ep, s * (Math.abs(pointe[1]) + 0.5)], pointe, [pointe[0] + ep, s * (Math.abs(pointe[1]) + 0.9)], [2.3, s * yParoi(2.3)]];
-        path(m, 'lt-vis-muscle' + (etat.a > 0.05 ? ' lt-vis-muscle-on' : '') + (anim ? ' lt-vis-muscle-anim' : ''));
+        path(m, 'mo-vis-muscle' + (etat.a > 0.05 ? ' mo-vis-muscle-on' : '') + (anim ? ' mo-vis-muscle-anim' : ''));
         [-0.9, -0.3, 0.3, 0.9].forEach(dx => {
           const de = [pointe[0] + dx * 0.6, pointe[1] - s * 0.1], vers = [dx * 1.1, s * (hC - 0.15)];
           const mi = [(de[0] + vers[0]) / 2 + 0.7 * k * (dx < 0 ? -1 : 1), (de[1] + vers[1]) / 2 - s * 0.5 * k];
-          out.push(`<path d="M${P(de).map(n1).join(' ')}Q${P(mi).map(n1).join(' ')} ${P(vers).map(n1).join(' ')}" class="lt-vis-zonule"/>`);
+          out.push(`<path d="M${P(de).map(n1).join(' ')}Q${P(mi).map(n1).join(' ')} ${P(vers).map(n1).join(' ')}" class="mo-vis-zonule"/>`);
         });
         // iris : coupe d'un anneau, de la pupille à la paroi
-        path([[xi - 0.3, s * (PUP + 0.1)], [xi - 0.3, s * yParoi(xi - 0.3)], [xi + 0.3, s * yParoi(xi + 0.3)], [xi + 0.3, s * (PUP + 0.1)]], 'lt-vis-iris', ` fill="${url('lt-iris')}"`);
+        path([[xi - 0.3, s * (PUP + 0.1)], [xi - 0.3, s * yParoi(xi - 0.3)], [xi + 0.3, s * yParoi(xi + 0.3)], [xi + 0.3, s * (PUP + 0.1)]], 'mo-vis-iris', ` fill="${url('mo-iris')}"`);
       });
       // axe optique, dans l'œil
-      ligne([[-7.5, 0], [Lr - EP, 0]], 'lt-vis-axe');
+      ligne([[-7.5, 0], [Lr - EP, 0]], 'mo-vis-axe');
 
       // faisceau issu de A, jusqu'au cristallin : bords (± pupille) et rayon central
       const bords = [-PUP, PUP];
@@ -258,9 +258,9 @@
         const g = yVerre(y), dep = xo === null ? [xGauche, g === null ? y : g] : [xo, 0];
         return g === null ? [dep, [0, y]] : [dep, [xAv(g), g], [xAr(g), g], [0, y]];
       });
-      path(avant[0].concat(avant[1].slice().reverse()), 'lt-vis-faisceau');
-      avant.forEach(r => ligne(r, 'lt-vis-rayon'));
-      ligne([[xo === null ? xGauche : xo, 0], [0, 0]], 'lt-vis-rayon lt-vis-rayon-c');
+      path(avant[0].concat(avant[1].slice().reverse()), 'mo-vis-faisceau');
+      avant.forEach(r => ligne(r, 'mo-vis-rayon'));
+      ligne([[xo === null ? xGauche : xo, 0], [0, 0]], 'mo-vis-rayon mo-vis-rayon-c');
       // dans l'œil : cristallin → rétine ; l'image A′ derrière la rétine est éloignée davantage (×3, au plus 13 mm) pour la voir ;
       // image nette : A′ dessiné sur la rétine
       const xFin = Lr - EP - 0.3;
@@ -268,43 +268,43 @@
       const xA = o.nette ? xFin : ecart < 0 ? xFin + ecart : xFin + 13 * Math.tanh(3 * ecart / 13);
       const yr = y => y * (1 - xFin / xA);     // hauteur sur la rétine du rayon parti de la hauteur y sur le cristallin
       if (xA < xFin) {
-        path([[0, -PUP], [xA, 0], [0, PUP]], 'lt-vis-faisceau');
-        path([[xA, 0], [xFin, yr(-PUP)], [xFin, yr(PUP)]], 'lt-vis-faisceau');
-      } else path([[0, -PUP], [xFin, yr(-PUP)], [xFin, yr(PUP)], [0, PUP]], 'lt-vis-faisceau');
-      bords.forEach(y => ligne([[0, y], [xFin, yr(y)]], 'lt-vis-rayon'));
-      ligne([[0, 0], [xFin, 0]], 'lt-vis-rayon lt-vis-rayon-c');
+        path([[0, -PUP], [xA, 0], [0, PUP]], 'mo-vis-faisceau');
+        path([[xA, 0], [xFin, yr(-PUP)], [xFin, yr(PUP)]], 'mo-vis-faisceau');
+      } else path([[0, -PUP], [xFin, yr(-PUP)], [xFin, yr(PUP)], [0, PUP]], 'mo-vis-faisceau');
+      bords.forEach(y => ligne([[0, y], [xFin, yr(y)]], 'mo-vis-rayon'));
+      ligne([[0, 0], [xFin, 0]], 'mo-vis-rayon mo-vis-rayon-c');
       // au-delà de la rétine : prolongement en pointillé jusqu'à A′
-      if (xA > xFin + 0.05) bords.forEach(y => ligne([[xFin, yr(y)], [xA, 0]], 'lt-vis-rayon lt-vis-rayon-p'));
+      if (xA > xFin + 0.05) bords.forEach(y => ligne([[xFin, yr(y)], [xA, 0]], 'mo-vis-rayon mo-vis-rayon-p'));
       // tache de lumière sur la rétine, et point image A′
       const h1 = Math.min(yr(-PUP), yr(PUP)) - 0.15, h2 = Math.max(yr(-PUP), yr(PUP)) + 0.15;
-      ligne([[xFin + 0.1, h1], [xFin + 0.1, h2]], 'lt-vis-tache' + (o.nette ? ' lt-vis-tache-nette' : ''));
+      ligne([[xFin + 0.1, h1], [xFin + 0.1, h2]], 'mo-vis-tache' + (o.nette ? ' mo-vis-tache-nette' : ''));
       const I = P([xA, 0]);
-      out.push(`<circle cx="${n1(I[0])}" cy="${n1(I[1])}" r="5" class="lt-vis-pt"/>`);
-      if (!o.nette) texte([xA < xFin ? xA - 0.4 : xA, 0.9], 'A′', 'lt-vis-nom', xA < xFin ? 'end' : 'middle');
+      out.push(`<circle cx="${n1(I[0])}" cy="${n1(I[1])}" r="5" class="mo-vis-pt"/>`);
+      if (!o.nette) texte([xA < xFin ? xA - 0.4 : xA, 0.9], 'A′', 'mo-vis-nom', xA < xFin ? 'end' : 'middle');
 
       // lunettes : verre en profil (ménisque), monture en haut et en bas, vergence
       if (etat.lun) {
         const ys = arc(0, 0, 1, rv, -90, 90, 10).map(q => q[1]);
-        path(ys.map(y => [xAv(y), y]).concat(ys.slice().reverse().map(y => [xAr(y), y])), 'lt-vis-verre', ` fill="${url('lt-verre')}"`);
-        [1, -1].forEach(s => path([[xAv(rv) - 0.4, s * (rv - 0.5)], [xAv(rv) - 0.4, s * (rv + 0.6)], [xAr(rv) + 0.4, s * (rv + 0.6)], [xAr(rv) + 0.4, s * (rv - 0.5)]], 'lt-vis-cercle'));
-        texte([xg, -rv - 3.2], `${Vg > 0 ? '+' : Vg < 0 ? '−' : ''}${fmt(Math.abs(Vg), 2)} δ`, 'lt-vis-nom');
-        texte([xg, -rv - 5.6], Vg > 0.01 ? 'convergent' : Vg < -0.01 ? 'divergent' : 'sans effet', 'lt-vis-txt');
+        path(ys.map(y => [xAv(y), y]).concat(ys.slice().reverse().map(y => [xAr(y), y])), 'mo-vis-verre', ` fill="${url('mo-verre')}"`);
+        [1, -1].forEach(s => path([[xAv(rv) - 0.4, s * (rv - 0.5)], [xAv(rv) - 0.4, s * (rv + 0.6)], [xAr(rv) + 0.4, s * (rv + 0.6)], [xAr(rv) + 0.4, s * (rv - 0.5)]], 'mo-vis-cercle'));
+        texte([xg, -rv - 3.2], `${Vg > 0 ? '+' : Vg < 0 ? '−' : ''}${fmt(Math.abs(Vg), 2)} δ`, 'mo-vis-nom');
+        texte([xg, -rv - 5.6], Vg > 0.01 ? 'convergent' : Vg < -0.01 ? 'divergent' : 'sans effet', 'mo-vis-txt');
       }
 
       // objet A (flèche verticale) ou objet à l'infini
       if (xo !== null) {
-        ligne([[xo, 0], [xo, 6]], 'lt-vis-objet');
+        ligne([[xo, 0], [xo, 6]], 'mo-vis-objet');
         const b = P([xo, 6]);
-        out.push(`<path d="M${n1(b[0])} ${n1(b[1] - 14)}l-10 22h20z" class="lt-vis-objet-p"/>`);
-        texte([xo, -3], 'A', 'lt-vis-nom');
-        texte([xo, 8.6], `objet ${texteDist(D)}`, 'lt-vis-txt');
+        out.push(`<path d="M${n1(b[0])} ${n1(b[1] - 14)}l-10 22h20z" class="mo-vis-objet-p"/>`);
+        texte([xo, -3], 'A', 'mo-vis-nom');
+        texte([xo, 8.6], `objet ${texteDist(D)}`, 'mo-vis-txt');
       } else {
-        texte([xGauche, 13.2], 'objet A à l\'infini :', 'lt-vis-txt', 'start');
-        texte([xGauche, 11.4], 'rayons parallèles', 'lt-vis-txt', 'start');
+        texte([xGauche, 13.2], 'objet A à l\'infini :', 'mo-vis-txt', 'start');
+        texte([xGauche, 11.4], 'rayons parallèles', 'mo-vis-txt', 'start');
       }
 
       // noms des parties de l'œil
-      const lien = (p, q, nom, ancre) => { ligne([p, q], 'lt-vis-lien'); texte([q[0], q[1] + (q[1] > p[1] ? 0.6 : -2.4)], nom, 'lt-vis-txt', ancre); };
+      const lien = (p, q, nom, ancre) => { ligne([p, q], 'mo-vis-lien'); texte([q[0], q[1] + (q[1] > p[1] ? 0.6 : -2.4)], nom, 'mo-vis-txt', ancre); };
       lien([0.6, -3.4], [3, -14.6], 'cristallin');
       lien([xc + (rx - EP) * Math.cos(-38 * RAD), (R - EP) * Math.sin(-38 * RAD)], [Lr + 3.2, -9], 'rétine', 'start');
       lien([xi, -5.4], [-6, -14.6], 'iris', 'end');
@@ -342,10 +342,10 @@
     prise.addEventListener('pointerdown', ev => {
       ev.preventDefault(); doigt = ev.pointerId;
       try { prise.setPointerCapture(ev.pointerId); } catch (e) { /* capture indisponible */ }
-      prise.classList.add('lt-vis-prise-on'); placerObjet(ev);
+      prise.classList.add('mo-vis-prise-on'); placerObjet(ev);
     });
     prise.addEventListener('pointermove', ev => { if (ev.pointerId === doigt) placerObjet(ev); });
-    const lacher = ev => { if (ev.pointerId === doigt) { doigt = null; prise.classList.remove('lt-vis-prise-on'); } };
+    const lacher = ev => { if (ev.pointerId === doigt) { doigt = null; prise.classList.remove('mo-vis-prise-on'); } };
     prise.addEventListener('pointerup', lacher); prise.addEventListener('pointercancel', lacher);
     $g.oninput = () => { etat.Vg = +$g.value / 4; maj(); };
     $('lun').onclick = () => { etat.lun = !etat.lun; maj(); };
@@ -370,7 +370,7 @@
     const onglets = zone.querySelectorAll('[data-o]');
     function onglet(o) {
       onglets.forEach(b => b.setAttribute('aria-selected', b.dataset.o === o ? 'true' : 'false'));
-      zone.querySelectorAll('[data-s]').forEach(s => s.classList.toggle('lt-vis-actif', s.dataset.s === o));
+      zone.querySelectorAll('[data-s]').forEach(s => s.classList.toggle('mo-vis-actif', s.dataset.s === o));
     }
     onglets.forEach(b => { b.onclick = () => onglet(b.dataset.o); });
     onglet('oeil');
@@ -387,7 +387,7 @@
         ok: o => etat.defaut === 'normal' && etat.age === 60 && etat.lun && Math.abs(o.D - 0.25) < 1e-9 && o.nette },
     ];
     const faits = DEFIS.map(() => false);
-    $('defis').innerHTML = DEFIS.map(d => `<li><span class="lt-vis-coche" aria-hidden="true"></span><span>${d.t}</span></li>`).join('');
+    $('defis').innerHTML = DEFIS.map(d => `<li><span class="mo-vis-coche" aria-hidden="true"></span><span>${d.t}</span></li>`).join('');
     const lis = Array.from($('defis').children);
     let marque = false;
 
@@ -409,7 +409,7 @@
       const $lim = $('aLim');
       $lim.textContent = etat.age === 20 ? 'maximum à 20 ans' : `limite à ${etat.age} ans`;
       $lim.style.setProperty('--m', lim / 100);
-      $lim.classList.toggle('lt-vis-acc-g', lim < 50);
+      $lim.classList.toggle('mo-vis-acc-g', lim < 50);
       $('foc').innerHTML = `Distance focale de l'œil : <b>${fmt(1000 / o.Voeil, 1)} mm</b>${etat.a < 0.05 ? ' (au repos)' : ''} ; rétine à ${fmt(L(), 1)} mm du cristallin.`;
       $('lun').textContent = etat.lun ? 'Enlever les lunettes' : 'Mettre les lunettes';
       $('lun').setAttribute('aria-pressed', etat.lun ? 'true' : 'false');
@@ -425,29 +425,29 @@
       $('zone').innerHTML = zt;
       // état de l'image
       const nom = { normal: 'Œil normal', myope: 'Œil myope', hyper: 'Œil hypermétrope' }[etat.defaut] + (etat.defaut === 'normal' ? '' : etat.niveau === 'fort' ? ' (fort)' : ' (moyen)');
-      const ou = o.nette ? '<b class="lt-vis-ok">Image nette sur la rétine.</b>'
-        : o.dV > 0 ? '<b class="lt-vis-ko">Image floue</b> : elle se forme <b>en avant</b> de la rétine.'
-        : '<b class="lt-vis-ko">Image floue</b> : elle se formerait <b>en arrière</b> de la rétine.';
+      const ou = o.nette ? '<b class="mo-vis-ok">Image nette sur la rétine.</b>'
+        : o.dV > 0 ? '<b class="mo-vis-ko">Image floue</b> : elle se forme <b>en avant</b> de la rétine.'
+        : '<b class="mo-vis-ko">Image floue</b> : elle se formerait <b>en arrière</b> de la rétine.';
       $('etat').innerHTML = `${nom}, ${etat.age} ans${etat.lun ? ', avec lunettes' : ''} · objet ${texteDist(o.D)} · ${ou}`;
       const retT = svg.querySelector('[data-a="retT"]');
       retT.textContent = o.nette ? 'nette' : 'floue';
-      retT.setAttribute('class', o.nette ? 'lt-vis-ok' : 'lt-vis-ko');
+      retT.setAttribute('class', o.nette ? 'mo-vis-ok' : 'mo-vis-ko');
       const s = o.nette ? 0 : Math.min(12, 1.4 + 2.2 * Math.abs(o.dV));
       flou.setAttribute('stdDeviation', String(Math.round(s * 100) / 100));
       dessiner(o);
       // défis
-      DEFIS.forEach((d, i) => { if (!faits[i] && d.ok(o)) faits[i] = true; lis[i].classList.toggle('lt-vis-fait', faits[i]); });
+      DEFIS.forEach((d, i) => { if (!faits[i] && d.ok(o)) faits[i] = true; lis[i].classList.toggle('mo-vis-fait', faits[i]); });
       if (!marque && faits.every(Boolean)) { marque = true; SOM.marquer({ fait: true }); }
     }
     // « À essayer » : sous l'œil sur ordinateur, dans un onglet sur téléphone
     const mq = matchMedia('(max-width: 899px)'), $defis = zone.querySelector('[data-s="defis"]');
-    function placerDefis() { (mq.matches ? zone.querySelector('.lt-vis-panneau') : $('defisPC')).appendChild($defis); }
+    function placerDefis() { (mq.matches ? zone.querySelector('.mo-vis-panneau') : $('defisPC')).appendChild($defis); }
     if (mq.addEventListener) mq.addEventListener('change', placerDefis); else mq.addListener(placerDefis);
     placerDefis();
     maj();
-    LT.visionEnCours = { etat, optique, zoneNette, maj, faits, L, A, DIST };   // utile pour vérifier l'application
-    return LT.visionEnCours;
+    MO.visionEnCours = { etat, optique, zoneNette, maj, faits, L, A, DIST };   // utile pour vérifier l'application
+    return MO.visionEnCours;
   }
 
-  Object.assign(LT, { simulateurVision });
+  Object.assign(MO, { simulateurVision });
 })();

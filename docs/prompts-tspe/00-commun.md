@@ -144,7 +144,7 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 | `gaz-parfait.md` | Gaz parfait : PV = nRT | `gaz-parfait/` | 17 | à faire | | |
 | `chapitre-17.md` | Thermodynamique | `thermodynamique/` | | à faire | | |
 | `chapitre-18.md` | Équilibre chimique et piles | `equilibre-piles/` | | à faire | | |
-| `modele-oeil.md` | Modèle de l'œil | `modele-oeil/` | 19 | à faire | | sort le module 3 de `lentilles/` |
+| `modele-oeil.md` | Modèle de l'œil | `modele-oeil/` | 19 | fait | 27/11/2026 | manipulation et simulateur sortis tels quels du module 3 de `lentilles/` (moteur `MO`, `mo.js`, `mo.css`) ; rien de propre à un niveau ; `lentilles/` : module 3 en deux pages ↗ ; progression de `lentilles-progression` recopiée au premier chargement |
 | `chapitre-19.md` | Lunette astronomique | `lunette-astronomique/` | | à faire | | |
 | `chapitre-20.md` | Mouvements d'un fluide | `mecanique-fluides/` | | à faire | | |
 | `chapitre-21.md` | Synthèse organique | `synthese-organique/` | | à faire | | mis en commun avec 2nde 12 |
