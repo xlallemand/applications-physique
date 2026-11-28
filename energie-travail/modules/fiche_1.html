@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : fiche récapitulative — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche" id="fiche"></div>
+<script>
+/* Fiche récapitulative du module 1 : une section par sous-module de cours (ancres du PLAN) */
+const { W, V, nomV, figTravail, figDecomp, figCondoW, CERCLE } = ET;
+const WF = W('F'), WP = W('P'), WE = `W<sub>AB</sub>(${V('F', 'él')})`;
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card"><span class="er-badge">MODULE 1 · FICHE RÉCAPITULATIVE</span><h2 class="er-titre">Travail d'une force</h2></div>
+
+  <section class="er-card" id="formule">
+    <h3 class="cours-titre">Définition et formule</h3>
+    <div class="cle"><p>Le <b>travail</b> d'une force est l'énergie qu'elle transmet au solide au cours d'un déplacement. Force constante, déplacement de A à B :</p>
+      <p class="som-formule">${WF} = F × AB × cos α</p>
+      <p>W en J ; F en N ; AB en m ; α : angle entre ${nomV('F')} et <span class="vec-nom">AB</span>, en <b>degrés</b> (calculatrice en degrés). Le travail d'une force constante ne dépend pas du chemin suivi.</p></div>
+    <div class="som-fiche-figs">${figTravail({ alpha: 40 })}${CERCLE}</div>
+    <p>Exemples : F = 10 N, AB = 1 m, α = 40° : 7,66 J ; pétrolier : 100 kN, 2,0 km, 20° : 1,9 × 10<sup>8</sup> J.</p>
+  </section>
+
+  <section class="er-card" id="signe">
+    <h3 class="cours-titre">Travail moteur, résistant ou nul</h3>
+    <div class="som-defile"><table class="som-tab">
+      <thead><tr><th>Travail moteur</th><th>Travail résistant</th><th>Travail nul</th></tr></thead>
+      <tbody><tr><td>0° ≤ α < 90°</td><td>90° < α ≤ 180°</td><td>α = 90°</td></tr>
+        <tr><td>0 < cos α ≤ 1</td><td>−1 ≤ cos α < 0</td><td>cos α = 0</td></tr>
+        <tr><td>${WF} > 0</td><td>${WF} < 0</td><td>${WF} = 0</td></tr>
+        <tr><td>favorise le déplacement</td><td>ne le favorise pas</td><td>pas d'effet</td></tr></tbody></table></div>
+  </section>
+
+  <section class="er-card" id="poids">
+    <h3 class="cours-titre">Travail du poids</h3>
+    <div class="cle"><p class="som-formule">${WP} = m g h</p>
+      <p>h = z<sub>A</sub> − z<sub>B</sub> : altitude <b>descendue</b> (m). Descente : h > 0, moteur ; montée : h < 0, résistant. Pour retenir : poids × altitude, puis le signe.</p></div>
+    <p>Démonstration : chemin A → C (vertical) puis C → B (horizontal, travail nul) : ${WP} = P × AC × cos 0° + 0.</p>
+    <div class="som-fiche-figs">${figDecomp('descend')}${figDecomp('monte')}</div>
+  </section>
+
+  <section class="er-card" id="electrique">
+    <h3 class="cours-titre">Travail d'une force électrique</h3>
+    <div class="cle"><p class="som-formule">${WE} = q U</p>
+      <p>${V('F', 'él')} = q ${V('E')} ; q en C, U (tension entre les armatures) en V. Démonstration : chemin A → C → B, qE × L avec E = U / L.</p>
+      <p>Particule négative : |q| U, avec + si la force est motrice, − si elle est résistante (électron accéléré : W = e U).</p></div>
+    <div class="som-fiche-figs">${figCondoW()}</div>
+  </section>
+
+  <section class="er-card" id="perpendiculaire">
+    <h3 class="cours-titre">Force perpendiculaire au mouvement</h3>
+    <div class="cle"><p>Une force <b>toujours perpendiculaire</b> au mouvement a un travail <b>toujours nul</b> : attraction de la Terre sur un satellite en orbite circulaire, tension du fil d'un pendule, réaction d'une table à coussin d'air et poids sur un trajet horizontal.</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_1a_cours.html">Revoir les cours</a>
+    <a class="btn-secondary" href="module_1_questions.html">Questions sur le module 1</a>
+  </div>`;
+ET.menu('fiche_1');
+</script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 1 : 10 questions.
+   W = F × AB × cos α (calculatrice en degrés : diagnostic radians ;
+   sin au lieu de cos ; cos oublié ; angle repéré par rapport à la
+   verticale), signe du travail, conversions, travail du poids (montée,
+   descente), W = qU (signe pour un électron), travail nul, chemin suivi.
+   ============================================================ */
+const { o, fq, fmt, cs, sci, proche, hasard, entre, melanger, W, nomV, V, figTravail } = ET;
+const cosd = a => Math.cos(a * Math.PI / 180), sind = a => Math.sin(a * Math.PI / 180);
+const WF = W('F'), WP = W('P'), WE = `W<sub>AB</sub>(${V('F', 'él')})`, G = 'm·s<sup>−2</sup>';
+const nb = (q, label, valeur, unite, opts) => Object.assign({ type: 'nombre', q, label, valeur, unite, rel: .01, calc: true }, opts);
+const sc = (q, label, valeur, unite, opts) => Object.assign({ type: 'sci', q, label, valeur, unite, cs: 2, rel: .03, calc: true }, opts);
+const r3 = v => fmt(+v.toPrecision(3));
+function diagW(F, AB, a) {
+  const w = F * AB * cosd(a);
+  return v => (proche(v, F * AB * Math.cos(a), .02) ? `Ta calculatrice est en <b>radians</b> (cos ${a} ≈ ${r3(Math.cos(a))} au lieu de cos ${a}° ≈ ${r3(cosd(a))}) : passe-la en <b>degrés</b>.`
+    : Math.abs(w) > 1e-9 && proche(v, -w, .02) ? `Regarde le signe de cos ${a}°.`
+    : proche(v, F * AB * sind(a), .02) ? 'C\'est <b>cos</b> α, pas sin α.'
+    : proche(v, F * AB, .02) ? 'N\'oublie pas cos α.' : `${WF} = F × AB × cos α.`);
+}
+
+function calcul() {
+  const F = entre(2, 9) * 10, AB = hasard([2.0, 3.5, 5.0, 8.0]), a = hasard([20, 35, 50, 70]), w = F * AB * cosd(a);
+  return { theme: 'Calculer un travail', enonce: `<p>Une force constante de ${F} N fait un angle α = ${a}° avec le déplacement AB = ${fmt(AB)} m.</p>${figTravail({ alpha: a, W: 300, H: 130 })}`,
+    parties: [nb(`Calcule ${WF} (3 chiffres significatifs).`, `${WF} =`, w, 'J', { diag: diagW(F, AB, a), solution: `<p>${WF} = ${F} × ${fmt(AB)} × cos ${a}° = ${r3(w)} J</p>` })] };
+}
+function resistant() {
+  const F = hasard([15, 40, 120]), AB = hasard([1.5, 2.0, 6.0]), a = hasard([110, 135, 160]), w = F * AB * cosd(a);
+  return { theme: 'Angle obtus', enonce: `<p>F = ${F} N, AB = ${fmt(AB)} m, α = ${a}°.</p>`,
+    parties: [nb(`a) Calcule ${WF} (3 chiffres significatifs).`, `${WF} =`, w, 'J', { diag: diagW(F, AB, a), solution: `<p>${WF} = ${F} × ${fmt(AB)} × cos ${a}° = ${r3(w)} J</p>` }),
+      fq.choix('b) Ce travail est :', [o('r', 'résistant'), o('m', 'moteur'), o('n', 'nul')], 'r', { melanger: false, indice: '90° < α ≤ 180° : cos α < 0.', solution: '<p>W < 0 : travail résistant, la force ne favorise pas le déplacement.</p>' })] };
+}
+function signe() {
+  const a = hasard([0, 45, 90, 100, 180]), bonne = a < 90 ? 'm' : a === 90 ? 'n' : 'r';
+  return { theme: 'Moteur, résistant ou nul', parties: [fq.choix(`Une force fait un angle α = ${a}° avec le déplacement. Son travail est :`, [o('m', 'moteur'), o('r', 'résistant'), o('n', 'nul')], bonne,
+    { melanger: false, indice: 'Moteur si 0° ≤ α < 90°, nul si α = 90°, résistant si 90° < α ≤ 180°.', solution: `<p>cos ${a}° ${a < 90 ? '> 0 : travail moteur' : a === 90 ? '= 0 : travail nul' : '< 0 : travail résistant'}.</p>` })] };
+}
+function verticale() {
+  const F = hasard([30, 50, 80]), AB = hasard([2.0, 4.0, 10]), b = hasard([20, 30, 40]), a = 90 - b, w = F * AB * cosd(a);
+  return { theme: 'Repérer l\'angle', enonce: `<p>On tire une caisse sur un sol horizontal, de A à B (AB = ${fmt(AB)} m), avec une corde qui fait un angle de ${b}° avec la <b>verticale</b> ; la tension de la corde vaut F = ${F} N.</p>`,
+    parties: [fq.choix('a) Quel angle α faut-il utiliser dans la formule du travail ?', [o('ok', `α = ${a}°`), o('b', `α = ${b}°`), o('c', `α = ${180 - b}°`)], 'ok',
+      { melanger: false, indices: { b: 'Cet angle est mesuré par rapport à la verticale : α se mesure par rapport au déplacement (horizontal).', c: 'La corde tire vers l\'avant et vers le haut : α est aigu.' }, solution: `<p>Le déplacement est horizontal : α = 90° − ${b}° = ${a}°.</p>` }),
+      nb(`b) Calcule ${WF} (3 chiffres significatifs).`, `${WF} =`, w, 'J', { diag: v => (proche(v, F * AB * cosd(b), .02) ? 'Tu as utilisé l\'angle avec la verticale.' : diagW(F, AB, a)(v)), solution: `<p>${WF} = ${F} × ${fmt(AB)} × cos ${a}° = ${r3(w)} J</p>` })] };
+}
+function conversion() {
+  const F = hasard([20, 60, 150]), d = hasard([1.2, 2.5, 4.0]), a = hasard([10, 25, 30]), w = F * 1e3 * d * 1e3 * cosd(a);
+  return { theme: 'Avec des conversions', enonce: `<p>Un câble tire une péniche sur ${fmt(d)} km avec une force de ${F} kN qui fait un angle de ${a}° avec le déplacement.</p>`,
+    parties: [sc(`Calcule ${WF}.`, `${WF} =`, w, 'J', { diag: v => (proche(v, w / 1e3, .05) || proche(v, w / 1e6, .05) ? 'Convertis : 1 kN = 10<sup>3</sup> N et 1 km = 10<sup>3</sup> m.' : proche(v, F * d * 1e6 * Math.cos(a), .05) ? 'Calculatrice en radians : passe-la en degrés.' : `${WF} = F × AB × cos α.`),
+      solution: `<p>${WF} = ${F} × 10<sup>3</sup> × ${fmt(d)} × 10<sup>3</sup> × cos ${a}° = ${sci(w, 2)} J</p>` })] };
+}
+function poidsDescente() {
+  const m = hasard([60, 75, 90]), zA = hasard([2100, 1850, 1620]), dz = hasard([150, 240, 320]), w = m * 9.81 * dz;
+  return { theme: 'Travail du poids', enonce: `<p>Un skieur de ${m} kg descend de A (altitude ${fmt(zA)} m) à B (altitude ${fmt(zA - dz)} m) ; g = 9,81 ${G}.</p>`,
+    parties: [sc(`Calcule ${WP}.`, `${WP} =`, w, 'J', { diag: v => (proche(v, -w, .03) ? 'Le skieur descend : travail moteur, positif.' : proche(v, m * 9.81 * zA, .03) ? 'h est l\'altitude <b>descendue</b> : z<sub>A</sub> − z<sub>B</sub>.' : `${WP} = m g (z<sub>A</sub> − z<sub>B</sub>).`),
+      solution: `<p>${WP} = m g (z<sub>A</sub> − z<sub>B</sub>) = ${m} × 9,81 × ${dz} = ${sci(w, 2)} J (moteur)</p>` })] };
+}
+function poidsMontee() {
+  const m = hasard([0.5, 1.2, 2.0]), h = hasard([1.5, 2.4, 5.0]), w = -m * 9.81 * h;
+  return { theme: 'Travail du poids, montée', enonce: `<p>On monte un objet de ${fmt(m)} kg sur une étagère située ${fmt(h)} m plus haut, en le faisant passer par un chemin quelconque ; g = 9,81 ${G}.</p>`,
+    parties: [nb(`Calcule ${WP} (3 chiffres significatifs, avec son signe).`, `${WP} =`, w, 'J', { diag: v => (proche(v, -w, .02) ? 'L\'objet <b>monte</b> : h, altitude descendue, est <b>négative</b> ; le travail est résistant.' : `${WP} = m g h, avec h = −${fmt(h)} m.`),
+      solution: `<p>${WP} = m g h = ${fmt(m)} × 9,81 × (−${fmt(h)}) = ${r3(w)} J : travail résistant, quel que soit le chemin.</p>` })] };
+}
+function electrique() {
+  const U = hasard([500, 1200, 4000]), q = hasard([1, 2]), w = q * 1.6e-19 * U;
+  return { theme: 'Travail d\'une force électrique', enonce: `<p>Un ion de charge q = ${q === 1 ? 'e' : '2e'} (e = 1,60 × 10<sup>−19</sup> C) va de l'armature + à l'armature − d'un condensateur soumis à U = ${fmt(U)} V.</p>`,
+    parties: [sc(`Calcule ${WE}.`, `${WE} =`, w, 'J', { diag: v => (proche(v, -w, .03) ? 'La force pousse l\'ion vers l\'armature − : travail moteur, positif.' : proche(v, w / q, .03) ? `q = ${q}e = ${fmt(q * 1.6)} × 10<sup>−19</sup> C.` : 'W = q U.'),
+      solution: `<p>${WE} = q U = ${fmt(q * 1.6)} × 10<sup>−19</sup> × ${fmt(U)} = ${sci(w, 2)} J</p>` })] };
+}
+function electron() {
+  const U = hasard([200, 800, 3000]), freine = Math.random() < .5, w = (freine ? -1 : 1) * 1.6e-19 * U;
+  return { theme: 'Électron dans un condensateur', enonce: `<p>Un électron (q = −e, e = 1,60 × 10<sup>−19</sup> C) traverse un condensateur soumis à U = ${fmt(U)} V, de l'armature ${freine ? '+ vers l\'armature −' : '− vers l\'armature +'}.</p>`,
+    parties: [fq.choix('a) La force électrique sur l\'électron est :', [o('m', 'motrice : elle favorise son déplacement'), o('r', 'résistante : elle s\'oppose à son déplacement')], freine ? 'r' : 'm',
+      { melanger: false, colonne: true, indice: 'L\'électron, négatif, est attiré par l\'armature +.', solution: `<p>L'électron est attiré par l'armature + : ${freine ? 'il s\'en éloigne, la force est résistante' : 'il s\'en approche, la force est motrice'}.</p>` }),
+      sc(`b) Calcule ${WE}, avec son signe.`, `${WE} =`, w, 'J', { diag: v => (proche(v, -w, .03) ? 'Le signe : + si la force est motrice, − si elle est résistante.' : '|q| U, puis le signe.'), solution: `<p>${WE} = ${freine ? '−' : ''}e U = ${sci(w, 2)} J</p>` })] };
+}
+function nul() {
+  const s = hasard([['un satellite en orbite circulaire autour de la Terre : l\'attraction de la Terre', 'ok'], ['la bille d\'un pendule : la tension du fil', 'ok'], ['un palet qui glisse sur une table horizontale : le poids', 'ok']]);
+  return { theme: 'Travail nul', parties: [fq.choix(`Pour ${s[0]}, le travail au cours du mouvement est :`, [o('ok', 'nul : la force est toujours perpendiculaire au mouvement'), o('m', 'moteur'), o('r', 'résistant')], 'ok',
+    { melanger: false, colonne: true, indice: 'Regarde l\'angle entre la force et la vitesse, à chaque instant.', solution: '<p>Force toujours perpendiculaire au mouvement : travail toujours nul.</p>' })] };
+}
+function chemin() {
+  return { theme: 'Chemin suivi', parties: [fq.choix('Un enfant descend d\'un toboggan droit, puis du même point, d\'un toboggan en spirale qui arrive au même endroit. Le travail de son poids est :', [o('ok', 'le même dans les deux cas'), o('s', 'plus grand pour la spirale (trajet plus long)'), o('d', 'plus grand pour le toboggan droit')], 'ok',
+    { melanger: false, colonne: true, indices: { s: 'Le travail du poids ne dépend que de l\'altitude descendue, pas de la longueur du trajet.', d: 'Le travail du poids ne dépend pas du chemin suivi.' }, solution: `<p>${WP} = m g h : seule l'altitude descendue compte.</p>` })] };
+}
+
+ET.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Travail d\'une force',
+  intro: '<p class="er-contexte">10 questions : W = F × AB × cos α (calculatrice en <b>degrés</b>), signe du travail, travail du poids, travail d\'une force électrique, travail nul.</p>',
+  questions: () => melanger([calcul(), resistant(), signe(), hasard([verticale, conversion])(), poidsDescente(), poidsMontee(), electrique(), electron(), nul(), chemin()]),
+  revoir: { href: 'module_1a_cours.html', label: 'Revoir les cours' },
+  suite: { href: 'fiche_1.html', label: 'Fiche récapitulative →' },
+});
+ET.menu('module_1_questions');
+</script>
+</body>
+</html>

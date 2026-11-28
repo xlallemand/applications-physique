@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : conservation de l'énergie mécanique — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 3</span>
+    <h2 class="er-titre">Conservation de l'énergie mécanique</h2>
+    <p class="er-contexte">Sans frottements, l'énergie mécanique <b>se conserve</b> : l'énergie cinétique et l'énergie potentielle s'échangent. C'est une autre façon d'écrire le théorème de l'énergie cinétique.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Conservation sans frottements ; lancer de balle : courbes E_c,
+      E_pp, E_m (savoir les reconnaître) ; « À toi » : reconnaître les
+      courbes, transferts
+   2. Équivalence avec le théorème de l'énergie cinétique (au programme :
+      E_m en chute libre seulement) ; les deux exemples de la pomme refaits
+      avec E_m ; « À toi » : vitesse, hauteur
+   Valeurs (vérifiées par un script) : v = √(2gh) ; h = 10² / (2 × 9,81)
+   = 5,1 m ; « À toi » : 12,5 m·s⁻¹ (8,0 m, g = 9,81), etc.
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { fmt, proche, fr, rac, MS, CALC, figEnergies, versCours, o } = ET;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const G = 'm·s<sup>−2</sup>', EPP = 'E<sub>pp</sub>', EM = 'E<sub>m</sub>', EC = 'E<sub>c</sub>';
+
+/* ---------- 1. La conservation ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Sans frottements, E<sub>m</sub> se conserve');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Conservation.</b> S'il n'y a pas de perte d'énergie par frottements, l'énergie mécanique se conserve : ${EM} = ${EC} + ${EPP} reste constante.</p></div>
+      <p>Quand l'objet monte, ${EPP} augmente et ${EC} diminue d'autant : l'énergie cinétique se transforme en énergie potentielle, et inversement quand il descend.</p>
+    </div>
+    ${exemple(`<p>Lancer d'une balle, sans frottements de l'air : à l'altitude maximale, ${EPP} est maximale et la vitesse minimale (${EC} minimale) ; au départ et à l'arrivée, l'altitude est nulle (${EPP} = 0). ${EM} reste constante.</p>
+      ${figEnergies({ frott: 0 })}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Reconnaître les courbes', parties: [versCours({ type: 'grille', q: 'Sur un graphique des énergies d\'une balle lancée (sans frottements), quelle courbe est :',
+      options: [o('cst', 'constante'), o('cloche', 'en cloche (max au sommet)'), o('creux', 'en creux (min au sommet)')],
+      lignes: [{ id: 'em', label: EM, bonne: 'cst', indices: { cloche: 'Sans frottements, E<sub>m</sub> se conserve.', creux: 'Sans frottements, E<sub>m</sub> se conserve.' } },
+        { id: 'epp', label: EPP, bonne: 'cloche', indice: `${EPP} = m g z suit l'altitude : maximale au sommet.` },
+        { id: 'ec', label: EC, bonne: 'creux', indice: 'La vitesse est minimale au sommet.' }],
+      solution: `<p>${EM} constante ; ${EPP} suit l'altitude ; ${EC} = ${EM} − ${EPP}.</p>` })] },
+    { titre: 'Le transfert', parties: [{ type: 'choix', q: 'Pendant la montée de la balle, il y a un transfert :', colonne: true, melanger: false,
+      options: [o('ok', 'd\'énergie cinétique en énergie potentielle'), o('inv', 'd\'énergie potentielle en énergie cinétique')], bonne: 'ok',
+      indice: 'En montant, la balle ralentit et gagne de l\'altitude.', solution: `<p>${EC} diminue, ${EPP} augmente.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le lien avec le théorème de l'énergie cinétique ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Une autre écriture du théorème');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Le théorème de l'énergie cinétique et la conservation de l'énergie mécanique sont <b>équivalents</b> : ils donnent les mêmes relations, on utilise l'un ou l'autre (au programme, la conservation de ${EM} ne s'utilise qu'en chute libre).</p>
+      <div class="cle"><p class="crs-formule">${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B)</p></div>
+    </div>
+    ${exemple(`<p><b>Pomme lâchée</b> d'une hauteur h (origine au sol) : en A, v<sub>A</sub> = 0, ${EC}(A) = 0, ${EPP}(A) = m g h ; en B, ${EC}(B) = ½ m v<sub>sol</sub><sup>2</sup>, ${EPP}(B) = 0.</p>
+      ${calc(`0 + m g h = ½ m v<sub>sol</sub><sup>2</sup> + 0 &nbsp; ⟺ &nbsp; v<sub>sol</sub> = ${rac('2 g h')}`)}
+      <p><b>Pomme lancée</b> vers le haut à v<sub>initiale</sub> = 10 ${MS} : ${EC}<sub>i</sub> = ½ m v<sub>initiale</sub><sup>2</sup>, ${EPP}<sub>i</sub> = 0 ; au sommet, ${EC}<sub>f</sub> = 0, ${EPP}<sub>f</sub> = m g h.</p>
+      ${calc(`½ m v<sub>initiale</sub><sup>2</sup> + 0 = 0 + m g h &nbsp; ⟺ &nbsp; h = ${fr('v<sub>initiale</sub><sup>2</sup>', '2 g')} = ${fr('10<sup>2</sup>', '2 × 9,81')} = ${c('5,1 m')}`)}
+      <p>Les mêmes résultats qu'avec le théorème de l'énergie cinétique.</p>`)}`);
+  const h = hasard([5.0, 8.0, 15]), v = Math.sqrt(2 * 9.81 * h), v0 = hasard([4.0, 7.0]), z = v0 * v0 / (2 * 9.81);
+  c_.aToi(carte, [
+    { titre: 'Une chute', enonce: `<p>Un caillou est lâché sans vitesse d'une hauteur de ${fmt(h)} m (g = 9,81 ${G}, sans frottements).</p>`,
+      parties: [{ type: 'nombre', q: 'Par la conservation de l\'énergie mécanique, calcule sa vitesse au sol (3 chiffres significatifs).', label: 'v<sub>sol</sub> =', valeur: v, rel: .01, unite: MS + CALC, signe: false,
+        diag: x => (proche(x, v * v, .02) ? 'Prends la racine carrée.' : proche(x, Math.sqrt(9.81 * h), .02) ? 'm g h = ½ m v² donne v² = 2 g h.' : 'E<sub>m</sub>(A) = E<sub>m</sub>(B) : m g h = ½ m v<sub>sol</sub>².'),
+        solution: calc(`m g h = ½ m v<sub>sol</sub><sup>2</sup> ⟺ v<sub>sol</sub> = ${rac('2 g h')} = ${rac(`2 × 9,81 × ${fmt(h)}`)} = ${c(fmt(+v.toPrecision(3)) + ' ' + MS)}`) }] },
+    { titre: 'Un lancer', enonce: `<p>Un caillou est lancé verticalement vers le haut depuis le sol à ${fmt(v0)} ${MS}.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule l\'altitude maximale atteinte (3 chiffres significatifs).', label: 'h =', valeur: z, rel: .01, unite: 'm' + CALC, signe: false,
+        diag: x => (proche(x, 2 * z, .02) ? 'h = v<sub>i</sub>² / (2 g).' : 'E<sub>m</sub> au départ = E<sub>m</sub> au sommet : ½ m v<sub>i</sub>² = m g h.'),
+        solution: calc(`½ m v<sub>i</sub><sup>2</sup> = m g h ⟺ h = ${fr('v<sub>i</sub><sup>2</sup>', '2 g')} = ${c(fmt(+z.toPrecision(3)) + ' m')}`) }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Sans frottements, ${EM} se conserve : ${EC} et ${EPP} s'échangent (${EPP} maximale et ${EC} minimale au sommet).</p></div>
+    <div class="cle"><p>${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B) : équivalent au théorème de l'énergie cinétique (chute libre).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3c_cours.html">Cours : frottements et énergie perdue →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#conservation">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+ET.menu('module_3b_cours');
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche" id="fiche"></div>
+<script>
+/* Fiche récapitulative du module 3 : une section par sous-module de cours (ancres du PLAN) */
+const { W, rac, fr, figBalcon, figEnergies } = ET;
+const EPP = 'E<sub>pp</sub>', EM = 'E<sub>m</sub>', EC = 'E<sub>c</sub>';
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card"><span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span><h2 class="er-titre">Énergie mécanique</h2></div>
+
+  <section class="er-card" id="energies">
+    <h3 class="cours-titre">Énergie potentielle et énergie mécanique</h3>
+    <div class="cle"><p class="som-formule">${EM} = ${EC} + E<sub>p</sub> &nbsp; ; &nbsp; ${EC} = ½ m v<sup>2</sup> &nbsp; ; &nbsp; en chute libre, E<sub>p</sub> = ${EPP} = m g z</p>
+      <p>Énergies en J ; m en kg ; g en m·s<sup>−2</sup> ; z altitude en m (axe vers le haut).</p></div>
+    <div class="cle"><p>${EPP} est définie à une constante près (choix de l'origine z = 0) ; ses variations n'en dépendent pas. Balle de 100 g, balcon à 3 m (g = 10) : 3 J → 0 J ou 0 J → −3 J, ΔE<sub>pp</sub> = −3 J.</p></div>
+    <div class="som-fiche-figs">${figBalcon({ origine: 'sol' })}${figBalcon({ origine: 'balcon' })}</div>
+  </section>
+
+  <section class="er-card" id="conservation">
+    <h3 class="cours-titre">Conservation de l'énergie mécanique</h3>
+    <div class="cle"><p>S'il n'y a pas de perte d'énergie par frottements, l'énergie mécanique se conserve : ${EC}(A) + ${EPP}(A) = ${EC}(B) + ${EPP}(B). ${EC} et ${EPP} s'échangent.</p>
+      <p>C'est équivalent au théorème de l'énergie cinétique (au programme : en chute libre). Pomme lâchée de h : v = ${rac('2 g h')} ; lancée à v : h = ${fr('v<sup>2</sup>', '2 g')} (10 m·s<sup>−1</sup> : 5,1 m).</p></div>
+    <div class="som-fiche-figs">${figEnergies({ frott: 0 })}</div>
+    <p>Savoir reconnaître les courbes : ${EM} constante ; ${EPP} maximale à l'altitude maximale ; ${EC} minimale quand la vitesse est minimale.</p>
+  </section>
+
+  <section class="er-card" id="frottements">
+    <h3 class="cours-titre">Frottements et énergie perdue</h3>
+    <div class="cle"><p>Avec des frottements, ${EM} diminue. <b>La perte d'énergie mécanique correspond au travail des forces de frottement</b> : ΔE<sub>m</sub> = ${W('f')} = −f × d (force constante, opposée au mouvement), d'où f = −ΔE<sub>m</sub> / d.</p></div>
+    <div class="som-fiche-figs">${figEnergies({ frott: 5, Em0: 25, aria: 'Énergies d\'une balle lancée avec frottements : l\'énergie mécanique passe de 25 J à 20 J' })}</div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3a_cours.html">Revoir les cours</a>
+    <a class="btn-secondary" href="module_3_simulation.html">Simulateur</a>
+    <a class="btn-secondary" href="module_3_questions.html">Questions sur le module 3</a>
+  </div>`;
+ET.menu('fiche_3');
+</script>
+</body>
+</html>

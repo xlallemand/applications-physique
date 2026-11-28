@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : force perpendiculaire au mouvement — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 5 / 5</span>
+    <h2 class="er-titre">Force perpendiculaire au mouvement</h2>
+    <p class="er-contexte">Une force qui reste <b>toujours perpendiculaire</b> au mouvement ne travaille pas : son travail est <b>toujours nul</b>, même sur une trajectoire courbe.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Travail toujours nul ; exemples du cours : satellite en orbite
+      circulaire, tension du fil d'un pendule, table à coussin d'air
+      (réaction et poids sur un trajet horizontal) ; « À toi » : quelles
+      forces ne travaillent pas
+   ============================================================ */
+const { exemple } = COURS;
+const { W, nomV, V, figPerp, versCours, o } = ET;
+
+function etape1(c_) {
+  const carte = c_.carte('1. Un travail toujours nul');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Si une force est <b>à chaque instant perpendiculaire</b> au mouvement (α = 90° tout le long), son travail est <b>toujours nul</b> : elle ne change pas la valeur de la vitesse.</p></div>
+      <p><b>Mouvements circulaires</b> :</p>
+      <div class="et-figs2"><div>${figPerp('sat')}<p>Force d'attraction de la Terre sur un satellite en orbite circulaire : W<sub>AB</sub>(${V('F', 'T/S')}) = 0, car elle est toujours normale (perpendiculaire) à la trajectoire.</p></div>
+        <div>${figPerp('pendule')}<p>Tension du fil d'un pendule : W<sub>AB</sub>(${V('T')}) = 0, car elle est toujours perpendiculaire à la trajectoire.</p></div></div>
+    </div>
+    ${exemple(`<p><b>Mouvement rectiligne</b> : un mobile sur coussin d'air glisse sans frottements sur une table horizontale. La réaction de la table ${V('R')} et le poids ${V('P')} sont toujours perpendiculaires au mouvement : W(${V('R')}) = W(${V('P')}) = 0.</p>${figPerp('coussin')}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Qui ne travaille pas ?', parties: [versCours({ type: 'grille', q: 'Pour chaque force, son travail au cours du mouvement est-il toujours nul ?',
+      options: [o('o', 'toujours nul'), o('n', 'pas forcément nul')],
+      lignes: [{ id: 'lune', label: 'Attraction de la Terre sur la Lune (orbite circulaire)', bonne: 'o', indices: { n: 'L\'orbite est circulaire : la force, dirigée vers le centre, est perpendiculaire à la vitesse.' } },
+        { id: 'luge', label: 'Poids d\'une luge qui descend une pente', bonne: 'n', indices: { o: 'La luge descend : son altitude diminue, le poids travaille (W = m g h > 0).' } },
+        { id: 'manege', label: 'Force exercée par la barre d\'une nacelle de manège qui tourne en cercle horizontal', bonne: 'o', indices: { n: 'La barre est dirigée vers le centre du cercle, perpendiculaire au mouvement.' } },
+        { id: 'frott', label: 'Frottements de l\'air sur un parachutiste', bonne: 'n', indices: { o: 'Les frottements sont opposés au mouvement (α = 180°) : travail résistant.' } }],
+      solution: '<p>Seules les forces toujours perpendiculaires à la vitesse (mouvement circulaire, force vers le centre) ont un travail toujours nul.</p>' })] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Une force toujours perpendiculaire au mouvement a un travail <b>toujours nul</b> : attraction sur un satellite en orbite circulaire, tension du fil d'un pendule, réaction d'un support horizontal sans frottements, poids sur un trajet horizontal.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur le travail d'une force →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2a_cours.html">Module 2 : énergie cinétique</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#perpendiculaire">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+ET.menu('module_1e_cours');
+</script>
+</body>
+</html>

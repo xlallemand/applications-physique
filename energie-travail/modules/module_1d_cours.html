@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : travail d'une force électrique — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 4 / 5</span>
+    <h2 class="er-titre">Travail d'une force électrique</h2>
+    <p class="er-contexte">Dans un condensateur plan, une particule chargée subit la force constante <span class="vec-nom">F</span><sub>él</sub> = q <span class="vec-nom">E</span>. Son travail entre les deux armatures vaut <b>q U</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. W_AB(F⃗_él) = qU ; démonstration sur le chemin A → C → B
+      (qE × L, E = U / L) ; « À toi » : particule positive (q = 2e)
+   2. Particule négative : refaire le raisonnement ou décider « moteur
+      ou résistant » et adapter le signe ; exemples du cours (électron
+      accéléré : W = eU ; particule positive ralentie : W = −qU) ;
+      « À toi » : électron accéléré, signe
+   Valeurs (vérifiées par un script) : 2e × 1 000 V = 3,2 × 10⁻¹⁶ J ;
+   électron, 500 V : 8,0 × 10⁻¹⁷ J.
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { fmt, sci, proche, W, nomV, V, fr, figCondoW, figAcc, CALC, o } = ET;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const WF = `W<sub>AB</sub>(${V('F', 'él')})`;
+
+/* ---------- 1. W = qU ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. W = q U');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Une particule de charge q va d'un point A à un point B dans le champ électrique uniforme ${V('E')} d'un condensateur plan. Elle subit la force constante ${V('F', 'él')} = q ${V('E')}.</p>
+      <div class="cle"><p class="crs-formule">${WF} = q U</p>
+        <p>q : charge de la particule, en coulombs (C) ; U : tension entre les deux armatures (différence de potentiel), en volts (V) ; ${WF} en J.</p></div>
+      <p><b>Démonstration</b> : le travail ne dépend pas du chemin suivi ; on le calcule sur le chemin A → C → B.</p>
+      ${figCondoW()}
+      ${calc(`${WF} = W<sub>AC</sub>(${V('F', 'él')}) + W<sub>CB</sub>(${V('F', 'él')}) = qE × AC × cos 0° + 0 = qE L = q ${fr('U', 'L')} L = q U &nbsp; car E = ${fr('U', 'L')}`)}
+      <p>Si la particule va en ligne droite d'une armature à l'autre, on calcule directement le travail sur AC : qEL = qU.</p>
+    </div>
+    ${exemple(`<p>Un ion de charge q = 2e = 3,2 × 10<sup>−19</sup> C traverse un condensateur soumis à U = 1 000 V, de l'armature + vers l'armature − (la force l'y pousse : travail moteur).</p>
+      ${calc(`${WF} = q U = 3,2 × 10<sup>−19</sup> × 1 000 = ${c('3,2 × 10<sup>−16</sup> J')}`)}`)}`);
+  const U = hasard([200, 400, 2500]), w = 1.6e-19 * U;
+  c_.aToi(carte, [
+    { titre: 'Un proton', enonce: `<p>Un proton (q = e = 1,60 × 10<sup>−19</sup> C) va de l'armature + à l'armature − d'un condensateur soumis à U = ${fmt(U)} V.</p>`,
+      parties: [{ type: 'sci', q: `Calcule ${WF} (3 chiffres significatifs).`, label: `${WF} =`, valeur: w, cs: 3, rel: .01, unite: 'J' + CALC,
+        diag: v => (proche(v, -w, .02) ? 'Le proton est poussé vers l\'armature −, dans le sens du déplacement : travail moteur, positif.' : 'W = q U.'), solution: calc(`${WF} = q U = 1,60 × 10<sup>−19</sup> × ${fmt(U)} = ${c(sci(w, 3) + ' J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le signe ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Le signe du travail');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Si la particule est <b>négative</b> (électron, q = −e), ou si elle va dans l'autre sens, on peut refaire la démonstration pour trouver le signe, <b>ou</b> plus simplement :</p>
+      <div class="cle"><p><b class="cle-titre">Méthode simple.</b> On calcule |q| U, puis on met le signe : <b>+</b> si la force favorise le déplacement (travail <b>moteur</b>), <b>−</b> si elle s'y oppose (travail <b>résistant</b>).</p></div>
+    </div>
+    ${exemple(`<p><b>Électron accéléré</b> (q = −e) : il entre par l'armature − et sort par l'armature +. La force ${V('F', 'él')} = −e ${V('E')} est dans le sens du mouvement : travail moteur.</p>
+      ${figAcc({ q: -1, d: 'L' })}
+      ${calc(`${WF} = e U > 0`)}
+      <p><b>OU</b> avec la formule du travail : α = 0°, ${WF} = F<sub>él</sub> × AB × cos 0° = eE × L × 1 = e U (E = U / L).</p>
+      <p><b>Particule positive ralentie</b> (q > 0, elle va vers l'armature +) : la force est opposée au mouvement, travail résistant : ${WF} = ${c('−q U')}.</p>`)}`);
+  const U = hasard([500, 1500, 3000]), w = 1.6e-19 * U;
+  c_.aToi(carte, [
+    { titre: 'Moteur ou résistant ?', parties: [{ type: 'choix', q: 'Un électron entre dans un condensateur par l\'armature + et se dirige vers l\'armature −. Le travail de la force électrique est :', colonne: false, melanger: false,
+      options: [o('r', 'résistant : W = −e U'), o('m', 'moteur : W = e U')], bonne: 'r',
+      indice: 'L\'électron, négatif, est attiré par l\'armature + : la force est dirigée vers l\'armature +, opposée à son mouvement.',
+      solution: '<p>La force est opposée au déplacement : l\'électron est freiné, W = −e U.</p>' }] },
+    { titre: 'Un électron accéléré', enonce: `<p>Un électron (e = 1,60 × 10<sup>−19</sup> C) traverse un condensateur de l'armature − à l'armature +, soumis à U = ${fmt(U)} V.</p>`,
+      parties: [{ type: 'sci', q: `Calcule ${WF} (2 chiffres significatifs, avec son signe).`, label: `${WF} =`, valeur: w, cs: 2, rel: .02, unite: 'J' + CALC,
+        diag: v => (proche(v, -w, .02) ? 'L\'électron est accéléré : la force favorise le déplacement, le travail est positif.' : '|q| U, puis le signe.'),
+        solution: calc(`Travail moteur : ${WF} = e U = 1,60 × 10<sup>−19</sup> × ${fmt(U)} = ${c(sci(w, 2) + ' J')}`) }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>${WF} = q U (q en C, U en V), démontré sur le chemin A → C → B avec E = U / L.</p></div>
+    <div class="cle"><p>Particule négative ou déplacement dans l'autre sens : |q| U, avec le signe + si la force est motrice, − si elle est résistante.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1e_cours.html">Cours : force perpendiculaire au mouvement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#electrique">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+ET.menu('module_1d_cours');
+</script>
+</body>
+</html>

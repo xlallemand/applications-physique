@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : énergie cinétique — Énergie et travail</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/equations.css">
+<link rel="stylesheet" href="et.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="et.js"></script>
+<script src="figures.js"></script>
+<script src="../../assets/equations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 1 / 4</span>
+    <h2 class="er-titre">Énergie cinétique</h2>
+    <p class="er-contexte">Un solide en mouvement possède une <b>énergie cinétique</b> E<sub>c</sub> = ½ m v². On la calcule, puis on retrouve la <b>vitesse</b> à partir de l'énergie.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. E_c = ½ m v² (J, kg, m·s⁻¹) ; « À toi » : calcul (masse en g,
+      vitesse en km/h, carré oublié)
+   2. Retrouver v : isoler v dans E_c = ½ m v² avec l'éditeur
+      d'équations EQ (× 2, ÷ m, √), puis le calcul
+   Valeurs (vérifiées par un script) : voiture 1 200 kg à 90 km/h :
+   3,75 × 10⁵ J ; v = √(2 × 4,0 / 0,50) = 4,0 m·s⁻¹.
+   ============================================================ */
+const { exemple, hasard } = COURS;
+const { fmt, sci, cs, proche, fr, rac, MS, CALC } = ET;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const EC = 'E<sub>c</sub>';
+
+/* ---------- 1. E_c = ½ m v² ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. E<sub>c</sub> = ½ m v²');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">${EC} = ${fr('1', '2')} m v<sup>2</sup></p>
+        <p>${EC} : énergie cinétique, en joules (J) ; m : masse, en <b>kg</b> ; v : vitesse, en <b>${MS}</b> (1 km·h<sup>−1</sup> = ${fr('1', '3,6')} ${MS}).</p></div>
+      <p>L'énergie cinétique est toujours positive ; elle est nulle à l'arrêt. Si la vitesse double, ${EC} est multipliée par 4.</p>
+    </div>
+    ${exemple(`<p>Une voiture de 1 200 kg roule à 90 km·h<sup>−1</sup>.</p>
+      ${calc(`v = ${fr('90', '3,6')} = 25 ${MS}`)}
+      ${calc(`${EC} = ${fr('1', '2')} × 1 200 × 25<sup>2</sup> = ${c('3,75 × 10<sup>5</sup> J')}`)}`)}`);
+  const m = hasard([60, 150, 250]), vk = hasard([36, 54, 72]), v = vk / 3.6, E = .5 * (m / 1000) * v * v;
+  c_.aToi(carte, [
+    { titre: 'Un ballon', enonce: '<p>Un ballon de 450 g est lancé à 20 ' + MS + '.</p>',
+      parties: [{ type: 'nombre', q: `Calcule son énergie cinétique.`, label: `${EC} =`, valeur: 90, unite: 'J' + CALC, signe: false,
+        diag: x => (proche(x, 90000) ? 'La masse s\'exprime en <b>kg</b> : 450 g = 0,450 kg.' : proche(x, 4.5) ? 'La vitesse est <b>au carré</b>.' : proche(x, 180) ? 'N\'oublie pas le ½.' : `${EC} = ½ m v².`),
+        solution: calc(`${EC} = ${fr('1', '2')} × 0,450 × 20<sup>2</sup> = ${c('90 J')}`) }] },
+    { titre: 'Avec des km/h', enonce: `<p>Une balle de ${m} g roule à ${vk} km·h<sup>−1</sup>.</p>`,
+      parties: [{ type: 'nombre', q: `Calcule son énergie cinétique (3 chiffres significatifs).`, label: `${EC} =`, valeur: E, rel: .01, unite: 'J' + CALC, signe: false,
+        diag: x => (proche(x, .5 * (m / 1000) * vk * vk, .02) ? 'Convertis d\'abord la vitesse en m·s<sup>−1</sup> : ÷ 3,6.' : proche(x, E * 1000, .02) ? 'La masse en kg.' : `${EC} = ½ m v², m en kg, v en ${MS}.`),
+        solution: calc(`v = ${vk} / 3,6 = ${fmt(v)} ${MS} ; ${EC} = ½ × ${fmt(m / 1000)} × ${fmt(v)}<sup>2</sup> = ${c(fmt(+E.toPrecision(3)) + ' J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Retrouver la vitesse ---------- */
+const GV = { Ec: EC, m: 'm', v: 'v', deux: '2' };
+function etape2(c_) {
+  const carte = c_.carte('2. Retrouver la vitesse');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>On isole v dans ${EC} = ½ m v<sup>2</sup> : on multiplie par 2, on divise par m, puis on prend la racine carrée.</p>
+      <div class="cle"><p class="crs-formule">v = ${rac(fr(`2 ${EC}`, 'm'))}</p></div>
+    </div>
+    ${exemple(`<p>Un palet de 0,50 kg a une énergie cinétique de 4,0 J.</p>
+      ${calc(`v = ${rac(fr(`2 ${EC}`, 'm'))} = ${rac(fr('2 × 4,0', '0,50'))} = ${c('4,0 ' + MS)}`)}`)}`);
+  const m = hasard([2.0, 5.0, 8.0]), E = hasard([100, 400, 900]), v = Math.sqrt(2 * E / m);
+  c_.aToi(carte, [
+    { titre: 'Isole v', enonce: '<p class="er-consigne">Dans l\'éditeur, isole v : glisse les grandeurs d\'un membre à l\'autre, puis utilise l\'outil √ sur les deux membres.</p>',
+      parties: [EQ.partie(EQ.exercice({ eq: 'Ec = [1|deux] m v^2', g: GV, cible: 'v', outils: ['sqrt'],
+        valeurs: () => { const mm = 1 + Math.random() * 9, vv = 1 + Math.random() * 9; return { m: mm, v: vv, Ec: mm * vv * vv / 2, deux: 2 }; },
+        aides: ['Le 2 divise : glisse-le de l\'autre côté du signe =, il multipliera E<sub>c</sub>.', 'm multiplie v<sup>2</sup> : glisse-le de l\'autre côté, il divisera.', 'Applique √ aux deux membres pour passer de v<sup>2</sup> à v.'] }),
+        { solution: `<p>v = ${rac(fr(`2 ${EC}`, 'm'))}</p>` })] },
+    { titre: 'Le calcul', enonce: `<p>Un objet de ${fmt(m)} kg a une énergie cinétique de ${E} J.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule sa vitesse (3 chiffres significatifs).', label: 'v =', valeur: v, rel: .01, unite: MS + CALC, signe: false,
+        diag: x => (proche(x, v * v, .02) ? 'Tu as trouvé v² : prends la racine carrée.' : proche(x, Math.sqrt(E / m), .02) ? `N'oublie pas le 2 : v = ${rac(fr('2 E<sub>c</sub>', 'm'))}.` : `v = ${rac(fr('2 E<sub>c</sub>', 'm'))}.`),
+        solution: calc(`v = ${rac(fr(`2 × ${E}`, fmt(m)))} = ${c(cs(v, 3) + ' ' + MS)}`) }] },
+  ]);
+  return carte;
+}
+
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>${EC} = ½ m v<sup>2</sup> : en J, m en kg, v en ${MS} (km·h<sup>−1</sup> ÷ 3,6).</p></div>
+    <div class="cle"><p>v = ${rac(fr(`2 ${EC}`, 'm'))}.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2b_cours.html">Cours : énoncé du théorème →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#energie-cinetique">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+ET.menu('module_2a_cours');
+</script>
+</body>
+</html>
