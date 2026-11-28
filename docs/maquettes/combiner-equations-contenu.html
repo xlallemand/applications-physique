@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="maths">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combiner des équations : contenu à valider</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<style>
+/* ============================================================
+   Contenu à valider : compétences, niveaux, questions et formulaires
+   de la famille « Combiner des équations » (equations-physique-mobile).
+   Tout est modifiable : un appui sur un texte l'ouvre en écriture
+   (notation linéaire : m_NaOH indice, v^2 puissance, a / b fraction,
+   √( ) racine ; une équation par ligne, « (inutile) » devant une
+   équation qui ne sert pas). Statut et remarque pour chaque élément.
+   Les modifications sont gardées dans ce navigateur ; « Exporter »
+   fabrique un fichier à me renvoyer.
+   ============================================================ */
+body { font-family: var(--font-sans); background: var(--paper); color: var(--ink); margin: 0; padding: 0 0 80px; }
+.page { max-width: 1320px; margin: 0 auto; padding: 0 16px; }
+.barre { position: sticky; top: 0; z-index: 5; background: var(--sheet); border-bottom: 1px solid var(--line); }
+.barre-in { max-width: 1320px; margin: 0 auto; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.barre-in b { margin-right: auto; }
+.cpt { font-size: .85rem; color: var(--ink-2); }
+h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; margin: 24px 0 6px; }
+h2 { font-size: 1.3rem; font-weight: 800; letter-spacing: -.02em; margin: 34px 0 8px; }
+.note { color: var(--ink-2); line-height: 1.55; max-width: 950px; }
+.note b { color: var(--ink); }
+.regles { background: var(--sheet); border: 1px solid var(--line); border-radius: 18px; padding: 6px 16px; }
+.regle { display: grid; grid-template-columns: 200px 1fr 230px; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--paper-3); align-items: start; }
+.regle:last-child { border-bottom: 0; }
+.regle > b { font-size: .92rem; }
+.ed { border-radius: 8px; padding: 3px 5px; margin: -3px -5px; line-height: 1.45; cursor: text; outline: none; }
+.ed:hover { background: var(--paper); }
+.ed:focus { background: var(--cle-bg); box-shadow: inset 0 0 0 1.5px var(--accent); white-space: pre-wrap; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .88rem; }
+.ed.modif { box-shadow: inset 3px 0 0 var(--accent); }
+.etat { display: flex; flex-direction: column; gap: 5px; }
+.etat-b { display: flex; gap: 4px; flex-wrap: wrap; }
+.etat-b button { font: inherit; font-size: .75rem; font-weight: 700; border: 0; border-radius: 999px; padding: 4px 9px; background: var(--paper); color: var(--ink-2); cursor: pointer; touch-action: manipulation; }
+.etat-b button[aria-pressed="true"][data-v="ok"] { background: var(--success-bg); color: var(--success-text); }
+.etat-b button[aria-pressed="true"][data-v="mod"] { background: var(--cle-bg); color: var(--accent-ink); }
+.etat-b button[aria-pressed="true"][data-v="sup"] { background: var(--danger-bg); color: var(--danger-text); }
+textarea { font: inherit; font-size: .82rem; border: 1px solid var(--line-strong); border-radius: 10px; padding: 5px 7px; resize: vertical; min-height: 30px; width: 100%; box-sizing: border-box; background: var(--sheet); color: var(--ink); }
+.comp { background: var(--sheet); border: 1px solid var(--line); border-radius: 22px; padding: 16px; margin: 0 0 22px; }
+.comp-t { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 10px; }
+.comp-id { background: var(--ink); color: var(--sheet); font-weight: 800; border-radius: 999px; padding: 3px 12px; }
+.comp-t h3 { margin: 0; font-size: 1.15rem; letter-spacing: -.01em; }
+section.comp { scroll-margin-top: 70px; }
+.pastille .ed, .comp-t h3 .ed { display: inline-block; }
+.pastille { font-size: .78rem; font-weight: 800; border-radius: 999px; padding: 3px 10px; background: var(--cle-bg); color: var(--accent-ink); }
+.fiche { display: grid; grid-template-columns: 150px 1fr; gap: 6px 12px; font-size: .9rem; background: var(--paper); border-radius: 14px; padding: 10px 12px; margin: 0 0 8px; }
+.fiche > span:nth-child(odd) { font-weight: 700; color: var(--ink-2); font-size: .82rem; padding-top: 2px; }
+.defile { overflow-x: auto; }
+table.q { border-collapse: collapse; width: 100%; min-width: 1100px; font-size: .88rem; }
+table.q th { text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .03em; color: var(--ink-2); background: var(--paper); padding: 6px 8px; position: sticky; top: 0; }
+table.q td { border-top: 1px solid var(--paper-3); padding: 8px; vertical-align: top; }
+table.q tr.sup td { opacity: .45; }
+table.q tr.sup td:last-child { opacity: 1; }
+.c-n { width: 52px; font-weight: 800; color: var(--ink-2); font-size: .78rem; }
+.c-d { width: 46px; } .c-cl { width: 52px; } .c-ctx { width: 230px; } .c-eq { width: 210px; } .c-ci { width: 60px; } .c-av { width: 120px; } .c-fo { width: 170px; } .c-et { width: 200px; }
+.eqs .l { display: block; white-space: nowrap; }
+.eqs .l.inu { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--ink-3); }
+.eqs .l.inu::after { content: '  inutile'; font-size: .7rem; font-weight: 800; text-decoration: none; color: var(--ink-2); }
+.ctx-t { font-weight: 700; display: block; }
+.ajout { margin-top: 10px; }
+.form { background: var(--sheet); border: 1px solid var(--line); border-radius: 18px; padding: 12px 16px; margin: 0 0 14px; display: grid; grid-template-columns: 260px 1fr 230px; gap: 12px; }
+.form .eqs .l { padding: 1px 0; }
+.btn { font: inherit; font-weight: 700; font-size: .85rem; border: 0; border-radius: 999px; padding: 7px 14px; cursor: pointer; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); color: var(--ink); touch-action: manipulation; }
+.btn.noir { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.filtres { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 0; }
+.filtres button { font: inherit; font-size: .8rem; font-weight: 700; border: 0; border-radius: 999px; padding: 5px 11px; background: var(--paper); cursor: pointer; }
+.filtres button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.recap { width: 100%; border-collapse: collapse; background: var(--sheet); border-radius: 14px; overflow: hidden; font-size: .9rem; }
+.recap th, .recap td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: center; }
+.recap th:first-child, .recap td:first-child { text-align: left; }
+@media (max-width: 760px) {
+  .regle, .form { grid-template-columns: 1fr; }
+  .fiche { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="barre"><div class="barre-in"><b>Combiner des équations : contenu à valider</b>
+  <span class="cpt" id="cpt"></span>
+  <button class="btn noir" type="button" id="exporter">⤓ Exporter mes modifications</button>
+  <button class="btn" type="button" id="copier">Copier</button>
+  <button class="btn" type="button" id="raz">Tout réinitialiser</button>
+</div></div>
+
+<div class="page" id="page"></div>
+
+<script>
+/* ============================================================
+   1. LE CONTENU PROPOSÉ (valeurs de départ, jamais modifiées ici :
+      les changements sont gardés à part, dans le stockage du navigateur)
+   ============================================================ */
+
+// règles générales de la mise en œuvre (choix de la maquette)
+const REGLES = [
+  ['famille', 'Famille', 'Nouvelle famille « CO · Combiner des équations » dans les séances habituelles de 5 questions, avec Mon suivi, Fiches, Réglages, succès (un succès de famille comme MU, AD, FO).'],
+  ['dispo', 'Disposition (A2 + A4)', 'Téléphone : résumé de toutes les équations en haut, puis un onglet par équation, un seul éditeur affiché. Ordinateur (≥ 900 px) : éditeurs côte à côte, 2 par ligne.'],
+  ['report', 'Report (B1)', 'Dès qu’une grandeur est seule à gauche d’une équation (étape vérifiée), l’outil « grandeur = expression » apparaît dans la réserve des autres équations ; on le glisse sur la grandeur à remplacer. Une fraction se répartit de part et d’autre du trait ; dans un carré, chaque grandeur prend la puissance (v = d / Δt dans v^2 → d^2 / Δt^2).'],
+  ['apres', 'Après le report (C1)', 'L’équation d’arrivée se transforme (tuiles reportées mises en valeur un instant) ; l’équation utilisée se replie en une ligne grisée « ✓ reportée dans l’éq. 2 », qu’on peut rouvrir.'],
+  ['objectif', 'Objectif (D1 puis D3)', 'Difficulté 1 de chaque compétence : bandeau d’objectif (grandeurs permises, grandeurs à éliminer, barrées une fois éliminées). Difficultés 2 et 3 : consigne seule ; le premier indice donne les grandeurs à éliminer.'],
+  ['fin', 'Fin (F2)', 'Finie quand la grandeur cherchée est seule à gauche, exprimée seulement avec les grandeurs demandées (et les nombres), et que plus rien ne se simplifie. Ordre des facteurs indifférent. Sinon : message ciblé (« V est en haut et en bas : simplifie-le », « il reste n, qui n’est pas dans la liste »), sans compter d’erreur.'],
+  ['inutile', 'Équation inutile (G1)', 'Dès la 1re (compétence CO5, puis CO7 et CO8) : le bilan dit pourquoi l’équation ne servait pas. La reporter n’est pas une erreur, mais la question ne finit pas tant que ses grandeurs restent.'],
+  ['formulaire', 'Formulaire (E1)', 'CO8 (Terminale) : l’élève choisit ses équations (4 au plus) dans le formulaire du chapitre, « + Utiliser » ; elles prennent les indices de la situation. Choisir une formule inutile ne compte pas comme une erreur.'],
+  ['points', 'Points et aides', 'Comme les autres compétences : 2 points sans erreur, 1 après une erreur (étape fausse, déplacement refusé, report sur la mauvaise grandeur), 0 solution affichée. Indices successifs générés à partir des données : 1) grandeurs à éliminer ; 2) quelle équation donne quelle grandeur ; 3) ordre des reports ; 4) isoler, puis simplifier. Exemple : une autre question de la même compétence.'],
+  ['strategie', 'Stratégie libre', 'Toute suite de reports juste est acceptée (pas d’ordre imposé). Chaque étape est vérifiée sur des valeurs tirées au hasard qui respectent toutes les équations.'],
+  ['nombres', 'Nombres', 'Facteurs numériques simples seulement (2, ½, 4, π, ln 2, 273…) ; jamais de valeur numérique d’une grandeur. Pas d’application numérique.'],
+  ['decouverte', 'Découverte', 'Deux écrans de plus à la fin de la Découverte des méthodes : « Remplacer une grandeur » (c = n / V et n = m / M, c en fonction de m, M et V) puis « Remplacer et simplifier » (P = m g et P = G M_T m / R_T^2, g en fonction de G, M_T et R_T).'],
+  ['classe', 'Classe des questions', 'Une question n’est proposée que si la classe choisie dans les réglages est au moins celle de la question (une compétence de 1re peut avoir des questions de Terminale).'],
+];
+
+// compétences : id, titre, classe minimale, niveau (ordre), prérequis, nombre d'équations, fiche (règle, méthode, piège)
+const COMPS = [
+  { id: 'CO1', titre: 'Remplacer une grandeur', classe: '2de', niveau: '2', prerequis: 'MU1, MU2', nb: '2 équations ; la grandeur à éliminer est déjà seule dans l’une, la grandeur cherchée déjà seule dans l’autre : un seul report.',
+    regle: 'Quand une grandeur est <b>seule</b> d’un côté d’une équation (n = m / M), on peut la <b>remplacer</b> par son expression dans une autre équation.',
+    methode: 'Repère la grandeur qui n’est pas dans la liste demandée. Trouve l’équation où elle est seule, et reporte son expression dans l’autre équation.',
+    piege: 'Une fraction reportée se répartit : n / V avec n = m / M donne m / (M V), pas m / M V au numérateur.' },
+  { id: 'CO2', titre: 'Isoler pour remplacer', classe: '2de', niveau: '3', prerequis: 'CO1, MU3', nb: '2 équations ; il faut d’abord isoler la grandeur à éliminer, ou isoler la grandeur cherchée après le report.',
+    regle: 'Pour remplacer une grandeur, il faut d’abord l’<b>isoler</b> dans une équation ; on la reporte, puis on isole la grandeur cherchée.',
+    methode: 'Choisis la grandeur à éliminer. Isole-la dans une équation, reporte-la dans l’autre, puis isole la grandeur cherchée avec les règles des produits et quotients.',
+    piege: 'On ne reporte qu’une grandeur seule : dans c = n / V, n n’est pas encore isolée (n = c V).' },
+  { id: 'CO3', titre: 'Remplacer puis simplifier', classe: '2de', niveau: '3', prerequis: 'CO2', nb: '2 équations ; après le report, une grandeur apparaît en haut et en bas (ou des deux côtés) et se simplifie.',
+    regle: 'Une grandeur présente <b>au numérateur et au dénominateur</b> d’une même fraction se <b>simplifie</b> : m g / m = g.',
+    methode: 'Après le report, rassemble tout dans une fraction. Touche une grandeur en haut, puis la même en bas : elles se barrent. Vérifie l’étape.',
+    piege: 'On ne simplifie que des facteurs : dans (m + M) / m, m ne se simplifie pas.' },
+  { id: 'CO4', titre: 'Trois équations', classe: '1re', niveau: '4', prerequis: 'CO3', nb: '3 équations utiles, donc 2 grandeurs à éliminer.',
+    regle: 'Avec trois équations, on élimine les grandeurs intermédiaires <b>une à une</b> : chaque report fait disparaître une grandeur.',
+    methode: 'Liste les grandeurs à éliminer. Pour chacune, trouve une équation qui la donne, isole-la et reporte-la. Termine par l’isolement et les simplifications.',
+    piege: 'Ne reporte pas une grandeur dans l’équation d’où elle vient : tu retrouverais 1 = 1.' },
+  { id: 'CO5', titre: 'Repérer l’équation inutile', classe: '1re', niveau: '4', prerequis: 'CO2', nb: '2 ou 3 équations utiles et 1 équation inutile.',
+    regle: 'Toutes les équations données ne servent pas toujours : on n’utilise que celles qui relient la grandeur cherchée aux grandeurs demandées.',
+    methode: 'Pour chaque équation, regarde si elle contient la grandeur cherchée ou une grandeur à éliminer. Une équation qui n’apporte que des grandeurs étrangères ne sert pas.',
+    piege: 'Une équation qui introduit une nouvelle grandeur (absente de la liste) ajoute une grandeur à éliminer : elle ne sert souvent à rien.' },
+  { id: 'CO6', titre: 'Remplacer dans un carré ou une racine', classe: '1re', niveau: '5', prerequis: 'CO3, FO1, FO2', nb: '2 ou 3 équations ; une grandeur au carré ou sous une racine est remplacée, ou le résultat demande √.',
+    regle: 'Une grandeur au carré se remplace avec son expression <b>au carré</b> : v = d / Δt donne v^2 = d^2 / Δt^2. Un facteur qui entre sous une racine y entre <b>au carré</b>.',
+    methode: 'Reporte l’expression : chaque grandeur prend la puissance. Simplifie, puis applique √ aux deux membres si la grandeur cherchée est au carré.',
+    piege: '(d / Δt)^2 = d^2 / Δt^2 : le carré porte sur le numérateur et sur le dénominateur.' },
+  { id: 'CO7', titre: 'Jusqu’à quatre équations', classe: 'tle', niveau: '6', prerequis: 'CO4, CO5, CO6', nb: '3 ou 4 équations utiles, parfois 1 inutile ; situations de Terminale (titrage, champ uniforme, gravitation…).',
+    regle: 'Une démonstration de Terminale enchaîne plusieurs reports : on garde le même principe, une grandeur éliminée à chaque report.',
+    methode: 'Commence par l’équation qui contient la grandeur cherchée ; remplace ses grandeurs une à une jusqu’à n’avoir que les grandeurs demandées. Simplifie à chaque étape.',
+    piege: 'Simplifie au fur et à mesure : une expression trop longue cache les grandeurs qui se simplifient.' },
+  { id: 'CO8', titre: 'Choisir ses équations', classe: 'tle', niveau: '7', prerequis: 'CO7', nb: 'Aucune équation donnée : l’élève choisit dans le formulaire du chapitre (4 au plus).',
+    regle: 'Pour exprimer une grandeur, on cherche dans le cours les relations qui la relient aux grandeurs connues.',
+    methode: 'Choisis d’abord une formule qui contient la grandeur cherchée. Si elle contient une grandeur inconnue, cherche une formule qui la donne, et ainsi de suite.',
+    piege: 'Vérifie que chaque grandeur de la formule choisie a bien le même sens dans la situation (m de la soude ou m de la solution ?).' },
+];
+
+// questions : comp, diff (1 à 3), classe, titre, contexte, équations (une par ligne, « (inutile) » devant une équation inutile),
+// grandeur cherchée, grandeurs permises, forme finale attendue ; pour CO8 : formulaire (id) au lieu des équations
+const Q = [
+  /* ---- CO1 : remplacer une grandeur ---- */
+  ['CO1', 1, '2de', 'Solution de sulfate de cuivre', 'Une masse m de soluté de masse molaire M est dissoute dans un volume V de solution.', 'c = n / V\nn = m / M', 'c', 'm, M, V', 'c = m / (M V)'],
+  ['CO1', 1, '2de', 'Nombre de molécules', 'Un échantillon de masse m contient N molécules.', 'N = n N_A\nn = m / M', 'N', 'm, M, N_A', 'N = m N_A / M'],
+  ['CO1', 1, '2de', 'Masse volumique', 'Un échantillon de liquide de volume V contient n moles de molécules de masse molaire M.', 'ρ = m / V\nm = n M', 'ρ', 'n, M, V', 'ρ = n M / V'],
+  ['CO1', 1, '2de', 'Concentration en masse', 'Une solution de volume V contient n moles de soluté de masse molaire M.', 'C_m = m / V\nm = n M', 'C_m', 'n, M, V', 'C_m = n M / V'],
+  ['CO1', 1, '2de', 'Lumière dans une fibre optique', 'La lumière parcourt une distance d dans une fibre d’indice n pendant Δt.', 'd = v Δt\nv = c / n', 'd', 'c, n, Δt', 'd = c Δt / n'],
+  ['CO1', 1, '2de', 'Écho d’un sonar', 'Un sonar mesure la durée Δt d’un aller-retour du son jusqu’au fond, à la profondeur D.', 'D = d / 2\nd = v Δt', 'D', 'v, Δt', 'D = v Δt / 2'],
+  ['CO1', 1, '2de', 'Poids d’un bloc', 'Un bloc de béton de volume V et de masse volumique ρ.', 'P = m g\nm = ρ V', 'P', 'ρ, V, g', 'P = ρ V g'],
+  ['CO1', 2, '2de', 'Puissance d’un conducteur ohmique (U)', 'Un conducteur ohmique de résistance R est soumis à la tension U.', 'P = U I\nI = U / R', 'P', 'U, R', 'P = U^2 / R'],
+  ['CO1', 2, '2de', 'Puissance d’un conducteur ohmique (I)', 'Un conducteur ohmique de résistance R est traversé par le courant I.', 'P = U I\nU = R I', 'P', 'R, I', 'P = R I^2'],
+  ['CO1', 1, '1re', 'Énergie consommée', 'Un appareil fonctionne pendant Δt sous la tension U, traversé par le courant I.', 'E = P Δt\nP = U I', 'E', 'U, I, Δt', 'E = U I Δt'],
+  ['CO1', 1, '1re', 'Énergie d’un photon', 'Un photon de longueur d’onde λ dans le vide.', 'E = h ν\nν = c / λ', 'E', 'h, c, λ', 'E = h c / λ'],
+  ['CO1', 1, '1re', 'Absorbance', 'Une solution colorée contient n moles de soluté dans un volume V.', 'A = k c\nc = n / V', 'A', 'k, n, V', 'A = k n / V'],
+  ['CO1', 3, '1re', 'Célérité d’une onde', 'Une onde périodique de fréquence f et de longueur d’onde λ.', 'v = λ / T\nT = 1 / f', 'v', 'λ, f', 'v = λ f'],
+  ['CO1', 1, 'tle', 'Particule dans un champ électrique', 'Une particule de charge q et de masse m est soumise au champ E (poids négligé).', 'a = F / m\nF = q E', 'a', 'q, E, m', 'a = q E / m'],
+  ['CO1', 2, 'tle', 'Champ dans un condensateur', 'Deux armatures distantes de d sont soumises à la tension U.', 'a = q E / m\nE = U / d', 'a', 'q, U, m, d', 'a = q U / (m d)'],
+  ['CO1', 2, 'tle', 'Activité d’un échantillon', 'Un échantillon contient N noyaux radioactifs de demi-vie t_½.', 'A = λ N\nλ = ln 2 / t_½', 'A', 'N, t_½', 'A = ln 2 N / t_½'],
+
+  /* ---- CO2 : isoler pour remplacer ---- */
+  ['CO2', 1, '2de', 'Préparer une solution', 'On veut préparer un volume V de solution de concentration c, avec un soluté de masse molaire M.', 'c = n / V\nn = m / M', 'm', 'c, V, M', 'm = c V M'],
+  ['CO2', 2, '2de', 'Volume de solution', 'On dissout une masse m de soluté de masse molaire M pour obtenir une concentration c.', 'c = n / V\nn = m / M', 'V', 'm, M, c', 'V = m / (M c)'],
+  ['CO2', 2, '2de', 'Masse d’un échantillon', 'Un échantillon contient N atomes de masse molaire M.', 'N = n N_A\nn = m / M', 'm', 'N, M, N_A', 'm = N M / N_A'],
+  ['CO2', 2, '2de', 'Volume d’un liquide', 'On prélève n moles d’éthanol, de masse molaire M et de masse volumique ρ.', 'ρ = m / V\nn = m / M', 'V', 'n, M, ρ', 'V = n M / ρ'],
+  ['CO2', 2, '2de', 'Profondeur par écho', 'L’ultrason fait l’aller-retour jusqu’à l’obstacle (distance D) en Δt.', 'v = d / Δt\nd = 2 D', 'D', 'v, Δt', 'D = v Δt / 2'],
+  ['CO2', 2, '2de', 'Volume d’un bloc', 'Un bloc de masse volumique ρ a un poids P.', 'P = m g\nm = ρ V', 'V', 'P, ρ, g', 'V = P / (ρ g)'],
+  ['CO2', 3, '2de', 'Résistance d’une lampe', 'Une lampe de puissance P fonctionne sous la tension U (on la modélise par une résistance R).', 'U = R I\nP = U I', 'R', 'U, P', 'R = U^2 / P'],
+  ['CO2', 3, '2de', 'Durée de traversée', 'La lumière traverse une épaisseur d de verre d’indice n.', 'n = c / v\nv = d / Δt', 'Δt', 'd, n, c', 'Δt = n d / c'],
+  ['CO2', 1, '2de', 'Masse volumique d’une roche lunaire', 'Une roche lunaire de volume V a un poids P sur la Lune, où l’intensité de la pesanteur vaut g_L.', 'P = m g_L\nρ = m / V', 'ρ', 'P, g_L, V', 'ρ = P / (g_L V)'],
+  ['CO2', 2, '1re', 'Longueur d’onde', 'Une onde de célérité v et de fréquence f.', 'f = 1 / T\nv = λ / T', 'λ', 'v, f', 'λ = v / f'],
+  ['CO2', 3, '1re', 'Longueur d’onde d’un photon', 'Un photon d’énergie E.', 'E = h ν\nλ = c / ν', 'λ', 'h, c, E', 'λ = h c / E'],
+  ['CO2', 2, '1re', 'Intensité dans un appareil', 'Un appareil consomme l’énergie E en Δt sous la tension U.', 'E = P Δt\nP = U I', 'I', 'E, U, Δt', 'I = E / (U Δt)'],
+  ['CO2', 2, '1re', 'Masse d’un gaz', 'Un volume V de gaz (volume molaire V_m) de masse molaire M.', 'n = V / V_m\nn = m / M', 'm', 'V, V_m, M', 'm = V M / V_m'],
+  ['CO2', 3, '1re', 'Dosage par étalonnage', 'Une solution de concentration c_0 a une absorbance A_0 ; l’absorbance d’une solution inconnue vaut A.', 'A = k c\nA_0 = k c_0', 'c', 'A, A_0, c_0', 'c = c_0 A / A_0'],
+  ['CO2', 2, '1re', 'Taille d’une image', 'Une lentille donne d’un objet AB une image A′B′ ; on connaît OA et OA′.', 'γ = A′B′ / AB\nγ = OA′ / OA', 'A′B′', 'AB, OA, OA′', 'A′B′ = AB OA′ / OA'],
+  ['CO2', 2, 'tle', 'Tension d’accélération', 'On veut donner l’accélération a à une particule (charge q, masse m) entre deux armatures distantes de d.', 'a = q E / m\nE = U / d', 'U', 'a, m, d, q', 'U = m a d / q'],
+
+  /* ---- CO3 : remplacer puis simplifier ---- */
+  ['CO3', 2, '2de', 'Pesanteur à la surface de la Terre', 'Le poids d’un objet de masse m est la force d’attraction de la Terre (masse M_T, rayon R_T).', 'P = m g\nP = G M_T m / R_T^2', 'g', 'G, M_T, R_T', 'g = G M_T / R_T^2'],
+  ['CO3', 2, '2de', 'Dilution', 'On dilue F fois une solution mère (c_0, V_0) : la solution fille a le volume V_1 = F V_0.', 'c_0 V_0 = c_1 V_1\nV_1 = F V_0', 'c_1', 'c_0, F', 'c_1 = c_0 / F'],
+  ['CO3', 3, '2de', 'Facteur de dilution', 'Une dilution de facteur F fait passer de la concentration c_0 à c_1.', 'F = c_0 / c_1\nc_0 V_0 = c_1 V_1', 'F', 'V_0, V_1', 'F = V_1 / V_0'],
+  ['CO3', 3, '2de', 'Masse de la Terre', 'Le poids d’un objet de masse m est la force d’attraction de la Terre (masse M_T, rayon R_T).', 'P = m g\nP = G M_T m / R_T^2', 'M_T', 'g, R_T, G', 'M_T = g R_T^2 / G'],
+  ['CO3', 2, '1re', 'Hauteur de chute', 'Une bille lâchée sans vitesse tombe de h ; son énergie cinétique finale vaut m g h.', 'E_c = m g h\nE_c = ½ m v^2', 'h', 'v, g', 'h = v^2 / (2 g)'],
+  ['CO3', 2, '1re', 'Titrage', 'On titre un volume V_A d’acide par une solution de concentration c_B ; équivalence pour V_E.', 'c_A V_A = c_B V_E\nc_A = n_A / V_A', 'n_A', 'c_B, V_E', 'n_A = c_B V_E'],
+  ['CO3', 3, '1re', 'Puissance d’un conducteur ohmique', 'Un conducteur ohmique de résistance R sous la tension U.', 'P = R I^2\nI = U / R', 'P', 'U, R', 'P = U^2 / R'],
+  ['CO3', 2, '1re', 'Pression au fond d’un récipient', 'Une colonne de liquide (masse volumique ρ, hauteur h, section S) appuie sur le fond avec la force F.', 'P = F / S\nF = ρ S h g', 'P', 'ρ, g, h', 'P = ρ g h'],
+  ['CO3', 1, 'tle', 'Travail de la force électrique', 'Une charge q traverse un condensateur (armatures distantes de d, tension U).', 'W = F d\nF = q U / d', 'W', 'q, U', 'W = q U'],
+  ['CO3', 1, 'tle', 'Accélération d’un satellite', 'Un satellite de masse m est à la distance r du centre de la Terre (masse M).', 'a = F / m\nF = G M m / r^2', 'a', 'G, M, r', 'a = G M / r^2'],
+  ['CO3', 3, 'tle', 'Accélération d’un mouvement circulaire', 'Un satellite parcourt un cercle de rayon r en une période T.', 'a = v^2 / r\nv = 2 π r / T', 'a', 'r, T', 'a = 4 π^2 r / T^2'],
+  ['CO3', 1, 'tle', 'Champ électrique dans un condensateur', 'Une charge q subit la force F entre deux armatures distantes de d, sous la tension U.', 'E = F / q\nF = q U / d', 'E', 'U, d', 'E = U / d'],
+
+  /* ---- CO4 : trois équations ---- */
+  ['CO4', 2, '1re', 'Concentration en masse et en quantité', 'Une solution de volume V contient n moles de soluté de masse molaire M.', 'C_m = m / V\nm = n M\nn = c V', 'C_m', 'c, M', 'C_m = c M'],
+  ['CO4', 2, '1re', 'Solution d’éthanol', 'On dissout un volume V_e d’éthanol (masse volumique ρ, masse molaire M) pour obtenir un volume V de solution.', 'c = n / V\nn = m / M\nm = ρ V_e', 'c', 'ρ, V_e, M, V', 'c = ρ V_e / (M V)'],
+  ['CO4', 1, '1re', 'Poids sur la Terre et sur la Lune', 'Un même objet de masse m a les poids P_T et P_L.', 'r = P_T / P_L\nP_T = m g_T\nP_L = m g_L', 'r', 'g_T, g_L', 'r = g_T / g_L'],
+  ['CO4', 1, '1re', 'Rendement', 'Pendant Δt, un appareil reçoit E_a et fournit E_u.', 'η = E_u / E_a\nE_u = P_u Δt\nE_a = P_a Δt', 'η', 'P_u, P_a', 'η = P_u / P_a'],
+  ['CO4', 1, '1re', 'Effet Joule', 'Un conducteur ohmique de résistance R est traversé par I pendant Δt.', 'E = P Δt\nP = U I\nU = R I', 'E', 'R, I, Δt', 'E = R I^2 Δt'],
+  ['CO4', 2, '1re', 'Chute libre', 'Une bille lâchée sans vitesse de la hauteur h : son énergie potentielle devient énergie cinétique.', 'E_c = E_p\nE_c = ½ m v^2\nE_p = m g h', 'h', 'v, g', 'h = v^2 / (2 g)'],
+  ['CO4', 3, '1re', 'Longueur d’onde mesurée', 'Une onde de fréquence f parcourt d en Δt.', 'v = λ / T\nT = 1 / f\nv = d / Δt', 'λ', 'd, Δt, f', 'λ = d / (f Δt)'],
+  ['CO4', 3, '1re', 'Masse d’acide titrée', 'Un volume V_A d’acide est titré par c_B (équivalence V_E) ; on cherche la masse d’acide dans un volume V.', 'm = C_m V\nC_m = c_A M\nc_A V_A = c_B V_E', 'm', 'c_B, V_E, V_A, M, V', 'm = c_B V_E M V / V_A'],
+  ['CO4', 2, '1re', 'Solution fille', 'On prélève V_0 de solution mère (c_0), qu’on dilue F fois.', 'c_1 = n / V_1\nn = c_0 V_0\nV_1 = F V_0', 'c_1', 'c_0, F', 'c_1 = c_0 / F'],
+  ['CO4', 1, 'tle', 'Accélération dans un condensateur', 'Une particule (q, m) entre deux armatures distantes de d, sous la tension U.', 'a = F / m\nF = q E\nE = U / d', 'a', 'q, U, m, d', 'a = q U / (m d)'],
+  ['CO4', 2, 'tle', 'Travail entre les armatures', 'Une charge q va d’une armature à l’autre (distance d, tension U).', 'W = F d\nF = q E\nE = U / d', 'W', 'q, U', 'W = q U'],
+  ['CO4', 3, 'tle', 'Masse volumique d’un gaz', 'Un gaz parfait de masse molaire M, à la pression P et à la température T.', 'P V = n R T\nn = m / M\nρ = m / V', 'ρ', 'P, M, R, T', 'ρ = P M / (R T)'],
+  ['CO4', 2, 'tle', 'Activité d’un échantillon', 'Un échantillon radioactif de masse m, de noyaux de masse m_n, de demi-vie t_½.', 'A = λ N\nλ = ln 2 / t_½\nN = m / m_n', 'A', 'm, m_n, t_½', 'A = ln 2 m / (t_½ m_n)'],
+  ['CO4', 2, '1re', 'Pression dans un liquide', 'Une colonne de liquide (masse volumique ρ, hauteur h, section S) a le poids F.', 'P = F / S\nF = m g\nm = ρ S h', 'P', 'ρ, g, h', 'P = ρ g h'],
+  ['CO4', 2, 'tle', 'Grossissement d’une lunette', 'Une lunette afocale donne d’un objet vu sous l’angle θ une image vue sous θ′ ; image intermédiaire de taille A_1B_1.', 'G = θ′ / θ\nθ = A_1B_1 / f_1′\nθ′ = A_1B_1 / f_2′', 'G', 'f_1′, f_2′', 'G = f_1′ / f_2′'],
+  ['CO4', 2, 'tle', 'Photon émis par un électron', 'Un électron accéléré sous la tension U donne toute son énergie à un photon.', 'E = h ν\nν = c / λ\nE = e U', 'λ', 'h, c, e, U', 'λ = h c / (e U)'],
+
+  /* ---- CO5 : repérer l'équation inutile ---- */
+  ['CO5', 1, '1re', 'Préparer une solution', 'On veut un volume V de solution de concentration c (masse molaire M du soluté).', 'c = n / V\nn = m / M\n(inutile) N = n N_A', 'm', 'c, V, M', 'm = c V M'],
+  ['CO5', 1, '1re', 'Puissance dissipée', 'Un conducteur ohmique de résistance R est traversé par I.', 'P = U I\nU = R I\n(inutile) E = P Δt', 'P', 'R, I', 'P = R I^2'],
+  ['CO5', 1, '1re', 'Écho', 'Un ultrason fait l’aller-retour jusqu’à un obstacle à la distance D en Δt.', 'v = d / Δt\nd = 2 D\n(inutile) f = 1 / T', 'D', 'v, Δt', 'D = v Δt / 2'],
+  ['CO5', 2, '1re', 'Chute d’une pierre', 'Une pierre lâchée sans vitesse de la hauteur h.', 'E_c = E_p\nE_c = ½ m v^2\nE_p = m g h\n(inutile) P = m g', 'h', 'v, g', 'h = v^2 / (2 g)'],
+  ['CO5', 2, '1re', 'Titrage', 'On titre V_A d’acide par c_B ; équivalence pour V_E.', 'c_A V_A = c_B V_E\nn_A = c_A V_A\n(inutile) C_m = c_A M', 'n_A', 'c_B, V_E', 'n_A = c_B V_E'],
+  ['CO5', 1, '1re', 'Énergie d’un photon', 'Un photon de longueur d’onde λ.', 'E = h ν\nν = c / λ\n(inutile) v = d / Δt', 'E', 'h, c, λ', 'E = h c / λ'],
+  ['CO5', 2, '1re', 'Taille d’une image', 'Une lentille de distance focale f′ donne de AB une image A′B′.', 'γ = A′B′ / AB\nγ = OA′ / OA\n(inutile) 1 / OA′ − 1 / OA = 1 / f′', 'A′B′', 'AB, OA, OA′', 'A′B′ = AB OA′ / OA'],
+  ['CO5', 2, '1re', 'Volume d’un liquide', 'On prélève n moles d’un liquide (masse molaire M, masse volumique ρ).', 'ρ = m / V\nn = m / M\n(inutile) N = n N_A', 'V', 'n, M, ρ', 'V = n M / ρ'],
+  ['CO5', 3, '1re', 'Énergie électrique', 'Un appareil fonctionne pendant Δt sous U, traversé par I.', 'E = P Δt\nP = U I\n(inutile) U = R I', 'E', 'U, I, Δt', 'E = U I Δt'],
+  ['CO5', 3, '1re', 'Longueur d’onde', 'Une onde de célérité v et de fréquence f.', 'λ = v T\nf = 1 / T\n(inutile) v = d / Δt', 'λ', 'v, f', 'λ = v / f'],
+  ['CO5', 1, 'tle', 'Accélération dans un condensateur', 'Une particule (q, m) entre deux armatures distantes de d, sous U ; poids négligé.', 'a = q E / m\nE = U / d\n(inutile) P = m g', 'a', 'q, U, m, d', 'a = q U / (m d)'],
+  ['CO5', 2, 'tle', 'Masse d’un gaz', 'Un gaz parfait de masse molaire M occupe V à P et T.', 'P V = n R T\nn = m / M\n(inutile) N = n N_A', 'm', 'P, V, M, R, T', 'm = P V M / (R T)'],
+
+  /* ---- CO6 : carré ou racine ---- */
+  ['CO6', 1, '1re', 'Énergie cinétique d’un coureur', 'Un coureur de masse m parcourt d en Δt à vitesse constante.', 'E_c = ½ m v^2\nv = d / Δt', 'E_c', 'm, d, Δt', 'E_c = m d^2 / (2 Δt^2)'],
+  ['CO6', 2, '1re', 'Vitesse en fin de chute', 'Une bille lâchée sans vitesse de la hauteur h ; son énergie cinétique finale vaut m g h.', 'E_c = m g h\nE_c = ½ m v^2', 'v', 'g, h', 'v = √(2 g h)'],
+  ['CO6', 2, '1re', 'Intensité dans un conducteur', 'Un conducteur ohmique de résistance R dissipe la puissance P.', 'P = U I\nU = R I', 'I', 'P, R', 'I = √(P / R)'],
+  ['CO6', 2, '1re', 'Tension aux bornes d’un conducteur', 'Un conducteur ohmique de résistance R dissipe la puissance P.', 'P = U I\nI = U / R', 'U', 'P, R', 'U = √(P R)'],
+  ['CO6', 3, '1re', 'Chute libre', 'Un objet lâché sans vitesse tombe pendant t.', 'v^2 = 2 g h\nh = ½ g t^2', 'v', 'g, t', 'v = g t'],
+  ['CO6', 3, '1re', 'Rayon de la Terre', 'Le poids d’un objet de masse m est la force d’attraction de la Terre (masse M_T).', 'P = m g\nP = G M_T m / R_T^2', 'R_T', 'G, M_T, g', 'R_T = √(G M_T / g)'],
+  ['CO6', 2, 'tle', 'Électron accéléré', 'Un électron (charge e, masse m), parti au repos, est accéléré sous la tension U.', 'E_c = e U\nE_c = ½ m v^2', 'v', 'e, U, m', 'v = √(2 e U / m)'],
+  ['CO6', 2, 'tle', 'Vitesse d’un satellite', 'Satellite en orbite circulaire de rayon r autour d’un astre de masse M.', 'a = v^2 / r\na = G M / r^2', 'v', 'G, M, r', 'v = √(G M / r)'],
+  ['CO6', 3, 'tle', 'Période d’un satellite', 'Satellite en orbite circulaire de rayon r autour d’un astre de masse M.', 'T = 2 π r / v\nv = √(G M / r)', 'T', 'G, M, r', 'T = 2 π √(r^3 / (G M))'],
+  ['CO6', 2, 'tle', 'Durée de traversée d’un condensateur', 'Une particule (q, m) part au repos et parcourt x dans le champ E.', 'x = ½ a t^2\na = q E / m', 't', 'x, m, q, E', 't = √(2 m x / (q E))'],
+  ['CO6', 3, 'tle', 'Vitesse de sortie (accélération uniforme)', 'Partie au repos, la particule parcourt L avec l’accélération a ; elle sort à t_s.', 'v = a t_s\nt_s = √(2 L / a)', 'v', 'a, L', 'v = √(2 a L)'],
+  ['CO6', 2, 'tle', 'Quantité de mouvement', 'Une particule de masse m et de quantité de mouvement p.', 'E_c = ½ m v^2\np = m v', 'E_c', 'p, m', 'E_c = p^2 / (2 m)'],
+
+  /* ---- CO7 : jusqu'à quatre équations ---- */
+  ['CO7', 2, 'tle', 'Titre massique (solution commerciale)', 'Un volume V de Destop (masse volumique ρ) contient de la soude de concentration c (masse molaire M).', 't = m_NaOH / m_sol\nm_NaOH = C_m V\nm_sol = ρ V\nC_m = c M', 't', 'c, M, ρ', 't = c M / ρ'],
+  ['CO7', 3, 'tle', 'Titre massique (titrage pH-métrique)', 'La solution commerciale est diluée F fois ; on titre V_D de solution diluée par c_A, équivalence pour V_E.', 't = C_m / ρ\nC_m = c_0 M\nc_0 = F c_D\nc_D V_D = c_A V_E', 't', 'F, c_A, V_E, M, ρ, V_D', 't = F c_A V_E M / (ρ V_D)'],
+  ['CO7', 3, 'tle', 'Vitesse de sortie d’un condensateur', 'Accélération dans un condensateur : particule (q, m) au repos, armatures distantes de L, tension U.', 'v = (q E / m) t\nt = √(2 m L / (q E))\nE = U / L', 'v', 'q, U, m', 'v = √(2 q U / m)'],
+  ['CO7', 3, 'tle', 'Vitesse de sortie (par l’accélération)', 'Particule (q, m) au repos, armatures distantes de d, tension U.', 'v^2 = 2 a d\na = F / m\nF = q E\nE = U / d', 'v', 'q, U, m', 'v = √(2 q U / m)'],
+  ['CO7', 2, 'tle', 'Chauffe-eau', 'Un chauffe-eau de puissance P et de rendement η chauffe une masse m d’eau (capacité c) de ΔT.', 'η = E_u / E_a\nE_u = m c ΔT\nE_a = P Δt', 'Δt', 'm, c, ΔT, η, P', 'Δt = m c ΔT / (η P)'],
+  ['CO7', 3, 'tle', 'Activité d’une source', 'Une source contient une masse m d’un radionucléide de masse molaire M et de demi-vie t_½.', 'A = λ N\nλ = ln 2 / t_½\nN = n N_A\nn = m / M', 'A', 'm, N_A, t_½, M', 'A = ln 2 m N_A / (t_½ M)'],
+  ['CO7', 3, 'tle', 'Masse d’une planète', 'Un satellite décrit une orbite circulaire de rayon r en une période T.', 'T = 2 π r / v\na = v^2 / r\na = G M / r^2', 'M', 'T, r, G', 'M = 4 π^2 r^3 / (G T^2)'],
+  ['CO7', 2, 'tle', 'Comprimé de vitamine C', 'Un comprimé de masse m_cp est dissous ; on titre la vitamine C par c_B (réaction mole à mole), équivalence pour V_E.', 'P = m_A / m_cp\nm_A = n_A M\nn_A = c_B V_E', 'P', 'c_B, V_E, M, m_cp', 'P = c_B V_E M / m_cp'],
+  ['CO7', 2, 'tle', 'Largeur d’une fente', 'Diffraction par une fente de largeur a, tache centrale de largeur L sur un écran à la distance D ; source de fréquence ν.', 'θ = λ / a\nθ = L / (2 D)\nλ = c / ν', 'a', 'c, D, ν, L', 'a = 2 c D / (ν L)'],
+  ['CO7', 3, 'tle', 'Électron et photon', 'Un électron accéléré sous U donne toute son énergie à un photon.', 'E = h ν\nν = c / λ\nE = e U\n(inutile) E_c = ½ m v^2', 'λ', 'h, c, e, U', 'λ = h c / (e U)'],
+  ['CO7', 2, 'tle', 'Masse volumique d’un gaz', 'Gaz parfait de masse molaire M à P et T.', 'P V = n R T\nn = m / M\nρ = m / V\n(inutile) N = n N_A', 'ρ', 'P, M, R, T', 'ρ = P M / (R T)'],
+  ['CO7', 3, 'tle', 'Interfrange', 'Fentes d’Young distantes de b, écran à D ; lumière de fréquence f.', 'i = λ D / b\nλ = c T\nT = 1 / f', 'i', 'c, D, b, f', 'i = c D / (b f)'],
+
+  /* ---- CO8 : choisir ses équations (formulaire du chapitre) ---- */
+  ['CO8', 1, 'tle', 'Préparer une solution', 'On veut un volume V de solution de concentration c (masse molaire M du soluté).', '[formulaire : SOL]', 'm', 'c, V, M', 'm = c V M'],
+  ['CO8', 1, 'tle', 'Nombre de molécules', 'Un échantillon de masse m (masse molaire M).', '[formulaire : SOL]', 'N', 'm, M, N_A', 'N = m N_A / M'],
+  ['CO8', 2, 'tle', 'Concentration en masse', 'Solution de concentration c d’un soluté de masse molaire M.', '[formulaire : SOL]', 'C_m', 'c, M', 'C_m = c M'],
+  ['CO8', 2, 'tle', 'Intensité dans un conducteur', 'Un conducteur ohmique de résistance R dissipe la puissance P.', '[formulaire : ELEC]', 'I', 'P, R', 'I = √(P / R)'],
+  ['CO8', 1, 'tle', 'Énergie consommée', 'Un appareil fonctionne Δt sous U, traversé par I.', '[formulaire : ELEC]', 'E', 'U, I, Δt', 'E = U I Δt'],
+  ['CO8', 1, 'tle', 'Longueur d’onde', 'Une onde de célérité v et de fréquence f.', '[formulaire : ONDES]', 'λ', 'v, f', 'λ = v / f'],
+  ['CO8', 2, 'tle', 'Énergie d’un photon', 'Un photon de longueur d’onde λ.', '[formulaire : ONDES]', 'E', 'h, c, λ', 'E = h c / λ'],
+  ['CO8', 2, 'tle', 'Accélération dans un condensateur', 'Particule (q, m), armatures distantes de d, tension U, poids négligé.', '[formulaire : CHAMP]', 'a', 'q, U, m, d', 'a = q U / (m d)'],
+  ['CO8', 3, 'tle', 'Vitesse de sortie', 'Particule (q, m) partie au repos, accélérée sous la tension U.', '[formulaire : CHAMP]', 'v', 'q, U, m', 'v = √(2 q U / m)'],
+  ['CO8', 3, 'tle', 'Vitesse d’un satellite', 'Orbite circulaire de rayon r autour d’un astre de masse M.', '[formulaire : GRAV]', 'v', 'G, M, r', 'v = √(G M / r)'],
+  ['CO8', 3, 'tle', 'Masse d’une planète', 'Un satellite parcourt son orbite circulaire (rayon r) en T.', '[formulaire : GRAV]', 'M', 'T, r, G', 'M = 4 π^2 r^3 / (G T^2)'],
+  ['CO8', 3, 'tle', 'Titre massique', 'Solution commerciale diluée F fois, titrée (V_D, c_A, V_E) ; masse volumique ρ.', '[formulaire : TITR]', 't', 'F, c_A, V_E, M, ρ, V_D', 't = F c_A V_E M / (ρ V_D)'],
+];
+
+// formulaires des chapitres (CO8) : une formule par ligne
+const FORMS = [
+  { id: 'SOL', titre: 'Solutions et quantité de matière', f: 'c = n / V\nC_m = m / V\nn = m / M\nN = n N_A\nρ = m / V\nc_0 V_0 = c_1 V_1' },
+  { id: 'ELEC', titre: 'Électricité', f: 'U = R I\nP = U I\nE = P Δt\nη = P_u / P_a\nQ = I Δt' },
+  { id: 'ONDES', titre: 'Ondes et lumière', f: 'v = d / Δt\nf = 1 / T\nλ = v T\nE = h ν\nν = c / λ\nn = c / v' },
+  { id: 'CHAMP', titre: 'Mouvement dans un champ uniforme', f: 'F = q E\nE = U / d\na = F / m\nv = a t\nx = ½ a t^2\nE_c = ½ m v^2\nW = q U\nE_c = W   (départ au repos)' },
+  { id: 'GRAV', titre: 'Gravitation, mouvement circulaire', f: 'F = G m M / r^2\na = F / m\na = v^2 / r\nv = 2 π r / T\nP = m g' },
+  { id: 'TITR', titre: 'Titrage et titre massique', f: 'c_A V_A = c_B V_E\nc_0 = F c_D\nC_m = c M\nt = C_m / ρ\nn = c V\nm = n M' },
+];
+
+/* ============================================================
+   2. ÉTAT : modifications, statuts et remarques (stockage du navigateur)
+   ============================================================ */
+const CLE = 'maquette-combiner-equations-validation';
+let etat = {};
+try { etat = JSON.parse(localStorage.getItem(CLE) || '{}') || {}; } catch (e) { etat = {}; }
+const garder = () => { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) { /* stockage indisponible */ } compter(); };
+// valeur d'un champ : modifiée, ou d'origine
+const val = (k, orig) => (etat[k] && etat[k].v !== undefined ? etat[k].v : orig);
+
+/* ---------- écriture : indices, puissances (notation linéaire → HTML) ---------- */
+function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function rendu(t) {
+  return esc(t)
+    .replace(/_\{([^}]*)\}/g, '<sub>$1</sub>')
+    .replace(/_([A-Za-zÀ-ÿ0-9½′]+)/g, '<sub>$1</sub>')
+    .replace(/\^\(([^)]*)\)/g, '<sup>$1</sup>')
+    .replace(/\^([A-Za-z0-9½]+)/g, '<sup>$1</sup>');
+}
+const rendreEqs = t => t.split('\n').filter(l => l.trim()).map((l, k) => {
+  const inu = /^\(inutile\)\s*/.test(l);
+  return `<span class="l${inu ? ' inu' : ''}">${k + 1}. ${rendu(l.replace(/^\(inutile\)\s*/, ''))}</span>`;
+}).join('');
+
+/* ---------- un champ modifiable : affiché mis en forme, écrit en notation linéaire ---------- */
+function champ(k, orig, type) {
+  const v = val(k, orig);
+  const aff = type === 'eqs' ? rendreEqs : type === 'html' ? (x => x) : rendu;
+  return `<div class="ed${type === 'eqs' ? ' eqs' : ''}${v !== orig ? ' modif' : ''}" contenteditable="true" spellcheck="false" data-k="${k}" data-t="${type || ''}">${aff(v)}</div>`;
+}
+// statut (validé, à modifier, à supprimer) et remarque
+function statut(k) {
+  const s = (etat['s:' + k] || {}).v || '', r = (etat['r:' + k] || {}).v || '';
+  const b = (v, t) => `<button type="button" data-s="${k}" data-v="${v}" aria-pressed="${s === v}">${t}</button>`;
+  return `<div class="etat"><div class="etat-b">${b('ok', '✓ Validé')}${b('mod', '✎ À modifier')}${b('sup', '✗ Supprimer')}</div><textarea data-r="${k}" placeholder="Remarque…">${esc(r)}</textarea></div>`;
+}
+
+/* ============================================================
+   3. LA PAGE
+   ============================================================ */
+const NOMS = { '2de': '2de', '1re': '1re', tle: 'Terminale' };
+let filtre = '';
+function page() {
+  let h = `<h1>Combiner des équations : contenu à valider</h1>
+  <p class="note">Tout se modifie : touche un texte pour l’écrire (notation linéaire : <b>m_NaOH</b> pour un indice, <b>v^2</b> pour une puissance, <b>a / b</b> pour une fraction, <b>√( )</b> ; une équation par ligne, <b>(inutile)</b> devant une équation qui ne sert pas). Pour chaque élément : ✓ Validé, ✎ À modifier ou ✗ Supprimer, et une remarque. Tes changements restent dans ce navigateur ; quand tu as fini, <b>⤓ Exporter mes modifications</b> fabrique un fichier à me renvoyer (ou <b>Copier</b>, puis colle le texte dans la conversation). Pour ajouter une question, utilise « + Ajouter une question » sous la compétence.</p>`;
+
+  // récapitulatif : nombre de questions par compétence et par classe
+  h += `<h2>Récapitulatif</h2><div class="defile"><table class="recap"><thead><tr><th>Compétence</th><th>Classe</th><th>Niveau</th><th>2de</th><th>1re</th><th>Terminale</th><th>Total</th></tr></thead><tbody>`;
+  COMPS.forEach(c => {
+    const qs = toutes().filter(q => q.comp === c.id);
+    const n = cl => qs.filter(q => q.classe === cl).length;
+    h += `<tr><td><b>${c.id}</b> ${val('c:' + c.id + ':titre', c.titre)}</td><td>${NOMS[val('c:' + c.id + ':classe', c.classe)] || ''}</td><td>${val('c:' + c.id + ':niveau', c.niveau)}</td><td>${n('2de') || ''}</td><td>${n('1re') || ''}</td><td>${n('tle') || ''}</td><td><b>${qs.length}</b></td></tr>`;
+  });
+  h += `</tbody></table></div>`;
+
+  // règles générales
+  h += `<h2>Règles de mise en œuvre</h2><div class="regles">` + REGLES.map(r => `<div class="regle"><b>${r[1]}</b>${champ('g:' + r[0], r[2])}${statut('g:' + r[0])}</div>`).join('') + `</div>`;
+
+  // compétences et questions
+  h += `<h2>Compétences et questions</h2><p class="note">Classe : classe minimale de la compétence (réglage « Ma classe »). Niveau : ordre de progression dans le mode automatique (MU1, MU2 : 1 ; MU3, AD1 : 2…). Diff. : difficulté de la question (1 à 3), qui fixe aussi l’affichage du bandeau d’objectif (difficulté 1).</p>
+  <div class="filtres" role="group" aria-label="Classe des questions"><span class="cpt">Questions affichées :</span>${[['', 'Toutes'], ['2de', '2de'], ['1re', '1re'], ['tle', 'Terminale']].map(f => `<button type="button" data-f="${f[0]}" aria-pressed="${filtre === f[0]}">${f[1]}</button>`).join('')}</div><br>`;
+  COMPS.forEach(c => {
+    const k = 'c:' + c.id + ':';
+    h += `<section class="comp" id="${c.id}"><div class="comp-t"><span class="comp-id">${c.id}</span><h3>${champ(k + 'titre', c.titre)}</h3>
+      <span class="pastille">Classe ${champ(k + 'classe', c.classe)}</span><span class="pastille">Niveau ${champ(k + 'niveau', c.niveau)}</span><span class="pastille">Prérequis ${champ(k + 'prerequis', c.prerequis)}</span></div>
+      <div class="fiche"><span>Équations</span>${champ(k + 'nb', c.nb)}<span>Fiche : règle</span>${champ(k + 'regle', c.regle, 'html')}<span>Méthode</span>${champ(k + 'methode', c.methode, 'html')}<span>Piège</span>${champ(k + 'piege', c.piege, 'html')}<span>Statut</span>${statut('c:' + c.id)}</div>
+      <div class="defile"><table class="q"><thead><tr><th class="c-n">N°</th><th class="c-d">Diff.</th><th class="c-cl">Classe</th><th class="c-ctx">Situation</th><th class="c-eq">Équations données</th><th class="c-ci">Exprimer</th><th class="c-av">En fonction de</th><th class="c-fo">Forme finale</th><th class="c-et">Statut, remarque</th></tr></thead><tbody>`;
+    toutes().filter(q => q.comp === c.id).forEach(q => {
+      const cl = val('q:' + q.id + ':classe', q.classe);
+      if (filtre && cl !== filtre) return;
+      const sup = (etat['s:q:' + q.id] || {}).v === 'sup';
+      const K = 'q:' + q.id + ':';
+      h += `<tr class="${sup ? 'sup' : ''}"><td class="c-n">${q.id}</td><td>${champ(K + 'diff', String(q.diff))}</td><td>${champ(K + 'classe', q.classe)}</td>
+        <td><span class="ctx-t">${champ(K + 'titre', q.titre)}</span>${champ(K + 'ctx', q.ctx)}</td><td>${champ(K + 'eqs', q.eqs, 'eqs')}</td>
+        <td>${champ(K + 'cible', q.cible)}</td><td>${champ(K + 'avec', q.avec)}</td><td>${champ(K + 'forme', q.forme)}</td><td>${statut('q:' + q.id)}</td></tr>`;
+    });
+    h += `</tbody></table></div><button class="btn ajout" type="button" data-ajout="${c.id}">+ Ajouter une question à ${c.id}</button></section>`;
+  });
+
+  // formulaires
+  h += `<h2>Formulaires des chapitres (CO8)</h2><p class="note">Formules proposées à l’élève dans « Choisis tes équations » (E1). Une formule par ligne.</p>` +
+    FORMS.map(f => `<div class="form"><div><b>${f.id}</b>${champ('f:' + f.id + ':titre', f.titre)}</div>${champ('f:' + f.id + ':f', f.f, 'eqs')}${statut('f:' + f.id)}</div>`).join('');
+  document.getElementById('page').innerHTML = h;
+  compter();
+}
+
+// questions d'origine + questions ajoutées (numérotées CO1-01…)
+function toutes() {
+  const L = [], n = {};
+  Q.forEach(x => {
+    n[x[0]] = (n[x[0]] || 0) + 1;
+    L.push({ id: x[0] + '-' + String(n[x[0]]).padStart(2, '0'), comp: x[0], diff: x[1], classe: x[2], titre: x[3], ctx: x[4], eqs: x[5], cible: x[6], avec: x[7], forme: x[8] });
+  });
+  (etat.ajouts || []).forEach(a => L.push(a));
+  return L;
+}
+function compter() {
+  const s = Object.keys(etat).filter(k => k.startsWith('s:'));
+  const nb = v => s.filter(k => etat[k].v === v).length;
+  const mods = Object.keys(etat).filter(k => !k.startsWith('s:') && !k.startsWith('r:') && k !== 'ajouts').length;
+  document.getElementById('cpt').textContent = `${toutes().length} questions · ${nb('ok')} validés · ${nb('mod')} à modifier · ${nb('sup')} à supprimer · ${mods} textes modifiés`;
+}
+
+/* ---------- écriture dans un champ : texte brut pendant l'écriture, mis en forme ensuite ---------- */
+document.addEventListener('focusin', e => {
+  const el = e.target.closest && e.target.closest('.ed');
+  if (!el) return;
+  const k = el.dataset.k;
+  el.textContent = val(k, origine(k));
+});
+document.addEventListener('focusout', e => {
+  const el = e.target.closest && e.target.closest('.ed');
+  if (!el) return;
+  const k = el.dataset.k, o = origine(k), v = el.innerText.replace(/ /g, ' ').replace(/\n+$/, '');
+  if (v === o) delete etat[k]; else etat[k] = { v };
+  garder();
+  el.classList.toggle('modif', v !== o);
+  el.innerHTML = el.dataset.t === 'eqs' ? rendreEqs(v) : el.dataset.t === 'html' ? v : rendu(v);
+});
+// valeur d'origine d'un champ, d'après sa clé
+function origine(k) {
+  const p = k.split(':');
+  if (p[0] === 'g') return (REGLES.find(r => r[0] === p[1]) || [])[2] || '';
+  if (p[0] === 'c') { const c = COMPS.find(x => x.id === p[1]); return c ? String(c[p[2]] || '') : ''; }
+  if (p[0] === 'f') { const f = FORMS.find(x => x.id === p[1]); return f ? f[p[2]] : ''; }
+  if (p[0] === 'q') { const q = toutes().find(x => x.id === p[1]); return q ? String(q[p[2]] || '') : ''; }
+  return '';
+}
+// statuts, remarques, filtres, ajouts
+document.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.s) {
+    const k = 's:' + b.dataset.s, actif = b.getAttribute('aria-pressed') === 'true';
+    if (actif) delete etat[k]; else etat[k] = { v: b.dataset.v };
+    b.parentNode.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(!actif && x === b)));
+    const tr = b.closest('tr'); if (tr) tr.classList.toggle('sup', !actif && b.dataset.v === 'sup');
+    garder();
+  } else if (b.dataset.f !== undefined) { filtre = b.dataset.f; page(); }
+  else if (b.dataset.ajout) {
+    const c = b.dataset.ajout, a = etat.ajouts = etat.ajouts || [];
+    const n = a.filter(x => x.comp === c).length + 1;
+    a.push({ id: c + '-N' + n, comp: c, diff: 1, classe: (COMPS.find(x => x.id === c) || {}).classe || '2de', titre: 'Nouvelle situation', ctx: 'Contexte…', eqs: 'a = b c\nb = d / e', cible: 'a', avec: 'c, d, e', forme: 'a = c d / e', ajout: true });
+    garder(); page();
+    document.getElementById(c).scrollIntoView({ block: 'end', behavior: 'smooth' });
+  }
+});
+document.addEventListener('input', e => {
+  if (!e.target.dataset || !e.target.dataset.r) return;
+  const k = 'r:' + e.target.dataset.r;
+  if (e.target.value.trim()) etat[k] = { v: e.target.value }; else delete etat[k];
+  garder();
+});
+
+/* ---------- export : tout ce qui a changé, lisible, plus le détail en JSON ---------- */
+function texteExport() {
+  const lignes = ['Combiner des équations : retour de validation (' + new Date().toLocaleDateString('fr-FR') + ')', ''];
+  Object.keys(etat).sort().forEach(k => {
+    if (k === 'ajouts') return;
+    const v = etat[k].v;
+    if (k.startsWith('s:')) lignes.push(`[statut] ${k.slice(2)} : ${{ ok: 'validé', mod: 'à modifier', sup: 'à supprimer' }[v]}`);
+    else if (k.startsWith('r:')) lignes.push(`[remarque] ${k.slice(2)} : ${v}`);
+    else lignes.push(`[modifié] ${k}\n   avant : ${origine(k).replace(/\n/g, ' | ')}\n   après : ${String(v).replace(/\n/g, ' | ')}`);
+  });
+  (etat.ajouts || []).forEach(a => lignes.push(`[ajout] ${a.id} : ${['diff ' + val('q:' + a.id + ':diff', a.diff), val('q:' + a.id + ':classe', a.classe), val('q:' + a.id + ':titre', a.titre), val('q:' + a.id + ':ctx', a.ctx), val('q:' + a.id + ':eqs', a.eqs).replace(/\n/g, ' | '), 'exprimer ' + val('q:' + a.id + ':cible', a.cible), 'avec ' + val('q:' + a.id + ':avec', a.avec), val('q:' + a.id + ':forme', a.forme)].join(' ; ')}`));
+  return lignes.join('\n') + '\n\n--- détail (JSON) ---\n' + JSON.stringify(etat);
+}
+document.getElementById('exporter').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([texteExport()], { type: 'text/plain;charset=utf-8' }));
+  a.download = 'combiner-equations-validation.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+});
+document.getElementById('copier').addEventListener('click', e => {
+  const b = e.currentTarget;
+  navigator.clipboard.writeText(texteExport()).then(() => { b.textContent = '✓ Copié'; setTimeout(() => { b.textContent = 'Copier'; }, 1500); }, () => { b.textContent = 'Copie impossible'; });
+});
+document.getElementById('raz').addEventListener('click', () => {
+  if (!confirm('Effacer toutes tes modifications, statuts et remarques ?')) return;
+  etat = {}; garder(); page();
+});
+
+page();
+</script>
+</body>
+</html>
