@@ -977,14 +977,15 @@
         g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.globalAlpha = .5; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(xF, ly, 16, 0, 2 * Math.PI); ctx.fill();
         ctx.fillStyle = c; ctx.globalAlpha = .9; ctx.beginPath(); ctx.arc(xF, ly, 2.6, 0, 2 * Math.PI); ctx.fill();
-        // manche oblique (vers le bas et la droite) avec sa bague, sous la monture
-        const an = 62 * Math.PI / 180, ux = Math.cos(an), uy = Math.sin(an);
-        const bx = lx + rx * .35, by = ly + lh * .96;                     // départ du manche, sur la monture
+        // manche avec sa bague, sous la monture
+        // manche presque vertical, dans le plan de la monture : il part du bas de l'ovale (perspective cohérente)
+        const an = 80 * Math.PI / 180, ux = Math.cos(an), uy = Math.sin(an);
+        const bx = lx + rx * .1, by = ly + lh * .99;                      // départ du manche, en bas de la monture
         ctx.lineCap = 'round';
         ctx.globalAlpha = .5; ctx.lineWidth = 9; trait(ctx, bx, by, bx + ux * lh * .32, by + uy * lh * .32);             // bague
-        ctx.globalAlpha = .3; ctx.lineWidth = 14; trait(ctx, bx + ux * lh * .45, by + uy * lh * .45, bx + ux * lh * 1.3, by + uy * lh * 1.3);
+        ctx.globalAlpha = .3; ctx.lineWidth = 14; trait(ctx, bx + ux * lh * .45, by + uy * lh * .45, bx + ux * lh * 1.12, by + uy * lh * 1.12);
         ctx.globalAlpha = .45; ctx.lineWidth = 1.2;                                                                    // reflet du manche
-        trait(ctx, bx + ux * lh * .5 - uy * 3, by + uy * lh * .5 + ux * 3 - 6, bx + ux * lh * 1.2 - uy * 3, by + uy * lh * 1.2 + ux * 3 - 6);
+        trait(ctx, bx + ux * lh * .5 - uy * 3.5, by + uy * lh * .5 + ux * 3.5, bx + ux * lh * 1.02 - uy * 3.5, by + uy * lh * 1.02 + ux * 3.5);
         ctx.lineCap = 'butt';
         // verre (ovale teinté) et reflet
         ctx.beginPath(); ctx.ellipse(lx, ly, rx, lh, 0, 0, 2 * Math.PI);
